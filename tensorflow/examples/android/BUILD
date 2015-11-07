@@ -1,4 +1,5 @@
 # Description:
+<<<<<<< HEAD
 #   TensorFlow camera demo app for Android.
 
 load("@build_bazel_rules_android//android:rules.bzl", "android_binary")
@@ -40,11 +41,31 @@ cc_binary(
     ],
     linkshared = 1,
     linkstatic = 1,
+=======
+#   Tensorflow camera demo app for Android.
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])  # Apache 2.0
+
+exports_files(["LICENSE"])
+
+cc_library(
+    name = "tensorflow_native_libs",
+    srcs = glob(["jni/**/*.cc"]),
+    hdrs = glob(["jni/**/*.h"]),
+    copts = [
+        "-std=c++11",
+        "-mfpu=neon",
+    ],
+    linkopts = ["-llog -landroid -lm -ljnigraphics"],
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     tags = [
         "manual",
         "notap",
     ],
     deps = [
+<<<<<<< HEAD
         LINKER_SCRIPT,
     ],
 )
@@ -59,6 +80,19 @@ cc_library(
         "manual",
         "notap",
     ],
+=======
+        ":dummy_pthread",
+        "//tensorflow/core:android_tensorflow_lib",
+    ],
+)
+
+# This library only exists as a workaround to satisfy dependencies
+# that declare -lpthread in their linkopts. Although Android supports
+# pthreads, it does not provide it as a separate library.
+cc_library(
+    name = "dummy_pthread",
+    srcs = ["jni/libpthread.so"],
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 )
 
 android_binary(
@@ -66,6 +100,7 @@ android_binary(
     srcs = glob([
         "src/**/*.java",
     ]),
+<<<<<<< HEAD
     # Package assets from assets dir as well as all model targets. Remove undesired models
     # (and corresponding Activities in source) to reduce APK size.
     assets = [
@@ -75,6 +110,13 @@ android_binary(
     assets_dir = "",
     custom_package = "org.tensorflow.demo",
     inline_constants = 1,
+=======
+    assets = glob(["assets/**"]),
+    assets_dir = "assets",
+    custom_package = "org.tensorflow.demo",
+    inline_constants = 1,
+    legacy_native_support = 0,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     manifest = "AndroidManifest.xml",
     resource_files = glob(["res/**"]),
     tags = [
@@ -83,6 +125,7 @@ android_binary(
     ],
     deps = [
         ":tensorflow_native_libs",
+<<<<<<< HEAD
         "//tensorflow/tools/android/inference_interface:android_tensorflow_inference_java",
     ],
 )
@@ -120,3 +163,21 @@ filegroup(
 exports_files([
     "AndroidManifest.xml",
 ])
+=======
+    ],
+)
+
+filegroup(
+    name = "all_files",
+    srcs = glob(
+        ["**/*"],
+        exclude = [
+            "**/METADATA",
+            "**/OWNERS",
+            "bin/**",
+            "gen/**",
+        ],
+    ),
+    visibility = ["//tensorflow:__subpackages__"],
+)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

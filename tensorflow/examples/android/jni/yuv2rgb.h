@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,11 +21,23 @@ limitations under the License.
 #define TENSORFLOW_EXAMPLES_ANDROID_JNI_YUV2RGB_H_
 
 #include <stdint.h>
+=======
+// This is a collection of routines which converts various YUV image formats
+// to (A)RGB.
+
+#ifndef ORG_TENSORFLOW_JNI_IMAGEUTILS_YUV2RGB_H_
+#define ORG_TENSORFLOW_JNI_IMAGEUTILS_YUV2RGB_H_
+
+#include "tensorflow/core/platform/port.h"
+
+using namespace tensorflow;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 void ConvertYUV420ToARGB8888(const uint8_t* const yData,
                              const uint8_t* const uData,
                              const uint8_t* const vData, uint32_t* const output,
@@ -43,15 +56,36 @@ void ConvertYUV420SPToARGB8888(const uint8_t* const pY,
 void ConvertYUV420SPToARGB8888HalfSize(const uint8_t* const input,
                                        uint32_t* const output, int width,
                                        int height);
+=======
+// Converts YUV420 semi-planar data to ARGB 8888 data using the supplied width
+// and height. The input and output must already be allocated and non-null.
+// For efficiency, no error checking is performed.
+void ConvertYUV420SPToARGB8888(const uint8* const pY, const uint8* const pUV,
+                               uint32* const output, const int width,
+                               const int height);
+
+// The same as above, but downsamples each dimension to half size.
+void ConvertYUV420SPToARGB8888HalfSize(const uint8* const input,
+                                       uint32* const output,
+                                       int width, int height);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Converts YUV420 semi-planar data to RGB 565 data using the supplied width
 // and height. The input and output must already be allocated and non-null.
 // For efficiency, no error checking is performed.
+<<<<<<< HEAD
 void ConvertYUV420SPToRGB565(const uint8_t* const input, uint16_t* const output,
+=======
+void ConvertYUV420SPToRGB565(const uint8* const input, uint16* const output,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                              const int width, const int height);
 
 #ifdef __cplusplus
 }
 #endif
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_EXAMPLES_ANDROID_JNI_YUV2RGB_H_
+=======
+#endif  // ORG_TENSORFLOW_JNI_IMAGEUTILS_YUV2RGB_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Unit test cases for IntType.
 
 #include <memory>
 #include <unordered_map>
 
+<<<<<<< HEAD
 #include "tensorflow/core/lib/gtl/int_type.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/lib/gtl/int_type.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -42,10 +51,16 @@ class IntTypeTest : public ::testing::Test {
 
 // All tests below will be executed on all supported IntTypes.
 typedef ::testing::Types<Int8_IT, UInt8_IT, Int16_IT, UInt16_IT, Int32_IT,
+<<<<<<< HEAD
                          Int64_IT, UInt64_IT, Long_IT>
     SupportedIntTypes;
 
 TYPED_TEST_SUITE(IntTypeTest, SupportedIntTypes);
+=======
+                         Int64_IT, UInt64_IT, Long_IT> SupportedIntTypes;
+
+TYPED_TEST_CASE(IntTypeTest, SupportedIntTypes);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TYPED_TEST(IntTypeTest, TestInitialization) {
   constexpr typename TestFixture::T a;
@@ -233,8 +248,12 @@ TYPED_TEST(IntTypeTest, TestOperators) {
 
 TYPED_TEST(IntTypeTest, TestHashFunctor) {
   std::unordered_map<typename TestFixture::T, char,
+<<<<<<< HEAD
                      typename TestFixture::T::Hasher>
       map;
+=======
+                     typename TestFixture::T::Hasher> map;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   typename TestFixture::T a(0);
   map[a] = 'c';
   EXPECT_EQ('c', map[a]);

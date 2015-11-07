@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,12 +23,20 @@ limitations under the License.
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/types.h"
 #include "tensorflow/core/util/batch_util.h"
+=======
+#include "tensorflow/core/kernels/queue_base.h"
+
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/tensor_shape.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 namespace {
 
 template <DataType DT>
+<<<<<<< HEAD
 Status HandleSliceToElement(const Tensor& parent, Tensor* element,
                             int64 index) {
   typedef typename EnumToDataType<DT>::Type T;
@@ -45,10 +54,24 @@ Status HandleSliceToElement(const Tensor& parent, Tensor* element,
   auto parent_as_matrix = parent.flat_outer_dims<T>();
   element->flat<T>() = parent_as_matrix.chip(index, 0);
   return Status::OK();
+=======
+void HandleSliceToElement(const Tensor& parent, Tensor* element, int index) {
+  typedef typename EnumToDataType<DT>::Type T;
+  auto parent_as_matrix = parent.flat_outer_dims<T>();
+  element->flat<T>() = parent_as_matrix.chip(index, 0);
+}
+
+template <DataType DT>
+void HandleElementToSlice(const Tensor& element, Tensor* parent, int index) {
+  typedef typename EnumToDataType<DT>::Type T;
+  auto parent_as_matrix = parent->flat_outer_dims<T>();
+  parent_as_matrix.chip(index, 0) = element.flat<T>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace
 
+<<<<<<< HEAD
 QueueBase::QueueBase(int32 capacity, const DataTypeVector& component_dtypes,
                      const std::vector<TensorShape>& component_shapes,
                      const string& name)
@@ -59,6 +82,54 @@ QueueBase::QueueBase(int32 capacity, const DataTypeVector& component_dtypes,
       closed_(false) {}
 
 QueueBase::~QueueBase() {}
+=======
+// static
+Status QueueBase::CopySliceToElement(const Tensor& parent, Tensor* element,
+                                     int index) {
+#define HANDLE_TYPE(DT)                               \
+  if (parent.dtype() == DT) {                         \
+    HandleSliceToElement<DT>(parent, element, index); \
+    return Status::OK();                              \
+  }
+  HANDLE_TYPE(DT_FLOAT);
+  HANDLE_TYPE(DT_DOUBLE);
+  HANDLE_TYPE(DT_INT32);
+  HANDLE_TYPE(DT_UINT8);
+  HANDLE_TYPE(DT_INT16);
+  HANDLE_TYPE(DT_INT8);
+  HANDLE_TYPE(DT_STRING);
+  HANDLE_TYPE(DT_INT64);
+#undef HANDLE_TYPE
+  return errors::Unimplemented("Unhandled data type: ", parent.dtype());
+}
+
+// static
+Status QueueBase::CopyElementToSlice(const Tensor& element, Tensor* parent,
+                                     int index) {
+#define HANDLE_TYPE(DT)                               \
+  if (element.dtype() == DT) {                        \
+    HandleElementToSlice<DT>(element, parent, index); \
+    return Status::OK();                              \
+  }
+  HANDLE_TYPE(DT_FLOAT);
+  HANDLE_TYPE(DT_DOUBLE);
+  HANDLE_TYPE(DT_INT32);
+  HANDLE_TYPE(DT_UINT8);
+  HANDLE_TYPE(DT_INT16);
+  HANDLE_TYPE(DT_INT8);
+  HANDLE_TYPE(DT_STRING);
+  HANDLE_TYPE(DT_INT64);
+#undef HANDLE_TYPE
+  return errors::Unimplemented("Unhandled data type: ", element.dtype());
+}
+
+QueueBase::QueueBase(const DataTypeVector& component_dtypes,
+                     const std::vector<TensorShape>& component_shapes,
+                     const string& name)
+    : component_dtypes_(component_dtypes),
+      component_shapes_(component_shapes),
+      name_(name) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 Status QueueBase::ValidateTupleCommon(const Tuple& tuple) const {
   if (tuple.size() != static_cast<size_t>(num_components())) {
@@ -82,7 +153,11 @@ string QueueBase::ShapeListString(const gtl::ArraySlice<TensorShape>& shapes) {
   string result = "[";
   bool first = true;
   for (const TensorShape& shape : shapes) {
+<<<<<<< HEAD
     strings::StrAppend(&result, (first ? "" : ", "), shape.DebugString());
+=======
+    strings::StrAppend(&result, (first ? "" : ", "), shape.ShortDebugString());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     first = false;
   }
   strings::StrAppend(&result, "]");
@@ -139,6 +214,7 @@ Status QueueBase::MatchesNodeDefShapes(const NodeDef& node_def) const {
   return Status::OK();
 }
 
+<<<<<<< HEAD
 // TODO(mrry): If these checks become a bottleneck, find a way to
 //   reduce the number of times that they are called.
 Status QueueBase::ValidateTuple(const Tuple& tuple) {
@@ -345,4 +421,6 @@ Status QueueBase::CopyElementToSlice(const Tensor& element, Tensor* parent,
   return batch_util::CopyElementToSlice(element, parent, index);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

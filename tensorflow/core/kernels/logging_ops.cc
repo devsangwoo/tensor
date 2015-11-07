@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,6 +78,44 @@ REGISTER_KERNEL_BUILDER(Name("Assert")
                             .HostMemory("condition")
                             .HostMemory("data"),
                         AssertOp);
+=======
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/lib/strings/str_util.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/platform/logging.h"
+
+namespace tensorflow {
+
+class AssertOp : public OpKernel {
+ public:
+  explicit AssertOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+    OP_REQUIRES_OK(ctx, ctx->GetAttr("summarize", &summarize_));
+  }
+
+  void Compute(OpKernelContext* ctx) override {
+    const Tensor& cond = ctx->input(0);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsLegacyScalar(cond.shape()),
+                errors::InvalidArgument("In[0] should be a scalar: ",
+                                        cond.shape().ShortDebugString()));
+
+    if (cond.scalar<bool>()()) {
+      return;
+    }
+    string msg = "assertion failed: ";
+    for (int i = 1; i < ctx->num_inputs(); ++i) {
+      strings::StrAppend(&msg, "[", ctx->input(i).SummarizeValue(summarize_),
+                         "]");
+      if (i < ctx->num_inputs() - 1) strings::StrAppend(&msg, " ");
+    }
+    ctx->SetStatus(errors::InvalidArgument(msg));
+  }
+
+ private:
+  int32 summarize_ = 0;
+};
+
+REGISTER_KERNEL_BUILDER(Name("Assert").Device(DEVICE_CPU), AssertOp);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 class PrintOp : public OpKernel {
  public:
@@ -104,7 +143,11 @@ class PrintOp : public OpKernel {
       strings::StrAppend(&msg, "[", ctx->input(i).SummarizeValue(summarize_),
                          "]");
     }
+<<<<<<< HEAD
     std::cerr << msg << std::endl;
+=======
+    LOG(INFO) << msg;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
@@ -117,6 +160,7 @@ class PrintOp : public OpKernel {
 
 REGISTER_KERNEL_BUILDER(Name("Print").Device(DEVICE_CPU), PrintOp);
 
+<<<<<<< HEAD
 class PrintV2Op : public OpKernel {
  public:
   explicit PrintV2Op(OpKernelConstruction* ctx) : OpKernel(ctx) {
@@ -225,4 +269,6 @@ class TimestampOp : public OpKernel {
 
 REGISTER_KERNEL_BUILDER(Name("Timestamp").Device(DEVICE_CPU), TimestampOp);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace tensorflow

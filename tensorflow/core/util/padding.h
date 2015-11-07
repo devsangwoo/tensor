@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +16,16 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_UTIL_PADDING_H_
 #define TENSORFLOW_CORE_UTIL_PADDING_H_
+=======
+#ifndef TENSORFLOW_UTIL_PADDING_H_
+#define TENSORFLOW_UTIL_PADDING_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // This file contains helper routines to deal with padding in various ops and
 // kernels.
 
 #include <string>
+<<<<<<< HEAD
 #include <vector>
 
 #include "tensorflow/core/lib/core/status.h"
@@ -29,6 +35,14 @@ namespace tensorflow {
 
 class NodeDef;
 
+=======
+
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/public/status.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Padding: the padding we apply to the input tensor along the rows and columns
 // dimensions. This is usually used to make sure that the spatial dimensions do
 // not shrink when we progress with convolutions. Two types of padding are
@@ -36,6 +50,7 @@ class NodeDef;
 //   VALID: No padding is carried out.
 //   SAME: The pad value is computed so that the output will have the same
 //         dimensions as the input.
+<<<<<<< HEAD
 //   EXPLICIT: The user specifies the pad values in the explicit_padding
 //             attribute.
 // The padded area is zero-filled.
@@ -50,10 +65,19 @@ Status CheckValidPadding(Padding padding_type,
                          const std::vector<int64>& explicit_paddings,
                          int num_dims, TensorFormat data_format);
 
+=======
+// The padded area is zero-filled.
+enum Padding {
+  VALID = 1,  // No padding.
+  SAME = 2,   // Input and output layers have the same size.
+};
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Return the string containing the list of valid padding types, that can be
 // used as an Attr() in REGISTER_OP.
 string GetPaddingAttrString();
 
+<<<<<<< HEAD
 // Like GetPaddingAttrString(), but also includes EXPLICIT.
 string GetPaddingAttrStringWithExplicit();
 
@@ -69,3 +93,12 @@ Status GetPaddingFromString(StringPiece str_value, Padding* value);
 }  // end namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_UTIL_PADDING_H_
+=======
+// Specialization to parse an attribute directly into a Padding enum.
+Status GetNodeAttr(const NodeDef& node_def, const string& attr_name,
+                        Padding* value);
+
+}  // end namespace tensorflow
+
+#endif  // TENSORFLOW_UTIL_PADDING_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

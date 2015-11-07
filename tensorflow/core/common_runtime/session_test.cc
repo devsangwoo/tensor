@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,12 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/public/session_options.h"
+=======
+#include "tensorflow/core/public/session.h"
+
+#include "tensorflow/core/public/session_options.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -28,6 +35,7 @@ TEST(SessionTest, InvalidTargetReturnsNull) {
   options.target = "invalid target";
 
   EXPECT_EQ(nullptr, tensorflow::NewSession(options));
+<<<<<<< HEAD
 
   Session* session;
   Status s = tensorflow::NewSession(options, &session);
@@ -73,6 +81,8 @@ TEST(SessionTest, MultipleFactoriesForTarget) {
       absl::StrContains(s.error_message(), "Multiple session factories"));
   EXPECT_TRUE(absl::StrContains(s.error_message(), "FAKE_SESSION_1"));
   EXPECT_TRUE(absl::StrContains(s.error_message(), "FAKE_SESSION_2"));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace

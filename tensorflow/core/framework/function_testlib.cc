@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,12 @@ limitations under the License.
 #include "tensorflow/core/framework/versions.pb.h"
 #include "tensorflow/core/lib/core/threadpool.h"
 #include "tensorflow/core/public/version.h"
+=======
+#include "tensorflow/core/framework/function_testlib.h"
+
+#include "tensorflow/core/framework/function.h"
+#include "tensorflow/core/framework/tensor_testutil.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace test {
@@ -31,6 +38,7 @@ typedef FunctionDefHelper FDH;
 GraphDef GDef(gtl::ArraySlice<NodeDef> nodes,
               gtl::ArraySlice<FunctionDef> funcs) {
   GraphDef g;
+<<<<<<< HEAD
   VersionDef* versions = g.mutable_versions();
   versions->set_producer(TF_GRAPH_DEF_VERSION);
   versions->set_min_consumer(TF_GRAPH_DEF_VERSION_MIN_CONSUMER);
@@ -39,12 +47,20 @@ GraphDef GDef(gtl::ArraySlice<NodeDef> nodes,
   }
   auto lib = g.mutable_library();
   for (const auto& f : funcs) {
+=======
+  for (auto n : nodes) {
+    *(g.add_node()) = n;
+  }
+  auto lib = g.mutable_library();
+  for (auto f : funcs) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     *(lib->add_function()) = f;
   }
   return g;
 }
 
 // Helper to construct a NodeDef.
+<<<<<<< HEAD
 NodeDef NDef(StringPiece name, StringPiece op, gtl::ArraySlice<string> inputs,
              gtl::ArraySlice<std::pair<string, FDH::AttrValueWrapper>> attrs,
              const string& device) {
@@ -52,6 +68,16 @@ NodeDef NDef(StringPiece name, StringPiece op, gtl::ArraySlice<string> inputs,
   n.set_name(string(name));
   n.set_op(string(op));
   for (const auto& in : inputs) n.add_input(in);
+=======
+NodeDef NDef(const string& name, const string& op,
+             gtl::ArraySlice<string> inputs,
+             gtl::ArraySlice<std::pair<string, FDH::AttrValueWrapper>> attrs,
+             const string& device) {
+  NodeDef n;
+  n.set_name(name);
+  n.set_op(op);
+  for (auto in : inputs) n.add_input(in);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   n.set_device(device);
   for (auto na : attrs) n.mutable_attr()->insert({na.first, na.second.proto});
   return n;
@@ -73,6 +99,7 @@ FunctionDef NonZero() {
       });
 }
 
+<<<<<<< HEAD
 FunctionDef IsZero() {
   const Tensor kZero = test::AsScalar<int64>(0);
   return FDH::Define(
@@ -116,6 +143,8 @@ FunctionDef RandomUniform() {
          {"seed2", 42}}}});
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 FunctionDef XTimesTwo() {
   const Tensor kTwo = test::AsScalar<int64>(2);
   return FDH::Define(
@@ -135,6 +164,7 @@ FunctionDef XTimesTwo() {
       });
 }
 
+<<<<<<< HEAD
 FunctionDef TwoDeviceMult() {
   const Tensor kTwo = test::AsScalar<int64>(2);
   const Tensor kThree = test::AsScalar<int64>(3);
@@ -297,6 +327,10 @@ FunctionDef XTimesTwoInt32() {
 
 FunctionDef XTimesFour() {
   return FDH::Create(
+=======
+FunctionDef XTimesFour() {
+  return FDH::Define(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // Name
       "XTimesFour",
       // Args
@@ -308,6 +342,7 @@ FunctionDef XTimesFour() {
       // Nodes
       {
           {{"x2"}, "XTimesTwo", {"x"}, {{"T", "$T"}}},
+<<<<<<< HEAD
           {{"y"}, "XTimesTwo", {"x2:y:0"}, {{"T", "$T"}}},
       },
       {{"y", "y:y:0"}});
@@ -315,6 +350,14 @@ FunctionDef XTimesFour() {
 
 FunctionDef XTimes16() {
   return FDH::Create(
+=======
+          {{"y"}, "XTimesTwo", {"x2"}, {{"T", "$T"}}},
+      });
+}
+
+FunctionDef XTimes16() {
+  return FDH::Define(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // Name
       "XTimes16",
       // Args
@@ -326,9 +369,14 @@ FunctionDef XTimes16() {
       // Nodes
       {
           {{"x4"}, "XTimesFour", {"x"}, {{"T", "$T"}}},
+<<<<<<< HEAD
           {{"y"}, "XTimesFour", {"x4:y:0"}, {{"T", "$T"}}},
       },
       {{"y", "y:y:0"}});
+=======
+          {{"y"}, "XTimesFour", {"x4"}, {{"T", "$T"}}},
+      });
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 FunctionDef WXPlusB() {
@@ -361,12 +409,17 @@ FunctionDef Swap() {
       // Return values
       {"o0: T", "o1: T"},
       // Attr def
+<<<<<<< HEAD
       {"T: {float, double, resource}"},
+=======
+      {"T: {float, double}"},
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // Nodes
       {{{"o0"}, "Identity", {"i1"}, {{"T", "$T"}}},
        {{"o1"}, "Identity", {"i0"}, {{"T", "$T"}}}});
 }
 
+<<<<<<< HEAD
 FunctionDef EmptyBodySwap() {
   return FDH::Create(
       // Name
@@ -692,6 +745,8 @@ void FunctionTestSchedClosure(std::function<void()> fn) {
   w->Schedule(std::move(fn));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace function
 }  // end namespace test
 }  // end namespace tensorflow

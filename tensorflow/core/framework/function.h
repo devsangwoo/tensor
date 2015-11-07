@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,10 +44,25 @@ limitations under the License.
 #if !defined(IS_MOBILE_PLATFORM)
 #include "tensorflow/core/protobuf/remote_tensor_handle.pb.h"
 #endif  // IS_MOBILE_PLATFORM
+=======
+#ifndef TENSORFLOW_FRAMEWORK_FUNCTION_H_
+#define TENSORFLOW_FRAMEWORK_FUNCTION_H_
+
+#include <unordered_map>
+
+#include "tensorflow/core/framework/attr_value_util.h"
+#include "tensorflow/core/framework/function.pb.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_util.h"
+#include "tensorflow/core/framework/op.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/protobuf.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 class CancellationManager;
+<<<<<<< HEAD
 class CollectiveExecutor;
 class DeviceSet;
 class Graph;
@@ -75,6 +91,14 @@ class Node;
 //     {{"z", "o:z"}});
 //
 // For the old Function::Node approach, use FunctionDefHelper::Define()
+=======
+class Node;
+class OpKernel;
+
+// FunctionDefHelper::Define is a convenient helper to construct a
+// FunctionDef proto.
+//
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // E.g.,
 //   FunctionDef my_func = FunctionDefHelper::Define(
 //     "my_func_name",
@@ -84,7 +108,14 @@ class Node;
 //     {
 //        {{"z"}, "Mul", {"x", "y"}, {{"T", "$T"}}}
 //        /* one entry per function node */
+<<<<<<< HEAD
 //     });
+=======
+//     })
+//
+// NOTE: When we have a TFLang parser, we can add another helper:
+//   FunctionDef FunctionDefHelper::Define(const string& tf_func);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class FunctionDefHelper {
  public:
   // AttrValueWrapper has copy constructors for the type T so that
@@ -118,17 +149,25 @@ class FunctionDefHelper {
     return FunctionRef(name, {});
   }
 
+<<<<<<< HEAD
   // Node is used to construct FunctionDef.Node using initialization
   // lists. E.g.,
   //  Node n = {{"z"}, "Mul", {"x", "y"}, {{"T", "$T"}}};  // z = x * y
   struct Node {
     // When constructing a NodeDef, the first entry in ret is used as
     // the node name, the remaining values are ignored.
+=======
+  // Node is used to consturct FunctionDef.Node using initialization
+  // lists. E.g.,
+  //  Node n = {{"z"}, "Mul", {"x", "y"}, {{"T", "$T"}}};  // z = x * y
+  struct Node {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     std::vector<string> ret;
     string op;
     std::vector<string> arg;
     std::vector<std::pair<string, AttrValueWrapper>> attr;
     std::vector<string> dep;
+<<<<<<< HEAD
     string device;
 
     NodeDef ToNodeDef() const;
@@ -159,6 +198,12 @@ class FunctionDefHelper {
                             gtl::ArraySlice<std::pair<string, string>> ret_def);
 
   // TODO(josh11b): Get rid of these and transition to the one above.
+=======
+
+    FunctionDef::Node ToProto() const;
+  };
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   static FunctionDef Define(const string& function_name,
                             gtl::ArraySlice<string> arg_def,
                             gtl::ArraySlice<string> ret_def,
@@ -190,7 +235,11 @@ class FunctionDefHelper {
     n.attr.push_back({"dtype", dtype});
     int64 num = vals.size();
     Tensor t(dtype, TensorShape({num}));
+<<<<<<< HEAD
     for (size_t i = 0; i < vals.size(); ++i) {
+=======
+    for (int i = 0; i < vals.size(); ++i) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       t.flat<T>()(i) = vals[i];
     }
     n.attr.push_back({"value", t});
@@ -223,9 +272,20 @@ inline FunctionDefHelper::AttrValueWrapper::AttrValueWrapper(StringPiece val) {
 // "attr_values", which is a map from a placeholder name to an attr
 // value.
 //
+<<<<<<< HEAD
 // InstantiateFunction calls "get_function" to find signatures of other
 // functions and primitive ops.
 
+=======
+// InstatiateFunction calls "get_function" to find signatures of other
+// functions and primitive ops.
+
+// Placeholders in "fdef" is substitued based on "attr_values" here.
+typedef ::tensorflow::protobuf::Map<string, AttrValue> InstantiateAttrValueMap;
+typedef gtl::ArraySlice<std::pair<string, FunctionDefHelper::AttrValueWrapper>>
+    InstantiateAttrValueSlice;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // GetFunctionSignature(func name, opdef) returns OK if the func name is found
 // and opdef is filled with a pointer to the corresponding signature
 // (a OpDef proto). Otherwise, returns an error.
@@ -235,9 +295,20 @@ typedef std::function<Status(const string&, const OpDef**)>
 struct InstantiationResult {
   DataTypeVector arg_types;
   DataTypeVector ret_types;
+<<<<<<< HEAD
   std::vector<NodeDef> nodes;
 };
 Status InstantiateFunction(const FunctionDef& fdef, AttrSlice attr_values,
+=======
+  GraphDef gdef;
+};
+Status InstantiateFunction(const FunctionDef& fdef,
+                           const InstantiateAttrValueMap& attr_values,
+                           GetFunctionSignature get_function,
+                           InstantiationResult* result);
+Status InstantiateFunction(const FunctionDef& fdef,
+                           InstantiateAttrValueSlice attr_values,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                            GetFunctionSignature get_function,
                            InstantiationResult* result);
 
@@ -251,12 +322,16 @@ Status InstantiateFunction(const FunctionDef& fdef, AttrSlice attr_values,
 // etc.)
 string DebugString(const FunctionDef& func_def);
 string DebugString(const GraphDef& instantiated_func_def);
+<<<<<<< HEAD
 string DebugString(gtl::ArraySlice<NodeDef> instantiated_func_nodes);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Returns a debug string for a top level graph (the main program and
 // its supporting functions defined in its library).
 string DebugStringWhole(const GraphDef& gdef);
 
+<<<<<<< HEAD
 // Returns true if f1 == f2. Compares all fields, including descriptions. Order
 // of NodeDefs doesn't matter.
 bool FunctionDefsEqual(const FunctionDef& f1, const FunctionDef& f2);
@@ -276,6 +351,18 @@ class CallFrameInterface {
   virtual Status GetArg(int index, Tensor* val) const = 0;
   virtual Status SetRetval(int index, const Tensor& val) = 0;
 };
+=======
+// Returns a canonicalized string for the instantiation of the
+// function of the given "name" and attributes "attrs".
+//
+// The returned string is guaranteed to be stable within one address
+// space. But it may be change as the implementation
+// evolves. Therefore, it should not be persisted or compared across
+// address spaces.
+string Canonicalize(const string& funcname,
+                    const InstantiateAttrValueMap& attrs);
+string Canonicalize(const string& funcname, InstantiateAttrValueSlice attrs);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Represents a function call frame. I.e., the data structure used to
 // pass arguments to a function and retrieve its results.
@@ -283,15 +370,23 @@ class CallFrameInterface {
 // Runtime must arrange accesses to one FunctionCallFrame s.t.
 //   1. SetArgs() happens before any GetArg();
 //   2. GetRetvals happens after all SetRetval();
+<<<<<<< HEAD
 class FunctionCallFrame : public CallFrameInterface {
  public:
   FunctionCallFrame(DataTypeSlice arg_types, DataTypeSlice ret_types);
   ~FunctionCallFrame() override;
+=======
+class FunctionCallFrame {
+ public:
+  FunctionCallFrame(DataTypeSlice arg_types, DataTypeSlice ret_types);
+  ~FunctionCallFrame();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Caller methods.
   Status SetArgs(gtl::ArraySlice<Tensor> args);
   Status GetRetvals(std::vector<Tensor>* rets) const;
 
+<<<<<<< HEAD
   // Moves the return values from the frame to rets. If allow_dead_tensors is
   // false it will fail if any of the retvals do not have a value.
   Status ConsumeRetvals(std::vector<Tensor>* rets, bool allow_dead_tensors);
@@ -302,6 +397,11 @@ class FunctionCallFrame : public CallFrameInterface {
   // Callee methods.
   Status GetArg(int index, Tensor* val) const override;
   Status SetRetval(int index, const Tensor& val) override;
+=======
+  // Callee methods.
+  Status GetArg(int index, Tensor* val) const;
+  Status SetRetval(int index, const Tensor& val);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   DataTypeVector arg_types_;
@@ -318,6 +418,7 @@ class FunctionCallFrame : public CallFrameInterface {
 
 // Helper to maintain a map between function names in a given
 // FunctionDefLibrary and function definitions.
+<<<<<<< HEAD
 //
 // This class is thread-safe.
 class FunctionLibraryDefinition : public OpRegistryInterface {
@@ -401,11 +502,22 @@ class FunctionLibraryDefinition : public OpRegistryInterface {
   // the library, returns the gradient function name.  Otherwise,
   // returns an empty string.
   string FindGradient(const string& func) const LOCKS_EXCLUDED(mu_);
+=======
+class FunctionLibraryDefinition : public OpRegistryInterface {
+ public:
+  explicit FunctionLibraryDefinition(const FunctionDefLibrary& lib_def);
+  ~FunctionLibraryDefinition() override;
+
+  // Returns nullptr if "func" is not defined in "lib_def". Otherwise,
+  // returns its definition proto.
+  const FunctionDef* Find(const string& func) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // OpRegistryInterface method. Useful for constructing a Graph.
   //
   // If "op" is defined in the library, returns its signature.
   // Otherwise, assume "op" is a primitive op and returns its op
+<<<<<<< HEAD
   // signature and shape inference function.
   //
   // NB: This function outputs a borrowed pointer, which can be invalidated by a
@@ -511,16 +623,28 @@ class FunctionLibraryDefinition : public OpRegistryInterface {
   gtl::FlatMap<string, std::shared_ptr<FunctionDefAndOpRegistration>>
       function_defs_ GUARDED_BY(mu_);
   gtl::FlatMap<string, string> func_grad_ GUARDED_BY(mu_);
+=======
+  // signature.
+  const OpDef* LookUp(const string& op, Status* status) const override;
+
+ private:
+  std::unordered_map<string, FunctionDef> function_defs_;
+
+  TF_DISALLOW_COPY_AND_ASSIGN(FunctionLibraryDefinition);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // Forward declare. Defined in common_runtime/function.h
 struct FunctionBody;
 
+<<<<<<< HEAD
 // Forward declare. Defined in common_runtime/device.h
 class Device;
 // Forward declare. Defined in common_runtime/device_mgr.h
 class DeviceMgr;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class FunctionLibraryRuntime {
  public:
   virtual ~FunctionLibraryRuntime() {}
@@ -529,6 +653,7 @@ class FunctionLibraryRuntime {
   //
   // Returns OK and fills in "handle" if the instantiation succeeds.
   // Otherwise returns an error and "handle" is undefined.
+<<<<<<< HEAD
   struct InstantiateOptions {
     // The canonical device name of the device on which the function
     // should be instantiated. If empty, the function will be
@@ -650,6 +775,14 @@ class FunctionLibraryRuntime {
 
   // Releases state associated with the handle.
   virtual Status ReleaseHandle(Handle handle) = 0;
+=======
+  typedef uint64 Handle;
+  virtual Status Instantiate(const string& function_name,
+                             const InstantiateAttrValueMap& attrs,
+                             Handle* handle) = 0;
+  Status Instantiate(const string& function_name,
+                     InstantiateAttrValueSlice attrs, Handle* handle);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns the function body for the instantiated function given its
   // handle 'h'. Returns nullptr if "h" is not found.
@@ -658,9 +791,12 @@ class FunctionLibraryRuntime {
   // as long as *this.
   virtual const FunctionBody* GetFunctionBody(Handle h) = 0;
 
+<<<<<<< HEAD
   // Returns the return types for the function identified by handle `h`.
   virtual Status GetRetTypes(Handle h, DataTypeVector* ret_types) = 0;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Asynchronously invokes the instantiated function identified by
   // "handle".
   //
@@ -669,6 +805,7 @@ class FunctionLibraryRuntime {
   // "done" is called with an error status.
   //
   // Does not take ownership of "rets".
+<<<<<<< HEAD
   // In the cross-process scenario, runner isn't used for making the Async
   // RPC calls.
   struct Options {
@@ -714,13 +851,20 @@ class FunctionLibraryRuntime {
 
     // Returns a human readable representation of this.
     string DebugString() const;
+=======
+  struct Options {
+    CancellationManager* cancellation_manager = nullptr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   };
   typedef std::function<void(const Status&)> DoneCallback;
   virtual void Run(const Options& opts, Handle handle,
                    gtl::ArraySlice<Tensor> args, std::vector<Tensor>* rets,
                    DoneCallback done) = 0;
+<<<<<<< HEAD
   virtual void Run(const Options& opts, Handle handle,
                    CallFrameInterface* call_frame, DoneCallback done) = 0;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Creates a "kernel" for the given node def "ndef".
   //
@@ -728,6 +872,7 @@ class FunctionLibraryRuntime {
   // returned "*kernel". Otherwise, returns an error.
   virtual Status CreateKernel(const NodeDef& ndef, OpKernel** kernel) = 0;
 
+<<<<<<< HEAD
   // Returns true iff the function named `function_name` is stateful.
   //
   // NOTE(mrry): This method assumes that the runtime is associated with a
@@ -879,6 +1024,12 @@ class DistributedFunctionLibraryRuntime {
 Status ArgNumType(AttrSlice attrs, const OpDef::ArgDef& arg_def,
                   bool* is_type_list, DataTypeVector* dtypes);
 
+=======
+  // Return true iff 'function_name' is the name of a defined function.
+  virtual bool IsDefined(const string& function_name) = 0;
+};
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // To register a gradient function for a builtin op, one should use
 //   REGISTER_OP_GRADIENT(<op_name>, <c++ grad factory>);
 //
@@ -887,7 +1038,11 @@ Status ArgNumType(AttrSlice attrs, const OpDef::ArgDef& arg_def,
 //   std::function<Status(const AttrSlice&, FunctionDef*)>.
 //
 // A ::tensorflow::gradient::Creator should populate in FunctionDef* with a
+<<<<<<< HEAD
 // definition of a brain function which compute the gradient for the
+=======
+// definition of a brain function which computate the gradient for the
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // <op_name> when the <op_name> is instantiated with the given attrs.
 //
 // E.g.,
@@ -933,10 +1088,15 @@ Status ArgNumType(AttrSlice attrs, const OpDef::ArgDef& arg_def,
 #define REGISTER_OP_GRADIENT_UNIQ_HELPER(ctr, name, fn) \
   REGISTER_OP_GRADIENT_UNIQ(ctr, name, fn)
 
+<<<<<<< HEAD
 #define REGISTER_OP_GRADIENT_UNIQ(ctr, name, fn)      \
   static bool unused_grad_##ctr TF_ATTRIBUTE_UNUSED = \
       SHOULD_REGISTER_OP_GRADIENT &&                  \
       ::tensorflow::gradient::RegisterOp(name, fn)
+=======
+#define REGISTER_OP_GRADIENT_UNIQ(ctr, name, fn) \
+  static bool unused_grad_##ctr = ::tensorflow::gradient::RegisterOp(name, fn)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace gradient {
 // Register a gradient creator for the "op".
@@ -946,6 +1106,7 @@ bool RegisterOp(const string& op, Creator func);
 // Returns OK the gradient creator for the "op" is found (may be
 // nullptr if REGISTER_OP_NO_GRADIENT is used.
 Status GetOpGradientCreator(const string& op, Creator* creator);
+<<<<<<< HEAD
 };  // namespace gradient
 
 // Declare explicit instantiations of GetAttr
@@ -961,3 +1122,10 @@ GET_ATTR(bool)
 }  // end namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_FUNCTION_H_
+=======
+};
+
+}  // end namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_FUNCTION_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

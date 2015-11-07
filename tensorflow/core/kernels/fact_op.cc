@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/op_kernel.h"
 
 namespace tensorflow {
@@ -73,10 +76,15 @@ static void E(string* s) {
   }
 }
 
+<<<<<<< HEAD
+=======
+template <const char* const FACTS[], uint64 N>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class FactOpKernel : public OpKernel {
  public:
   explicit FactOpKernel(OpKernelConstruction* context) : OpKernel(context) {}
 
+<<<<<<< HEAD
   void Compute(OpKernelContext* context) override = 0;
 
  protected:
@@ -88,11 +96,21 @@ class FactOpKernel : public OpKernel {
     auto output = output_tensor->template scalar<tstring>();
 
     string coded = facts[context->env()->NowMicros() % count];
+=======
+  void Compute(OpKernelContext* context) override {
+    Tensor* output_tensor = NULL;
+    OP_REQUIRES_OK(
+        context, context->allocate_output(0, TensorShape({}), &output_tensor));
+    auto output = output_tensor->template scalar<string>();
+
+    string coded = FACTS[context->env()->NowMicros() % N];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     E(&coded);
     output() = coded;
   }
 };
 
+<<<<<<< HEAD
 class FactOpKernel1 : public FactOpKernel {
  public:
   explicit FactOpKernel1(OpKernelConstruction* context)
@@ -115,6 +133,10 @@ class FactOpKernel2 : public FactOpKernel {
 
 REGISTER_KERNEL_BUILDER(Name("Fact").Device(DEVICE_GPU).HostMemory("fact"),
                         FactOpKernel1);
+=======
+REGISTER_KERNEL_BUILDER(Name("Fact").Device(DEVICE_GPU).HostMemory("fact"),
+                        FactOpKernel<kFacts1, kNum1>);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 static string D(const char* s) {
   string ret(s);
@@ -122,9 +144,20 @@ static string D(const char* s) {
   return ret;
 }
 
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(
     Name("Fact").Device(DEVICE_CPU).Label(D("Yoxmos").c_str()), FactOpKernel2);
 REGISTER_KERNEL_BUILDER(
     Name("Fact").Device(DEVICE_CPU).Label(D("yoxmos").c_str()), FactOpKernel2);
+=======
+REGISTER_KERNEL_BUILDER(Name("Fact")
+                            .Device(DEVICE_CPU)
+                            .Label(D("Yoxmos").c_str()),
+                        FactOpKernel<kFacts2, kNum2>);
+REGISTER_KERNEL_BUILDER(Name("Fact")
+                            .Device(DEVICE_CPU)
+                            .Label(D("yoxmos").c_str()),
+                        FactOpKernel<kFacts2, kNum2>);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

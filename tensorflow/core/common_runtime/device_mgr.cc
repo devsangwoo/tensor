@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,10 @@ limitations under the License.
 
 #include <memory>
 #include <vector>
+=======
+#include "tensorflow/core/common_runtime/device_mgr.h"
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/common_runtime/local_device.h"
 #include "tensorflow/core/framework/device_attributes.pb.h"
 #include "tensorflow/core/lib/core/errors.h"
@@ -25,6 +30,7 @@ limitations under the License.
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 DeviceMgr::~DeviceMgr() {}
 
 StaticDeviceMgr::StaticDeviceMgr(std::vector<std::unique_ptr<Device>> devices)
@@ -40,10 +46,20 @@ StaticDeviceMgr::StaticDeviceMgr(std::vector<std::unique_ptr<Device>> devices)
          DeviceNameUtils::GetLocalNamesForDeviceMappings(d->parsed_name())) {
       device_map_[CopyToBackingStore(name)] = d.get();
     }
+=======
+DeviceMgr::DeviceMgr(const std::vector<Device*>& devices) {
+  for (Device* d : devices) {
+    devices_.push_back(d);
+
+    // Register under both the full name and the local name.
+    device_map_[d->name()] = d;
+    device_map_[DeviceNameUtils::LocalName(d->name())] = d;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     device_type_counts_[d->device_type()]++;
   }
 }
 
+<<<<<<< HEAD
 StaticDeviceMgr::StaticDeviceMgr(std::unique_ptr<Device> device)
     : StaticDeviceMgr([&device] {
         std::vector<std::unique_ptr<Device>> vector;
@@ -70,10 +86,21 @@ void StaticDeviceMgr::ListDeviceAttributes(
     std::vector<DeviceAttributes>* devices) const {
   devices->reserve(devices_.size());
   for (const auto& dev : devices_) {
+=======
+DeviceMgr::~DeviceMgr() {
+  for (auto p : devices_) delete p;
+}
+
+void DeviceMgr::ListDeviceAttributes(
+    std::vector<DeviceAttributes>* devices) const {
+  devices->reserve(devices_.size());
+  for (Device* dev : devices_) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     devices->emplace_back(dev->attributes());
   }
 }
 
+<<<<<<< HEAD
 std::vector<Device*> StaticDeviceMgr::ListDevices() const {
   std::vector<Device*> devices(devices_.size());
   for (size_t i = 0; i < devices_.size(); ++i) {
@@ -85,14 +112,29 @@ std::vector<Device*> StaticDeviceMgr::ListDevices() const {
 string StaticDeviceMgr::DebugString() const {
   string out;
   for (const auto& dev : devices_) {
+=======
+std::vector<Device*> DeviceMgr::ListDevices() const {
+  return std::vector<Device*>(devices_.begin(), devices_.end());
+}
+
+string DeviceMgr::DebugString() const {
+  string out;
+  for (Device* dev : devices_) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     strings::StrAppend(&out, dev->name(), "\n");
   }
   return out;
 }
 
+<<<<<<< HEAD
 string StaticDeviceMgr::DeviceMappingString() const {
   string out;
   for (const auto& dev : devices_) {
+=======
+string DeviceMgr::DeviceMappingString() const {
+  string out;
+  for (Device* dev : devices_) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!dev->attributes().physical_device_desc().empty()) {
       strings::StrAppend(&out, dev->name(), " -> ",
                          dev->attributes().physical_device_desc(), "\n");
@@ -101,6 +143,7 @@ string StaticDeviceMgr::DeviceMappingString() const {
   return out;
 }
 
+<<<<<<< HEAD
 Status StaticDeviceMgr::LookupDevice(StringPiece name, Device** device) const {
   auto iter = device_map_.find(name);
   if (iter == device_map_.end()) {
@@ -110,16 +153,28 @@ Status StaticDeviceMgr::LookupDevice(StringPiece name, Device** device) const {
     }
     VLOG(1) << "Unknown device: " << name
             << " all devices: " << absl::StrJoin(device_names, ", ");
+=======
+Status DeviceMgr::LookupDevice(const string& name, Device** device) const {
+  Status s;
+  auto iter = device_map_.find(name);
+  if (iter == device_map_.end()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return errors::InvalidArgument(name, " unknown device.");
   }
   *device = iter->second;
   return Status::OK();
 }
 
+<<<<<<< HEAD
 void StaticDeviceMgr::ClearContainers(
     gtl::ArraySlice<string> containers) const {
   Status s;
   for (const auto& dev : devices_) {
+=======
+void DeviceMgr::ClearContainers(gtl::ArraySlice<string> containers) const {
+  Status s;
+  for (Device* dev : devices_) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (containers.empty()) {
       s.Update(dev->resource_manager()->Cleanup(
           dev->resource_manager()->default_container()));
@@ -134,7 +189,11 @@ void StaticDeviceMgr::ClearContainers(
   }
 }
 
+<<<<<<< HEAD
 int StaticDeviceMgr::NumDeviceType(const string& type) const {
+=======
+int DeviceMgr::NumDeviceType(const string& type) const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   auto iter = device_type_counts_.find(type);
   if (iter != device_type_counts_.end()) return iter->second;
   return 0;

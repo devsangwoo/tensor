@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -303,6 +304,19 @@ BCastList<N>::BCastList(const BCastList::Vec (&x)[N],
   }
 }
 
+=======
+#ifndef TENSORFLOW_UTIL_BCAST_H_
+#define TENSORFLOW_UTIL_BCAST_H_
+
+#include <algorithm>
+#include <vector>
+
+#include "tensorflow/core/platform/port.h"
+
+#include "tensorflow/core/platform/logging.h"
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // BCast is a helper for broadcasting binary tensor operation.
 // TensorFlow's broadcasting rule follows that of numpy (See
 // http://docs.scipy.org/doc/numpy/user/basics.broadcasting.html).
@@ -342,6 +356,7 @@ BCastList<N>::BCastList(const BCastList::Vec (&x)[N],
 //
 // The multiplication in the grad * backprop_x itself is also
 // broadcasting following the same rule.
+<<<<<<< HEAD
 class BCast : public BCastList<2> {
  public:
   // Constructs all helper shapes, following the aforementioned rules.
@@ -410,9 +425,58 @@ class BCast : public BCastList<2> {
   static TensorShape ToShape(const Vec& vec);
 
  private:
+=======
+//
+// TODO(zhifengc): Adds support for n-ary (n >= 2).
+class BCast {
+ public:
+  // A vector of int32 representing the shape of tensor. The 0-th
+  // element is the outer-most dimension and the last element is the
+  // inner-most dimension. Note that we do not use TensorShape since
+  // it's more convenient to manipulate Vec directly for this module.
+  typedef std::vector<int64> Vec;
+
+  BCast(const Vec& x, const Vec& y);
+  ~BCast() {}
+
+  // Returns true iff two operands are compatible according to the
+  // broadcasting rule.
+  bool IsValid() const { return valid_; }
+
+  // If and only if IsValid(), the following fields can be used in
+  // implementing a broadcasted binary tensor operation according to
+  // the broadcasting rule.
+  const Vec& x_reshape() const { return x_reshape_; }
+  const Vec& x_bcast() const { return x_bcast_; }
+  const Vec& y_reshape() const { return y_reshape_; }
+  const Vec& y_bcast() const { return y_bcast_; }
+  const Vec& result_shape() const { return result_; }
+  const Vec& output_shape() const { return output_; }
+  const Vec& grad_x_reduce_idx() const { return grad_x_reduce_idx_; }
+  const Vec& grad_y_reduce_idx() const { return grad_y_reduce_idx_; }
+
+ private:
+  bool valid_ = true;
+  Vec x_reshape_;
+  Vec x_bcast_;
+  Vec y_reshape_;
+  Vec y_bcast_;
+  Vec result_;
+  Vec output_;
+  Vec grad_x_reduce_idx_;
+  Vec grad_y_reduce_idx_;
+
+  static void Reverse(Vec* shape);
+  static bool HasZero(const Vec& shape);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TF_DISALLOW_COPY_AND_ASSIGN(BCast);
 };
 
 }  // end namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_UTIL_BCAST_H_
+=======
+#endif  // TENSORFLOW_UTIL_BCAST_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

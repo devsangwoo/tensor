@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,14 +18,24 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_LIB_CORE_ARENA_H_
 #define TENSORFLOW_CORE_LIB_CORE_ARENA_H_
+=======
+// TODO(vrv): Switch this to an open-sourced version of Arena.
+
+#ifndef TENSORFLOW_LIB_CORE_ARENA_H_
+#define TENSORFLOW_LIB_CORE_ARENA_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <assert.h>
 
 #include <vector>
 
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace core {
@@ -42,10 +53,13 @@ class Arena {
     return reinterpret_cast<char*>(GetMemory(size, 1));
   }
 
+<<<<<<< HEAD
   char* AllocAligned(const size_t size, const size_t alignment) {
     return reinterpret_cast<char*>(GetMemory(size, alignment));
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   void Reset();
 
 // This should be the worst-case alignment for any type.  This is
@@ -83,7 +97,11 @@ class Arena {
     size_t size;
   };
 
+<<<<<<< HEAD
   // Allocate new block of at least block_size, with the specified
+=======
+  // Allocate new new block of at least block_size, with the specified
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // alignment.
   // The returned AllocatedBlock* is valid until the next call to AllocNewBlock
   // or Reset (i.e. anything that might affect overflow_blocks_).
@@ -107,4 +125,8 @@ class Arena {
 }  // namespace core
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_LIB_CORE_ARENA_H_
+=======
+#endif  // TENSORFLOW_LIB_CORE_ARENA_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

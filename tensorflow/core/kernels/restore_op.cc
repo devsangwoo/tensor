@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,10 @@ limitations under the License.
 
 // See docs in ../ops/io_ops.cc.
 #include "tensorflow/core/kernels/save_restore_tensor.h"
+=======
+// See docs in ../ops/io_ops.cc.
+#include "tensorflow/core/kernels/io.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/lib/core/errors.h"
@@ -41,7 +46,11 @@ class RestoreOp : public OpKernel {
   }
   void Compute(OpKernelContext* context) override {
     RestoreTensor(context, &checkpoint::OpenTableTensorSliceReader,
+<<<<<<< HEAD
                   preferred_shard_, false, 0);
+=======
+                  preferred_shard_, false);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
@@ -67,7 +76,11 @@ class RestoreSliceOp : public OpKernel {
   }
   void Compute(OpKernelContext* context) override {
     RestoreTensor(context, &checkpoint::OpenTableTensorSliceReader,
+<<<<<<< HEAD
                   preferred_shard_, true, 0);
+=======
+                  preferred_shard_, true);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:

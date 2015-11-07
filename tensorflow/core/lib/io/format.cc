@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,20 @@ limitations under the License.
 #include "tensorflow/core/lib/io/block.h"
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/platform/snappy.h"
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
+#include "tensorflow/core/lib/io/format.h"
+
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/lib/io/block.h"
+#include "tensorflow/core/lib/core/coding.h"
+#include "tensorflow/core/lib/hash/crc32c.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/lib/core/errors.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace table {
@@ -78,7 +93,11 @@ Status Footer::DecodeFrom(StringPiece* input) {
 }
 
 Status ReadBlock(RandomAccessFile* file, const BlockHandle& handle,
+<<<<<<< HEAD
                  BlockContents* result) {
+=======
+                      BlockContents* result) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   result->data = StringPiece();
   result->cachable = false;
   result->heap_allocated = false;
@@ -86,6 +105,7 @@ Status ReadBlock(RandomAccessFile* file, const BlockHandle& handle,
   // Read the block contents as well as the type/crc footer.
   // See table_builder.cc for the code that built this structure.
   size_t n = static_cast<size_t>(handle.size());
+<<<<<<< HEAD
 
   if (kBlockTrailerSize > std::numeric_limits<size_t>::max() - n) {
     return errors::DataLoss("handle.size() too big");
@@ -94,6 +114,12 @@ Status ReadBlock(RandomAccessFile* file, const BlockHandle& handle,
   char* buf = new char[n + kBlockTrailerSize];
   StringPiece contents;
   Status s = file->Read(handle.offset(), n + kBlockTrailerSize, &contents, buf);
+=======
+  char* buf = new char[n + kBlockTrailerSize];
+  StringPiece contents;
+  Status s =
+      file->Read(handle.offset(), n + kBlockTrailerSize, &contents, buf);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!s.ok()) {
     delete[] buf;
     return s;

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Operators that deal with SummaryProtos (encoded as DT_STRING tensors) as
 // inputs or outputs in various ways.
 
@@ -20,14 +23,21 @@ limitations under the License.
 
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/summary.pb.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/png/png_io.h"
 #include "tensorflow/core/platform/logging.h"
+=======
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/png/png_io.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 class SummaryImageOp : public OpKernel {
  public:
+<<<<<<< HEAD
   typedef Eigen::Tensor<uint8, 2, Eigen::RowMajor> Uint8Image;
 
   explicit SummaryImageOp(OpKernelConstruction* context) : OpKernel(context) {
@@ -36,6 +46,10 @@ class SummaryImageOp : public OpKernel {
     OP_REQUIRES(context, max_images_tmp < (1LL << 31),
                 errors::InvalidArgument("max_images must be < 2^31"));
     max_images_ = static_cast<int32>(max_images_tmp);
+=======
+  explicit SummaryImageOp(OpKernelConstruction* context) : OpKernel(context) {
+    OP_REQUIRES_OK(context, context->GetAttr("max_images", &max_images_));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     const TensorProto* proto;
     OP_REQUIRES_OK(context, context->GetAttr("bad_color", &proto));
     OP_REQUIRES_OK(context, context->device()->MakeTensorFromProto(
@@ -46,12 +60,17 @@ class SummaryImageOp : public OpKernel {
     OP_REQUIRES(
         context, TensorShapeUtils::IsVector(bad_color_.shape()),
         errors::InvalidArgument("bad_color must be a vector, got shape ",
+<<<<<<< HEAD
                                 bad_color_.shape().DebugString()));
+=======
+                                bad_color_.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void Compute(OpKernelContext* c) override {
     const Tensor& tags = c->input(0);
     const Tensor& tensor = c->input(1);
+<<<<<<< HEAD
     OP_REQUIRES(c, IsLegacyScalar(tags.shape()),
                 errors::InvalidArgument("Tags must be a scalar"));
     OP_REQUIRES(c,
@@ -114,11 +133,31 @@ class SummaryImageOp : public OpKernel {
                              int w, int hw, int depth, int batch_size,
                              const string& base_tag, Summary* s) {
     // For float and half images, nans and infs are replaced with bad_color.
+=======
+    OP_REQUIRES(c, TensorShapeUtils::IsLegacyScalar(tags.shape()),
+                errors::InvalidArgument("Tags must have be a scalar"));
+    OP_REQUIRES(c, tensor.dims() == 4 &&
+                       (tensor.dim_size(3) == 1 || tensor.dim_size(3) == 3 ||
+                        tensor.dim_size(3) == 4),
+                errors::InvalidArgument(
+                    "Tensor must be 4-D with last dim 1, 3, or 4, not ",
+                    tensor.shape().DebugString()));
+    const string& base_tag = tags.scalar<string>()();
+
+    const int batch_size = tensor.dim_size(0);
+    const int h = tensor.dim_size(1);
+    const int w = tensor.dim_size(2);
+    const int hw = h * w;  // Compact these two dims for simplicity
+    const int depth = tensor.dim_size(3);
+    auto tensor_eigen = tensor.shaped<float, 3>({batch_size, hw, depth});
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(c, bad_color_.dim_size(0) >= depth,
                 errors::InvalidArgument(
                     "expected depth <= bad_color.size, got depth = ", depth,
                     ", bad_color.size = ", bad_color_.dim_size(0)));
     auto bad_color_full = bad_color_.vec<uint8>();
+<<<<<<< HEAD
     typename TTypes<uint8>::ConstVec bad_color(bad_color_full.data(), depth);
 
     // Float images must be scaled and translated.
@@ -148,6 +187,17 @@ class SummaryImageOp : public OpKernel {
     const int N = std::min<int>(max_images_, batch_size);
     for (int i = 0; i < N; ++i) {
       Summary::Value* v = s->add_value();
+=======
+    typename TTypes<uint8>::Vec bad_color(bad_color_full.data(), depth);
+
+    // RGB (or gray or RGBA) is last dimension
+    Eigen::Tensor<uint8, 2, Eigen::RowMajor> image(hw, depth);
+
+    Summary s;
+    const int N = std::min<int>(max_images_, batch_size);
+    for (int i = 0; i < N; ++i) {
+      Summary::Value* v = s.add_value();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // The tag depends on the number of requested images (not the number
       // produced.)
       //
@@ -155,6 +205,7 @@ class SummaryImageOp : public OpKernel {
       // convention for display, so we append "/image" to guarantee that the
       // image(s) won't be displayed in the global scope with no name.
       if (max_images_ > 1) {
+<<<<<<< HEAD
         v->set_tag(strings::StrCat(tag, "/image/", i));
       } else {
         v->set_tag(strings::StrCat(tag, "/image"));
@@ -249,6 +300,99 @@ class SummaryImageOp : public OpKernel {
 
  private:
   int32 max_images_;
+=======
+        v->set_tag(strings::StrCat(base_tag, "/image/", i));
+      } else {
+        v->set_tag(strings::StrCat(base_tag, "/image"));
+      }
+
+      if (image.size()) {
+        typename TTypes<float>::ConstMatrix values(
+            &tensor_eigen(i, 0, 0),
+            Eigen::DSizes<Eigen::DenseIndex, 2>(hw, depth));
+
+        // Rescale the image to uint8 range.
+        //
+        // We are trying to generate an RCG image from a float tensor.  We do
+        // not have any info about the expected range of values in the tensor
+        // but the generated image needs to have all RGB values within [0, 255].
+        //
+        // We use two different algorithms to generate these values.  If the
+        // tensor has only positive values we scale them all by 255/max(values).
+        // If the tensor has both negative and positive values we scale them by
+        // the max of their absolute values and center them around 127.
+        //
+        // This works for most cases, but has the incovenient of not respecting
+        // the relative dynamic range across different instances of the tensor.
+
+        // Compute min and max ignoring nonfinite pixels
+        float image_min = std::numeric_limits<float>::infinity();
+        float image_max = -image_min;
+        for (int i = 0; i < hw; i++) {
+          bool finite = true;
+          for (int j = 0; j < depth; j++) {
+            if (!std::isfinite(values(i, j))) {
+              finite = false;
+              break;
+            }
+          }
+          if (finite) {
+            for (int j = 0; j < depth; j++) {
+              float value = values(i, j);
+              image_min = std::min(image_min, value);
+              image_max = std::max(image_max, value);
+            }
+          }
+        }
+
+        // Pick an affine transform into uint8
+        const float kZeroThreshold = 1e-6;
+        float scale, offset;
+        if (image_min < 0) {
+          float max_val = std::max(std::abs(image_min), std::abs(image_max));
+          scale = max_val < kZeroThreshold ? 0.0f : 127.0f / max_val;
+          offset = 128.0f;
+        } else {
+          scale = image_max < kZeroThreshold ? 0.0f : 255.0f / image_max;
+          offset = 0.0f;
+        }
+
+        // Transform image, turning nonfinite values to bad_color
+        for (int i = 0; i < hw; i++) {
+          bool finite = true;
+          for (int j = 0; j < depth; j++) {
+            if (!std::isfinite(values(i, j))) {
+              finite = false;
+              break;
+            }
+          }
+          if (finite) {
+            image.chip<0>(i) =
+                (values.chip<0>(i) * scale + offset).cast<uint8>();
+          } else {
+            image.chip<0>(i) = bad_color;
+          }
+        }
+      }
+
+      Summary::Image* si = v->mutable_image();
+      si->set_height(h);
+      si->set_width(w);
+      si->set_colorspace(depth);
+      OP_REQUIRES(c, png::WriteImageToBuffer(
+                         image.data(), w, h, w * depth, depth, 8, -1,
+                         si->mutable_encoded_image_string(), nullptr),
+                  errors::Internal("PNG encoding failed"));
+    }
+
+    Tensor* summary_tensor = nullptr;
+    OP_REQUIRES_OK(c, c->allocate_output(0, TensorShape({}), &summary_tensor));
+    CHECK(s.SerializeToString(&summary_tensor->scalar<string>()()));
+  }
+
+ private:
+  int64 max_images_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Tensor bad_color_;
 };
 

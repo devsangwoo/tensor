@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/array_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/bounds_check.h"
 #include "tensorflow/core/framework/op_kernel.h"
@@ -33,11 +37,25 @@ limitations under the License.
 #include "tensorflow/core/kernels/split_lib_gpu.h"
 #include "tensorflow/core/platform/stream_executor.h"
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#include "tensorflow/core/kernels/split_op.h"
+
+#include <vector>
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 typedef Eigen::SyclDevice SYCLDevice;
 #endif  // TENSORFLOW_USE_SYCL
@@ -65,6 +83,24 @@ class SplitOpBase : public OpKernel {
         errors::InvalidArgument("-input rank(-", input.dims(),
                                 ") <= split_dim < input rank (", input.dims(),
                                 "), but got ", split_dim_orig));
+=======
+
+template <typename Device, typename T>
+class SplitOp : public OpKernel {
+ public:
+  explicit SplitOp(OpKernelConstruction* c) : OpKernel(c) {}
+
+  void Compute(OpKernelContext* context) override {
+    const int32 split_dim = context->input(0).flat<int32>()(0);
+    const int32 num_split = num_outputs();
+    const Tensor& input = context->input(1);
+    const TensorShape& input_shape = input.shape();
+
+    OP_REQUIRES(
+        context, 0 <= split_dim && split_dim < input_shape.dims(),
+        errors::InvalidArgument("0 <= split_dim < number of input dimensions (",
+                                input_shape.dims(), "), but got ", split_dim));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     OP_REQUIRES(
         context, num_split > 0,
@@ -77,11 +113,18 @@ class SplitOpBase : public OpKernel {
                     "dimension, but got split_dim ",
                     split_dim, " (size = ", input_shape.dim_size(split_dim),
                     ") ", "and num_split ", num_split));
+<<<<<<< HEAD
+=======
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Special case 1: num_split == 1. Nothing to do.
     if (num_split == 1) {
       VLOG(1) << "Split identity";
       context->set_output(0, context->input(1));
+<<<<<<< HEAD
       *done = true;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       return;
     }
 
@@ -99,6 +142,7 @@ class SplitOpBase : public OpKernel {
       for (int i = 0; i < num_split; ++i) {
         context->set_output(i, input.Slice(i * delta, (i + 1) * delta));
       }
+<<<<<<< HEAD
       *done = true;
       return;
     }
@@ -109,11 +153,17 @@ class SplitOpBase : public OpKernel {
       const TensorShape& input_shape, int32 split_dim) const {
     static_assert(std::is_integral<IndexType>::value,
                   "IndexType must be an integer type");
+=======
+      return;
+    }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     int32 prefix_dim_size = 1;
     for (int i = 0; i < split_dim; ++i) {
       prefix_dim_size *= input_shape.dim_size(i);
     }
 
+<<<<<<< HEAD
     // Caller must ensure that dim_size and suffix_dim_size are <
     // std::numeric_limits<IndexType>::max()
     IndexType split_dim_size =
@@ -369,14 +419,38 @@ class SplitOpSYCL : public SplitOpBase<SYCLDevice, T> {
     Eigen::DSizes<Eigen::DenseIndex, 3> indices{0, 0, 0};
     Eigen::DSizes<Eigen::DenseIndex, 3> sizes{
         prefix_dim_size, split_dim_output_size, suffix_dim_size};
+=======
+    int32 split_dim_size = input_shape.dim_size(split_dim);
+
+    int32 suffix_dim_size = 1;
+    for (int i = split_dim + 1; i < input_shape.dims(); ++i) {
+      suffix_dim_size *= input_shape.dim_size(i);
+    }
+
+    auto input_reshaped =
+        input.shaped<T, 3>({prefix_dim_size, split_dim_size, suffix_dim_size});
+
+    const int32 split_dim_output_size = split_dim_size / num_split;
+    TensorShape output_shape(input_shape);
+    output_shape.set_dim(split_dim, split_dim_output_size);
+
+    Eigen::DSizes<ptrdiff_t, 3> indices{0, 0, 0};
+    Eigen::DSizes<ptrdiff_t, 3> sizes{prefix_dim_size, split_dim_output_size,
+                                      suffix_dim_size};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     for (int i = 0; i < num_split; ++i) {
       Tensor* result = nullptr;
       OP_REQUIRES_OK(context,
                      context->allocate_output(i, output_shape, &result));
       if (prefix_dim_size * split_dim_output_size * suffix_dim_size > 0) {
+<<<<<<< HEAD
         Eigen::DSizes<Eigen::DenseIndex, 3> slice_indices;
         Eigen::DSizes<Eigen::DenseIndex, 3> slice_sizes;
+=======
+        Eigen::DSizes<ptrdiff_t, 3> slice_indices;
+        Eigen::DSizes<ptrdiff_t, 3> slice_sizes;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         for (int j = 0; j < 3; ++j) {
           slice_indices[j] = indices[j];
           slice_sizes[j] = sizes[j];
@@ -385,21 +459,31 @@ class SplitOpSYCL : public SplitOpBase<SYCLDevice, T> {
         auto result_shaped = result->shaped<T, 3>(
             {prefix_dim_size, split_dim_output_size, suffix_dim_size});
 
+<<<<<<< HEAD
         functor::Split<SYCLDevice, T>()(context->eigen_device<SYCLDevice>(),
                                         result_shaped, input_reshaped,
                                         slice_indices, slice_sizes);
+=======
+        functor::Split<Device, T>()(context->eigen_device<Device>(),
+                                    result_shaped, input_reshaped,
+                                    slice_indices, slice_sizes);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
       indices[1] += split_dim_output_size;
     }
   }
 };
+<<<<<<< HEAD
 #endif  // TENSORFLOW_USE_SYCL
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define REGISTER_SPLIT(type)                             \
   REGISTER_KERNEL_BUILDER(Name("Split")                  \
                               .Device(DEVICE_CPU)        \
                               .TypeConstraint<type>("T") \
                               .HostMemory("split_dim"),  \
+<<<<<<< HEAD
                           SplitOpCPU<type>)
 
 TF_CALL_ALL_TYPES(REGISTER_SPLIT);
@@ -409,12 +493,22 @@ REGISTER_SPLIT(uint64);
 #undef REGISTER_SPLIT
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+                          SplitOp<CPUDevice, type>)
+
+TF_CALL_ALL_TYPES(REGISTER_SPLIT);
+
+#undef REGISTER_SPLIT
+
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define REGISTER_GPU(type)                               \
   REGISTER_KERNEL_BUILDER(Name("Split")                  \
                               .Device(DEVICE_GPU)        \
                               .TypeConstraint<type>("T") \
                               .HostMemory("split_dim"),  \
+<<<<<<< HEAD
                           SplitOpGPU<type>)
 
 TF_CALL_GPU_NUMBER_TYPES(REGISTER_GPU);
@@ -437,5 +531,13 @@ TF_CALL_GPU_NUMBER_TYPES_NO_HALF(REGISTER_SYCL);
 #undef REGISTER_SYCL
 
 #endif  // TENSORFLOW_USE_SYCL
+=======
+                          SplitOp<GPUDevice, type>)
+
+TF_CALL_GPU_NUMBER_TYPES(REGISTER_GPU);
+#undef REGISTER_GPU
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // end namespace tensorflow

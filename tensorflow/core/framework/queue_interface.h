@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +16,25 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_FRAMEWORK_QUEUE_INTERFACE_H_
 #define TENSORFLOW_CORE_FRAMEWORK_QUEUE_INTERFACE_H_
+=======
+#ifndef TENSORFLOW_FRAMEWORK_QUEUE_INTERFACE_H_
+#define TENSORFLOW_FRAMEWORK_QUEUE_INTERFACE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <string>
 #include <vector>
 
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/resource_mgr.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -54,6 +65,7 @@ class QueueInterface : public ResourceBase {
   virtual void TryDequeue(OpKernelContext* ctx, CallbackWithTuple callback) = 0;
 
   // Same as above, but the stashed function object will attempt to dequeue
+<<<<<<< HEAD
   // num_elements items.  If allow_small_batch is true, and the Queue is
   // closed but at least 1 element is available, there is no blocking
   // and between 1 and num_elements items are immediately returned.
@@ -61,6 +73,10 @@ class QueueInterface : public ResourceBase {
   // return an Unimplemented error.
   virtual void TryDequeueMany(int num_elements, OpKernelContext* ctx,
                               bool allow_small_batch,
+=======
+  // num_elements items.
+  virtual void TryDequeueMany(int num_elements, OpKernelContext* ctx,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                               CallbackWithTuple callback) = 0;
 
   // Signals that no more elements will be enqueued, and optionally
@@ -77,14 +93,18 @@ class QueueInterface : public ResourceBase {
   virtual void Close(OpKernelContext* ctx, bool cancel_pending_enqueues,
                      DoneCallback callback) = 0;
 
+<<<<<<< HEAD
   // Returns true if a given queue is closed and false if it is open.
   virtual bool is_closed() const = 0;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Assuming *this represents a shared queue, verify that it matches
   // another instantiation indicated by node_def.
   virtual Status MatchesNodeDef(const NodeDef& node_def) = 0;
 
   // Returns the number of elements in the queue.
+<<<<<<< HEAD
   virtual int32 size() const = 0;
 
   virtual const DataTypeVector& component_dtypes() const = 0;
@@ -92,6 +112,13 @@ class QueueInterface : public ResourceBase {
   string DebugString() const override {
     return strings::StrCat("A Queue of size: ", size());
   }
+=======
+  virtual int32 size() = 0;
+
+  virtual const DataTypeVector& component_dtypes() const = 0;
+
+  string DebugString() override { return "A queue"; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  protected:
   virtual ~QueueInterface() {}
@@ -99,4 +126,8 @@ class QueueInterface : public ResourceBase {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_QUEUE_INTERFACE_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_QUEUE_INTERFACE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

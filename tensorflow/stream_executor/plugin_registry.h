@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,22 +14,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifndef TENSORFLOW_STREAM_EXECUTOR_PLUGIN_REGISTRY_H_
 #define TENSORFLOW_STREAM_EXECUTOR_PLUGIN_REGISTRY_H_
 
 #include <map>
 
+<<<<<<< HEAD
 #include "absl/base/macros.h"
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/blas.h"
 #include "tensorflow/stream_executor/dnn.h"
 #include "tensorflow/stream_executor/fft.h"
 #include "tensorflow/stream_executor/lib/status.h"
 #include "tensorflow/stream_executor/lib/statusor.h"
 #include "tensorflow/stream_executor/platform.h"
+<<<<<<< HEAD
 #include "tensorflow/stream_executor/plugin.h"
 #include "tensorflow/stream_executor/rng.h"
 
 namespace stream_executor {
+=======
+#include "tensorflow/stream_executor/platform/mutex.h"
+#include "tensorflow/stream_executor/plugin.h"
+#include "tensorflow/stream_executor/rng.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace internal {
 class StreamExecutorInterface;
@@ -97,7 +112,10 @@ class PluginRegistry {
   // TODO(b/22689637): Deprecated/temporary. Will be deleted once all users are
   // on MultiPlatformManager / PlatformId.
   template <typename FactoryT>
+<<<<<<< HEAD
   ABSL_DEPRECATED("Use MultiPlatformManager / PlatformId instead.")
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   port::StatusOr<FactoryT> GetFactory(PlatformKind platform_kind,
                                       PluginId plugin_id);
 
@@ -138,6 +156,13 @@ class PluginRegistry {
   bool HasFactory(const PluginFactories& factories, PluginKind plugin_kind,
                   PluginId plugin) const;
 
+<<<<<<< HEAD
+=======
+  // As this object is a singleton, a global mutex can be used for static and
+  // instance protection.
+  static mutex mu_;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // The singleton itself.
   static PluginRegistry* instance_;
 
@@ -160,6 +185,7 @@ class PluginRegistry {
   SE_DISALLOW_COPY_AND_ASSIGN(PluginRegistry);
 };
 
+<<<<<<< HEAD
 // Explicit specializations are defined in plugin_registry.cc.
 #define DECLARE_PLUGIN_SPECIALIZATIONS(FACTORY_TYPE)                          \
   template <>                                                                 \
@@ -180,5 +206,9 @@ DECLARE_PLUGIN_SPECIALIZATIONS(RngFactory);
 #undef DECL_PLUGIN_SPECIALIZATIONS
 
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_PLUGIN_REGISTRY_H_

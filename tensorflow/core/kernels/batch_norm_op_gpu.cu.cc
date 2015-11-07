@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +15,9 @@ limitations under the License.
 ==============================================================================*/
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define EIGEN_USE_GPU
 
@@ -25,6 +29,7 @@ namespace tensorflow {
 
 typedef Eigen::GpuDevice GPUDevice;
 template struct functor::BatchNorm<GPUDevice, float>;
+<<<<<<< HEAD
 template struct functor::BatchNorm<GPUDevice, Eigen::half>;
 template struct functor::BatchNormGrad<GPUDevice, float>;
 template struct functor::BatchNormGrad<GPUDevice, Eigen::half>;
@@ -32,3 +37,10 @@ template struct functor::BatchNormGrad<GPUDevice, Eigen::half>;
 }  // namespace tensorflow
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+template struct functor::BatchNormGrad<GPUDevice, float>;
+
+}  // namespace tensorflow
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

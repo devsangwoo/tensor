@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Kernel-loader specs are structures that describe how to load a data-parallel
 // kernel on a given platform for subsequent launching. Headers that instantiate
 // these data structures will typically be auto-generated. However, users can
@@ -47,6 +50,7 @@ limitations under the License.
 #define TENSORFLOW_STREAM_EXECUTOR_KERNEL_SPEC_H_
 
 #include <stddef.h>
+<<<<<<< HEAD
 
 #include <map>
 #include <memory>
@@ -57,6 +61,19 @@ limitations under the License.
 #include "tensorflow/stream_executor/platform/port.h"
 
 namespace stream_executor {
+=======
+#include <map>
+#include <memory>
+#include "tensorflow/stream_executor/platform/port.h"
+
+#include "tensorflow/stream_executor/lib/stringpiece.h"
+#include "tensorflow/stream_executor/platform/logging.h"
+#include "tensorflow/stream_executor/platform/mutex.h"
+#include "tensorflow/stream_executor/platform/port.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Describes how to load a kernel on a target platform.
 //
@@ -76,7 +93,11 @@ class KernelLoaderSpec {
   const string &kernelname() const { return kernelname_; }
 
  protected:
+<<<<<<< HEAD
   explicit KernelLoaderSpec(absl::string_view kernelname);
+=======
+  explicit KernelLoaderSpec(port::StringPiece kernelname);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   // The kernel name that should be loaded out of the program description given
@@ -101,8 +122,13 @@ class OnDiskKernelLoaderSpec : public KernelLoaderSpec {
   virtual const char *CanonicalSuffix() const = 0;
 
  protected:
+<<<<<<< HEAD
   OnDiskKernelLoaderSpec(absl::string_view filename,
                          absl::string_view kernelname);
+=======
+  OnDiskKernelLoaderSpec(port::StringPiece filename,
+                         port::StringPiece kernelname);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   string filename_;
 
@@ -113,7 +139,11 @@ class OnDiskKernelLoaderSpec : public KernelLoaderSpec {
 // Kernel loader specification for PTX text that resides on disk.
 class CudaPtxOnDisk : public OnDiskKernelLoaderSpec {
  public:
+<<<<<<< HEAD
   CudaPtxOnDisk(absl::string_view filename, absl::string_view kernelname);
+=======
+  CudaPtxOnDisk(port::StringPiece filename, port::StringPiece kernelname);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~CudaPtxOnDisk() override {}
 
   const char *CanonicalSuffix() const override { return ".ptx"; }
@@ -125,7 +155,11 @@ class CudaPtxOnDisk : public OnDiskKernelLoaderSpec {
 // Kernel loader specification for CUBIN binary that resides on disk.
 class CudaCubinOnDisk : public OnDiskKernelLoaderSpec {
  public:
+<<<<<<< HEAD
   CudaCubinOnDisk(absl::string_view filename, absl::string_view kernelname);
+=======
+  CudaCubinOnDisk(port::StringPiece filename, port::StringPiece kernelname);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~CudaCubinOnDisk() override {}
 
   const string &filename() const { return filename_; }
@@ -143,7 +177,11 @@ class CudaPtxInMemory : public KernelLoaderSpec {
  public:
   // Components: compute capability major number, compute capability minor
   // number, and PTX source.
+<<<<<<< HEAD
   typedef std::tuple<int, int, absl::string_view> PtxSpec;
+=======
+  typedef std::tuple<int, int, port::StringPiece> PtxSpec;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Single-PTX constructor. Adds the provided PTX version with an unknown
   // compute capability. Since the CC is unknown, the PTX is assumed to be very
@@ -151,16 +189,26 @@ class CudaPtxInMemory : public KernelLoaderSpec {
   // likely to be used as the default! Note that the PTX can be compressed,
   // which is indicated by the argument ptx_compressed.
   //
+<<<<<<< HEAD
   // Warning: the string backing the provided absl::string_view ptx must outlive
   // this instance.
   CudaPtxInMemory(absl::string_view ptx, absl::string_view kernelname,
+=======
+  // Warning: the string backing the provided port::StringPiece ptx must outlive this
+  // instance.
+  CudaPtxInMemory(port::StringPiece ptx, port::StringPiece kernelname,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   bool ptx_compressed = false);
 
   // Multiple-PTX-version constructor. Adds each item in spec_list to this
   // object. Note that the PTX can be compressed, which is indicated by the
   // argument ptx_compressed.
   CudaPtxInMemory(const std::initializer_list<PtxSpec> &spec_list,
+<<<<<<< HEAD
                   absl::string_view kernel_name, bool ptx_compressed = false);
+=======
+                  port::StringPiece kernel_name, bool ptx_compressed = false);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~CudaPtxInMemory() override {}
 
   // Add the PTX implementation described by ptx_spec to this object. On
@@ -206,7 +254,11 @@ class CudaPtxInMemory : public KernelLoaderSpec {
   // Stores all decompressed ptx strings, with original ptx string as keys.
   // It is marked as mutable for lazy decompression.
   mutable std::map<const char *, string> decompressed_ptx_;
+<<<<<<< HEAD
   mutable absl::Mutex mu_;
+=======
+  mutable mutex mu_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Defines the minimum compute capability possible. Used when PTX has no
   // compute capability specified (in the single-PTX constructor).
@@ -218,7 +270,11 @@ class CudaPtxInMemory : public KernelLoaderSpec {
 // Kernel loader specification for OpenCL text that resides on disk.
 class OpenCLTextOnDisk : public OnDiskKernelLoaderSpec {
  public:
+<<<<<<< HEAD
   OpenCLTextOnDisk(absl::string_view filename, absl::string_view kernelname);
+=======
+  OpenCLTextOnDisk(port::StringPiece filename, port::StringPiece kernelname);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~OpenCLTextOnDisk() override {}
 
   const char *CanonicalSuffix() const override { return ".ocl"; }
@@ -230,7 +286,11 @@ class OpenCLTextOnDisk : public OnDiskKernelLoaderSpec {
 // Kernel loader specification for OpenCL binary that resides on disk.
 class OpenCLBinaryOnDisk : public OnDiskKernelLoaderSpec {
  public:
+<<<<<<< HEAD
   OpenCLBinaryOnDisk(absl::string_view filename, absl::string_view kernelname);
+=======
+  OpenCLBinaryOnDisk(port::StringPiece filename, port::StringPiece kernelname);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~OpenCLBinaryOnDisk() override {}
 
   const char *CanonicalSuffix() const override { return ".aocx"; }
@@ -242,7 +302,11 @@ class OpenCLBinaryOnDisk : public OnDiskKernelLoaderSpec {
 // Kernel loader specification for OpenCL text that resides in memory.
 class OpenCLTextInMemory : public KernelLoaderSpec {
  public:
+<<<<<<< HEAD
   OpenCLTextInMemory(absl::string_view text, absl::string_view kernelname);
+=======
+  OpenCLTextInMemory(port::StringPiece text, port::StringPiece kernelname);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~OpenCLTextInMemory() override {}
 
   // Returns the OpenCL text contents.
@@ -258,7 +322,11 @@ class OpenCLTextInMemory : public KernelLoaderSpec {
 // Kernel loader specification for a CUBIN blob that resides in memory.
 class CudaCubinInMemory : public KernelLoaderSpec {
  public:
+<<<<<<< HEAD
   CudaCubinInMemory(const char *bytes, absl::string_view kernelname);
+=======
+  CudaCubinInMemory(const char *bytes, port::StringPiece kernelname);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~CudaCubinInMemory() override {}
 
   const char *bytes() const { return bytes_; }
@@ -328,6 +396,7 @@ class MultiKernelLoaderSpec {
   // the PTX or OpenCL being loaded. Also be aware that in CUDA C++ the kernel
   // name may be mangled by the compiler if it is not declared in an
   // extern "C" scope.
+<<<<<<< HEAD
   MultiKernelLoaderSpec *AddOpenCLTextOnDisk(absl::string_view filename,
                                              absl::string_view kernelname);
   MultiKernelLoaderSpec *AddOpenCLBinaryOnDisk(absl::string_view filename,
@@ -350,6 +419,30 @@ class MultiKernelLoaderSpec {
   MultiKernelLoaderSpec *AddCudaCompressedPtxInMemory(
       std::initializer_list<CudaPtxInMemory::PtxSpec> spec_list,
       absl::string_view kernelname);
+=======
+  MultiKernelLoaderSpec *AddOpenCLTextOnDisk(port::StringPiece filename,
+                                             port::StringPiece kernelname);
+  MultiKernelLoaderSpec *AddOpenCLBinaryOnDisk(port::StringPiece filename,
+                                               port::StringPiece kernelname);
+  MultiKernelLoaderSpec *AddOpenCLTextInMemory(port::StringPiece ocl_text,
+                                               port::StringPiece kernelname);
+  MultiKernelLoaderSpec *AddCudaPtxOnDisk(port::StringPiece filename,
+                                          port::StringPiece kernelname);
+  MultiKernelLoaderSpec *AddCudaCubinOnDisk(port::StringPiece filename,
+                                            port::StringPiece kernelname);
+  MultiKernelLoaderSpec *AddCudaCubinInMemory(const char *cubin_bytes,
+                                              port::StringPiece kernelname);
+  MultiKernelLoaderSpec *AddCudaPtxInMemory(port::StringPiece ptx,
+                                            port::StringPiece kernelname);
+  MultiKernelLoaderSpec *AddCudaCompressedPtxInMemory(
+      port::StringPiece ptx, port::StringPiece kernelname);
+  MultiKernelLoaderSpec *AddCudaPtxInMemory(
+      std::initializer_list<CudaPtxInMemory::PtxSpec> spec_list,
+      port::StringPiece kernelname);
+  MultiKernelLoaderSpec *AddCudaCompressedPtxInMemory(
+      std::initializer_list<CudaPtxInMemory::PtxSpec> spec_list,
+      port::StringPiece kernelname);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   std::unique_ptr<CudaPtxOnDisk>
@@ -373,6 +466,11 @@ class MultiKernelLoaderSpec {
   size_t arity_;
 };
 
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_KERNEL_SPEC_H_

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +31,18 @@ namespace lookup {
 // LookupInterface.
 class InitializableLookupTable;
 
+=======
+#ifndef TENSORFLOW_FRAMEWORK_LOOKUP_INTERFACE_H_
+#define TENSORFLOW_FRAMEWORK_LOOKUP_INTERFACE_H_
+
+#include "tensorflow/core/framework/resource_mgr.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+
+namespace tensorflow {
+namespace lookup {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Lookup interface for batch lookups used by table lookup ops.
 class LookupInterface : public ResourceBase {
  public:
@@ -47,6 +60,7 @@ class LookupInterface : public ResourceBase {
   //   fails.
   // - In addition, other implementations may provide another non-OK status
   //   specific to their failure modes.
+<<<<<<< HEAD
   virtual Status Find(OpKernelContext* ctx, const Tensor& keys, Tensor* values,
                       const Tensor& default_value) = 0;
 
@@ -91,12 +105,21 @@ class LookupInterface : public ResourceBase {
   virtual Status ImportValues(OpKernelContext* ctx, const Tensor& keys,
                               const Tensor& values) = 0;
 
+=======
+  virtual Status Find(const Tensor& keys, Tensor* values,
+                      const Tensor& default_value) = 0;
+
+  // Returns the number of elements in the table.
+  virtual size_t size() const = 0;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Returns the data type of the key.
   virtual DataType key_dtype() const = 0;
 
   // Returns the data type of the value.
   virtual DataType value_dtype() const = 0;
 
+<<<<<<< HEAD
   // Returns the shape of a key in the table.
   virtual TensorShape key_shape() const = 0;
 
@@ -154,9 +177,35 @@ class LookupInterface : public ResourceBase {
  private:
   Status CheckKeyAndValueTensorsHelper(const Tensor& keys,
                                        const Tensor& values);
+=======
+  string DebugString() override { return "A lookup table"; }
+
+ protected:
+  virtual ~LookupInterface() = default;
+
+  // Check format of the key and value tensors.
+  // Returns OK if all the following requirements are satisfied, otherwise it
+  // returns InvalidArgument:
+  // - DataType of the tensor key equals to the table key_dtype
+  // - DataType of the test value equals to the table value_dtype
+  // - key and value have the same size and shape
+  Status CheckKeyAndValueTensors(const Tensor& keys, const Tensor& values);
+
+  // Check the arguments of a find operation. Returns OK if all the following
+  // requirements are satisfied, otherwise it returns InvalidArgument:
+  // - All requirements of CheckKeyAndValueTensors
+  // - default_value type equals to the table value_dtype
+  // - default_value is scalar
+  Status CheckFindArguments(const Tensor& keys, const Tensor& values,
+                            const Tensor& default_value);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace lookup
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_LOOKUP_INTERFACE_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_LOOKUP_INTERFACE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

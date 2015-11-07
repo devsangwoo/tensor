@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +27,22 @@ namespace internal {
 
 void TemporaryMemoryManager::ForceDeallocateAll() {
   absl::MutexLock lock(&mutex_);
+=======
+#include "tensorflow/stream_executor/temporary_memory_manager.h"
+
+#include "tensorflow/stream_executor/platform/logging.h"
+#include "tensorflow/stream_executor/lib/stringprintf.h"
+#include "tensorflow/stream_executor/lib/ptr_util.h"
+#include "tensorflow/stream_executor/stream.h"
+#include "tensorflow/stream_executor/stream_executor_pimpl.h"
+
+namespace perftools {
+namespace gputools {
+namespace internal {
+
+void TemporaryMemoryManager::ForceDeallocateAll() {
+  mutex_lock lock(mutex_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   VLOG(1) << "force-deallocating " << records_.size() << " remaining records";
   for (auto it = records_.begin(); it != records_.end(); ++it) {
     DeviceMemoryBase device_memory = it->first;
@@ -35,7 +52,11 @@ void TemporaryMemoryManager::ForceDeallocateAll() {
 
 void TemporaryMemoryManager::MarkFinalized(
     const DeviceMemoryBase& device_memory, uint64 generation, bool must_exist) {
+<<<<<<< HEAD
   absl::MutexLock lock(&mutex_);
+=======
+  mutex_lock lock(mutex_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   auto it = records_.find(device_memory);
   if (it == records_.end()) {
     if (must_exist) {
@@ -48,7 +69,11 @@ void TemporaryMemoryManager::MarkFinalized(
 }
 
 void TemporaryMemoryManager::DeallocateFinalizedTemporaries() {
+<<<<<<< HEAD
   absl::MutexLock lock(&mutex_);
+=======
+  mutex_lock lock(mutex_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int deallocated_count = 0;
   for (auto it = records_.begin(); it != records_.end();) {
     if (it->second.finalized) {
@@ -65,7 +90,11 @@ void TemporaryMemoryManager::DeallocateFinalizedTemporaries() {
 
 bool TemporaryMemoryManager::IsFinalized(const DeviceMemoryBase& device_memory,
                                          uint64 allocation_generation) const {
+<<<<<<< HEAD
   absl::MutexLock lock(&mutex_);
+=======
+  mutex_lock lock(mutex_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   auto it = records_.find(device_memory);
   if (it == records_.end()) {
     return true;  // If there's no record present it's vacuously finalized.
@@ -81,7 +110,11 @@ bool TemporaryMemoryManager::IsFinalized(const DeviceMemoryBase& device_memory,
 
 bool TemporaryMemoryManager::HasAllocated(const DeviceMemoryBase& device_memory,
                                           uint64 generation) const {
+<<<<<<< HEAD
   absl::MutexLock lock(&mutex_);
+=======
+  mutex_lock lock(mutex_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   auto it = records_.find(device_memory);
   if (it == records_.end()) {
     return false;
@@ -97,7 +130,11 @@ TemporaryMemoryManager::AllocateArrayBase(uint64 element_count,
       stream_->parent()->AllocateArray<uint8>(byte_size);
   if (device_memory == nullptr) {
     return port::Status(port::error::RESOURCE_EXHAUSTED,
+<<<<<<< HEAD
                         absl::StrCat("could not allocate temporary memory of ",
+=======
+                        port::StrCat("could not allocate temporary memory of ",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                      byte_size, " bytes"));
   }
 
@@ -106,16 +143,26 @@ TemporaryMemoryManager::AllocateArrayBase(uint64 element_count,
   // Add the record before instantiating the device memory instance so we can
   // check the allocation invariant at TemporaryDeviceMemory construction time.
   {
+<<<<<<< HEAD
     absl::MutexLock lock(&mutex_);
+=======
+    mutex_lock lock(mutex_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     generation = ++generation_;
     DCHECK(records_.find(device_memory) == records_.end());
     records_[device_memory] = {generation,
                                /*finalized=*/false};
   }
 
+<<<<<<< HEAD
   VLOG(1) << absl::StreamFormat(
       "stream %p allocated temporary device memory at %p (size %u) in "
       "generation %u",
+=======
+  VLOG(1) << port::Printf(
+      "stream %p allocated temporary device memory at %p (size %llu) in "
+      "generation %llu",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       stream_, device_memory.opaque(), byte_size, generation);
   std::unique_ptr<TemporaryDeviceMemoryBase> result(
       new TemporaryDeviceMemoryBase(stream_, device_memory, generation));
@@ -123,4 +170,9 @@ TemporaryMemoryManager::AllocateArrayBase(uint64 element_count,
 }
 
 }  // namespace internal
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,13 @@ limitations under the License.
 #include <set>
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/lib/random/random.h"
+
+#include <set>
+#include "tensorflow/core/platform/port.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace random {

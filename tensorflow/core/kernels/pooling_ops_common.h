@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,16 +23,31 @@ limitations under the License.
 #include "tensorflow/core/framework/numeric_op.h"
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/tensor_shape.h"
+=======
+#ifndef TENSORFLOW_KERNELS_POOLING_OPS_COMMON_H_
+#define TENSORFLOW_KERNELS_POOLING_OPS_COMMON_H_
+
+#include <vector>
+
+#include "tensorflow/core/framework/numeric_op.h"
+#include "tensorflow/core/framework/op_kernel.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/kernels/avgpooling_op.h"
 #include "tensorflow/core/kernels/maxpooling_op.h"
 #include "tensorflow/core/kernels/ops_util.h"
 #include "tensorflow/core/util/padding.h"
+<<<<<<< HEAD
 #include "tensorflow/core/util/tensor_format.h"
 #include "tensorflow/core/util/work_sharder.h"
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 #include "tensorflow/core/kernels/maxpooling_op_gpu.h"
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#include "tensorflow/core/public/tensor_shape.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/NeuralNetworks"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -42,7 +58,11 @@ struct PoolParameters {
   // Updates context->status if there is an invalid input.
   PoolParameters(OpKernelContext* context, const std::vector<int32>& ksize,
                  const std::vector<int32>& stride, Padding padding,
+<<<<<<< HEAD
                  TensorFormat data_format, const TensorShape& tensor_in_shape);
+=======
+                 const TensorShape& tensor_in_shape);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns the shape of the output for "forward" pooling operations.
   TensorShape forward_output_shape();
@@ -61,6 +81,7 @@ struct PoolParameters {
   int col_stride;
   int depth_stride;
 
+<<<<<<< HEAD
   int64 out_height;
   int64 out_width;
   int out_depth;
@@ -92,15 +113,34 @@ class MaxPoolingOp : public OpKernel {
     } else {
       data_format_ = FORMAT_NHWC;
     }
+=======
+  int out_height;
+  int out_width;
+  int out_depth;
+
+  int pad_rows;
+  int pad_cols;
+  int pad_depth;
+};
+
+// An implementation of MaxPooling (forward).
+template <typename Device, typename T>
+class MaxPoolingOp : public UnaryOp<T> {
+ public:
+  explicit MaxPoolingOp(OpKernelConstruction* context) : UnaryOp<T>(context) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES_OK(context, context->GetAttr("ksize", &ksize_));
     OP_REQUIRES(context, ksize_.size() == 4,
                 errors::InvalidArgument("Sliding window ksize field must "
                                         "specify 4 dimensions"));
+<<<<<<< HEAD
     for (int i = 0; i < ksize_.size(); ++i) {
       OP_REQUIRES(context, ksize_[i] > 0,
                   errors::InvalidArgument("Sliding window ksize for dimension ",
                                           i, " was zero."));
     }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES_OK(context, context->GetAttr("strides", &stride_));
     OP_REQUIRES(context, stride_.size() == 4,
                 errors::InvalidArgument("Sliding window stride field must "
@@ -113,8 +153,13 @@ class MaxPoolingOp : public OpKernel {
 
   void Compute(OpKernelContext* context) override {
     const Tensor& tensor_in = context->input(0);
+<<<<<<< HEAD
     PoolParameters params{context,  ksize_,      stride_,
                           padding_, FORMAT_NHWC, tensor_in.shape()};
+=======
+    PoolParameters params{context, ksize_, stride_, padding_,
+                          tensor_in.shape()};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!context->status().ok()) {
       return;
     }
@@ -124,6 +169,7 @@ class MaxPoolingOp : public OpKernel {
                                 0, params.forward_output_shape(), &output));
 
     if (params.depth_window > 1) {
+<<<<<<< HEAD
       // Validate spec against the current implementation.  A
       // relaxation of these requirements would be ideal.
       OP_REQUIRES(context, params.depth % params.depth_window == 0,
@@ -135,6 +181,8 @@ class MaxPoolingOp : public OpKernel {
           errors::Unimplemented("Depthwise max pooling requires "
                                 "the depth window to equal the depth stride."));
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       DepthwiseMaxPool(context, output, tensor_in, params);
     } else {
       SpatialMaxPool(context, output, tensor_in, params, padding_);
@@ -185,8 +233,13 @@ class MaxPoolingOp : public OpKernel {
           output->flat<T>().data(), params.depth,
           params.out_width * params.out_height * params.tensor_in_batch);
 
+<<<<<<< HEAD
       const DeviceBase::CpuWorkerThreads& worker_threads =
           *(context->device()->tensorflow_cpu_worker_threads());
+=======
+      // Initializes the output tensor with MIN<T>.
+      output->flat<T>().setConstant(Eigen::NumTraits<T>::lowest());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       // The following code basically does the following:
       // 1. Flattens the input and output tensors into two dimensional arrays.
@@ -199,6 +252,7 @@ class MaxPoolingOp : public OpKernel {
       // tensor_in_as_matrix,
       //    and updates the corresponding column(s) in output_as_matrix with the
       //    max value.
+<<<<<<< HEAD
       auto shard = [&params, &in_mat, &out_mat](int64 start, int64 limit) {
         const int32 in_rows = params.tensor_in_rows;
         const int32 in_cols = params.tensor_in_cols;
@@ -245,10 +299,41 @@ class MaxPoolingOp : public OpKernel {
                   out_mat.col(out_offset) =
                       out_mat.col(out_offset).cwiseMax(in_mat.col(in_offset));
                 }
+=======
+      for (int b = 0; b < params.tensor_in_batch; ++b) {
+        for (int h = 0; h < params.tensor_in_rows; ++h) {
+          for (int w = 0; w < params.tensor_in_cols; ++w) {
+            // (h_start, h_end) * (w_start, w_end) is the range that the input
+            // vector projects to.
+            const int hpad = h + params.pad_rows;
+            const int wpad = w + params.pad_cols;
+            const int h_start =
+                (hpad < params.window_rows)
+                    ? 0
+                    : (hpad - params.window_rows) / params.row_stride + 1;
+            const int h_end =
+                std::min(hpad / params.row_stride + 1, params.out_height);
+            const int w_start =
+                (wpad < params.window_cols)
+                    ? 0
+                    : (wpad - params.window_cols) / params.col_stride + 1;
+            const int w_end =
+                std::min(wpad / params.col_stride + 1, params.out_width);
+            // compute elementwise max
+            const int in_offset =
+                (b * params.tensor_in_rows + h) * params.tensor_in_cols + w;
+            for (int ph = h_start; ph < h_end; ++ph) {
+              for (int pw = w_start; pw < w_end; ++pw) {
+                const int out_offset =
+                    (b * params.out_height + ph) * params.out_width + pw;
+                out_mat.col(out_offset) =
+                    out_mat.col(out_offset).cwiseMax(in_mat.col(in_offset));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               }
             }
           }
         }
+<<<<<<< HEAD
       };
 
       // TODO(andydavis) Consider sharding across batch x rows x cols.
@@ -510,13 +595,19 @@ class MaxPoolingV2Op : public OpKernel {
           params.tensor_in_rows * params.tensor_in_cols * params.depth;
       Shard(worker_threads.num_threads, worker_threads.workers,
             params.tensor_in_batch, shard_cost, shard);
+=======
+      }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
   std::vector<int32> ksize_;
   std::vector<int32> stride_;
   Padding padding_;
+<<<<<<< HEAD
   TensorFormat data_format_;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 template <typename Device, typename T>
@@ -531,6 +622,7 @@ void SpatialAvgPool(OpKernelContext* context, Tensor* output,
   auto in_flat = input.flat<T>();
   auto out_flat = output->flat<T>();
 
+<<<<<<< HEAD
   auto shard = [&params, &in_flat, &out_flat](int64 start, int64 limit) {
     // Calculate indices for this shards chunk of work.
     const int64 input_image_size =
@@ -591,10 +683,64 @@ void SpatialAvgPool(OpKernelContext* context, Tensor* output,
               out_mat.col(out_offset) += in_mat.col(in_offset);
               out_count(out_offset) += T(1);
             }
+=======
+  ConstEigenMatrixMap in_mat(
+      in_flat.data(), params.depth,
+      params.tensor_in_cols * params.tensor_in_rows * params.tensor_in_batch);
+  EigenMatrixMap out_mat(
+      out_flat.data(), params.depth,
+      params.out_width * params.out_height * params.tensor_in_batch);
+  Eigen::Matrix<T, Eigen::Dynamic, 1> out_count(out_mat.cols());
+  out_count.setZero();
+
+  // Initializes output to zero.
+  out_flat.setZero();
+
+  // The following code basically does the following:
+  // 1. Flattens the input and output tensors into two dimensional arrays.
+  //    tensor_in_as_matrix:
+  //      depth by (tensor_in_cols * tensor_in_rows * tensor_in_batch)
+  //    output_as_matrix:
+  //      depth by (out_width * out_height * tensor_in_batch)
+  //
+  // 2. Walks through the set of columns in the flattened
+  // tensor_in_as_matrix,
+  //    and updates the corresponding column(s) in output_as_matrix with the
+  //    average value.
+  for (int b = 0; b < params.tensor_in_batch; ++b) {
+    for (int h = 0; h < params.tensor_in_rows; ++h) {
+      for (int w = 0; w < params.tensor_in_cols; ++w) {
+        // (h_start, h_end) * (w_start, w_end) is the range that the input
+        // vector projects to.
+        const int hpad = h + params.pad_rows;
+        const int wpad = w + params.pad_cols;
+        const int h_start =
+            (hpad < params.window_rows)
+                ? 0
+                : (hpad - params.window_rows) / params.row_stride + 1;
+        const int h_end =
+            std::min(hpad / params.row_stride + 1, params.out_height);
+        const int w_start =
+            (wpad < params.window_cols)
+                ? 0
+                : (wpad - params.window_cols) / params.col_stride + 1;
+        const int w_end =
+            std::min(wpad / params.col_stride + 1, params.out_width);
+        const int in_offset =
+            (b * params.tensor_in_rows + h) * params.tensor_in_cols + w;
+        Eigen::DSizes<ptrdiff_t, 2> in_indices(0, in_offset);
+        for (int ph = h_start; ph < h_end; ++ph) {
+          for (int pw = w_start; pw < w_end; ++pw) {
+            const int out_offset =
+                (b * params.out_height + ph) * params.out_width + pw;
+            out_mat.col(out_offset) += in_mat.col(in_offset);
+            out_count(out_offset)++;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           }
         }
       }
     }
+<<<<<<< HEAD
 
     DCHECK_GT(out_count.minCoeff(), T(0));
     out_mat.array().rowwise() /= out_count.transpose().array();
@@ -612,8 +758,17 @@ void SpatialAvgPool(OpKernelContext* context, Tensor* output,
       *(context->device()->tensorflow_cpu_worker_threads());
   Shard(worker_threads.num_threads, worker_threads.workers,
         params.tensor_in_batch, work_unit_cost, shard);
+=======
+  }
+  DCHECK_GT(out_count.minCoeff(), 0);
+  out_mat.array().rowwise() /= out_count.transpose().array();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_POOLING_OPS_COMMON_H_
+=======
+#endif  // TENSORFLOW_KERNELS_POOLING_OPS_COMMON_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

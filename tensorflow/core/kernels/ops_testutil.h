@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +16,17 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_KERNELS_OPS_TESTUTIL_H_
 #define TENSORFLOW_CORE_KERNELS_OPS_TESTUTIL_H_
+=======
+#ifndef TENSORFLOW_KERNELS_OPS_TESTUTIL_H_
+#define TENSORFLOW_KERNELS_OPS_TESTUTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <memory>
 #include <vector>
 
 #include "tensorflow/core/common_runtime/device.h"
 #include "tensorflow/core/common_runtime/device_factory.h"
+<<<<<<< HEAD
 #include "tensorflow/core/common_runtime/device_mgr.h"
 #include "tensorflow/core/common_runtime/process_function_library_runtime.h"
 #include "tensorflow/core/framework/allocator.h"
@@ -62,6 +68,35 @@ inline void SetOutputAttrs(OpKernelContext::Params* params,
   }
   params->output_attr_array = attrs->data();
 }
+=======
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/framework/device_base.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/tensor_testutil.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/lib/core/status_test_util.h"
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/lib/gtl/inlined_vector.h"
+#include "tensorflow/core/lib/gtl/stl_util.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/public/session_options.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/util/tensor_slice_reader_cache.h"
+#include <gtest/gtest.h>
+
+namespace tensorflow {
+
+namespace test {
+
+// Return a NodeDef with the specified name/op/inputs.
+NodeDef Node(const string& name, const string& op,
+             const std::vector<string>& inputs);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace test
 
@@ -72,6 +107,7 @@ inline void SetOutputAttrs(OpKernelContext::Params* params,
 class OpsTestBase : public ::testing::Test {
  public:
   OpsTestBase() : device_type_(DEVICE_CPU) {
+<<<<<<< HEAD
     auto device =
         DeviceFactory::NewDevice("CPU", {}, "/job:a/replica:0/task:0");
     CHECK(device) << "Could not create CPU device";
@@ -104,6 +140,18 @@ class OpsTestBase : public ::testing::Test {
   // Allow kernel unit tests to run on GPU
   void SetDevice(const DeviceType& device_type, std::unique_ptr<Device> device);
 
+=======
+    device_.reset(
+        DeviceFactory::NewDevice("CPU", {}, "/job:a/replica:0/task:0"));
+    CHECK(device_.get()) << "Could not create CPU device";
+  }
+
+  ~OpsTestBase() override {
+    gtl::STLDeleteElements(&tensors_);
+    context_.reset(nullptr);
+  }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   void set_node_def(const NodeDef& node_def) { node_def_.CopyFrom(node_def); }
 
   // Clients can manipulate the underlying NodeDef via this accessor.
@@ -113,6 +161,7 @@ class OpsTestBase : public ::testing::Test {
   // and output types as output.
   //
   // Returns the status of initialization.
+<<<<<<< HEAD
   Status InitOp() { return InitOpWithGraphVersion(TF_GRAPH_DEF_VERSION); }
 
   // Only use this directly if you have a deprecated op that you need to test.
@@ -120,6 +169,12 @@ class OpsTestBase : public ::testing::Test {
     Status status;
     kernel_ = CreateOpKernel(device_type_, device_, allocator(), node_def_,
                              graph_def_version, &status);
+=======
+  Status InitOp() {
+    Status status;
+    kernel_ = CreateOpKernel(device_type_, device_.get(), allocator(),
+                             node_def_, &status);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (kernel_ != nullptr) input_types_ = kernel_->input_types();
     return status;
   }
@@ -131,13 +186,32 @@ class OpsTestBase : public ::testing::Test {
   // TODO(vrv): Replace with something like a BrainClient Feed.
   template <typename T>
   void AddInput(const TensorShape& shape, std::function<T(int)> input_mapping) {
+<<<<<<< HEAD
     test::FillFn(AddInput(DataTypeToEnum<T>::v(), shape), input_mapping);
+=======
+    CHECK_GT(input_types_.size(), inputs_.size())
+        << "Adding more inputs than types; perhaps you need to call MakeOp";
+    bool is_ref = IsRefType(input_types_[inputs_.size()]);
+    Tensor* input = new Tensor(device_->GetAllocator(AllocatorAttributes()),
+                               DataTypeToEnum<T>::v(), shape);
+    test::FillFn(input, input_mapping);
+    tensors_.push_back(input);
+    if (is_ref) {
+      CHECK_EQ(RemoveRefType(input_types_[inputs_.size()]),
+               DataTypeToEnum<T>::v());
+      inputs_.push_back({&lock_for_refs_, input});
+    } else {
+      CHECK_EQ(input_types_[inputs_.size()], DataTypeToEnum<T>::v());
+      inputs_.push_back({nullptr, input});
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Like AddInput but takes in an explicit arrayslice of data.
   template <typename T>
   void AddInputFromArray(const TensorShape& shape,
                          const gtl::ArraySlice<T>& data) {
+<<<<<<< HEAD
     test::FillValues<T>(AddInput(DataTypeToEnum<T>::v(), shape), data);
   }
 
@@ -171,12 +245,30 @@ class OpsTestBase : public ::testing::Test {
     input->scalar<ResourceHandle>()() = handle;
     tensors_.push_back(input);
     inputs_.push_back({nullptr, input});
+=======
+    CHECK_GT(input_types_.size(), inputs_.size())
+        << "Adding more inputs than types; perhaps you need to call MakeOp";
+    bool is_ref = IsRefType(input_types_[inputs_.size()]);
+    Tensor* input = new Tensor(device_->GetAllocator(AllocatorAttributes()),
+                               DataTypeToEnum<T>::v(), shape);
+    test::FillValues<T>(input, data);
+    tensors_.push_back(input);
+    if (is_ref) {
+      CHECK_EQ(RemoveRefType(input_types_[inputs_.size()]),
+               DataTypeToEnum<T>::v());
+      inputs_.push_back({&lock_for_refs_, input});
+    } else {
+      CHECK_EQ(input_types_[inputs_.size()], DataTypeToEnum<T>::v());
+      inputs_.push_back({nullptr, input});
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Runs an operation producing 'num_outputs' outputs.
   //
   // Returns the context's status after running the operation.
   Status RunOpKernel() {
+<<<<<<< HEAD
     // Make sure the old OpKernelContext is deleted before the Params
     // it was using.
     context_.reset(nullptr);
@@ -203,6 +295,24 @@ class OpsTestBase : public ::testing::Test {
     params_->function_library = pflr_->GetFLR(device_->name());
 
     context_.reset(new OpKernelContext(params_.get()));
+=======
+    OpKernelContext::Params params;
+    params.device = device_.get();
+    params.frame_iter = FrameAndIter(0, 0);
+    params.inputs = &inputs_;
+    params.op_kernel = kernel_.get();
+    params.output_alloc_attr = [this, &params](int index) {
+      AllocatorAttributes attr;
+      const bool on_host =
+          (kernel_->output_memory_types()[index] == HOST_MEMORY);
+      attr.set_on_host(on_host);
+      return attr;
+    };
+    checkpoint::TensorSliceReaderCacheWrapper slice_reader_cache_wrapper;
+    params.slice_reader_cache = &slice_reader_cache_wrapper;
+
+    context_.reset(new OpKernelContext(params));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     device_->Compute(kernel_.get(), context_.get());
     return context_->status();
   }
@@ -223,13 +333,25 @@ class OpsTestBase : public ::testing::Test {
   // Returns the tensor output for 'output_index'.
   //
   // REQUIRES: 0 <= output_index < context_->num_outputs()
+<<<<<<< HEAD
   Tensor* GetOutput(int output_index);
 
   Allocator* allocator() { return allocator_; }
+=======
+  Tensor* GetOutput(int output_index) {
+    CHECK_LT(output_index, context_->num_outputs());
+    return context_->mutable_output(output_index);
+  }
+
+  Allocator* allocator() {
+    return device_->GetAllocator(AllocatorAttributes());
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   const DataTypeVector& output_types() const { return kernel_->output_types(); }
 
  protected:
+<<<<<<< HEAD
   Tensor* AddInput(DataType dtype, const TensorShape& shape) {
     CHECK_GT(input_types_.size(), inputs_.size())
         << "Adding more inputs than types; perhaps you need to call MakeOp";
@@ -255,6 +377,11 @@ class OpsTestBase : public ::testing::Test {
 
   std::unique_ptr<OpKernel> kernel_;
   std::unique_ptr<ScopedStepContainer> step_container_;
+=======
+  std::unique_ptr<Device> device_;
+
+  std::unique_ptr<OpKernel> kernel_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   NodeDef node_def_;
   DataTypeVector input_types_;
   DeviceType device_type_;
@@ -264,6 +391,7 @@ class OpsTestBase : public ::testing::Test {
   gtl::InlinedVector<TensorValue, 4> inputs_;
   // Owns Tensors.
   std::vector<Tensor*> tensors_;
+<<<<<<< HEAD
   // Copies of the outputs in unified memory (host and device accessible).
   std::vector<Tensor*> managed_outputs_;
 
@@ -274,6 +402,10 @@ class OpsTestBase : public ::testing::Test {
 
   std::unique_ptr<FunctionLibraryDefinition> flib_def_;
   std::unique_ptr<ProcessFunctionLibraryRuntime> pflr_;
+=======
+
+  std::unique_ptr<OpKernelContext> context_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   TF_DISALLOW_COPY_AND_ASSIGN(OpsTestBase);
@@ -281,4 +413,8 @@ class OpsTestBase : public ::testing::Test {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_OPS_TESTUTIL_H_
+=======
+#endif  // TENSORFLOW_KERNELS_OPS_TESTUTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

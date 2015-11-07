@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,13 +36,41 @@ limitations under the License.
 #include "tensorflow/core/platform/test_benchmark.h"
 #include "tensorflow/core/public/session_options.h"
 #include "tensorflow/core/public/version.h"
+=======
+#include <functional>
+
+#include "tensorflow/core/public/session_options.h"
+
+#include "tensorflow/core/common_runtime/device.h"
+#include "tensorflow/core/common_runtime/device_factory.h"
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/framework/fake_input.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/tensor_testutil.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/tensor.h"
+#include <gtest/gtest.h>
+#include "tensorflow/core/graph/node_builder.h"
+#include "tensorflow/core/graph/testlib.h"
+#include "tensorflow/core/common_runtime/kernel_benchmark_testlib.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 template <typename Index>
+<<<<<<< HEAD
 static void BM_SegmentReduction(int iters, const string& reduction,
                                 Index num_rows, Index num_cols,
                                 Index segment_size) {
+=======
+static void BM_SegmentReduction(int iters, string reduction, Index num_rows,
+                                Index num_cols, Index segment_size) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   testing::StopTiming();
   std::unique_ptr<Device> device(
       DeviceFactory::NewDevice("CPU", {}, "/job:a/replica:0/task:0"));
@@ -65,19 +94,37 @@ static void BM_SegmentReduction(int iters, const string& reduction,
                   .Input(FakeInput(DataTypeToEnum<Index>::v()))
                   .Finalize(&reduction_node_def));
   Status status;
+<<<<<<< HEAD
   std::unique_ptr<OpKernel> reduction_op(
       CreateOpKernel(DEVICE_CPU, device.get(), cpu_allocator(),
                      reduction_node_def, TF_GRAPH_DEF_VERSION, &status));
+=======
+  std::unique_ptr<OpKernel> reduction_op(CreateOpKernel(
+      DEVICE_CPU, device.get(), cpu_allocator(), reduction_node_def, &status));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   OpKernelContext::Params params;
   params.device = device.get();
   params.frame_iter = FrameAndIter(0, 0);
   params.inputs = &reduction_inputs;
   params.op_kernel = reduction_op.get();
+<<<<<<< HEAD
   std::vector<AllocatorAttributes> attrs;
   test::SetOutputAttrs(&params, &attrs);
 
   std::unique_ptr<OpKernelContext> reduction_context(
       new OpKernelContext(&params));
+=======
+  params.output_alloc_attr = [&device, &reduction_op, &params](int index) {
+    AllocatorAttributes attr;
+    const bool on_host =
+        (reduction_op->output_memory_types()[index] == HOST_MEMORY);
+    attr.set_on_host(on_host);
+    return attr;
+  };
+
+  std::unique_ptr<OpKernelContext> reduction_context(
+      new OpKernelContext(params));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   reduction_op->Compute(reduction_context.get());
   TF_CHECK_OK(reduction_context->status());
@@ -115,6 +162,10 @@ BM_Reduce_Arg(4096, 128, 2);
 
 static void SparseSegmentMeanGradHelper(int iters, float uniqueness, int size) {
   testing::StopTiming();
+<<<<<<< HEAD
+=======
+  RequireDefaultOps();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Graph* g = new Graph(OpRegistry::Global());
   CHECK_LE(uniqueness, 1.0);
   CHECK_GT(uniqueness, 0.0);

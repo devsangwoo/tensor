@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // The temporary-memory-manager is a helper class for a Stream to keep track of
 // temporary allocations. These allocations defer their deallocation to the next
 // Stream::BlockHostUntilDone call for efficiency purposes (as deallocation
@@ -24,6 +27,7 @@ limitations under the License.
 #include <map>
 #include <memory>
 
+<<<<<<< HEAD
 #include "absl/synchronization/mutex.h"
 #include "tensorflow/stream_executor/device_memory.h"
 #include "tensorflow/stream_executor/lib/status.h"
@@ -32,6 +36,17 @@ limitations under the License.
 #include "tensorflow/stream_executor/temporary_device_memory.h"
 
 namespace stream_executor {
+=======
+#include "tensorflow/stream_executor/device_memory.h"
+#include "tensorflow/stream_executor/lib/status.h"
+#include "tensorflow/stream_executor/lib/statusor.h"
+#include "tensorflow/stream_executor/platform/mutex.h"
+#include "tensorflow/stream_executor/platform/thread_annotations.h"
+#include "tensorflow/stream_executor/temporary_device_memory.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace internal {
 
 // Record used inside the TemporaryMemoryManager as metadata for a given device
@@ -108,7 +123,11 @@ class TemporaryMemoryManager {
       uint64 element_count, uint64 element_size);
 
   // Mutex to guard temporary record state.
+<<<<<<< HEAD
   mutable absl::Mutex mutex_;
+=======
+  mutable mutex mutex_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Mapping from device memory to the current (live) temporary memory record.
   //
@@ -146,6 +165,11 @@ TemporaryMemoryManager::AllocateArray(uint64 element_count) {
 }
 
 }  // namespace internal
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_TEMPORARY_MEMORY_MANAGER_H_

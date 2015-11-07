@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // ManualConstructor statically-allocates space in which to store some
 // object, but does not initialize it.  You can then call the constructor
 // and destructor for the object yourself as you see fit.  This is useful
@@ -29,8 +32,12 @@ limitations under the License.
 #include <new>
 #include <utility>
 
+<<<<<<< HEAD
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/mem.h"
+=======
+#include "tensorflow/core/platform/port.h"  // For aligned_malloc/aligned_free
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace gtl {
@@ -53,7 +60,11 @@ template <int size>
 struct AlignType<0, size> {
   typedef char result[size];
 };
+<<<<<<< HEAD
 #if defined(_MSC_VER)
+=======
+#if defined(COMPILER_MSVC)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #define TF_LIB_GTL_ALIGN_ATTRIBUTE(X) __declspec(align(X))
 #define TF_LIB_GTL_ALIGN_OF(T) __alignof(T)
 #elif defined(COMPILER_GCC3) || __GNUC__ >= 3 || defined(__APPLE__) || \
@@ -127,9 +138,15 @@ class ManualConstructor {
   // Support users creating arrays of ManualConstructor<>s.  This ensures that
   // the array itself has the correct alignment.
   static void* operator new[](size_t size) {
+<<<<<<< HEAD
     return port::AlignedMalloc(size, TF_LIB_GTL_ALIGN_OF(Type));
   }
   static void operator delete[](void* mem) { port::AlignedFree(mem); }
+=======
+    return port::aligned_malloc(size, TF_LIB_GTL_ALIGN_OF(Type));
+  }
+  static void operator delete[](void* mem) { port::aligned_free(mem); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   inline Type* get() { return reinterpret_cast<Type*>(space_); }
   inline const Type* get() const {

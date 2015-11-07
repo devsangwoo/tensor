@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -1839,12 +1840,49 @@ class TensorFlowTestCase(googletest.TestCase):
       # disable it here.
       pywrap_tensorflow.TF_SetXlaConstantFoldingDisabled(True)
 
+=======
+# pylint: disable=invalid-name
+"""Test utils for tensorflow."""
+import contextlib
+import math
+import re
+import threading
+
+import tensorflow.python.platform
+
+import numpy as np
+
+from google.protobuf import text_format
+
+from tensorflow.core.framework import config_pb2
+from tensorflow.python import pywrap_tensorflow
+from tensorflow.python.client import graph_util
+from tensorflow.python.client import session
+from tensorflow.python.framework import errors
+from tensorflow.python.framework import ops
+from tensorflow.python.platform import googletest
+from tensorflow.python.platform import logging
+from tensorflow.python.util.protobuf import compare
+
+
+def IsGoogleCudaEnabled():
+  return pywrap_tensorflow.IsGoogleCudaEnabled()
+
+
+class TensorFlowTestCase(googletest.TestCase):
+  """Root class for tests that need to test tensor flow.
+  """
+
+  def __init__(self, methodName="runTest"):
+    super(TensorFlowTestCase, self).__init__(methodName)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     self._threads = []
     self._tempdir = None
     self._cached_session = None
 
   def setUp(self):
     self._ClearCachedSession()
+<<<<<<< HEAD
     random.seed(random_seed.DEFAULT_GRAPH_SEED)
     np.random.seed(random_seed.DEFAULT_GRAPH_SEED)
     # Note: The following line is necessary because some test methods may error
@@ -1869,6 +1907,13 @@ class TensorFlowTestCase(googletest.TestCase):
     for thread in self._threads:
       thread.check_termination()
 
+=======
+    ops.reset_default_graph()
+
+  def tearDown(self):
+    for thread in self._threads:
+      self.assertFalse(thread.is_alive(), "A checkedThread did not terminate")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     self._ClearCachedSession()
 
   def _ClearCachedSession(self):
@@ -1877,6 +1922,7 @@ class TensorFlowTestCase(googletest.TestCase):
       self._cached_session = None
 
   def get_temp_dir(self):
+<<<<<<< HEAD
     """Returns a unique temporary directory for the test to use.
 
     If you call this method multiple times during in a test, it will return the
@@ -1945,33 +1991,61 @@ class TensorFlowTestCase(googletest.TestCase):
 
     Uses ProtoEq() first, as it returns correct results
     for floating point attributes, and then use assertProtoEqual()
+=======
+    if not self._tempdir:
+      self._tempdir = googletest.GetTempDir()
+    return self._tempdir
+
+  def _AssertProtoEquals(self, a, b):
+    """Asserts that a and b are the same proto.
+
+    Uses Proto2Cmp() first, as it returns correct results
+    for floating point attributes, and then use assertProto2Equal()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     in case of failure as it provides good error messages.
 
     Args:
       a: a proto.
       b: another proto.
+<<<<<<< HEAD
       msg: Optional message to report on failure.
     """
     if not compare.ProtoEq(a, b):
       compare.assertProtoEqual(self, a, b, normalize_numbers=True, msg=msg)
 
   def assertProtoEquals(self, expected_message_maybe_ascii, message, msg=None):
+=======
+    """
+    if compare.Proto2Cmp(a, b) != 0:
+      compare.assertProto2Equal(self, a, b, normalize_numbers=True)
+
+  def assertProtoEquals(self, expected_message_maybe_ascii, message):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Asserts that message is same as parsed expected_message_ascii.
 
     Creates another prototype of message, reads the ascii message into it and
     then compares them using self._AssertProtoEqual().
 
     Args:
+<<<<<<< HEAD
       expected_message_maybe_ascii: proto message in original or ascii form.
       message: the message to validate.
       msg: Optional message to report on failure.
     """
     msg = msg if msg else ""
     if isinstance(expected_message_maybe_ascii, type(message)):
+=======
+      expected_message_maybe_ascii: proto message in original or ascii form
+      message: the message to validate
+    """
+
+    if type(expected_message_maybe_ascii) == type(message):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       expected_message = expected_message_maybe_ascii
       self._AssertProtoEquals(expected_message, message)
     elif isinstance(expected_message_maybe_ascii, str):
       expected_message = type(message)()
+<<<<<<< HEAD
       text_format.Merge(
           expected_message_maybe_ascii,
           expected_message,
@@ -1991,6 +2065,14 @@ class TensorFlowTestCase(googletest.TestCase):
     expected = "versions { producer: %d min_consumer: %d };\n%s" % (
         producer, min_consumer, expected)
     self.assertProtoEquals(expected, actual, msg=msg)
+=======
+      text_format.Merge(expected_message_maybe_ascii, expected_message)
+      self._AssertProtoEquals(expected_message, message)
+    else:
+      assert False, ("Can't compare protos of type " +
+                     type(expected_message_maybe_ascii) + " and " +
+                     type(message))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def assertStartsWith(self, actual, expected_start, msg=None):
     """Assert that actual.startswith(expected_start) is True.
@@ -2005,6 +2087,7 @@ class TensorFlowTestCase(googletest.TestCase):
       fail_msg += " : %r" % (msg) if msg else ""
       self.fail(fail_msg)
 
+<<<<<<< HEAD
   def _eval_tensor(self, tensor):
     if tensor is None:
       return None
@@ -2129,12 +2212,42 @@ class TensorFlowTestCase(googletest.TestCase):
           with self.assertRaisesOpError("negative input not supported"):
             MyOperator(invalid_input).eval()
     ```
+=======
+  # pylint: disable=g-doc-return-or-yield
+  @contextlib.contextmanager
+  def test_session(self,
+                   graph=None,
+                   config=None,
+                   use_gpu=False,
+                   force_gpu=False):
+    """Returns a TensorFlow Session for use in executing tests.
+
+    This method should be used for all functional tests.
+
+    Use the `use_gpu` and `force_gpu` options to control where ops are run. If
+    `force_gpu` is True, all ops are pinned to `/gpu:0`. Otherwise, if `use_gpu`
+    is True, TensorFlow tries to run as many ops on the GPU as possible. If both
+    `force_gpu and `use_gpu` are False, all ops are pinned to the CPU.
+
+    Example:
+
+      class MyOperatorTest(test_util.TensorFlowTestCase):
+        def testMyOperator(self):
+          with self.test_session(use_gpu=True):
+            valid_input = [1.0, 2.0, 3.0, 4.0, 5.0]
+            result = MyOperator(valid_input).eval()
+            self.assertEqual(result, [1.0, 2.0, 3.0, 5.0, 8.0]
+            invalid_input = [-1.0, 2.0, 7.0]
+            with self.assertRaisesOpError("negative input not supported"):
+              MyOperator(invalid_input).eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Args:
       graph: Optional graph to use during the returned session.
       config: An optional config_pb2.ConfigProto to use to configure the
         session.
       use_gpu: If True, attempt to run as many ops as possible on GPU.
+<<<<<<< HEAD
       force_gpu: If True, pin all ops to `/device:GPU:0`.
 
     Yields:
@@ -2178,6 +2291,48 @@ class TensorFlowTestCase(googletest.TestCase):
         with self.session(graph, config, use_gpu, force_gpu) as sess:
           yield sess
 
+=======
+      force_gpu: If True, pin all ops to `/gpu:0`.
+
+    Returns:
+      A Session object that should be used as a context manager to surround
+      the graph building and execution code in a test case.
+    """
+    def prepare_config(config):
+      if config is None:
+        config = config_pb2.ConfigProto()
+        config.allow_soft_placement = not force_gpu
+        config.gpu_options.per_process_gpu_memory_fraction = 0.3
+      elif force_gpu and config.allow_soft_placement:
+        config = config_pb2.ConfigProto().CopyFrom(config)
+        config.allow_soft_placement = False
+      return config
+
+    if graph is None:
+      if self._cached_session is None:
+        self._cached_session = session.Session(graph=None,
+                                               config=prepare_config(config))
+      sess = self._cached_session
+      with sess.graph.as_default(), sess.as_default():
+        if force_gpu:
+          with sess.graph.device("/gpu:0"):
+            yield sess
+        elif use_gpu:
+          yield sess
+        else:
+          with sess.graph.device(graph_util.pin_to_cpu):
+            yield sess
+    else:
+      with session.Session(graph=graph, config=prepare_config(config)) as sess:
+        if force_gpu:
+          with sess.graph.device("/gpu:0"):
+            yield sess
+        elif use_gpu:
+          yield sess
+        else:
+          with sess.graph.device(graph_util.pin_to_cpu):
+            yield sess
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   # pylint: enable=g-doc-return-or-yield
 
   class _CheckedThread(object):
@@ -2204,13 +2359,22 @@ class TensorFlowTestCase(googletest.TestCase):
       self._thread = threading.Thread(target=self._protected_run)
       self._exception = None
 
+<<<<<<< HEAD
       self._is_thread_joined = False
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     def _protected_run(self):
       """Target for the wrapper thread. Sets self._exception on failure."""
       try:
         self._target(*self._args, **self._kwargs)
+<<<<<<< HEAD
       except Exception as e:  # pylint: disable=broad-except
+=======
+# pylint: disable=broad-except
+      except Exception as e:
+        # pylint: enable=broad-except
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         self._exception = e
 
     def start(self):
@@ -2228,10 +2392,17 @@ class TensorFlowTestCase(googletest.TestCase):
         self._testcase.failureException: If the thread terminates with due to
           an exception.
       """
+<<<<<<< HEAD
       self._is_thread_joined = True
       self._thread.join()
       if self._exception is not None:
         self._testcase.fail("Error in checkedThread: %s" % str(self._exception))
+=======
+      self._thread.join()
+      if self._exception is not None:
+        self._testcase.fail(
+            "Error in checkedThread: %s" % str(self._exception))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     def is_alive(self):
       """Returns whether the thread is alive.
@@ -2244,6 +2415,7 @@ class TensorFlowTestCase(googletest.TestCase):
       """
       return self._thread.is_alive()
 
+<<<<<<< HEAD
     def check_termination(self):
       """Returns whether the checked thread was properly used and did terminate.
 
@@ -2266,6 +2438,8 @@ class TensorFlowTestCase(googletest.TestCase):
       else:
         self._testcase.fail("A checked thread was not joined.")
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def checkedThread(self, target, args=None, kwargs=None):
     """Returns a Thread wrapper that asserts 'target' completes successfully.
 
@@ -2285,16 +2459,23 @@ class TensorFlowTestCase(googletest.TestCase):
     ret = TensorFlowTestCase._CheckedThread(self, target, args, kwargs)
     self._threads.append(ret)
     return ret
+<<<<<<< HEAD
 
   # pylint: enable=invalid-name
   @py_func_if_in_function
   def assertNear(self, f1, f2, err, msg=None):
+=======
+# pylint: enable=invalid-name
+
+  def assertNear(self, f1, f2, err):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Asserts that two floats are near each other.
 
     Checks that |f1 - f2| < err and asserts a test failure
     if not.
 
     Args:
+<<<<<<< HEAD
       f1: A float value.
       f2: A float value.
       err: A float value.
@@ -2307,6 +2488,15 @@ class TensorFlowTestCase(googletest.TestCase):
 
   @py_func_if_in_function
   def assertArrayNear(self, farray1, farray2, err, msg=None):
+=======
+      f1: a float value.
+      f2: a float value.
+      err: a float value.
+    """
+    self.assertTrue(math.fabs(f1 - f2) < err)
+
+  def assertArrayNear(self, farray1, farray2, err):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Asserts that two float arrays are near each other.
 
     Checks that for all elements of farray1 and farray2
@@ -2316,23 +2506,34 @@ class TensorFlowTestCase(googletest.TestCase):
       farray1: a list of float values.
       farray2: a list of float values.
       err: a float value.
+<<<<<<< HEAD
       msg: Optional message to report on failure.
     """
     self.assertEqual(len(farray1), len(farray2), msg=msg)
     for f1, f2 in zip(farray1, farray2):
       self.assertNear(float(f1), float(f2), err, msg=msg)
+=======
+    """
+    for f1, f2 in zip(farray1, farray2):
+      self.assertNear(f1, f2, err)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _NDArrayNear(self, ndarray1, ndarray2, err):
     return np.linalg.norm(ndarray1 - ndarray2) < err
 
+<<<<<<< HEAD
   @py_func_if_in_function
   def assertNDArrayNear(self, ndarray1, ndarray2, err, msg=None):
+=======
+  def assertNDArrayNear(self, ndarray1, ndarray2, err):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Asserts that two numpy arrays have near values.
 
     Args:
       ndarray1: a numpy ndarray.
       ndarray2: a numpy ndarray.
       err: a float. The maximum absolute difference allowed.
+<<<<<<< HEAD
       msg: Optional message to report on failure.
     """
     self.assertTrue(self._NDArrayNear(ndarray1, ndarray2, err), msg=msg)
@@ -2365,12 +2566,39 @@ class TensorFlowTestCase(googletest.TestCase):
     msgs = [msg]
     if not np.allclose(a, b, rtol=rtol, atol=atol):
       # Adds more details to np.testing.assert_allclose.
+=======
+    """
+    self.assertTrue(self._NDArrayNear(ndarray1, ndarray2, err))
+
+  def _GetNdArray(self, a):
+    if not isinstance(a, np.ndarray):
+      a = np.array(a)
+    return a
+
+  def assertAllClose(self, a, b, rtol=1e-6, atol=1e-6):
+    """Asserts that two numpy arrays have near values.
+
+    Args:
+      a: a numpy ndarray or anything can be converted to one.
+      b: a numpy ndarray or anything can be converted to one.
+      rtol: relative tolerance
+      atol: absolute tolerance
+    """
+    a = self._GetNdArray(a)
+    b = self._GetNdArray(b)
+    self.assertEqual(
+        a.shape, b.shape,
+        "Shape mismatch: expected %s, got %s." % (a.shape, b.shape))
+    if not np.allclose(a, b, rtol=rtol, atol=atol):
+      # Prints more details than np.testing.assert_allclose.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       #
       # NOTE: numpy.allclose (and numpy.testing.assert_allclose)
       # checks whether two arrays are element-wise equal within a
       # tolerance. The relative difference (rtol * abs(b)) and the
       # absolute difference atol are added together to compare against
       # the absolute difference between a and b.  Here, we want to
+<<<<<<< HEAD
       # tell user which elements violate such conditions.
       cond = np.logical_or(
           np.abs(a - b) > atol + rtol * np.abs(b),
@@ -2591,10 +2819,46 @@ class TensorFlowTestCase(googletest.TestCase):
     msgs = [msg]
     if not np.all(same):
       # Adds more details to np.testing.assert_array_equal.
+=======
+      # print out which elements violate such conditions.
+      cond = np.abs(a - b) > atol + rtol * np.abs(b)
+      if a.ndim:
+        x = a[np.where(cond)]
+        y = b[np.where(cond)]
+        print "not close where = ", np.where(cond)
+      else:
+        # np.where is broken for scalars
+        x, y = a, b
+      print "not close lhs = ", x
+      print "not close rhs = ", y
+      print "not close dif = ", np.abs(x - y)
+      print "not close tol = ", atol + rtol * np.abs(y)
+      np.testing.assert_allclose(a, b, rtol=rtol, atol=atol)
+
+  def assertAllEqual(self, a, b):
+    """Asserts that two numpy arrays have the same values.
+
+    Args:
+      a: a numpy ndarray or anything can be converted to one.
+      b: a numpy ndarray or anything can be converted to one.
+    """
+    a = self._GetNdArray(a)
+    b = self._GetNdArray(b)
+    self.assertEqual(
+        a.shape, b.shape,
+        "Shape mismatch: expected %s, got %s." % (a.shape, b.shape))
+    same = (a == b)
+
+    if a.dtype == np.float32 or a.dtype == np.float64:
+      same = np.logical_or(same, np.logical_and(np.isnan(a), np.isnan(b)))
+    if not np.all(same):
+      # Prints more details than np.testing.assert_array_equal.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       diff = np.logical_not(same)
       if a.ndim:
         x = a[np.where(diff)]
         y = b[np.where(diff)]
+<<<<<<< HEAD
         msgs.append("not equal where = {}".format(np.where(diff)))
       else:
         # np.where is broken for scalars
@@ -2794,6 +3058,15 @@ class TensorFlowTestCase(googletest.TestCase):
       arrays = [target]
     for arr in arrays:
       self.assertEqual(arr.dtype, expected_dtype)
+=======
+        print "not equal where = ", np.where(diff)
+      else:
+        # np.where is broken for scalars
+        x, y = a, b
+      print "not equal lhs = ", x
+      print "not equal rhs = ", y
+      np.testing.assert_array_equal(a, b)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   # pylint: disable=g-doc-return-or-yield
   @contextlib.contextmanager
@@ -2801,6 +3074,7 @@ class TensorFlowTestCase(googletest.TestCase):
                                      expected_err_re_or_predicate):
     """Returns a context manager to enclose code expected to raise an exception.
 
+<<<<<<< HEAD
     If the exception is an OpError, the op stack is also included in the message
     predicate search.
 
@@ -2814,10 +3088,23 @@ class TensorFlowTestCase(googletest.TestCase):
     Returns:
       A context manager to surround code that is expected to raise an
       exception.
+=======
+    Args:
+      exception_type: The expected type of exception that should be raised.
+      expected_err_re_or_predicate: If this is callable, it should be a function
+        of one argument that inspects the passed-in OpError exception and
+        returns True (success) or False (please fail the test). Otherwise, the
+        error message is expected to match this regular expression partially.
+
+    Returns:
+      A context manager to surround code that is expected to raise an
+      errors.OpError exception.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """
     if callable(expected_err_re_or_predicate):
       predicate = expected_err_re_or_predicate
     else:
+<<<<<<< HEAD
 
       def predicate(e):
         err_str = e.message if isinstance(e, errors.OpError) else str(e)
@@ -2837,19 +3124,45 @@ class TensorFlowTestCase(googletest.TestCase):
         raise AssertionError("Exception of type %s: %s" %
                              (str(type(e)), str(e)))
 
+=======
+      def predicate(e):
+        err_str = e.message
+        op = e.op
+        while op is not None:
+          err_str += "\nCaused by: " + op.name
+          op = op._original_op
+        logging.info("Searching within error strings: '%s' within '%s'",
+                     expected_err_re_or_predicate, err_str)
+        return re.search(expected_err_re_or_predicate, err_str)
+    try:
+      yield
+      self.fail(exception_type.__name__ + " not raised")
+# pylint: disable=broad-except
+    except Exception as e:
+      # pylint: enable=broad-except
+      if not isinstance(e, exception_type) or not predicate(e):
+        raise AssertionError(e)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   # pylint: enable=g-doc-return-or-yield
 
   def assertRaisesOpError(self, expected_err_re_or_predicate):
     return self.assertRaisesWithPredicateMatch(errors.OpError,
                                                expected_err_re_or_predicate)
 
+<<<<<<< HEAD
   def assertShapeEqual(self, np_array, tf_tensor, msg=None):
+=======
+  def assertShapeEqual(self, np_array, tf_tensor):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Asserts that a Numpy ndarray and a TensorFlow tensor have the same shape.
 
     Args:
       np_array: A Numpy ndarray or Numpy scalar.
       tf_tensor: A Tensor.
+<<<<<<< HEAD
       msg: Optional message to report on failure.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Raises:
       TypeError: If the arguments have the wrong type.
@@ -2858,6 +3171,7 @@ class TensorFlowTestCase(googletest.TestCase):
       raise TypeError("np_array must be a Numpy ndarray or Numpy scalar")
     if not isinstance(tf_tensor, ops.Tensor):
       raise TypeError("tf_tensor must be a Tensor")
+<<<<<<< HEAD
     self.assertAllEqual(
         np_array.shape, tf_tensor.get_shape().as_list(), msg=msg)
 
@@ -3143,3 +3457,6 @@ def set_producer_version(graph, producer_version):
   with graph.as_default():
     importer.import_graph_def(graph_def)
   assert graph.graph_def_versions.producer, producer_version
+=======
+    self.assertAllEqual(np_array.shape, tf_tensor.get_shape().as_list())
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

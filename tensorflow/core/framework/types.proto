@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package tensorflow;
+<<<<<<< HEAD
 option cc_enable_arenas = true;
 option java_outer_classname = "TypesProtos";
 option java_multiple_files = true;
@@ -9,6 +10,10 @@ option go_package = "github.com/tensorflow/tensorflow/tensorflow/go/core/framewo
 
 // (== suppress_warning documentation-presence ==)
 // LINT.IfChange
+=======
+// option cc_enable_arenas = true;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 enum DataType {
   // Not a legal value for DataType.  Used to indicate a DataType field
   // has not been set.
@@ -30,6 +35,7 @@ enum DataType {
   DT_QUINT8 = 12;    // Quantized uint8
   DT_QINT32 = 13;    // Quantized int32
   DT_BFLOAT16 = 14;  // Float32 truncated to 16 bits.  Only for cast ops.
+<<<<<<< HEAD
   DT_QINT16 = 15;    // Quantized int16
   DT_QUINT16 = 16;   // Quantized uint16
   DT_UINT16 = 17;
@@ -39,6 +45,12 @@ enum DataType {
   DT_VARIANT = 21;  // Arbitrary C++ data types
   DT_UINT32 = 22;
   DT_UINT64 = 23;
+=======
+
+  // TODO(josh11b): DT_GENERIC_PROTO = ??;
+  // TODO(jeff,josh11b): DT_UINT64?  DT_UINT32?  DT_UINT16?
+  // TODO(zhifengc): DT_COMPLEX128 (double-precision complex)?
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Do not use!  These are only for parameters.  Every enum above
   // should have a corresponding value below (verified by types_test).
@@ -56,6 +68,7 @@ enum DataType {
   DT_QUINT8_REF = 112;
   DT_QINT32_REF = 113;
   DT_BFLOAT16_REF = 114;
+<<<<<<< HEAD
   DT_QINT16_REF = 115;
   DT_QUINT16_REF = 116;
   DT_UINT16_REF = 117;
@@ -74,3 +87,6 @@ enum DataType {
 //    https://www.tensorflow.org/code/tensorflow/core/framework/types.cc,
 //    https://www.tensorflow.org/code/tensorflow/python/framework/dtypes.py,
 //    https://www.tensorflow.org/code/tensorflow/python/framework/function.py)
+=======
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

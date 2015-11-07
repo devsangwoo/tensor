@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +23,15 @@ limitations under the License.
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_TENSOR_TESTUTIL_H_
+#define TENSORFLOW_FRAMEWORK_TENSOR_TESTUTIL_H_
+
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/tensor.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace test {
@@ -62,6 +72,7 @@ void FillValues(Tensor* tensor, gtl::ArraySlice<T> vals) {
   }
 }
 
+<<<<<<< HEAD
 // Fills in '*tensor' with 'vals', converting the types as needed.
 template <typename T, typename SrcType>
 void FillValues(Tensor* tensor, std::initializer_list<SrcType> vals) {
@@ -75,6 +86,8 @@ void FillValues(Tensor* tensor, std::initializer_list<SrcType> vals) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Fills in '*tensor' with a sequence of value of val, val+1, val+2, ...
 //   Tensor x(&alloc, DT_FLOAT, TensorShape({2, 2}));
 //   test::FillIota<float>(&x, 1.0);
@@ -99,16 +112,26 @@ template <typename T>
 void ExpectTensorEqual(const Tensor& x, const Tensor& y);
 
 // Expects "x" and "y" are tensors of the same type, same shape, and
+<<<<<<< HEAD
 // approximate equal values, each within "abs_err".
+=======
+// approxmiate equal values, each within "abs_err".
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <typename T>
 void ExpectTensorNear(const Tensor& x, const Tensor& y, const T& abs_err);
 
 // Expects "x" and "y" are tensors of the same type (float or double),
 // same shape and element-wise difference between x and y is no more
+<<<<<<< HEAD
 // than atol + rtol * abs(x). If atol or rtol is negative, it is replaced
 // with a default tolerance value = data type's epsilon * kSlackFactor.
 void ExpectClose(const Tensor& x, const Tensor& y, double atol = -1.0,
                  double rtol = -1.0);
+=======
+// than atol + rtol * abs(x).
+void ExpectClose(const Tensor& x, const Tensor& y, double atol = 1e-6,
+                 double rtol = 1e-6);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Implementation details.
 
@@ -116,6 +139,7 @@ namespace internal {
 
 template <typename T>
 struct is_floating_point_type {
+<<<<<<< HEAD
   static const bool value = std::is_same<T, Eigen::half>::value ||
                             std::is_same<T, float>::value ||
                             std::is_same<T, double>::value ||
@@ -125,25 +149,48 @@ struct is_floating_point_type {
 
 template <typename T>
 inline void ExpectEqual(const T& a, const T& b) {
+=======
+  static const bool value = std::is_same<T, float>::value ||
+                            std::is_same<T, double>::value ||
+                            std::is_same<T, std::complex<float> >::value ||
+                            std::is_same<T, std::complex<double> >::value;
+};
+
+template <typename T>
+static void ExpectEqual(const T& a, const T& b) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(a, b);
 }
 
 template <>
+<<<<<<< HEAD
 inline void ExpectEqual<float>(const float& a, const float& b) {
+=======
+void ExpectEqual<float>(const float& a, const float& b) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_FLOAT_EQ(a, b);
 }
 
 template <>
+<<<<<<< HEAD
 inline void ExpectEqual<double>(const double& a, const double& b) {
+=======
+void ExpectEqual<double>(const double& a, const double& b) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_DOUBLE_EQ(a, b);
 }
 
 template <>
+<<<<<<< HEAD
 inline void ExpectEqual<complex64>(const complex64& a, const complex64& b) {
+=======
+void ExpectEqual<complex64>(const complex64& a, const complex64& b) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_FLOAT_EQ(a.real(), b.real()) << a << " vs. " << b;
   EXPECT_FLOAT_EQ(a.imag(), b.imag()) << a << " vs. " << b;
 }
 
+<<<<<<< HEAD
 template <>
 inline void ExpectEqual<complex128>(const complex128& a, const complex128& b) {
   EXPECT_DOUBLE_EQ(a.real(), b.real()) << a << " vs. " << b;
@@ -183,6 +230,8 @@ inline void ExpectEqual<complex128>(const complex128& a, const complex128& b,
       << a << " vs. " << b << " at index " << index;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 inline void AssertSameTypeDims(const Tensor& x, const Tensor& y) {
   ASSERT_EQ(x.dtype(), y.dtype());
   ASSERT_TRUE(x.IsSameSize(y))
@@ -200,11 +249,18 @@ struct Expector<T, false> {
   static void Equal(const Tensor& x, const Tensor& y) {
     ASSERT_EQ(x.dtype(), DataTypeToEnum<T>::v());
     AssertSameTypeDims(x, y);
+<<<<<<< HEAD
     const auto size = x.NumElements();
     const T* a = x.flat<T>().data();
     const T* b = y.flat<T>().data();
     for (int i = 0; i < size; ++i) {
       ExpectEqual(a[i], b[i]);
+=======
+    auto a = x.flat<T>();
+    auto b = y.flat<T>();
+    for (int i = 0; i < a.size(); ++i) {
+      ExpectEqual(a(i), b(i));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 };
@@ -217,6 +273,7 @@ struct Expector<T, true> {
   static void Equal(const Tensor& x, const Tensor& y) {
     ASSERT_EQ(x.dtype(), DataTypeToEnum<T>::v());
     AssertSameTypeDims(x, y);
+<<<<<<< HEAD
     const auto size = x.NumElements();
     const T* a = x.flat<T>().data();
     const T* b = y.flat<T>().data();
@@ -229,21 +286,42 @@ struct Expector<T, true> {
     // Need a == b so that infinities are close to themselves.
     return (a == b) ||
            (static_cast<double>(Eigen::numext::abs(a - b)) <= abs_err);
+=======
+    auto a = x.flat<T>();
+    auto b = y.flat<T>();
+    for (int i = 0; i < a.size(); ++i) {
+      ExpectEqual(a(i), b(i));
+    }
+  }
+
+  static void Near(const T& a, const T& b, const double abs_err) {
+    if (a != b) {  // Takes care of inf.
+      EXPECT_LE(std::abs(a - b), abs_err) << "a = " << a << " b = " << b;
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   static void Near(const Tensor& x, const Tensor& y, const double abs_err) {
     ASSERT_EQ(x.dtype(), DataTypeToEnum<T>::v());
     AssertSameTypeDims(x, y);
+<<<<<<< HEAD
     const auto size = x.NumElements();
     const T* a = x.flat<T>().data();
     const T* b = y.flat<T>().data();
     for (int i = 0; i < size; ++i) {
       EXPECT_TRUE(Near(a[i], b[i], abs_err))
           << "a = " << a[i] << " b = " << b[i] << " index = " << i;
+=======
+    auto a = x.flat<T>();
+    auto b = y.flat<T>();
+    for (int i = 0; i < a.size(); ++i) {
+      Near(a(i), b(i), abs_err);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 };
 
+<<<<<<< HEAD
 template <typename T>
 struct Helper {
   // Assumes atol and rtol are nonnegative.
@@ -263,6 +341,8 @@ struct Helper<std::complex<T>> {
   }
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace internal
 
 template <typename T>
@@ -274,11 +354,18 @@ template <typename T>
 void ExpectTensorNear(const Tensor& x, const Tensor& y, const double abs_err) {
   static_assert(internal::is_floating_point_type<T>::value,
                 "T is not a floating point types.");
+<<<<<<< HEAD
   ASSERT_GE(abs_err, 0.0) << "abs_error is negative" << abs_err;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   internal::Expector<T>::Near(x, y, abs_err);
 }
 
 }  // namespace test
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_TENSOR_TESTUTIL_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_TENSOR_TESTUTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

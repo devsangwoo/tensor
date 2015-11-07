@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,16 +23,36 @@ limitations under the License.
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/summary.pb.h"
 #include "tensorflow/core/framework/tensor.h"
+=======
+#include <functional>
+#include <memory>
+#include <vector>
+
+#include <gtest/gtest.h>
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/framework/fake_input.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/summary.pb.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/kernels/ops_testutil.h"
 #include "tensorflow/core/kernels/ops_util.h"
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/lib/histogram/histogram.h"
 #include "tensorflow/core/lib/strings/strcat.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -49,12 +70,22 @@ static void EXPECT_SummaryMatches(const Summary& actual,
 class SummaryImageOpTest : public OpsTestBase {
  protected:
   void MakeOp(int max_images) {
+<<<<<<< HEAD
     TF_ASSERT_OK(NodeDefBuilder("myop", "ImageSummary")
                      .Input(FakeInput())
                      .Input(FakeInput())
                      .Attr("max_images", max_images)
                      .Finalize(node_def()));
     TF_ASSERT_OK(InitOp());
+=======
+    RequireDefaultOps();
+    ASSERT_OK(NodeDefBuilder("myop", "ImageSummary")
+                  .Input(FakeInput())
+                  .Input(FakeInput())
+                  .Attr("max_images", max_images)
+                  .Finalize(node_def()));
+    ASSERT_OK(InitOp());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void CheckAndRemoveEncodedImages(Summary* summary) {
@@ -78,16 +109,27 @@ TEST_F(SummaryImageOpTest, ThreeGrayImagesOutOfFive4dInput) {
   MakeOp(3 /* max images */);
 
   // Feed and run
+<<<<<<< HEAD
   AddInputFromArray<tstring>(TensorShape({}), {"tag"});
   AddInputFromArray<float>(TensorShape({5, 2, 1, 1}),
                            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
   TF_ASSERT_OK(RunOpKernel());
+=======
+  AddInputFromArray<string>(TensorShape({}), {"tag"});
+  AddInputFromArray<float>(TensorShape({5, 2, 1, 1}),
+                           {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the output size.
   Tensor* out_tensor = GetOutput(0);
   ASSERT_EQ(0, out_tensor->dims());
   Summary summary;
+<<<<<<< HEAD
   ParseProtoUnlimited(&summary, out_tensor->scalar<tstring>()());
+=======
+  ParseProtoUnlimited(&summary, out_tensor->scalar<string>()());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   CheckAndRemoveEncodedImages(&summary);
   EXPECT_SummaryMatches(summary, R"(
@@ -101,16 +143,27 @@ TEST_F(SummaryImageOpTest, OneGrayImage4dInput) {
   MakeOp(1 /* max images */);
 
   // Feed and run
+<<<<<<< HEAD
   AddInputFromArray<tstring>(TensorShape({}), {"tag"});
   AddInputFromArray<float>(TensorShape({5 /*batch*/, 2, 1, 1 /*depth*/}),
                            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
   TF_ASSERT_OK(RunOpKernel());
+=======
+  AddInputFromArray<string>(TensorShape({}), {"tag"});
+  AddInputFromArray<float>(TensorShape({5 /*batch*/, 2, 1, 1 /*depth*/}),
+                           {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the output size.
   Tensor* out_tensor = GetOutput(0);
   ASSERT_EQ(0, out_tensor->dims());
   Summary summary;
+<<<<<<< HEAD
   ParseProtoUnlimited(&summary, out_tensor->scalar<tstring>()());
+=======
+  ParseProtoUnlimited(&summary, out_tensor->scalar<string>()());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   CheckAndRemoveEncodedImages(&summary);
   EXPECT_SummaryMatches(summary, R"(
@@ -121,6 +174,7 @@ TEST_F(SummaryImageOpTest, OneColorImage4dInput) {
   MakeOp(1 /* max images */);
 
   // Feed and run
+<<<<<<< HEAD
   AddInputFromArray<tstring>(TensorShape({}), {"tag"});
   AddInputFromArray<float>(
       TensorShape({1 /*batch*/, 5 /*rows*/, 2 /*columns*/, 3 /*depth*/}),
@@ -137,12 +191,34 @@ TEST_F(SummaryImageOpTest, OneColorImage4dInput) {
           /* r4, c1, RGB */ 1.0f, 0.0f, 1.0f,
       });
   TF_ASSERT_OK(RunOpKernel());
+=======
+  AddInputFromArray<string>(TensorShape({}), {"tag"});
+  AddInputFromArray<float>(
+      TensorShape({1 /*batch*/, 5 /*rows*/, 2 /*columns*/, 3 /*depth*/}),
+      {
+          /* r0, c0, RGB */ 1.0, 0.1, 0.2,
+          /* r0, c1, RGB */ 1.0, 0.3, 0.4,
+          /* r1, c0, RGB */ 0.0, 1.0, 0.0,
+          /* r1, c1, RGB */ 0.0, 1.0, 0.0,
+          /* r2, c0, RGB */ 0.0, 0.0, 1.0,
+          /* r2, c1, RGB */ 0.0, 0.0, 1.0,
+          /* r3, c0, RGB */ 1.0, 1.0, 0.0,
+          /* r3, c1, RGB */ 1.0, 0.0, 1.0,
+          /* r4, c0, RGB */ 1.0, 1.0, 0.0,
+          /* r4, c1, RGB */ 1.0, 0.0, 1.0,
+      });
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the output size.
   Tensor* out_tensor = GetOutput(0);
   ASSERT_EQ(0, out_tensor->dims());
   Summary summary;
+<<<<<<< HEAD
   ParseProtoUnlimited(&summary, out_tensor->scalar<tstring>()());
+=======
+  ParseProtoUnlimited(&summary, out_tensor->scalar<string>()());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   CheckAndRemoveEncodedImages(&summary);
   EXPECT_SummaryMatches(summary, R"(

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,3 +55,23 @@ ops.NotDifferentiable("ScatterNdSub")
 ops.NotDifferentiable("ScatterNdMul")
 
 ops.NotDifferentiable("ScatterNdDiv")
+=======
+"""Gradients for operators defined in state_ops.py."""
+
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import state_ops
+
+ops.NoGradient("Assign")
+
+
+ops.NoGradient("AssignAdd")
+
+
+ops.NoGradient("AssignSub")
+
+
+ops.NoGradient("ScatterAdd")
+
+
+ops.NoGradient("ScatterSub")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

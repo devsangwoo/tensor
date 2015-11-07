@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +16,21 @@ limitations under the License.
 
 // See docs in ../ops/io_ops.cc
 #include "tensorflow/core/kernels/save_restore_tensor.h"
+=======
+// See docs in ../ops/io_ops.cc
+#include "tensorflow/core/kernels/io.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/lib/strings/stringprintf.h"
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/tensor_slice_writer.h"
 
 namespace tensorflow {
@@ -55,6 +64,7 @@ class ShardedFilenameOp : public OpKernel {
   void Compute(OpKernelContext* ctx) override {
     static const char* input_names[3] = {"basename", "shard", "num_shards"};
     for (int i = 0; i < ctx->num_inputs(); ++i) {
+<<<<<<< HEAD
       OP_REQUIRES(ctx, IsLegacyScalar(ctx->input(i).shape()),
                   errors::InvalidArgument(input_names[i],
                                           " must be a scalar, got shape ",
@@ -64,6 +74,17 @@ class ShardedFilenameOp : public OpKernel {
     OP_REQUIRES_OK(ctx, ctx->allocate_output(0, TensorShape({}), &out));
     out->scalar<tstring>()() = strings::Printf(
         "%s-%05d-of-%05d", ctx->input(0).scalar<tstring>()().c_str(),
+=======
+      OP_REQUIRES(ctx, TensorShapeUtils::IsLegacyScalar(ctx->input(i).shape()),
+                  errors::InvalidArgument(
+                      input_names[i], " must be a scalar, got shape ",
+                      ctx->input(i).shape().ShortDebugString()));
+    }
+    Tensor* out = nullptr;
+    OP_REQUIRES_OK(ctx, ctx->allocate_output(0, TensorShape({}), &out));
+    out->scalar<string>()() = strings::Printf(
+        "%s-%05d-of-%05d", ctx->input(0).scalar<string>()().c_str(),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         ctx->input(1).scalar<int32>()(), ctx->input(2).scalar<int32>()());
   }
 };
@@ -78,6 +99,7 @@ class ShardedFilespecOp : public OpKernel {
   void Compute(OpKernelContext* ctx) override {
     static const char* input_names[2] = {"basename", "num_shards"};
     for (int i = 0; i < ctx->num_inputs(); ++i) {
+<<<<<<< HEAD
       OP_REQUIRES(ctx, IsLegacyScalar(ctx->input(i).shape()),
                   errors::InvalidArgument(input_names[i],
                                           " must be a scalar, got shape ",
@@ -87,6 +109,17 @@ class ShardedFilespecOp : public OpKernel {
     OP_REQUIRES_OK(ctx, ctx->allocate_output(0, TensorShape({}), &out));
     out->scalar<tstring>()() = strings::Printf(
         "%s-\?\?\?\?\?-of-%05d", ctx->input(0).scalar<tstring>()().c_str(),
+=======
+      OP_REQUIRES(ctx, TensorShapeUtils::IsLegacyScalar(ctx->input(i).shape()),
+                  errors::InvalidArgument(
+                      input_names[i], " must be a scalar, got shape ",
+                      ctx->input(i).shape().ShortDebugString()));
+    }
+    Tensor* out = nullptr;
+    OP_REQUIRES_OK(ctx, ctx->allocate_output(0, TensorShape({}), &out));
+    out->scalar<string>()() = strings::Printf(
+        "%s-\?\?\?\?\?-of-%05d", ctx->input(0).scalar<string>()().c_str(),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         ctx->input(1).scalar<int32>()());
   }
 };

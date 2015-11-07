@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,11 @@ limitations under the License.
 
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/lib/core/arena.h"
+
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace core {
@@ -57,6 +63,7 @@ TEST(ArenaTest, TestBasicArena) {
   TestMemory(memory, 100);
 }
 
+<<<<<<< HEAD
 TEST(ArenaTest, TestAlignment) {
   Arena a(1024);
   char* byte0 = a.Alloc(1);
@@ -70,6 +77,8 @@ TEST(ArenaTest, TestAlignment) {
   EXPECT_EQ(alloc_aligned8_d - alloc_aligned8_c, 16);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(ArenaTest, TestVariousArenaSizes) {
   {
     Arena a(1024);

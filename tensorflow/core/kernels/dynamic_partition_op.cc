@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,15 @@ limitations under the License.
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/lib/gtl/inlined_vector.h"
 #include "tensorflow/core/util/util.h"
+=======
+// See docs in ../ops/data_flow_ops.cc.
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/gtl/inlined_vector.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -44,6 +54,7 @@ class DynamicPartitionOp_Shared : public OpKernel {
                                   OpOutputList* Tout) {
     OP_REQUIRES_OK(c, c->input("data", data));
     OP_REQUIRES_OK(c, c->input("partitions", partitions));
+<<<<<<< HEAD
     OP_REQUIRES(
         c,
         TensorShapeUtils::StartsWith((*data)->shape(), (*partitions)->shape()),
@@ -51,16 +62,32 @@ class DynamicPartitionOp_Shared : public OpKernel {
             "data.shape must start with partitions.shape, ",
             "got data.shape = ", (*data)->shape().DebugString(),
             ", partitions.shape = ", (*partitions)->shape().DebugString()));
+=======
+    OP_REQUIRES(c, TensorShapeUtils::StartsWith((*data)->shape(),
+                                                (*partitions)->shape()),
+                errors::InvalidArgument(
+                    "data.shape must start with partitions.shape, ",
+                    "got data.shape = ", (*data)->shape().ShortDebugString(),
+                    ", partitions.shape = ",
+                    (*partitions)->shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Count how many occurrences of each partition id we have in partitions
     gtl::InlinedVector<int, 32> partition_count(num_partitions_);
     auto e_partitions = (*partitions)->flat<int32>();
     const int64 N = e_partitions.dimension(0);
     for (int64 i = 0; i < N; i++) {
+<<<<<<< HEAD
       const int32 p = internal::SubtleMustCopy(e_partitions(i));
       OP_REQUIRES(c, FastBoundsCheck(p, num_partitions_),
                   errors::InvalidArgument(
                       "partitions", SliceDebugString((*partitions)->shape(), i),
+=======
+      const int32 p = e_partitions(i);
+      OP_REQUIRES(c, p >= 0 && p < num_partitions_,
+                  errors::InvalidArgument(
+                      "partitions", SliceString((*partitions)->shape(), i),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                       " = ", p, " is not in [0, ", num_partitions_, ")"));
       partition_count[p]++;
     }
@@ -80,6 +107,33 @@ class DynamicPartitionOp_Shared : public OpKernel {
 
  protected:
   int num_partitions_;
+<<<<<<< HEAD
+=======
+
+  static string SliceString(const TensorShape& shape, const int64 flat) {
+    // Special case rank 0 and 1
+    const int dims = shape.dims();
+    if (dims == 0) return "";
+    if (dims == 1) return strings::StrCat("[", flat, "]");
+
+    // Compute strides
+    gtl::InlinedVector<int64, 32> strides(dims);
+    strides.back() = 1;
+    for (int i = dims - 2; i >= 0; i--) {
+      strides[i] = strides[i + 1] * shape.dim_size(i + 1);
+    }
+
+    // Unflatten index
+    int64 left = flat;
+    string result;
+    for (int i = 0; i < dims; i++) {
+      strings::StrAppend(&result, i ? "," : "[", left / strides[i]);
+      left %= strides[i];
+    }
+    strings::StrAppend(&result, "]");
+    return result;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 template <class T>
@@ -103,13 +157,18 @@ class DynamicPartitionOp : public DynamicPartitionOp_Shared {
       // Walk through data and copy the data to the appropriate output tensor
       const auto data_flat = data->flat<T>();
       std::vector<Eigen::TensorMap<Eigen::Tensor<T, 1, Eigen::RowMajor>,
+<<<<<<< HEAD
                                    Eigen::Aligned> >
           out_vec;
       out_vec.reserve(num_partitions_);
+=======
+                                   Eigen::Aligned> > out_vec;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       for (int p = 0; p < num_partitions_; p++) {
         out_vec.push_back(outputs[p]->vec<T>());
       }
       for (int64 i = 0; i < N; i++) {
+<<<<<<< HEAD
         const int32 p = internal::SubtleMustCopy(e_partitions(i));
         OP_REQUIRES(
             c, FastBoundsCheck(p, num_partitions_),
@@ -120,14 +179,22 @@ class DynamicPartitionOp : public DynamicPartitionOp_Shared {
                         "out_vec[", p, "] size: ", out_vec[p].size(),
                         " is not LTE output_index[", p, "] : ", oi));
         out_vec[p](oi) = data_flat(i);
+=======
+        const int32 p = e_partitions(i);
+        out_vec[p](output_index[p]) = data_flat(i);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         output_index[p]++;
       }
     } else {
       // If data has extra dimensions, use Eigen slices
       std::vector<Eigen::TensorMap<Eigen::Tensor<T, 2, Eigen::RowMajor>,
+<<<<<<< HEAD
                                    Eigen::Aligned> >
           out_flat;
       out_flat.reserve(num_partitions_);
+=======
+                                   Eigen::Aligned> > out_flat;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       for (int p = 0; p < num_partitions_; p++) {
         out_flat.push_back(outputs[p]->flat_outer_dims<T>());
       }
@@ -137,6 +204,7 @@ class DynamicPartitionOp : public DynamicPartitionOp_Shared {
       const auto data_flat = data->shaped<T, 2>({N, slice_size});
       Eigen::DSizes<Eigen::DenseIndex, 2> sizes(1, slice_size);
       for (int64 i = 0; i < N; i++) {
+<<<<<<< HEAD
         // outputs[p][output_index[p]++] = data[i]
         const int32 p = internal::SubtleMustCopy(e_partitions(i));
         OP_REQUIRES(
@@ -149,6 +217,11 @@ class DynamicPartitionOp : public DynamicPartitionOp_Shared {
                     errors::InvalidArgument("Size of output_index: ", oi,
                                             " is no longer in range."));
         Eigen::DSizes<Eigen::DenseIndex, 2> out_indices(oi, 0);
+=======
+        const int32 p = e_partitions(i);
+        // outputs[p][output_index[p]++] = data[i]
+        Eigen::DSizes<Eigen::DenseIndex, 2> out_indices(output_index[p], 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         Eigen::DSizes<Eigen::DenseIndex, 2> data_indices(i, 0);
         out_flat[p].slice(out_indices, sizes) =
             data_flat.slice(data_indices, sizes);

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -136,6 +137,19 @@ constexpr int MantissaWidth<bfloat16>() {
   return 7 + 1;
 }
 
+=======
+#ifndef TENSORFLOW_KERNELS_CAST_OP_H_
+#define TENSORFLOW_KERNELS_CAST_OP_H_
+
+#include "tensorflow/core/framework/bfloat16.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "tensorflow/core/platform/port.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+
+namespace tensorflow {
+namespace functor {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <typename Device, typename Tout, typename Tin>
 void Cast(const Device& d, typename TTypes<Tout>::Flat o,
           typename TTypes<Tin>::ConstFlat i) {
@@ -145,6 +159,7 @@ void Cast(const Device& d, typename TTypes<Tout>::Flat o,
 template <typename Device, typename Tout, typename Tin>
 struct CastFunctor {
   void operator()(const Device& d, typename TTypes<Tout>::Flat o,
+<<<<<<< HEAD
                   typename TTypes<Tin>::ConstFlat i, bool truncate = false);
 };
 
@@ -224,6 +239,9 @@ struct LSBZeroSetter<std::complex<I>, O> {
     std::complex<I> toReturn(re, img);
     return toReturn;
   }
+=======
+                  typename TTypes<Tin>::ConstFlat i);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // end namespace functor
@@ -232,6 +250,7 @@ struct LSBZeroSetter<std::complex<I>, O> {
 namespace Eigen {
 namespace internal {
 
+<<<<<<< HEAD
 // Eigen can't convert to/from complex numbers, because it is limited to cases
 // that can be static_casted. But numpy is able to cast to/from complex, which
 // we want to replicate. So we add specializations for complex here.
@@ -281,10 +300,16 @@ struct functor_traits<scalar_cast_op<std::complex<From>, std::complex<To>>>
 // Specialized cast op impls for bfloat16.
 template <>
 struct scalar_cast_op<::tensorflow::bfloat16, float> {
+=======
+// Specialized cast op impls for bfloat16.
+template <>
+struct scalar_cast_op< ::tensorflow::bfloat16, float> {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EIGEN_EMPTY_STRUCT_CTOR(scalar_cast_op)
   typedef float result_type;
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE float operator()(
       const ::tensorflow::bfloat16& a) const {
+<<<<<<< HEAD
     float ret;
     uint16_t* p = reinterpret_cast<uint16_t*>(&ret);
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -296,12 +321,23 @@ struct scalar_cast_op<::tensorflow::bfloat16, float> {
     p[0] = 0;
     p[1] = a.value;
 #endif
+=======
+    static_assert(::tensorflow::port::kLittleEndian, "");
+    float ret;
+    uint16_t* p = reinterpret_cast<uint16_t*>(&ret);
+    p[0] = 0;
+    p[1] = a.value;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return ret;
   }
 };
 
 template <>
+<<<<<<< HEAD
 struct functor_traits<scalar_cast_op<::tensorflow::bfloat16, float>> {
+=======
+struct functor_traits<scalar_cast_op< ::tensorflow::bfloat16, float> > {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   enum { Cost = NumTraits<float>::AddCost, PacketAccess = false };
 };
 
@@ -311,16 +347,30 @@ struct scalar_cast_op<float, ::tensorflow::bfloat16> {
   typedef ::tensorflow::bfloat16 result_type;
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE const ::tensorflow::bfloat16 operator()(
       const float a) const {
+<<<<<<< HEAD
     return ::tensorflow::bfloat16(a);
+=======
+    static_assert(::tensorflow::port::kLittleEndian, "");
+    const uint16_t* p = reinterpret_cast<const uint16_t*>(&a);
+    return ::tensorflow::bfloat16(p[1]);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 template <>
+<<<<<<< HEAD
 struct functor_traits<scalar_cast_op<float, ::tensorflow::bfloat16>> {
+=======
+struct functor_traits<scalar_cast_op<float, ::tensorflow::bfloat16> > {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   enum { Cost = NumTraits<float>::AddCost, PacketAccess = false };
 };
 
 }  // namespace internal
 }  // namespace Eigen
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_CAST_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_CAST_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

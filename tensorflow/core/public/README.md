@@ -10,6 +10,7 @@ The following is an example python code to do a simple matrix multiply
 of two constants and get the result from a locally-running TensorFlow
 process.
 
+<<<<<<< HEAD
 First, bring in tensorflow python dependency
 
 //third_party/py/tensorflow
@@ -17,14 +18,33 @@ First, bring in tensorflow python dependency
 to get the python TensorFlow API.
 
 Then:
+=======
+First, bring in the following dependency:
+
+//third_party/tensorflow/core/public:tensorflow_py
+
+to get the python TensorFlow API. If you intend to run TensorFlow within
+the same process, link in the following to the same binary:
+
+//third_party/tensorflow/core/public:tensorflow_std_ops
+
+to get the standard set of op implementations.  Then:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 ```python
 import tensorflow as tf
 
+<<<<<<< HEAD
 with tf.Session():
   input1 = tf.constant(1.0, shape=[1, 1], name="input1")
   input2 = tf.constant(2.0, shape=[1, 1], name="input2")
   output = tf.matmul(input1, input2)
+=======
+with tf.Session("local"):
+  input1 = tf.Constant(1.0, shape=[1, 1], name="input1")
+  input2 = tf.Constant(2.0, shape=[1, 1], name="input2")
+  output = tf.MatMul(input1, input2)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   # Run graph and fetch the output
   result = output.eval()
@@ -35,11 +55,19 @@ with tf.Session():
 
 If you are running TensorFlow locally, link your binary with
 
+<<<<<<< HEAD
 //third_party/tensorflow/core
 
 and link in the operation implementations you want to supported, e.g.,
 
 //third_party/tensorflow/core:kernels
+=======
+//third_party/tensorflow/core/public:tensorflow_local
+
+and link in the operation implementations you want to supported, e.g.,
+
+//third_party/tensorflow/core/public:tensorflow_std_ops
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 An example program to take a GraphDef and run it using TensorFlow
 using the C++ Session API:
@@ -51,7 +79,11 @@ using the C++ Session API:
 
 #include "tensorflow/core/framework/graph.pb.h"
 #include "tensorflow/core/public/session.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor.h"
+=======
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 int main(int argc, char** argv) {
   // Construct your graph.

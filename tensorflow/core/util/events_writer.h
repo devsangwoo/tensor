@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,16 @@ limitations under the License.
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_UTIL_EVENTS_WRITER_H_
+#define TENSORFLOW_UTIL_EVENTS_WRITER_H_
+
+#include <memory>
+#include <string>
+#include "tensorflow/core/lib/io/record_writer.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/env.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/event.pb.h"
 
 namespace tensorflow {
@@ -33,6 +44,7 @@ class EventsWriter {
 #ifndef SWIG
   // Prefix of version string present in the first entry of every event file.
   static constexpr const char* kVersionPrefix = "brain.Event:";
+<<<<<<< HEAD
   static constexpr const int kCurrentVersion = 2;
 #endif
 
@@ -41,11 +53,25 @@ class EventsWriter {
   // To create and EventWriter, the user should provide file_prefix =
   //   '/some/file/path/my.file'
   // The EventsWriter will append '.out.events.[timestamp].[hostname][suffix]'
+=======
+  static constexpr const int kCurrentVersion = 1;
+#endif
+
+  // Events files typically have a name of the form
+  //   '/some/file/path/my.file.out.events.[timestamp].[hostname]'
+  // To create and EventWriter, the user should provide file_prefix =
+  //   '/some/file/path/my.file'
+  // The EventsWriter will append '.out.events.[timestamp].[hostname]'
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // to the ultimate filename once Init() is called.
   // Note that it is not recommended to simultaneously have two
   // EventWriters writing to the same file_prefix.
   explicit EventsWriter(const string& file_prefix);
+<<<<<<< HEAD
   ~EventsWriter();
+=======
+  ~EventsWriter() { Close(); }  // Autoclose in destructor.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Sets the event file filename and opens file for writing.  If not called by
   // user, will be invoked automatically by a call to FileName() or Write*().
@@ -53,11 +79,18 @@ class EventsWriter {
   // and is open this is a no-op.  If on the other hand the file was opened,
   // but has since disappeared (e.g. deleted by another process), this will open
   // a new file with a new timestamp in its filename.
+<<<<<<< HEAD
   Status Init();
   Status InitWithSuffix(const string& suffix);
 
   // Returns the filename for the current events file:
   // filename_ = [file_prefix_].out.events.[timestamp].[hostname][suffix]
+=======
+  bool Init();
+
+  // Returns the filename for the current events file:
+  // filename_ = [file_prefix_].out.events.[timestamp].[hostname]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string FileName();
 
   // Append "event" to the file.  The "tensorflow::" part is for swig happiness.
@@ -65,8 +98,13 @@ class EventsWriter {
 
   // Append "event_str", a serialized Event, to the file.
   // Note that this function does NOT check that de-serializing event_str
+<<<<<<< HEAD
   // results in a valid Event proto.  The tensorflow:: bit makes SWIG happy.
   void WriteSerializedEvent(tensorflow::StringPiece event_str);
+=======
+  // results in a valid Event proto.
+  void WriteSerializedEvent(const string& event_str);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // EventWriter automatically flushes and closes on destruction, but
   // these two methods are provided for users who want to write to disk sooner
@@ -76,6 +114,7 @@ class EventsWriter {
   // be written too.
   //   Close() calls Flush() and then closes the current events file.
   // Returns true only if both the flush and the closure were successful.
+<<<<<<< HEAD
   Status Flush();
   Status Close();
 
@@ -86,6 +125,16 @@ class EventsWriter {
   Env* env_;
   const string file_prefix_;
   string file_suffix_;
+=======
+  bool Flush();
+  bool Close();
+
+ private:
+  bool FileHasDisappeared();  // True if event_file_path_ does not exist.
+
+  Env* env_;
+  const string file_prefix_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string filename_;
   std::unique_ptr<WritableFile> recordio_file_;
   std::unique_ptr<io::RecordWriter> recordio_writer_;
@@ -95,4 +144,8 @@ class EventsWriter {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_UTIL_EVENTS_WRITER_H_
+=======
+#endif  // TENSORFLOW_UTIL_EVENTS_WRITER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

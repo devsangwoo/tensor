@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,10 +19,14 @@ from __future__ import division
 from __future__ import print_function
 
 import contextlib
+=======
+"""Coordinator to help multiple threads stop when requested."""
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import sys
 import threading
 import time
 
+<<<<<<< HEAD
 import six
 
 from tensorflow.python.framework import errors
@@ -31,6 +36,11 @@ from tensorflow.python.util.tf_export import tf_export
 
 
 @tf_export("train.Coordinator")
+=======
+from tensorflow.python.platform import logging
+
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class Coordinator(object):
   """A coordinator for threads.
 
@@ -54,17 +64,30 @@ class Coordinator(object):
   `coord.should_stop()` on a regular basis.  `coord.should_stop()` returns
   `True` as soon as `coord.request_stop()` has been called.
 
+<<<<<<< HEAD
   A typical thread running with a coordinator will do something like:
 
   ```python
   while not coord.should_stop():
     ...do some work...
+=======
+  A typical thread running with a Coordinator will do something like:
+
+  ```python
+  while not coord.should_stop():
+     ...do some work...
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ```
 
   #### Exception handling:
 
+<<<<<<< HEAD
   A thread can report an exception to the coordinator as part of the
   `request_stop()` call.  The exception will be re-raised from the
+=======
+  A thread can report an exception to the Coordinator as part of the
+  `should_stop()` call.  The exception will be re-raised from the
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   `coord.join()` call.
 
   Thread code:
@@ -73,7 +96,11 @@ class Coordinator(object):
   try:
     while not coord.should_stop():
       ...do some work...
+<<<<<<< HEAD
   except Exception as e:
+=======
+  except Exception, e:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     coord.request_stop(e)
   ```
 
@@ -88,6 +115,7 @@ class Coordinator(object):
     ...start thread N...(coord, ...)
     # Wait for all the threads to terminate.
     coord.join(threads)
+<<<<<<< HEAD
   except Exception as e:
     ...exception that was passed to coord.request_stop()
   ```
@@ -103,14 +131,26 @@ class Coordinator(object):
       ...do some work...
   ```
 
+=======
+  except Exception, e:
+    ...exception that was passed to coord.request_stop()
+  ```
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   #### Grace period for stopping:
 
   After a thread has called `coord.request_stop()` the other threads have a
   fixed time to stop, this is called the 'stop grace period' and defaults to 2
   minutes.  If any of the threads is still alive after the grace period expires
+<<<<<<< HEAD
   `coord.join()` raises a RuntimeError reporting the laggards.
 
   ```python
+=======
+  `coord.join()` raises a RuntimeException reporting the laggards.
+
+  ```
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   try:
     ...
     coord = Coordinator()
@@ -119,7 +159,11 @@ class Coordinator(object):
     ...start thread N...(coord, ...)
     # Wait for all the threads to terminate, give them 10s grace period
     coord.join(threads, stop_grace_period_secs=10)
+<<<<<<< HEAD
   except RuntimeError:
+=======
+  except RuntimeException:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ...one of the threads took more than 10s to stop after request_stop()
     ...was called.
   except Exception:
@@ -127,6 +171,7 @@ class Coordinator(object):
   ```
   """
 
+<<<<<<< HEAD
   def __init__(self, clean_stop_exception_types=None):
     """Create a new Coordinator.
 
@@ -142,11 +187,16 @@ class Coordinator(object):
     if clean_stop_exception_types is None:
       clean_stop_exception_types = (errors.OutOfRangeError,)
     self._clean_stop_exception_types = tuple(clean_stop_exception_types)
+=======
+  def __init__(self):
+    """Create a new Coordinator."""
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     # Protects all attributes.
     self._lock = threading.Lock()
     # Event set when threads must stop.
     self._stop_event = threading.Event()
     # Python exc_info to report.
+<<<<<<< HEAD
     # If not None, it should hold the returned value of sys.exc_info(), which is
     # a tuple containing exception (type, value, traceback).
     self._exc_info_to_raise = None
@@ -183,10 +233,14 @@ class Coordinator(object):
       # Ignore the exception.
       ex = None
     return ex
+=======
+    self._exc_info_to_raise = None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def request_stop(self, ex=None):
     """Request that the threads stop.
 
+<<<<<<< HEAD
     After this is called, calls to `should_stop()` will return `True`.
 
     Note: If an exception is being passed in, in must be in the context of
@@ -254,6 +308,26 @@ class Coordinator(object):
       if self._stop_event.is_set():
         self._stop_event.clear()
 
+=======
+    After this is called, calls to should_stop() will return True.
+
+    Args:
+      ex: Optional Exception, or Python 'exc_info' tuple as returned by
+        sys.exc_info().  If this is the first call to request_stop() the
+        corresponding exception is recorded and re-raised from join().
+    """
+    with self._lock:
+      if not self._stop_event.is_set():
+        if ex and self._exc_info_to_raise is None:
+          if isinstance(ex, tuple):
+            logging.info("Error reported to Coordinator: %s", str(ex[1]))
+            self._exc_info_to_raise = ex
+          else:
+            logging.info("Error reported to Coordinator: %s", str(ex))
+            self._exc_info_to_raise = sys.exc_info()
+        self._stop_event.set()
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def should_stop(self):
     """Check if stop was requested.
 
@@ -262,6 +336,7 @@ class Coordinator(object):
     """
     return self._stop_event.is_set()
 
+<<<<<<< HEAD
   @contextlib.contextmanager
   def stop_on_exception(self):
     """Context manager to request stop when an Exception is raised.
@@ -298,11 +373,17 @@ class Coordinator(object):
     except:  # pylint: disable=bare-except
       self.request_stop(ex=sys.exc_info())
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def wait_for_stop(self, timeout=None):
     """Wait till the Coordinator is told to stop.
 
     Args:
+<<<<<<< HEAD
       timeout: Float.  Sleep for up to that many seconds waiting for
+=======
+      timeout: float.  Sleep for up to that many seconds waiting for
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         should_stop() to become True.
 
     Returns:
@@ -310,6 +391,7 @@ class Coordinator(object):
     """
     return self._stop_event.wait(timeout)
 
+<<<<<<< HEAD
   def register_thread(self, thread):
     """Register a thread to join.
 
@@ -359,11 +441,37 @@ class Coordinator(object):
       # is added while we are waiting.
       threads = list(threads)
 
+=======
+  def join(self, threads, stop_grace_period_secs=120):
+    """Wait for threads to terminate.
+
+    Blocks until all 'threads' have terminated or request_stop() is called.
+
+    After the threads stop, if an 'exc_info' was passed to request_stop, that
+    exception is re-reaised.
+
+    Grace period handling: When request_stop() is called, threads are given
+    'stop_grace_period_secs' seconds to terminate.  If any of them is still
+    alive after that period expires, a RuntimeError is raised.  Note that if
+    an 'exc_info' was passed to request_stop() then it is raised instead of
+    that RuntimeError.
+
+    Args:
+      threads: List threading.Threads. The started threads to join.
+      stop_grace_period_secs: Number of seconds given to threads to stop after
+        request_stop() has been called.
+
+    Raises:
+      RuntimeError: If any thread is still alive after request_stop()
+        is called and the grace period expires.
+    """
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     # Wait for all threads to stop or for request_stop() to be called.
     while any(t.is_alive() for t in threads) and not self.wait_for_stop(1.0):
       pass
 
     # If any thread is still alive, wait for the grace period to expire.
+<<<<<<< HEAD
     # By the time this check is executed, threads may still be shutting down,
     # so we add a sleep of increasing duration to give them a chance to shut
     # down without losing too many cycles.
@@ -377,12 +485,18 @@ class Coordinator(object):
       # The minimum value is to avoid decreasing stop_wait_secs to a value
       # that could cause stop_grace_period_secs to remain unchanged.
       stop_wait_secs = max(min(stop_wait_secs, stop_grace_period_secs), 0.001)
+=======
+    while any(t.is_alive() for t in threads) and stop_grace_period_secs >= 0.0:
+      stop_grace_period_secs -= 1.0
+      time.sleep(1.0)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     # List the threads still alive after the grace period.
     stragglers = [t.name for t in threads if t.is_alive()]
 
     # Terminate with an exception if appropriate.
     with self._lock:
+<<<<<<< HEAD
       self._joined = True
       self._registered_threads = set()
       if self._exc_info_to_raise:
@@ -507,3 +621,11 @@ class LooperThread(threading.Thread):
     """Called at 'timer_interval_secs' boundaries."""
     if self._target:
       self._target(*self._args, **self._kwargs)
+=======
+      if self._exc_info_to_raise:
+        exc_info = self._exc_info_to_raise
+        raise exc_info[0], exc_info[1], exc_info[2]
+      elif stragglers:
+        raise RuntimeError("Coordinator stopped with threads still running: %s",
+                           " ".join(stragglers))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

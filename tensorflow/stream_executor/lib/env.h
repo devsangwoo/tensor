@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,5 +38,34 @@ inline Status FileExists(const absl::string_view& filename) {
 
 }  // namespace port
 }  // namespace stream_executor
+=======
+#ifndef TENSORFLOW_STREAM_EXECUTOR_LIB_ENV_H_
+#define TENSORFLOW_STREAM_EXECUTOR_LIB_ENV_H_
+
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/stream_executor/lib/stringpiece.h"
+#include "tensorflow/stream_executor/platform/port.h"
+
+namespace perftools {
+namespace gputools {
+namespace port {
+
+using tensorflow::Env;
+using tensorflow::ReadFileToString;
+using tensorflow::Thread;
+using tensorflow::WriteStringToFile;
+
+inline bool FileExists(const string& filename) {
+  return Env::Default()->FileExists(filename);
+}
+
+inline bool FileExists(const port::StringPiece& filename) {
+  return Env::Default()->FileExists(filename.ToString());
+}
+
+}  // namespace port
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_LIB_ENV_H_

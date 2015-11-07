@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/lib/io/table_builder.h"
 
 #include <assert.h>
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/coding.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/hash/crc32c.h"
@@ -24,6 +31,15 @@ limitations under the License.
 #include "tensorflow/core/lib/io/table_options.h"
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/platform/snappy.h"
+=======
+#include "tensorflow/core/lib/io/block_builder.h"
+#include "tensorflow/core/lib/io/format.h"
+#include "tensorflow/core/lib/io/table_options.h"
+#include "tensorflow/core/lib/core/coding.h"
+#include "tensorflow/core/lib/hash/crc32c.h"
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/lib/core/errors.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace table {
@@ -158,7 +174,11 @@ void TableBuilder::Flush() {
   WriteBlock(&r->data_block, &r->pending_handle);
   if (ok()) {
     r->pending_index_entry = true;
+<<<<<<< HEAD
     // We don't flush the underlying file as that can be slow.
+=======
+    r->status = r->file->Flush();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 

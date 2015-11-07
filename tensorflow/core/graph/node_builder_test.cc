@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/graph/node_builder.h"
 
 #include "tensorflow/core/framework/op.h"
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/kernels/ops_util.h"
 #include "tensorflow/core/lib/core/status_test_util.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/test.h"
+=======
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -28,6 +35,7 @@ REGISTER_OP("Source").Output("o: out_types").Attr("out_types: list(type)");
 REGISTER_OP("Sink").Input("i: T").Attr("T: type");
 
 TEST(NodeBuilderTest, Simple) {
+<<<<<<< HEAD
   Graph graph(OpRegistry::Global());
   Node* source_node;
   TF_EXPECT_OK(NodeBuilder("source_op", "Source")
@@ -42,6 +50,23 @@ TEST(NodeBuilderTest, Simple) {
   TF_EXPECT_OK(NodeBuilder("sink2", "Sink")
                    .Input(source_node, 1)
                    .Finalize(&graph, nullptr));
+=======
+  RequireDefaultOps();
+  Graph graph(OpRegistry::Global());
+  Node* source_node;
+  EXPECT_OK(NodeBuilder("source_op", "Source")
+                .Attr("out_types", {DT_INT32, DT_STRING})
+                .Finalize(&graph, &source_node));
+  ASSERT_TRUE(source_node != nullptr);
+
+  // Try connecting to each of source_node's outputs.
+  EXPECT_OK(NodeBuilder("sink1", "Sink")
+                .Input(source_node)
+                .Finalize(&graph, nullptr));
+  EXPECT_OK(NodeBuilder("sink2", "Sink")
+                .Input(source_node, 1)
+                .Finalize(&graph, nullptr));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Generate an error if the index is out of range.
   EXPECT_FALSE(NodeBuilder("sink3", "Sink")

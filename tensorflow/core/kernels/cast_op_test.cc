@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,17 @@ limitations under the License.
 #include "tensorflow/core/platform/test_benchmark.h"
 
 using Eigen::half;
+=======
+#include "tensorflow/core/framework/fake_input.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/common_runtime/kernel_benchmark_testlib.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/kernels/ops_testutil.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/tensor.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -40,6 +52,7 @@ static Graph* Cast(int num) {
 
 class CastOpTest : public OpsTestBase {
  protected:
+<<<<<<< HEAD
   void MakeOp(DataType src, DataType dst, bool trunc = false) {
     if (trunc) {
       TF_EXPECT_OK(NodeDefBuilder("cast_op", "Cast")
@@ -117,6 +130,27 @@ TEST_ALL_CASTS_FROM(quint16)
 #undef TEST_CAST
 
 // TODO(wicke): check conversions from/to bool, and bfloat16
+=======
+  void MakeOp(DataType src, DataType dst) {
+    RequireDefaultOps();
+    EXPECT_OK(NodeDefBuilder("cast_op", "Cast")
+                  .Input(FakeInput(DT_INT32))
+                  .Attr("SrcT", src)
+                  .Attr("DstT", dst)
+                  .Finalize(node_def()));
+    EXPECT_OK(InitOp());
+  }
+};
+
+TEST_F(CastOpTest, Int32ToUint8) {
+  MakeOp(DT_INT32, DT_UINT8);
+  AddInputFromArray<int32>(TensorShape({1, 2, 2, 1}), {1, 2, 3, 4});
+  ASSERT_OK(RunOpKernel());
+  Tensor expected(allocator(), DT_UINT8, TensorShape({1, 2, 2, 1}));
+  test::FillValues<uint8>(&expected, {1, 2, 3, 4});
+  test::ExpectTensorEqual<uint8>(expected, *GetOutput(0));
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 static void BM_cpu_float_int64(int iters, int num) {
   testing::ItemsProcessed(static_cast<int64>(iters) * num);
@@ -132,12 +166,16 @@ static void BM_gpu_float_int64(int iters, int num) {
   testing::BytesProcessed(static_cast<int64>(iters) * num *
                           (sizeof(float) + sizeof(int64)));
   testing::UseRealTime();
+<<<<<<< HEAD
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
   test::Benchmark("gpu", Cast<float, int64>(num)).Run(iters);
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 #ifdef TENSORFLOW_USE_SYCL
   test::Benchmark("sycl", Cast<float, int64>(num)).Run(iters);
 #endif  // TENSORFLOW_USE_SYCL
+=======
+  test::Benchmark("gpu", Cast<float, int64>(num)).Run(iters);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 BENCHMARK(BM_gpu_float_int64)->Arg(64 << 10)->Arg(32 << 20);
 
@@ -155,12 +193,16 @@ static void BM_gpu_bool_float(int iters, int num) {
   testing::BytesProcessed(static_cast<int64>(iters) * num *
                           (sizeof(bool) + sizeof(float)));
   testing::UseRealTime();
+<<<<<<< HEAD
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
   test::Benchmark("gpu", Cast<bool, float>(num)).Run(iters);
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 #ifdef TENSORFLOW_USE_SYCL
   test::Benchmark("sycl", Cast<bool, float>(num)).Run(iters);
 #endif  // TENSORFLOW_USE_SYCL
+=======
+  test::Benchmark("gpu", Cast<bool, float>(num)).Run(iters);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 BENCHMARK(BM_gpu_bool_float)->Arg(64 << 10)->Arg(32 << 20);
 
@@ -182,6 +224,7 @@ static void BM_cpu_bfloat16_float(int iters, int num) {
 }
 BENCHMARK(BM_cpu_bfloat16_float)->Arg(64 << 10)->Arg(32 << 20);
 
+<<<<<<< HEAD
 static void BM_cpu_float_half(int iters, int num) {
   testing::ItemsProcessed(static_cast<int64>(iters) * num);
   testing::BytesProcessed(static_cast<int64>(iters) * num *
@@ -222,4 +265,6 @@ static void BM_gpu_half_float(int iters, int num) {
 }
 BENCHMARK(BM_gpu_half_float)->Arg(64 << 10)->Arg(32 << 20);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace tensorflow

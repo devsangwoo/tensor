@@ -1,20 +1,31 @@
 syntax = "proto3";
 
 package tensorflow;
+<<<<<<< HEAD
 option cc_enable_arenas = true;
 option java_outer_classname = "OpDefProtos";
 option java_multiple_files = true;
 option java_package = "org.tensorflow.framework";
 option go_package = "github.com/tensorflow/tensorflow/tensorflow/go/core/framework";
+=======
+// option cc_enable_arenas = true;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import "tensorflow/core/framework/attr_value.proto";
 import "tensorflow/core/framework/types.proto";
 
 // Defines an operation. A NodeDef in a GraphDef specifies an Op by
 // using the "op" field which should match the name of a OpDef.
+<<<<<<< HEAD
 // LINT.IfChange
 message OpDef {
   // Op names starting with an underscore are reserved for internal use.
   // Names should be CamelCase and match the regexp "[A-Z][a-zA-Z0-9>_]*".
+=======
+message OpDef {
+  // Op names starting with an underscore are reserved for internal use.
+  // Names should be CamelCase and match the regexp "[A-Z][a-zA-Z0-9_]*".
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string name = 1;
 
   // For describing inputs and outputs.
@@ -54,10 +65,13 @@ message OpDef {
   // Description of the output(s).
   repeated ArgDef output_arg = 3;
 
+<<<<<<< HEAD
   // Named control outputs for this operation. Useful only for composite
   // operations (i.e. functions) which want to name different control outputs.
   repeated string control_output = 20;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Description of the graph-construction-time configuration of this
   // Op.  That is to say, this describes the attr fields that will
   // be specified in the NodeDef.
@@ -90,18 +104,29 @@ message OpDef {
     int64 minimum = 6;
 
     // The set of allowed values.  Has type that is the "list" version
+<<<<<<< HEAD
     // of the "type" field above (uses the "list" field of AttrValue).
     // If type == "type" or "list(type)" above, then the "type" field
     // of "allowed_values.list" has the set of allowed DataTypes.
     // If type == "string" or "list(string)", then the "s" field of
     // "allowed_values.list" has the set of allowed strings.
+=======
+    // of the "type" field above (uses the ..._list, fields of AttrValue).
+    // If type == "type" or "list(type)" above, then the type_list field
+    // of allowed_values has the set of allowed DataTypes.
+    // If type == "string" or "list(string)", then the s_list field has
+    // the set of allowed strings.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     AttrValue allowed_values = 7;
   }
   repeated AttrDef attr = 4;
 
+<<<<<<< HEAD
   // Optional deprecation based on GraphDef versions.
   OpDeprecation deprecation = 8;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // One-line human-readable description of what the Op does.
   string summary = 5;
 
@@ -130,12 +155,15 @@ message OpDef {
   // -------------------------------------------------------------------------
   // Optimization constraints.
 
+<<<<<<< HEAD
   // Ops are marked as stateful if their behavior depends on some state beyond
   // their input tensors (e.g. variable reading op) or if they have
   // a side-effect (e.g. printing or asserting ops). Equivalently, stateless ops
   // must always produce the same output for the same input and have
   // no side-effects.
   //
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // By default Ops may be moved between devices.  Stateful ops should
   // either not be moved, or should only be moved if that state can also
   // be moved (e.g. via some sort of save / restore).
@@ -152,6 +180,7 @@ message OpDef {
   // input.
   bool allows_uninitialized_input = 19;  // for Assign, etc.
 };
+<<<<<<< HEAD
 // LINT.ThenChange(
 //     https://www.tensorflow.org/code/tensorflow/core/framework/op_def_util.cc)
 
@@ -163,6 +192,8 @@ message OpDeprecation {
   // Explanation of why it was deprecated and what to use instead.
   string explanation = 2;
 };
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // A collection of OpDefs
 message OpList {

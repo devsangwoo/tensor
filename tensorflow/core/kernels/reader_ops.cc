@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/io_ops.cc.
 
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/queue_interface.h"
 #include "tensorflow/core/framework/reader_interface.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "tensorflow/core/kernels/ops_util.h"
 #include "tensorflow/core/lib/core/threadpool.h"
@@ -26,6 +30,13 @@ limitations under the License.
 namespace tensorflow {
 
 class ReaderVerbSyncOpKernel : public OpKernel {
+=======
+#include "tensorflow/core/public/tensor_shape.h"
+
+namespace tensorflow {
+
+class ReaderVerbOpKernel : public OpKernel {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  public:
   using OpKernel::OpKernel;
 
@@ -42,6 +53,7 @@ class ReaderVerbSyncOpKernel : public OpKernel {
                                  ReaderInterface* reader) = 0;
 };
 
+<<<<<<< HEAD
 class ReaderVerbAsyncOpKernel : public AsyncOpKernel {
  public:
   using AsyncOpKernel::AsyncOpKernel;
@@ -76,6 +88,11 @@ class ReaderVerbAsyncOpKernel : public AsyncOpKernel {
 class ReaderReadOp : public ReaderVerbAsyncOpKernel {
  public:
   using ReaderVerbAsyncOpKernel::ReaderVerbAsyncOpKernel;
+=======
+class ReaderReadOp : public ReaderVerbOpKernel {
+ public:
+  using ReaderVerbOpKernel::ReaderVerbOpKernel;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void ComputeWithReader(OpKernelContext* context,
                          ReaderInterface* reader) override {
@@ -90,16 +107,23 @@ class ReaderReadOp : public ReaderVerbAsyncOpKernel {
     OP_REQUIRES_OK(context,
                    context->allocate_output("value", TensorShape({}), &value));
 
+<<<<<<< HEAD
     auto key_scalar = key->scalar<tstring>();
     auto value_scalar = value->scalar<tstring>();
     tstring key_out, val_out;
     reader->Read(queue, &key_out, &val_out, context);
     key_scalar() = key_out;
     value_scalar() = val_out;
+=======
+    auto key_scalar = key->scalar<string>();
+    auto value_scalar = value->scalar<string>();
+    reader->Read(queue, &key_scalar(), &value_scalar(), context);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 REGISTER_KERNEL_BUILDER(Name("ReaderRead").Device(DEVICE_CPU), ReaderReadOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("ReaderReadV2").Device(DEVICE_CPU), ReaderReadOp);
 
 class ReaderReadUpToOp : public ReaderVerbAsyncOpKernel {
@@ -159,6 +183,12 @@ REGISTER_KERNEL_BUILDER(Name("ReaderReadUpToV2").Device(DEVICE_CPU),
 class ReaderNumRecordsProducedOp : public ReaderVerbSyncOpKernel {
  public:
   using ReaderVerbSyncOpKernel::ReaderVerbSyncOpKernel;
+=======
+
+class ReaderNumRecordsProducedOp : public ReaderVerbOpKernel {
+ public:
+  using ReaderVerbOpKernel::ReaderVerbOpKernel;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void ComputeWithReader(OpKernelContext* context,
                          ReaderInterface* reader) override {
@@ -171,12 +201,19 @@ class ReaderNumRecordsProducedOp : public ReaderVerbSyncOpKernel {
 
 REGISTER_KERNEL_BUILDER(Name("ReaderNumRecordsProduced").Device(DEVICE_CPU),
                         ReaderNumRecordsProducedOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("ReaderNumRecordsProducedV2").Device(DEVICE_CPU),
                         ReaderNumRecordsProducedOp);
 
 class ReaderNumWorkUnitsCompletedOp : public ReaderVerbSyncOpKernel {
  public:
   using ReaderVerbSyncOpKernel::ReaderVerbSyncOpKernel;
+=======
+
+class ReaderNumWorkUnitsCompletedOp : public ReaderVerbOpKernel {
+ public:
+  using ReaderVerbOpKernel::ReaderVerbOpKernel;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void ComputeWithReader(OpKernelContext* context,
                          ReaderInterface* reader) override {
@@ -189,6 +226,7 @@ class ReaderNumWorkUnitsCompletedOp : public ReaderVerbSyncOpKernel {
 
 REGISTER_KERNEL_BUILDER(Name("ReaderNumWorkUnitsCompleted").Device(DEVICE_CPU),
                         ReaderNumWorkUnitsCompletedOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(
     Name("ReaderNumWorkUnitsCompletedV2").Device(DEVICE_CPU),
     ReaderNumWorkUnitsCompletedOp);
@@ -196,6 +234,12 @@ REGISTER_KERNEL_BUILDER(
 class ReaderSerializeStateOp : public ReaderVerbSyncOpKernel {
  public:
   using ReaderVerbSyncOpKernel::ReaderVerbSyncOpKernel;
+=======
+
+class ReaderSerializeStateOp : public ReaderVerbOpKernel {
+ public:
+  using ReaderVerbOpKernel::ReaderVerbOpKernel;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void ComputeWithReader(OpKernelContext* context,
                          ReaderInterface* reader) override {
@@ -203,18 +247,29 @@ class ReaderSerializeStateOp : public ReaderVerbSyncOpKernel {
     OP_REQUIRES_OK(context,
                    context->allocate_output("state", TensorShape({}), &output));
     OP_REQUIRES_OK(context,
+<<<<<<< HEAD
                    reader->SerializeState(&output->scalar<tstring>()()));
+=======
+                   reader->SerializeState(&output->scalar<string>()()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 REGISTER_KERNEL_BUILDER(Name("ReaderSerializeState").Device(DEVICE_CPU),
                         ReaderSerializeStateOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("ReaderSerializeStateV2").Device(DEVICE_CPU),
                         ReaderSerializeStateOp);
 
 class ReaderRestoreStateOp : public ReaderVerbSyncOpKernel {
  public:
   using ReaderVerbSyncOpKernel::ReaderVerbSyncOpKernel;
+=======
+
+class ReaderRestoreStateOp : public ReaderVerbOpKernel {
+ public:
+  using ReaderVerbOpKernel::ReaderVerbOpKernel;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void ComputeWithReader(OpKernelContext* context,
                          ReaderInterface* reader) override {
@@ -224,18 +279,29 @@ class ReaderRestoreStateOp : public ReaderVerbSyncOpKernel {
         context, TensorShapeUtils::IsScalar(tensor->shape()),
         errors::InvalidArgument("Reader state must be scalar, but had shape: ",
                                 tensor->shape().DebugString()));
+<<<<<<< HEAD
     OP_REQUIRES_OK(context, reader->RestoreState(tensor->scalar<tstring>()()));
+=======
+    OP_REQUIRES_OK(context, reader->RestoreState(tensor->scalar<string>()()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 REGISTER_KERNEL_BUILDER(Name("ReaderRestoreState").Device(DEVICE_CPU),
                         ReaderRestoreStateOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("ReaderRestoreStateV2").Device(DEVICE_CPU),
                         ReaderRestoreStateOp);
 
 class ReaderResetOp : public ReaderVerbSyncOpKernel {
  public:
   using ReaderVerbSyncOpKernel::ReaderVerbSyncOpKernel;
+=======
+
+class ReaderResetOp : public ReaderVerbOpKernel {
+ public:
+  using ReaderVerbOpKernel::ReaderVerbOpKernel;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void ComputeWithReader(OpKernelContext* context,
                          ReaderInterface* reader) override {
@@ -244,7 +310,10 @@ class ReaderResetOp : public ReaderVerbSyncOpKernel {
 };
 
 REGISTER_KERNEL_BUILDER(Name("ReaderReset").Device(DEVICE_CPU), ReaderResetOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("ReaderResetV2").Device(DEVICE_CPU),
                         ReaderResetOp);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

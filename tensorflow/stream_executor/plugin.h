@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,13 @@ limitations under the License.
 #define TENSORFLOW_STREAM_EXECUTOR_PLUGIN_H_
 
 namespace stream_executor {
+=======
+#ifndef TENSORFLOW_STREAM_EXECUTOR_PLUGIN_H_
+#define TENSORFLOW_STREAM_EXECUTOR_PLUGIN_H_
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // A plugin ID is a unique identifier for each registered plugin type.
 typedef void* PluginId;
@@ -48,7 +56,11 @@ enum class PluginKind {
 //
 // A PluginConfig may be passed to the StreamExecutor constructor - the plugins
 // described therein will be used to provide BLAS, DNN, FFT, and RNG
+<<<<<<< HEAD
 // functionality. Platform-appropriate defaults will be used for any un-set
+=======
+// functionality. Platform-approprate defaults will be used for any un-set
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // libraries. If a platform does not support a specified plugin (ex. cuBLAS on
 // an OpenCL executor), then an error will be logged and no plugin operations
 // will succeed.
@@ -82,6 +94,11 @@ class PluginConfig {
   PluginId blas_, dnn_, fft_, rng_;
 };
 
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_PLUGIN_H_

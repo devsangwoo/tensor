@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +34,23 @@ limitations under the License.
 #include "tensorflow/core/util/saved_tensor_slice_util.h"
 #include "tensorflow/core/util/tensor_slice_reader_cache.h"
 #include "tensorflow/core/util/tensor_slice_writer.h"
+=======
+#include "tensorflow/core/util/tensor_slice_reader.h"
+
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/core/status_test_util.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/lib/io/path.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/platform/test.h"
+#include "tensorflow/core/util/saved_tensor_slice_util.h"
+#include "tensorflow/core/util/tensor_slice_writer.h"
+#include "tensorflow/core/util/tensor_slice_reader_cache.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -52,9 +70,14 @@ namespace {
 //
 // We assume this is a row-major matrix.
 
+<<<<<<< HEAD
 void SimpleFloatHelper(
     const TensorSliceWriter::CreateBuilderFunction& create_function,
     TensorSliceReader::OpenTableFunction open_function) {
+=======
+void SimpleFloatHelper(TensorSliceWriter::CreateBuilderFunction create_function,
+                       TensorSliceReader::OpenTableFunction open_function) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const string fname_base = io::JoinPath(testing::TmpDir(), "float_checkpoint");
 
   TensorShape shape({4, 5});
@@ -113,8 +136,13 @@ void SimpleFloatHelper(
 
   // Now we need to read the tensor slices
   const string filepattern = strings::StrCat(fname_base, "_*");
+<<<<<<< HEAD
   TensorSliceReader reader(filepattern, std::move(open_function));
   TF_EXPECT_OK(reader.status());
+=======
+  TensorSliceReader reader(filepattern, open_function);
+  EXPECT_OK(reader.status());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(2, reader.num_files());
 
   // We query some of the tensors
@@ -122,7 +150,14 @@ void SimpleFloatHelper(
     TensorShape shape;
     DataType type;
     EXPECT_TRUE(reader.HasTensor("test", &shape, &type));
+<<<<<<< HEAD
     EXPECT_EQ("[4,5]", shape.DebugString());
+=======
+    EXPECT_EQ(
+        "dim { size: 4 } "
+        "dim { size: 5 }",
+        shape.DebugString());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_EQ(DT_FLOAT, type);
     EXPECT_FALSE(reader.HasTensor("don't exist", nullptr, nullptr));
   }
@@ -176,10 +211,16 @@ TEST(TensorSliceReaderTest, SimpleFloat) {
 }
 
 template <typename T, typename U>
+<<<<<<< HEAD
 void SimpleIntXHelper(
     const TensorSliceWriter::CreateBuilderFunction& create_function,
     TensorSliceReader::OpenTableFunction open_function,
     const string& checkpoint_file) {
+=======
+void SimpleIntXHelper(TensorSliceWriter::CreateBuilderFunction create_function,
+                      TensorSliceReader::OpenTableFunction open_function,
+                      const string& checkpoint_file) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const string fname_base = io::JoinPath(testing::TmpDir(), checkpoint_file);
 
   TensorShape shape({4, 5});
@@ -238,8 +279,13 @@ void SimpleIntXHelper(
 
   // Now we need to read the tensor slices
   const string filepattern = strings::StrCat(fname_base, "_*");
+<<<<<<< HEAD
   TensorSliceReader reader(filepattern, std::move(open_function));
   TF_EXPECT_OK(reader.status());
+=======
+  TensorSliceReader reader(filepattern, open_function);
+  EXPECT_OK(reader.status());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(2, reader.num_files());
 
   // We query some of the tensors
@@ -247,7 +293,14 @@ void SimpleIntXHelper(
     TensorShape shape;
     DataType type;
     EXPECT_TRUE(reader.HasTensor("test", &shape, &type));
+<<<<<<< HEAD
     EXPECT_EQ("[4,5]", shape.DebugString());
+=======
+    EXPECT_EQ(
+        "dim { size: 4 } "
+        "dim { size: 5 }",
+        shape.DebugString());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_EQ(DataTypeToEnum<T>::v(), type);
     EXPECT_FALSE(reader.HasTensor("don't exist", nullptr, nullptr));
   }
@@ -310,8 +363,13 @@ TEST_SIMPLE_INT(int8, int32)
 TEST_SIMPLE_INT(uint8, int32)
 
 void CachedTensorSliceReaderTesterHelper(
+<<<<<<< HEAD
     const TensorSliceWriter::CreateBuilderFunction& create_function,
     const TensorSliceReader::OpenTableFunction& open_function) {
+=======
+    TensorSliceWriter::CreateBuilderFunction create_function,
+    TensorSliceReader::OpenTableFunction open_function) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const string fname_base = io::JoinPath(testing::TmpDir(), "float_checkpoint");
 
   TensorShape shape({4, 5});
@@ -381,7 +439,14 @@ void CachedTensorSliceReaderTesterHelper(
     TensorShape shape;
     DataType type;
     EXPECT_TRUE(reader->HasTensor("test", &shape, &type));
+<<<<<<< HEAD
     EXPECT_EQ("[4,5]", shape.DebugString());
+=======
+    EXPECT_EQ(
+        "dim { size: 4 } "
+        "dim { size: 5 }",
+        shape.DebugString());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_EQ(DT_FLOAT, type);
     EXPECT_FALSE(reader->HasTensor("don't exist", nullptr, nullptr));
   }
@@ -401,6 +466,7 @@ TEST(CachedTensorSliceReaderTest, SimpleFloat) {
                                       OpenTableTensorSliceReader);
 }
 
+<<<<<<< HEAD
 static void VersionTest(const VersionDef& versions, const string& error) {
   const string path = io::JoinPath(testing::TmpDir(), "checkpoint");
 
@@ -460,6 +526,8 @@ TEST(CheckpointVersionTest, BadConsumer) {
           ".  Please upgrade TensorFlow: this version is likely buggy."));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 
 }  // namespace checkpoint

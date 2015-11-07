@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Exposes the family of FFT routines as pre-canned high performance calls for
 // use in conjunction with the StreamExecutor abstraction.
 //
@@ -34,8 +37,13 @@ limitations under the License.
 //     stream_exec.AsFft()->Create1dPlan(&stream, 1024, Type::kC2CForward);
 //  stream
 //    .Init()
+<<<<<<< HEAD
 //    .ThenFft(plan.get(), x, &y);
 //  SE_CHECK_OK(stream.BlockHostUntilDone());
+=======
+//    .ThenFft(plan.get(), x, &y)
+//    .BlockHostUntilDone();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 // By using stream operations in this manner the user can easily intermix custom
 // kernel launches (via StreamExecutor::ThenLaunch()) with these pre-canned FFT
@@ -48,19 +56,30 @@ limitations under the License.
 #include <memory>
 #include "tensorflow/stream_executor/platform/port.h"
 
+<<<<<<< HEAD
 namespace stream_executor {
+=======
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 class Stream;
 template <typename ElemT>
 class DeviceMemory;
+<<<<<<< HEAD
 class ScratchAllocator;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace fft {
 
 // Specifies FFT input and output types, and the direction.
 // R, D, C, and Z stand for SP real, DP real, SP complex, and DP complex.
 enum class Type {
+<<<<<<< HEAD
   kInvalid,
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   kC2CForward,
   kC2CInverse,
   kC2R,
@@ -104,6 +123,7 @@ class FftSupport {
                                              uint64 num_y, uint64 num_z,
                                              Type type, bool in_place_fft) = 0;
 
+<<<<<<< HEAD
   // Creates a 1d FFT plan with scratch allocator.
   virtual std::unique_ptr<Plan> Create1dPlanWithScratchAllocator(
       Stream *stream, uint64 num_x, Type type, bool in_place_fft,
@@ -119,6 +139,8 @@ class FftSupport {
       Stream *stream, uint64 num_x, uint64 num_y, uint64 num_z, Type type,
       bool in_place_fft, ScratchAllocator *scratch_allocator) = 0;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Creates a batched FFT plan.
   //
   // stream:          The GPU stream in which the FFT runs.
@@ -142,6 +164,7 @@ class FftSupport {
       uint64 output_stride, uint64 output_distance, Type type,
       bool in_place_fft, int batch_count) = 0;
 
+<<<<<<< HEAD
   // Creates a batched FFT plan with scratch allocator.
   //
   // stream:          The GPU stream in which the FFT runs.
@@ -175,6 +198,8 @@ class FftSupport {
   virtual void UpdatePlanWithScratchAllocator(
       Stream *stream, Plan *plan, ScratchAllocator *scratch_allocator) = 0;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Computes complex-to-complex FFT in the transform direction as specified
   // by direction parameter.
   virtual bool DoFft(Stream *stream, Plan *plan,
@@ -209,6 +234,7 @@ class FftSupport {
 
 // Macro used to quickly declare overrides for abstract virtuals in the
 // fft::FftSupport base class. Assumes that it's emitted somewhere inside the
+<<<<<<< HEAD
 // ::stream_executor namespace.
 #define TENSORFLOW_STREAM_EXECUTOR_GPU_FFT_SUPPORT_OVERRIDES                   \
   std::unique_ptr<fft::Plan> Create1dPlan(Stream *stream, uint64 num_x,        \
@@ -265,5 +291,45 @@ class FftSupport {
 
 }  // namespace fft
 }  // namespace stream_executor
+=======
+// ::perftools::gputools namespace.
+#define TENSORFLOW_STREAM_EXECUTOR_GPU_FFT_SUPPORT_OVERRIDES                 \
+  std::unique_ptr<fft::Plan> Create1dPlan(Stream *stream, uint64 num_x,      \
+                                          fft::Type type, bool in_place_fft) \
+      override;                                                              \
+  std::unique_ptr<fft::Plan> Create2dPlan(Stream *stream, uint64 num_x,      \
+                                          uint64 num_y, fft::Type type,      \
+                                          bool in_place_fft) override;       \
+  std::unique_ptr<fft::Plan> Create3dPlan(                                   \
+      Stream *stream, uint64 num_x, uint64 num_y, uint64 num_z,              \
+      fft::Type type, bool in_place_fft) override;                           \
+  std::unique_ptr<fft::Plan> CreateBatchedPlan(                              \
+      Stream *stream, int rank, uint64 *elem_count, uint64 *input_embed,     \
+      uint64 input_stride, uint64 input_distance, uint64 *output_embed,      \
+      uint64 output_stride, uint64 output_distance, fft::Type type,          \
+      bool in_place_fft, int batch_count) override;                          \
+  bool DoFft(Stream *stream, fft::Plan *plan,                                \
+             const DeviceMemory<std::complex<float>> &input,                 \
+             DeviceMemory<std::complex<float>> *output) override;            \
+  bool DoFft(Stream *stream, fft::Plan *plan,                                \
+             const DeviceMemory<std::complex<double>> &input,                \
+             DeviceMemory<std::complex<double>> *output) override;           \
+  bool DoFft(Stream *stream, fft::Plan *plan,                                \
+             const DeviceMemory<float> &input,                               \
+             DeviceMemory<std::complex<float>> *output) override;            \
+  bool DoFft(Stream *stream, fft::Plan *plan,                                \
+             const DeviceMemory<double> &input,                              \
+             DeviceMemory<std::complex<double>> *output) override;           \
+  bool DoFft(Stream *stream, fft::Plan *plan,                                \
+             const DeviceMemory<std::complex<float>> &input,                 \
+             DeviceMemory<float> *output) override;                          \
+  bool DoFft(Stream *stream, fft::Plan *plan,                                \
+             const DeviceMemory<std::complex<double>> &input,                \
+             DeviceMemory<double> *output) override;
+
+}  // namespace fft
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_FFT_H_

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,6 +57,21 @@ def GetShrunkInceptionShapes(shrink=10):
 
   Args:
     shrink: Factor to shrink each depth value by relative to Inception.
+=======
+"""Functional tests for convolutional operations."""
+import math
+
+import tensorflow.python.platform
+
+import numpy as np
+import tensorflow as tf
+
+from tensorflow.python.kernel_tests import gradient_checker as gc
+
+
+def GetInceptionShapes():
+  """Iterator for the convolution shapes used in the Inception 2015 model.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Yields:
     Tuple (input_size, filter_size, out_size, stride, padding), the convolution
@@ -118,6 +134,7 @@ def GetShrunkInceptionShapes(shrink=10):
                [4, 35, 35, 96], [4, 35, 35, 32], [4, 35, 35, 64],
                [4, 35, 35, 48], [4, 71, 71, 192], [4, 73, 73, 64],
                [4, 147, 147, 64]]
+<<<<<<< HEAD
   strides = [
       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1,
       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1,
@@ -131,10 +148,16 @@ def GetShrunkInceptionShapes(shrink=10):
     f[3] //= shrink
   for o in out_sizes:
     o[3] //= shrink
+=======
+  strides = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1,
+             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+             1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   # pylint: disable=invalid-name
   VALID = "VALID"
   SAME = "SAME"
   # pylint: enable=invalid-name
+<<<<<<< HEAD
   paddings = [
       SAME, SAME, SAME, SAME, SAME, SAME, SAME, SAME, SAME, SAME, SAME, SAME,
       VALID, SAME, SAME, VALID, SAME, SAME, SAME, SAME, SAME, SAME, SAME, SAME,
@@ -181,6 +204,24 @@ class Conv2DTest(test.TestCase):
 
   def _SetupValuesForDevice(self, tensor_in_sizes, filter_in_sizes, dilations,
                             strides, padding, data_format, dtype, use_gpu):
+=======
+  paddings = [SAME, SAME, SAME, SAME, SAME, SAME, SAME, SAME,
+              SAME, SAME, SAME, SAME, VALID, SAME, SAME, VALID,
+              SAME, SAME, SAME, SAME, SAME, SAME, SAME, SAME,
+              SAME, SAME, SAME, SAME, SAME, SAME, SAME, SAME,
+              SAME, SAME, SAME, SAME, SAME, SAME, SAME, SAME,
+              SAME, VALID, VALID, SAME, SAME, SAME, SAME, SAME,
+              SAME, SAME, SAME, SAME, VALID, VALID, VALID]
+  for i, f, o, s, p in zip(input_sizes, filter_sizes, out_sizes,
+                           strides, paddings):
+    yield i, f, o, s, p
+
+
+class Conv2DTest(tf.test.TestCase):
+
+  def _SetupValuesForDevice(self, tensor_in_sizes, filter_in_sizes, stride,
+                            padding, use_gpu):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Verifies the output values of the convolution function.
 
     Args:
@@ -188,15 +229,21 @@ class Conv2DTest(test.TestCase):
         [batch, input_rows, input_cols, input_depth].
       filter_in_sizes: Filter tensor dimensions in
         [kernel_rows, kernel_cols, input_depth, output_depth].
+<<<<<<< HEAD
       dilations: Dilated rate: [col_dilation, row_dilation]
       strides: Stride: [col_stride, row_stride]
       padding: Padding type.
       data_format: Format of the data tensors.
       dtype: Data type for inputs and outputs.
+=======
+      stride: Stride.
+      padding: Padding type.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       use_gpu: True if the operations should be run on GPU
     Returns:
       Symbolic tensor value that can be used to execute the computation
     """
+<<<<<<< HEAD
     x1 = self._CreateNumpyTensor(tensor_in_sizes)
     x2 = self._CreateNumpyTensor(filter_in_sizes)
 
@@ -228,6 +275,28 @@ class Conv2DTest(test.TestCase):
 
   def _CompareFwdValues(self, tensor_in_sizes, filter_in_sizes, conv_strides,
                         padding):
+=======
+    total_size_1 = 1
+    total_size_2 = 1
+    for s in tensor_in_sizes:
+      total_size_1 *= s
+    for s in filter_in_sizes:
+      total_size_2 *= s
+    # Initializes the input tensor with array containing incrementing
+    # numbers from 1.
+    x1 = [f * 1.0 for f in range(1, total_size_1 + 1)]
+    x2 = [f * 1.0 for f in range(1, total_size_2 + 1)]
+    with self.test_session(use_gpu=use_gpu) as sess:
+      t1 = tf.constant(x1, shape=tensor_in_sizes)
+      t2 = tf.constant(x2, shape=filter_in_sizes)
+      conv = tf.nn.conv2d(t1, t2,
+                           strides=[1, stride, stride, 1],
+                           padding=padding)
+      return conv
+
+  def _CompareFwdValues(self, tensor_in_sizes, filter_in_sizes,
+                        stride, padding):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Verifies that CPU and GPU produce the same values.
 
     Args:
@@ -235,11 +304,16 @@ class Conv2DTest(test.TestCase):
         [batch, input_rows, input_cols, input_depth].
       filter_in_sizes: Filter tensor dimensions in
         [kernel_rows, kernel_cols, input_depth, output_depth].
+<<<<<<< HEAD
       conv_strides: [row_stride, col_stride] for the convolution;
+=======
+      stride: Stride.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       padding: Padding type.
     """
     x1 = np.random.rand(*tensor_in_sizes).astype(np.float32)
     x2 = np.random.rand(*filter_in_sizes).astype(np.float32)
+<<<<<<< HEAD
 
     def _SetupVal(data_format, use_gpu):
       with test_util.device(use_gpu):
@@ -1785,6 +1859,243 @@ class Conv2DTest(test.TestCase):
                      stride_rows) // stride_rows
       output_cols = (input_cols + padding[2][0] + padding[2][1] - filter_cols +
                      stride_cols) // stride_cols
+=======
+    def _SetupVal(use_gpu):
+      with self.test_session(use_gpu=use_gpu):
+        t1 = tf.constant(x1, shape=tensor_in_sizes)
+        t2 = tf.constant(x2, shape=filter_in_sizes)
+        conv = tf.nn.conv2d(t1, t2, strides=[1, stride, stride, 1],
+                             padding=padding)
+        return conv
+    gpu_tensor = _SetupVal(use_gpu=True)
+    cpu_tensor = _SetupVal(use_gpu=False)
+    with self.test_session() as sess:
+      (gpu_value, cpu_value) = sess.run([gpu_tensor, cpu_tensor])
+      self.assertAllClose(cpu_value, gpu_value, rtol=1e-5, atol=1e-5)
+
+  def _VerifyValues(self, tensor_in_sizes, filter_in_sizes, stride,
+                    padding, expected):
+    tensor_cpu = self._SetupValuesForDevice(tensor_in_sizes, filter_in_sizes,
+                                            stride, padding, use_gpu=False)
+    tensor_gpu = self._SetupValuesForDevice(tensor_in_sizes, filter_in_sizes,
+                                            stride, padding, use_gpu=True)
+    with self.test_session() as sess:
+      tensors = [tensor_cpu, tensor_gpu]
+      (value_cpu, value_gpu) = sess.run(tensors)
+      values = [value_cpu, value_gpu]
+      for i in range(len(tensors)):
+        conv = tensors[i]
+        value = values[i]
+        print "expected = ", expected
+        print "actual = ", value
+        self.assertArrayNear(expected, np.ravel(value), 1e-5)
+        self.assertShapeEqual(value, conv)
+
+  def testConv2D1x1Filter(self):
+    expected_output = [30.0, 36.0, 42.0, 66.0, 81.0, 96.0, 102.0, 126.0, 150.0,
+                       138.0, 171.0, 204.0, 174.0, 216.0, 258.0, 210.0, 261.0,
+                       312.0]
+    self._VerifyValues(tensor_in_sizes=[1, 2, 3, 3],
+                       filter_in_sizes=[1, 1, 3, 3],
+                       stride=1, padding="VALID",
+                       expected=expected_output)
+
+  def testConv2D2x2Filter(self):
+    # The outputs are computed using third_party/py/IPython/notebook.
+    expected_output = [2271.0, 2367.0, 2463.0, 2901.0, 3033.0, 3165.0]
+    self._VerifyValues(tensor_in_sizes=[1, 2, 3, 3],
+                       filter_in_sizes=[2, 2, 3, 3],
+                       stride=1, padding="VALID",
+                       expected=expected_output)
+
+  def testConv2D1x2Filter(self):
+    # The outputs are computed using third_party/py/IPython/notebook.
+    expected_output = [231.0, 252.0, 273.0, 384.0, 423.0, 462.0, 690.0,
+                       765.0, 840.0, 843.0, 936.0, 1029.0]
+    self._VerifyValues(tensor_in_sizes=[1, 2, 3, 3],
+                       filter_in_sizes=[1, 2, 3, 3],
+                       stride=1, padding="VALID",
+                       expected=expected_output)
+
+  def testConv2D2x2FilterStride2(self):
+    expected_output = [2271.0, 2367.0, 2463.0]
+    self._VerifyValues(tensor_in_sizes=[1, 2, 3, 3],
+                       filter_in_sizes=[2, 2, 3, 3],
+                       stride=2, padding="VALID",
+                       expected=expected_output)
+
+  def testConv2D2x2FilterStride2Same(self):
+    expected_output = [2271.0, 2367.0, 2463.0, 1230.0, 1305.0, 1380.0]
+    self._VerifyValues(tensor_in_sizes=[1, 2, 3, 3],
+                       filter_in_sizes=[2, 2, 3, 3],
+                       stride=2, padding="SAME",
+                       expected=expected_output)
+
+  # Testing for backprops
+  def _RunAndVerifyBackpropInput(self, input_sizes, filter_sizes, output_sizes,
+                                 stride, padding, expected, use_gpu):
+    total_output_size = 1
+    total_filter_size = 1
+    for s in output_sizes:
+      total_output_size *= s
+    for s in filter_sizes:
+      total_filter_size *= s
+    # Initializes the input tensor with array containing incrementing
+    # numbers from 1.
+    x1 = [f * 1.0 for f in range(1, total_filter_size + 1)]
+    x2 = [f * 1.0 for f in range(1, total_output_size + 1)]
+    with self.test_session(use_gpu=use_gpu) as sess:
+      t0 = tf.constant(input_sizes, shape=[len(input_sizes)])
+      t1 = tf.constant(x1, shape=filter_sizes)
+      t2 = tf.constant(x2, shape=output_sizes)
+      conv = tf.nn.conv2d_backprop_input(t0, t1, t2,
+                                        strides=[1, stride, stride, 1],
+                                        padding=padding)
+      # "values" consists of two tensors for two backprops
+      value = sess.run(conv)
+      self.assertShapeEqual(value, conv)
+    print "expected = ", expected
+    print "actual = ", value
+    self.assertArrayNear(expected, value.flatten(), 1e-5)
+
+  def _CompareBackpropInput(self, input_sizes, filter_sizes, output_sizes,
+                            stride, padding):
+    x1 = np.random.rand(*filter_sizes).astype(np.float32)
+    x2 = np.random.rand(*output_sizes).astype(np.float32)
+    def _GetVal(use_gpu):
+      with self.test_session(use_gpu=use_gpu) as sess:
+        t0 = tf.constant(input_sizes, shape=[len(input_sizes)])
+        t1 = tf.constant(x1, shape=filter_sizes)
+        t2 = tf.constant(x2, shape=output_sizes)
+        conv = tf.nn.conv2d_backprop_input(t0, t1, t2,
+                                          strides=[1, stride, stride, 1],
+                                          padding=padding)
+        ret = conv.eval()
+        self.assertShapeEqual(ret, conv)
+        return ret
+    gpu_value = _GetVal(use_gpu=True)
+    cpu_value = _GetVal(use_gpu=False)
+    self.assertAllClose(cpu_value, gpu_value, rtol=1e-4, atol=1e-4)
+
+  def testConv2D2x2Depth1ValidBackpropInput(self):
+    expected_output = [1.0, 4.0, 4.0, 3.0, 10.0, 8.0]
+    self._RunAndVerifyBackpropInput(input_sizes=[1, 2, 3, 1],
+                                    filter_sizes=[2, 2, 1, 1],
+                                    output_sizes=[1, 1, 2, 1],
+                                    stride=1, padding="VALID",
+                                    expected=expected_output, use_gpu=False)
+    self._RunAndVerifyBackpropInput(input_sizes=[1, 2, 3, 1],
+                                    filter_sizes=[2, 2, 1, 1],
+                                    output_sizes=[1, 1, 2, 1],
+                                    stride=1, padding="VALID",
+                                    expected=expected_output, use_gpu=True)
+
+  def testConv2D2x2Depth3ValidBackpropInput(self):
+    expected_output = [14.0, 32.0, 50.0,
+                       100.0, 163.0, 226.0,
+                       167.0, 212.0, 257.0,
+                       122.0, 140.0, 158.0,
+                       478.0, 541.0, 604.0,
+                       437.0, 482.0, 527.0]
+    self._RunAndVerifyBackpropInput(input_sizes=[1, 2, 3, 3],
+                                    filter_sizes=[2, 2, 3, 3],
+                                    output_sizes=[1, 1, 2, 3],
+                                    stride=1, padding="VALID",
+                                    expected=expected_output, use_gpu=False)
+    self._RunAndVerifyBackpropInput(input_sizes=[1, 2, 3, 3],
+                                    filter_sizes=[2, 2, 3, 3],
+                                    output_sizes=[1, 1, 2, 3],
+                                    stride=1, padding="VALID",
+                                    expected=expected_output, use_gpu=True)
+
+  # Testing for backprops
+  def _RunAndVerifyBackpropFilter(self, input_sizes, filter_sizes, output_sizes,
+                                  stride, padding, expected, use_gpu):
+    total_input_size = 1
+    total_output_size = 1
+    for s in input_sizes:
+      total_input_size *= s
+    for s in output_sizes:
+      total_output_size *= s
+    # Initializes the input tensor with array containing incrementing
+    # numbers from 1.
+    x0 = [f * 1.0 for f in range(1, total_input_size + 1)]
+    x2 = [f * 1.0 for f in range(1, total_output_size + 1)]
+    with self.test_session(use_gpu=use_gpu) as sess:
+      t0 = tf.constant(x0, shape=input_sizes)
+      t1 = tf.constant(filter_sizes, shape=[len(filter_sizes)])
+      t2 = tf.constant(x2, shape=output_sizes)
+      conv = tf.nn.conv2d_backprop_filter(t0, t1, t2,
+                                         strides=[1, stride, stride, 1],
+                                         padding=padding)
+      value = sess.run(conv)
+      self.assertShapeEqual(value, conv)
+    print "expected = ", expected
+    print "actual = ", value
+    self.assertArrayNear(expected, value.flatten(), 1e-5)
+
+  def _CompareBackFilter(self, input_sizes, filter_sizes, output_sizes,
+                         stride, padding):
+    x0 = np.random.rand(*input_sizes).astype(np.float32)
+    x2 = np.random.rand(*output_sizes).astype(np.float32)
+    def _GetVal(use_gpu):
+      with self.test_session(use_gpu=use_gpu) as sess:
+        t0 = tf.constant(x0, shape=input_sizes)
+        t1 = tf.constant(filter_sizes, shape=[len(filter_sizes)])
+        t2 = tf.constant(x2, shape=output_sizes)
+        conv = tf.nn.conv2d_backprop_filter(t0, t1, t2,
+                                           strides=[1, stride, stride, 1],
+                                           padding=padding)
+        ret = conv.eval()
+        self.assertShapeEqual(ret, conv)
+        return ret
+    gpu_value = _GetVal(use_gpu=True)
+    cpu_value = _GetVal(use_gpu=False)
+    self.assertAllClose(cpu_value, gpu_value, rtol=1e-4, atol=1e-4)
+
+  def testConv2D2x2Depth1ValidBackpropFilter(self):
+    expected = [5.0, 8.0, 14.0, 17.0]
+    self._RunAndVerifyBackpropFilter(input_sizes=[1, 2, 3, 1],
+                                     filter_sizes=[2, 2, 1, 1],
+                                     output_sizes=[1, 1, 2, 1],
+                                     stride=1, padding="VALID",
+                                     expected=expected, use_gpu=False)
+    self._RunAndVerifyBackpropFilter(input_sizes=[1, 2, 3, 1],
+                                     filter_sizes=[2, 2, 1, 1],
+                                     output_sizes=[1, 1, 2, 1],
+                                     stride=1, padding="VALID",
+                                     expected=expected, use_gpu=True)
+
+  def testConv2D2x2Depth3ValidBackpropFilter(self):
+    expected = [17.0, 22.0, 27.0, 22.0, 29.0, 36.0, 27.0, 36.0, 45.0,
+                32.0, 43.0, 54.0, 37.0, 50.0, 63.0, 42.0, 57.0, 72.0,
+                62.0, 85.0, 108.0, 67.0, 92.0, 117.0, 72.0, 99.0, 126.0,
+                77.0, 106.0, 135.0, 82.0, 113.0, 144.0, 87.0, 120.0, 153.0]
+    self._RunAndVerifyBackpropFilter(input_sizes=[1, 2, 3, 3],
+                                     filter_sizes=[2, 2, 3, 3],
+                                     output_sizes=[1, 1, 2, 3],
+                                     stride=1, padding="VALID",
+                                     expected=expected, use_gpu=False)
+    self._RunAndVerifyBackpropFilter(input_sizes=[1, 2, 3, 3],
+                                     filter_sizes=[2, 2, 3, 3],
+                                     output_sizes=[1, 1, 2, 3],
+                                     stride=1, padding="VALID",
+                                     expected=expected, use_gpu=True)
+
+  # Gradient checkers
+  def ConstructAndTestGradient(self, batch, input_rows, input_cols, filter_rows,
+                               filter_cols, in_depth, out_depth, stride,
+                               padding, test_input, use_gpu):
+    input_shape = [batch, input_rows, input_cols, in_depth]
+    filter_shape = [filter_rows, filter_cols, in_depth, out_depth]
+    # TODO(yangke): re-factor the computation of output shape.
+    if padding == "VALID":
+      output_rows = int(math.ceil((input_rows - filter_rows + 1.0) / stride))
+      output_cols = int(math.ceil((input_cols - filter_cols + 1.0) / stride))
+    else:
+      output_rows = int(math.ceil(float(input_rows) / stride))
+      output_cols = int(math.ceil(float(input_cols) / stride))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     output_shape = [batch, output_rows, output_cols, out_depth]
     input_size = 1
     for x in input_shape:
@@ -1794,6 +2105,7 @@ class Conv2DTest(test.TestCase):
       filter_size *= x
     input_data = [x * 1.0 / input_size for x in range(0, input_size)]
     filter_data = [x * 1.0 / filter_size for x in range(0, filter_size)]
+<<<<<<< HEAD
     # Conv2DGrad functions are not compiled for double due to
     # a problem in the way Eigen's Conv2DGrad works for double.
     # So we disable the DOUBLE path.  We should re-enable this
@@ -2341,10 +2653,358 @@ class Conv2DTest(test.TestCase):
         array_ops.placeholder(dtypes.float32),
         strides=[1, 1, 1, 1],
         padding="SAME")
+=======
+    with self.test_session(use_gpu=use_gpu):
+      # Conv2DGrad functions are not compiled for double due to
+      # a problem in the way Eigen's Conv2DGrad works for double.
+      # So we disable the DOUBLE path.  We should re-enable this
+      # when double support returns for CPU and/or GPU.
+      # data_type = tf.float64
+      # tolerance = 1e-8
+
+      data_type = tf.float32
+      tolerance = 0.002
+
+      input_tensor = tf.constant(input_data, shape=input_shape,
+                                          dtype=data_type, name="input")
+      filter_tensor = tf.constant(filter_data, shape=filter_shape,
+                                           dtype=data_type, name="filter")
+      conv = tf.nn.conv2d(input_tensor, filter_tensor,
+                           [1, stride, stride, 1], padding,
+                           name="conv")
+      self.assertEqual(output_shape, conv.get_shape())
+      if test_input:
+        err = gc.ComputeGradientError(input_tensor, input_shape,
+                                      conv, output_shape)
+      else:
+        err = gc.ComputeGradientError(filter_tensor, filter_shape,
+                                      conv, output_shape)
+      print "conv_2d gradient error = ", err
+      self.assertLess(err, tolerance)
+
+  def testInputGradientValidPaddingStrideOne(self):
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=5,
+        input_cols=4,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=2,
+        out_depth=3,
+        stride=1,
+        padding="VALID",
+        test_input=True,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=5,
+        input_cols=4,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=2,
+        out_depth=3,
+        stride=1,
+        padding="VALID",
+        test_input=True,
+        use_gpu=True)
+
+  def testFilterGradientValidPaddingStrideOne(self):
+    self.ConstructAndTestGradient(
+        batch=4,
+        input_rows=6,
+        input_cols=5,
+        filter_rows=2,
+        filter_cols=2,
+        in_depth=2,
+        out_depth=3,
+        stride=1,
+        padding="VALID",
+        test_input=False,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=4,
+        input_rows=6,
+        input_cols=5,
+        filter_rows=2,
+        filter_cols=2,
+        in_depth=2,
+        out_depth=3,
+        stride=1,
+        padding="VALID",
+        test_input=False,
+        use_gpu=True)
+
+  def testInputGradientValidPaddingStrideTwo(self):
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=4,
+        input_cols=5,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=2,
+        out_depth=3,
+        stride=2,
+        padding="VALID",
+        test_input=True,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=4,
+        input_cols=5,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=2,
+        out_depth=3,
+        stride=2,
+        padding="VALID",
+        test_input=True,
+        use_gpu=True)
+
+  def testFilterGradientValidPaddingStrideTwo(self):
+    self.ConstructAndTestGradient(
+        batch=4,
+        input_rows=6,
+        input_cols=5,
+        filter_rows=2,
+        filter_cols=2,
+        in_depth=2,
+        out_depth=3,
+        stride=2,
+        padding="VALID",
+        test_input=False,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=4,
+        input_rows=6,
+        input_cols=5,
+        filter_rows=2,
+        filter_cols=2,
+        in_depth=2,
+        out_depth=3,
+        stride=2,
+        padding="VALID",
+        test_input=False,
+        use_gpu=True)
+
+  def testInputGradientValidPaddingStrideThree(self):
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=7,
+        input_cols=6,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=4,
+        out_depth=5,
+        stride=3,
+        padding="VALID",
+        test_input=True,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=7,
+        input_cols=6,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=4,
+        out_depth=5,
+        stride=3,
+        padding="VALID",
+        test_input=True,
+        use_gpu=True)
+
+  def testFilterGradientValidPaddingStrideThree(self):
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=8,
+        input_cols=7,
+        filter_rows=4,
+        filter_cols=4,
+        in_depth=2,
+        out_depth=3,
+        stride=3,
+        padding="VALID",
+        test_input=False,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=8,
+        input_cols=7,
+        filter_rows=4,
+        filter_cols=4,
+        in_depth=2,
+        out_depth=3,
+        stride=3,
+        padding="VALID",
+        test_input=False,
+        use_gpu=True)
+
+  def testInputGradientSamePaddingStrideOne(self):
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=7,
+        input_cols=6,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=2,
+        out_depth=3,
+        stride=1,
+        padding="SAME",
+        test_input=True,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=7,
+        input_cols=6,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=2,
+        out_depth=3,
+        stride=1,
+        padding="SAME",
+        test_input=True,
+        use_gpu=True)
+
+  def testFilterGradientSamePaddingStrideOne(self):
+    self.ConstructAndTestGradient(
+        batch=4,
+        input_rows=6,
+        input_cols=5,
+        filter_rows=2,
+        filter_cols=2,
+        in_depth=2,
+        out_depth=3,
+        stride=1,
+        padding="SAME",
+        test_input=False,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=4,
+        input_rows=6,
+        input_cols=5,
+        filter_rows=2,
+        filter_cols=2,
+        in_depth=2,
+        out_depth=3,
+        stride=1,
+        padding="SAME",
+        test_input=False,
+        use_gpu=True)
+
+  def testInputGradientSamePaddingStrideTwo(self):
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=5,
+        input_cols=4,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=3,
+        out_depth=3,
+        stride=2,
+        padding="SAME",
+        test_input=True,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=5,
+        input_cols=4,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=3,
+        out_depth=3,
+        stride=2,
+        padding="SAME",
+        test_input=True,
+        use_gpu=True)
+
+  def testFilterGradientSamePaddingStrideTwo(self):
+    self.ConstructAndTestGradient(
+        batch=4,
+        input_rows=6,
+        input_cols=5,
+        filter_rows=2,
+        filter_cols=2,
+        in_depth=2,
+        out_depth=3,
+        stride=2,
+        padding="SAME",
+        test_input=False,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=4,
+        input_rows=6,
+        input_cols=5,
+        filter_rows=2,
+        filter_cols=2,
+        in_depth=2,
+        out_depth=3,
+        stride=2,
+        padding="SAME",
+        test_input=False,
+        use_gpu=True)
+
+  def testInputGradientSamePaddingStrideThree(self):
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=7,
+        input_cols=6,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=4,
+        out_depth=5,
+        stride=3,
+        padding="SAME",
+        test_input=True,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=7,
+        input_cols=6,
+        filter_rows=3,
+        filter_cols=3,
+        in_depth=4,
+        out_depth=5,
+        stride=3,
+        padding="SAME",
+        test_input=True,
+        use_gpu=True)
+
+  def testFilterGradientSamePaddingStrideThree(self):
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=8,
+        input_cols=7,
+        filter_rows=4,
+        filter_cols=4,
+        in_depth=2,
+        out_depth=3,
+        stride=3,
+        padding="SAME",
+        test_input=False,
+        use_gpu=False)
+    self.ConstructAndTestGradient(
+        batch=2,
+        input_rows=8,
+        input_cols=7,
+        filter_rows=4,
+        filter_cols=4,
+        in_depth=2,
+        out_depth=3,
+        stride=3,
+        padding="SAME",
+        test_input=False,
+        use_gpu=True)
+
+  def testShapeFunctionEdgeCases(self):
+    # All shapes unknown.
+    c1 = tf.nn.conv2d(tf.placeholder(tf.float32),
+                       tf.placeholder(tf.float32),
+                       strides=[1, 1, 1, 1], padding="SAME")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     self.assertEqual([None, None, None, None], c1.get_shape().as_list())
 
     # Incorrect input shape.
     with self.assertRaises(ValueError):
+<<<<<<< HEAD
       nn_ops.conv2d(
           array_ops.placeholder(
               dtypes.float32, shape=[1, 3]),
@@ -2508,6 +3168,84 @@ class DepthwiseConv2DTest(test.TestCase):
 
   def _VerifyValues(self, tensor_in_sizes, filter_in_sizes, stride, padding,
                     expected):
+=======
+      tf.nn.conv2d(tf.placeholder(tf.float32, shape=[1, 3]),
+                    tf.placeholder(tf.float32),
+                    strides=[1, 1, 1, 1], padding="SAME")
+
+    # Incorrect filter shape.
+    with self.assertRaises(ValueError):
+      tf.nn.conv2d(tf.placeholder(tf.float32),
+                    tf.placeholder(tf.float32, shape=[1, 3]),
+                    strides=[1, 1, 1, 1], padding="SAME")
+
+    # Depth mismatch.
+    with self.assertRaises(ValueError):
+      tf.nn.conv2d(tf.placeholder(tf.float32,
+                                          shape=[32, 20, 20, 3]),
+                    tf.placeholder(tf.float32,
+                                          shape=[4, 4, 2, 2]),
+                    strides=[1, 1, 1, 1], padding="SAME")
+
+    # Illegal strides.
+    with self.assertRaisesRegexp(ValueError, "strides in the batch and depth"):
+      tf.nn.conv2d(tf.placeholder(tf.float32),
+                    tf.placeholder(tf.float32),
+                    strides=[2, 1, 1, 1], padding="SAME")
+    with self.assertRaisesRegexp(ValueError, "strides in the batch and depth"):
+      tf.nn.conv2d(tf.placeholder(tf.float32),
+                    tf.placeholder(tf.float32),
+                    strides=[1, 1, 1, 2], padding="SAME")
+
+    # Filter larger than input.
+    with self.assertRaisesRegexp(ValueError,
+                                 "filter must not be larger than the input"):
+      tf.nn.conv2d(tf.placeholder(tf.float32,
+                                          shape=[32, 20, 20, 3]),
+                    tf.placeholder(tf.float32,
+                                          shape=[20, 21, 3, 2]),
+                    strides=[1, 1, 1, 1], padding="SAME")
+    with self.assertRaisesRegexp(ValueError,
+                                 "filter must not be larger than the input"):
+      tf.nn.conv2d(tf.placeholder(tf.float32,
+                                          shape=[32, 20, 20, 3]),
+                    tf.placeholder(tf.float32,
+                                          shape=[21, 20, 3, 2]),
+                    strides=[1, 1, 1, 1], padding="SAME")
+
+    # Stride larger than filter.
+    with self.assertRaisesRegexp(ValueError,
+                                 "stride must be less than or equal to filter"):
+      tf.nn.conv2d(tf.placeholder(tf.float32,
+                                          shape=[32, 20, 20, 3]),
+                    tf.placeholder(tf.float32,
+                                          shape=[4, 5, 3, 2]),
+                    strides=[1, 5, 5, 1], padding="SAME")
+    with self.assertRaisesRegexp(ValueError,
+                                 "stride must be less than or equal to filter"):
+      tf.nn.conv2d(tf.placeholder(tf.float32,
+                                          shape=[32, 20, 20, 3]),
+                    tf.placeholder(tf.float32,
+                                          shape=[5, 4, 3, 2]),
+                    strides=[1, 5, 5, 1], padding="SAME")
+
+    # Invalid rectangular stride.
+    with self.assertRaisesRegexp(ValueError,
+                                 "equal length strides in the row and column"):
+      tf.nn.conv2d(tf.placeholder(tf.float32),
+                    tf.placeholder(tf.float32),
+                    strides=[1, 3, 7, 1], padding="SAME")
+
+
+# This is only a very simple test. More comprehensive tests live in
+# //learning/dist_belief/experimental/brain_compatibility/conv_nn_test.py
+# where we compare the numeric results of the depthwise conv op with the
+# depthwise weighted sum transformer in dist_belief.
+class DepthwiseConv2DTest(tf.test.TestCase):
+
+  def _VerifyValues(self, tensor_in_sizes, filter_in_sizes, stride,
+                    padding, expected):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Verifies the output values of the convolution function.
 
     Args:
@@ -2529,6 +3267,7 @@ class DepthwiseConv2DTest(test.TestCase):
     # numbers from 1.
     x1 = [f * 1.0 for f in range(1, total_size_1 + 1)]
     x2 = [f * 1.0 for f in range(1, total_size_2 + 1)]
+<<<<<<< HEAD
     with self.cached_session() as sess:
       t1 = constant_op.constant(x1, shape=tensor_in_sizes)
       t1.set_shape(tensor_in_sizes)
@@ -2537,6 +3276,16 @@ class DepthwiseConv2DTest(test.TestCase):
           t1, t2, strides=[1, stride, stride, 1], padding=padding)
       value = self.evaluate(conv)
     tf_logging.debug("value = %s", value)
+=======
+    with self.test_session() as sess:
+      t1 = tf.constant(x1, shape=tensor_in_sizes)
+      t1.set_shape(tensor_in_sizes)
+      t2 = tf.constant(x2, shape=filter_in_sizes)
+      conv = tf.nn.depthwise_conv2d(t1, t2, strides=[1, stride, stride, 1],
+                                    padding=padding)
+      value = sess.run(conv)
+    print "value = ", value
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     self.assertArrayNear(expected, np.ravel(value), 1e-5)
     self.assertShapeEqual(value, conv)
 
@@ -2590,6 +3339,7 @@ class DepthwiseConv2DTest(test.TestCase):
     # (position 1, 0: in_depth 1, output_depth 3 -- using filter #1)
     #  4.0 * 4.0 + 10.0 * 12.0 + 6.0 * 8.0 + 12.0 * 16.0 = 376
     expected_output = [196, 216, 272, 296, 252, 280, 344, 376]
+<<<<<<< HEAD
     self._VerifyValues(
         tensor_in_sizes=[1, 2, 3, 2],
         filter_in_sizes=[2, 2, 2, 2],
@@ -2599,6 +3349,15 @@ class DepthwiseConv2DTest(test.TestCase):
 
 
 class SeparableConv2DTest(test.TestCase):
+=======
+    self._VerifyValues(tensor_in_sizes=[1, 2, 3, 2],
+                       filter_in_sizes=[2, 2, 2, 2],
+                       stride=1, padding="VALID",
+                       expected=expected_output)
+
+
+class SeparableConv2DTest(tf.test.TestCase):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _InitValues(self, sizes):
     """Initializes values for input tensors.
@@ -2613,6 +3372,7 @@ class SeparableConv2DTest(test.TestCase):
     for s in sizes:
       total_size *= s
     x = [f * 0.5 for f in range(1, total_size + 1)]
+<<<<<<< HEAD
     return constant_op.constant(x, shape=sizes)
 
   def _VerifyValues(self,
@@ -2623,6 +3383,12 @@ class SeparableConv2DTest(test.TestCase):
                     padding,
                     expected,
                     data_format="NHWC"):
+=======
+    return tf.constant(x, shape=sizes)
+
+  def _VerifyValues(self, tensor_in_sizes, depthwise_filter_in_sizes,
+                    pointwise_filter_in_sizes, stride, padding, expected):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Verifies the output values of the separable convolution function.
 
     Args:
@@ -2632,13 +3398,19 @@ class SeparableConv2DTest(test.TestCase):
       stride: Stride.
       padding: Padding type.
       expected: An array containing the expected operation outputs.
+<<<<<<< HEAD
       data_format: string data format for input tensor.
     """
     with self.cached_session(use_gpu=True) as sess:
+=======
+    """
+    with self.test_session() as sess:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       t1 = self._InitValues(tensor_in_sizes)
       f1 = self._InitValues(depthwise_filter_in_sizes)
       f1.set_shape(depthwise_filter_in_sizes)
       f2 = self._InitValues(pointwise_filter_in_sizes)
+<<<<<<< HEAD
 
       real_t1 = t1
       strides = [1, stride, stride, 1]
@@ -2667,6 +3439,20 @@ class SeparableConv2DTest(test.TestCase):
     # First with tensor_in[1, 4, 4, 2] * filter1[2, 2, 2, 3].
     # Second with intermediate_out[1, 4, 4, 6] * filter2[1, 1, 6, 7].
     # Complexity is O(2*3*2*2 + 6*7*1*1) as opposed to O(2*7*2*2).
+=======
+      conv = tf.nn.separable_conv2d(t1, f1, f2, strides=[1, stride, stride, 1],
+                                    padding=padding)
+      value = sess.run(conv)
+    print "value = ", value
+    self.assertArrayNear(expected, np.ravel(value), 1e-5)
+    self.assertShapeEqual(value, conv)
+
+  def testSeparableConv2D(self):
+    # The output is the result of two convolutions:
+    # First with tensor_in[1, 4, 4, 3] * filter1[2, 2, 3, 3].
+    # Second with intermediate_out[4, 4, 3, 3] * filter2[1, 1, 3, 6].
+    # Complexity is O(3*3*2*2 + 3*6*1*1] as opposed to O(3*6*2*2).
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     expected_output = [
         6644.5, 6971.5, 7298.5, 7625.5, 7952.5, 8279.5, 8606.5, 8154.5, 8556.5,
         8958.5, 9360.5, 9762.5, 10164.5, 10566.5, 9664.5, 10141.5, 10618.5,
@@ -2681,6 +3467,7 @@ class SeparableConv2DTest(test.TestCase):
         10569.5, 10998.5, 11427.5, 5746.75, 6010.75, 6274.75, 6538.75, 6802.75,
         7066.75, 7330.75, 6168.75, 6452.25, 6735.75, 7019.25, 7302.75, 7586.25,
         7869.75, 6590.75, 6893.75, 7196.75, 7499.75, 7802.75, 8105.75, 8408.75,
+<<<<<<< HEAD
         2036.25, 2119.5, 2202.75, 2286.0, 2369.25, 2452.5, 2535.75
     ]
 
@@ -3070,11 +3857,48 @@ def GetInceptionBackFilterTest(input_size, filter_size, output_size, strides,
     self._CompareBackFilter(input_size, filter_size, output_size, strides,
                             padding)
 
+=======
+        2036.25, 2119.5, 2202.75, 2286.0, 2369.25, 2452.5, 2535.75]
+
+    self._VerifyValues(tensor_in_sizes=[1, 4, 4, 2],
+                       depthwise_filter_in_sizes=[2, 2, 2, 3],
+                       pointwise_filter_in_sizes=[1, 1, 6, 7],
+                       stride=1, padding="SAME",
+                       expected=expected_output)
+
+
+def GetInceptionFwdTest(input_size, filter_size, stride, padding):
+  def Test(self):
+    tf.logging.info("Testing InceptionFwd %s", (input_size, filter_size,
+                                                stride, padding))
+    self._CompareFwdValues(input_size, filter_size, stride, padding)
+  return Test
+
+
+def GetInceptionBackInputTest(input_size, filter_size, output_size,
+                              stride, padding):
+  def Test(self):
+    tf.logging.info("Testing InceptionBackInput %s",
+                    (input_size, filter_size, output_size, stride, padding))
+    self._CompareBackpropInput(input_size, filter_size, output_size,
+                               stride, padding)
+  return Test
+
+
+def GetInceptionBackFilterTest(input_size, filter_size, output_size,
+                               stride, padding):
+  def Test(self):
+    tf.logging.info("Testing InceptionBackFilter %s",
+                    (input_size, filter_size, output_size, stride, padding))
+    self._CompareBackFilter(input_size, filter_size, output_size,
+                            stride, padding)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return Test
 
 
 if __name__ == "__main__":
   for index, (input_size_, filter_size_, output_size_, stride_,
+<<<<<<< HEAD
               padding_) in enumerate(GetShrunkInceptionShapes()):
     setattr(Conv2DTest, "testInceptionFwd_" + str(index),
             test_util.run_in_graph_and_eager_modes(
@@ -3118,3 +3942,15 @@ if __name__ == "__main__":
               GetInceptionBackFilterTest(ishape, fshape, oshape, [1, 1], "SAME",
                                          gpu_only=True)))
   test.main()
+=======
+              padding_) in enumerate(GetInceptionShapes()):
+    setattr(Conv2DTest, "testInceptionFwd_" + str(index),
+            GetInceptionFwdTest(input_size_, filter_size_, stride_, padding_))
+    setattr(Conv2DTest, "testInceptionBackInput_" + str(index),
+            GetInceptionBackInputTest(input_size_, filter_size_, output_size_,
+                                      stride_, padding_))
+    setattr(Conv2DTest, "testInceptionBackFilter_" + str(index),
+            GetInceptionBackFilterTest(input_size_, filter_size_, output_size_,
+                                       stride_, padding_))
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

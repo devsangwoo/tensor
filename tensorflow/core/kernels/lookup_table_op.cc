@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,24 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/kernels/lookup_table_op.h"
 #define EIGEN_USE_THREADS
 
 #include <string>
+<<<<<<< HEAD
 #include <type_traits>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <utility>
 
 #include "tensorflow/core/framework/register_types.h"
 #include "tensorflow/core/framework/types.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/variant.h"
 #include "tensorflow/core/kernels/initializable_lookup_table.h"
 #include "tensorflow/core/lib/gtl/inlined_vector.h"
+=======
+#include "tensorflow/core/kernels/initializable_lookup_table.h"
+#include "tensorflow/core/lib/gtl/map_util.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/hash/hash.h"
 
 namespace tensorflow {
 namespace lookup {
 
 // Lookup table that wraps an unordered_map, where the key and value data type
+<<<<<<< HEAD
 // is specified. Each individual value must be a scalar. If vector values are
 // required, use MutableHashTableOfTensors.
 //
@@ -41,10 +53,29 @@ namespace lookup {
 // MutableHashTableOfScalars<int64, int64> table;  // int64 -> int64.
 // // Populate the table, elements could be added in one or multiple calls.
 // table.Insert(key_tensor, value_tensor); // Populate the table.
+=======
+// is specified.
+//
+// This table is recommened for any variations to key values.
+//
+// For look up, the table is required to be initialized (allocated
+// and populated). Once the table is marked as initialized it becomes read-only.
+//
+// Sample use case:
+//
+// HashTable<int64, int64> table;  // int64 -> int64.
+// table.Prepare(10); // Prepare the underlying data structure, the number of
+//                    // elements is required by interface, but not used.
+// // Populate the table, elements could be added in one or multiple calls.
+// table.Insert(key_tensor, value_tensor); // Populate the table.
+// ...
+// table.set_is_initialized();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 // table.Find(in_t, &out_t, default_t)
 //
 template <class K, class V>
+<<<<<<< HEAD
 class MutableHashTableOfScalars final : public LookupInterface {
  public:
   MutableHashTableOfScalars(OpKernelContext* ctx, OpKernel* kernel) {}
@@ -124,11 +155,17 @@ class MutableHashTableOfScalars final : public LookupInterface {
     }
     return Status::OK();
   }
+=======
+class HashTable : public InitializableLookupTable {
+ public:
+  size_t size() const override { return table_ ? table_->size() : 0; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   DataType key_dtype() const override { return DataTypeToEnum<K>::v(); }
 
   DataType value_dtype() const override { return DataTypeToEnum<V>::v(); }
 
+<<<<<<< HEAD
   TensorShape key_shape() const final { return TensorShape(); }
 
   TensorShape value_shape() const override { return TensorShape(); }
@@ -510,11 +547,41 @@ class MutableDenseHashTable final : public LookupInterface {
       if (!IsEqualKey(key_buckets_tensor, i, empty_key_tensor, 0) &&
           !IsEqualKey(key_buckets_tensor, i, deleted_key_tensor, 0)) {
         ++num_entries_;
+=======
+ protected:
+  Status DoPrepare(size_t unused) override {
+    if (is_initialized_) {
+      return errors::Aborted("HashTable already initialized.");
+    }
+    if (!table_) {
+      table_ = std::unique_ptr<std::unordered_map<K, V>>(
+          new std::unordered_map<K, V>());
+    }
+    return Status::OK();
+  };
+
+  Status DoInsert(const Tensor& keys, const Tensor& values) override {
+    if (!table_) {
+      return errors::FailedPrecondition("HashTable is not prepared.");
+    }
+
+    const auto key_values = keys.flat<K>();
+    const auto value_values = values.flat<V>();
+    for (size_t i = 0; i < key_values.size(); ++i) {
+      const K& key = key_values(i);
+      const V& value = value_values(i);
+      const V& previous_value = gtl::LookupOrInsert(table_.get(), key, value);
+      if (previous_value != value) {
+        return errors::FailedPrecondition(
+            "HashTable has different value for same key. Key ", key, " has ",
+            previous_value, " and trying to add value ", value);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     }
     return Status::OK();
   }
 
+<<<<<<< HEAD
   Status ExportValues(OpKernelContext* ctx) override LOCKS_EXCLUDED(mu_) {
     tf_shared_lock l(mu_);
     Tensor key_buckets_tensor = *key_buckets_.AccessTensor(ctx);
@@ -545,10 +612,22 @@ class MutableDenseHashTable final : public LookupInterface {
       return errors::InvalidArgument(
           "Expected shape ", expected_value_shape.DebugString(),
           " for value, got ", values.shape().DebugString());
+=======
+  Status DoFind(const Tensor& key, Tensor* value,
+                const Tensor& default_value) override {
+    const V default_val = default_value.flat<V>()(0);
+    const auto key_values = key.flat<K>();
+    auto value_values = value->flat<V>();
+
+    for (size_t i = 0; i < key_values.size(); ++i) {
+      value_values(i) =
+          gtl::FindWithDefault(*table_, key_values(i), default_val);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     return Status::OK();
   }
 
+<<<<<<< HEAD
   DataType key_dtype() const override { return DataTypeToEnum<K>::v(); }
 
   DataType value_dtype() const override { return DataTypeToEnum<V>::v(); }
@@ -774,10 +853,15 @@ class MutableDenseHashTable final : public LookupInterface {
   uint64 empty_key_hash_;
   PersistentTensor deleted_key_;
   uint64 deleted_key_hash_;
+=======
+ private:
+  std::unique_ptr<std::unordered_map<K, V>> table_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace lookup
 
+<<<<<<< HEAD
 // Base class for kernels that take a LookupTable handle as the 0th input.
 class LookupTableOpKernel : public OpKernel {
  public:
@@ -810,10 +894,24 @@ class LookupTableFindOp : public LookupTableOpKernel {
     core::ScopedUnref unref_me(table);
 
     DataTypeVector expected_inputs = {expected_input_0_, table->key_dtype(),
+=======
+// Table lookup op. Perform the lookup operation on the given table.
+class LookupTableFindOp : public OpKernel {
+ public:
+  explicit LookupTableFindOp(OpKernelConstruction* ctx) : OpKernel(ctx) {}
+
+  void Compute(OpKernelContext* ctx) override {
+    lookup::LookupInterface* table;
+    OP_REQUIRES_OK(ctx, GetLookupTable("table_handle", ctx, &table));
+    core::ScopedUnref unref_me(table);
+
+    DataTypeVector expected_inputs = {DT_STRING_REF, table->key_dtype(),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                       table->value_dtype()};
     DataTypeVector expected_outputs = {table->value_dtype()};
     OP_REQUIRES_OK(ctx, ctx->MatchSignature(expected_inputs, expected_outputs));
 
+<<<<<<< HEAD
     const Tensor& key = ctx->input(1);
     const Tensor& default_value = ctx->input(2);
     OP_REQUIRES_OK(ctx, table->CheckFindArguments(key, default_value));
@@ -825,11 +923,29 @@ class LookupTableFindOp : public LookupTableOpKernel {
     OP_REQUIRES_OK(ctx, ctx->allocate_output("values", output_shape, &out));
 
     OP_REQUIRES_OK(ctx, table->Find(ctx, key, out, default_value));
+=======
+    const Tensor& input = ctx->input(1);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsVector(input.shape()),
+                errors::InvalidArgument("Input must be a vector, not ",
+                                        input.shape().DebugString()));
+
+    const Tensor& default_value = ctx->input(2);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(default_value.shape()),
+                errors::InvalidArgument("Default value must be a scalar, not ",
+                                        default_value.shape().DebugString()));
+
+    Tensor* out;
+    OP_REQUIRES_OK(ctx,
+                   ctx->allocate_output("output_values", input.shape(), &out));
+
+    OP_REQUIRES_OK(ctx, table->Find(input, out, default_value));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 REGISTER_KERNEL_BUILDER(Name("LookupTableFind").Device(DEVICE_CPU),
                         LookupTableFindOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("LookupTableFindV2").Device(DEVICE_CPU),
                         LookupTableFindOp);
 
@@ -907,6 +1023,17 @@ class LookupTableSizeOp : public LookupTableOpKernel {
   void Compute(OpKernelContext* ctx) override {
     lookup::LookupInterface* table;
     OP_REQUIRES_OK(ctx, GetTable(ctx, &table));
+=======
+
+// Op that returns the size of the given table.
+class LookupTableSizeOp : public OpKernel {
+ public:
+  explicit LookupTableSizeOp(OpKernelConstruction* ctx) : OpKernel(ctx) {}
+
+  void Compute(OpKernelContext* ctx) override {
+    lookup::LookupInterface* table;
+    OP_REQUIRES_OK(ctx, GetLookupTable("table_handle", ctx, &table));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     core::ScopedUnref unref_me(table);
 
     Tensor* out;
@@ -917,6 +1044,7 @@ class LookupTableSizeOp : public LookupTableOpKernel {
 
 REGISTER_KERNEL_BUILDER(Name("LookupTableSize").Device(DEVICE_CPU),
                         LookupTableSizeOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("LookupTableSizeV2").Device(DEVICE_CPU),
                         LookupTableSizeOp);
 
@@ -973,6 +1101,8 @@ REGISTER_KERNEL_BUILDER(Name("LookupTableImport").Device(DEVICE_CPU),
                         LookupTableImportOp);
 REGISTER_KERNEL_BUILDER(Name("LookupTableImportV2").Device(DEVICE_CPU),
                         LookupTableImportOp);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Register the HashTable op with the currently supported key and value types.
 #define REGISTER_KERNEL(key_dtype, value_dtype)                           \
@@ -982,6 +1112,7 @@ REGISTER_KERNEL_BUILDER(Name("LookupTableImportV2").Device(DEVICE_CPU),
           .TypeConstraint<key_dtype>("key_dtype")                         \
           .TypeConstraint<value_dtype>("value_dtype"),                    \
       LookupTableOp<lookup::HashTable<key_dtype, value_dtype>, key_dtype, \
+<<<<<<< HEAD
                     value_dtype>)                                         \
   REGISTER_KERNEL_BUILDER(                                                \
       Name("HashTableV2")                                                 \
@@ -1108,6 +1239,12 @@ REGISTER_KERNEL(tstring, float);
 REGISTER_KERNEL(tstring, int32);
 REGISTER_KERNEL(tstring, int64);
 REGISTER_KERNEL(tstring, ResourceHandle);
+=======
+                    value_dtype>)
+
+REGISTER_KERNEL(string, int64);
+REGISTER_KERNEL(int64, string);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #undef REGISTER_KERNEL
 

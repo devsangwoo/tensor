@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +16,27 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_GRAPH_GRAPH_PARTITION_H_
 #define TENSORFLOW_CORE_GRAPH_GRAPH_PARTITION_H_
+=======
+#ifndef TENSORFLOW_GRAPH_GRAPH_PARTITION_H_
+#define TENSORFLOW_GRAPH_GRAPH_PARTITION_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <functional>
 #include <string>
 #include <unordered_map>
+<<<<<<< HEAD
 #include <vector>
 
 #include "tensorflow/core/framework/function.h"
 #include "tensorflow/core/framework/graph.pb.h"
 #include "tensorflow/core/graph/costmodel.h"
 #include "tensorflow/core/graph/graph.h"
+=======
+
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/graph/graph.h"
+#include "tensorflow/core/graph/costmodel.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -41,15 +53,22 @@ struct PartitionOptions {
 
   // A function that returns the incarnation of a device given the
   // device's fullname. If not found, GetIncarnationFunc should return
+<<<<<<< HEAD
   // kIllegalIncarnation.
+=======
+  // kIlledgalIncarnation.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   static const uint64 kIllegalIncarnation = 0;
   typedef std::function<uint64(const string&)> GetIncarnationFunc;
   GetIncarnationFunc get_incarnation = nullptr;
 
+<<<<<<< HEAD
   // If specified, flib_def defines a function library that should be
   // partitioned and replicated into each resulting partition graphs.
   const FunctionLibraryDefinition* flib_def = nullptr;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // True if all the control flow "code" has already been added. The
   // control flow code needs to be added when we still have the entire
   // graph before any partitioning. So this flag should be false for
@@ -59,7 +78,11 @@ struct PartitionOptions {
   // flow code incremental based on 'node_to_loc'. This makes the
   // communication a broadcast tree, which could be more efficient when
   // the number of participating devices is large.
+<<<<<<< HEAD
   bool control_flow_added = false;
+=======
+  bool control_flow_added;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // A function that returns the data type into which the tensor
   // should be cast before sent over the wire.
@@ -95,4 +118,8 @@ Status AddControlEdges(const PartitionOptions& opts,
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_GRAPH_GRAPH_PARTITION_H_
+=======
+#endif  // TENSORFLOW_GRAPH_GRAPH_PARTITION_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/node_def_util.h"
 
 #include <algorithm>
 #include <unordered_map>
+<<<<<<< HEAD
 #include <vector>
 
 #include "absl/strings/str_cat.h"
@@ -62,6 +66,27 @@ string SummarizeAttrsHelper(AttrSlice attrs, StringPiece device) {
   std::vector<string> attr_names;
   attr_names.reserve(attrs.size());
   for (const auto& attr : attrs) {
+=======
+
+#include "tensorflow/core/framework/attr_value_util.h"
+#include "tensorflow/core/framework/op.h"
+#include "tensorflow/core/framework/op_def_util.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/gtl/map_util.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/platform/regexp.h"
+
+namespace tensorflow {
+
+string SummarizeNodeDef(const NodeDef& node_def) {
+  string ret = strings::StrCat(node_def.name(), " = ", node_def.op(), "[");
+
+  // We sort the attrs so the output is deterministic.
+  std::vector<string> attr_names;
+  attr_names.reserve(node_def.attr().size());
+  for (const auto& attr : node_def.attr()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     attr_names.push_back(attr.first);
   }
   std::sort(attr_names.begin(), attr_names.end());
@@ -69,6 +94,7 @@ string SummarizeAttrsHelper(AttrSlice attrs, StringPiece device) {
   for (const string& attr_name : attr_names) {
     if (!first) strings::StrAppend(&ret, ", ");
     first = false;
+<<<<<<< HEAD
     strings::StrAppend(&ret, attr_name, "=",
                        SummarizeAttrValue(*attrs.Find(attr_name)));
   }
@@ -108,6 +134,22 @@ string SummarizeNodeDef(const NodeDef& node_def) {
 
   // Output inputs, including control inputs, verbatim.
   bool first = true;
+=======
+    auto iter = node_def.attr().find(attr_name);
+    strings::StrAppend(&ret, attr_name, "=", SummarizeAttrValue(iter->second));
+  }
+
+  // Consider the device to be a final attr with name "_device".
+  if (!node_def.device().empty()) {
+    if (!first) strings::StrAppend(&ret, ", ");
+    first = false;
+    strings::StrAppend(&ret, "_device=\"", node_def.device(), "\"");
+  }
+  strings::StrAppend(&ret, "](");
+
+  // Output inputs, including control inputs, verbatim.
+  first = true;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (const string& input : node_def.input()) {
     if (!first) strings::StrAppend(&ret, ", ");
     first = false;
@@ -117,6 +159,7 @@ string SummarizeNodeDef(const NodeDef& node_def) {
   return ret;
 }
 
+<<<<<<< HEAD
 string SummarizeAttrs(const NodeDef& node_def) {
   return SummarizeAttrsHelper(node_def, node_def.device());
 }
@@ -159,21 +202,35 @@ const AttrValue* AttrSlice::Find(StringPiece attr_name) const {
 }
 
 Status AttrSlice::Find(StringPiece attr_name,
+=======
+const AttrValue* AttrSlice::Find(const string& attr_name) const {
+  auto iter = attrs_->find(attr_name);
+  if (iter == attrs_->end()) return nullptr;
+  return &iter->second;
+}
+
+Status AttrSlice::Find(const string& attr_name,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                        const AttrValue** attr_value) const {
   *attr_value = Find(attr_name);
   if (*attr_value != nullptr) {
     return Status::OK();
   }
   Status s = errors::NotFound("No attr named '", attr_name, "' in NodeDef:");
+<<<<<<< HEAD
   // Skip AttachDef for internal attrs since it is a little bit
   // expensive and it is common for them to correctly not be included
   // in a NodeDef.
   if (!absl::StartsWith(attr_name, "_") && ndef_ != nullptr) {
+=======
+  if (ndef_) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     s = AttachDef(s, *ndef_);
   }
   return s;
 }
 
+<<<<<<< HEAD
 bool AttrSlice::EqualAttrs(AttrSlice other, Scratch* scratch) const {
   if (size() != other.size()) return false;
 
@@ -194,6 +251,12 @@ bool AttrSlice::EqualAttrs(AttrSlice other, Scratch* scratch) const {
 // just ; if no additional validation code is needed.
 #define DEFINE_GET_ATTR(TYPE, FIELD, ATTR_TYPE, APPEND_OP, CAST, ...)         \
   Status GetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,           \
+=======
+// The ... is to allow the caller to inject some value validation code.  Use
+// just ; if no additional validation code is needed.
+#define DEFINE_GET_ATTR(TYPE, FIELD, ATTR_TYPE, APPEND_OP, CAST, ...)         \
+  Status GetNodeAttr(const AttrSlice& attrs, const string& attr_name,         \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                      TYPE* value) {                                           \
     const AttrValue* attr_value;                                              \
     TF_RETURN_IF_ERROR(attrs.Find(attr_name, &attr_value));                   \
@@ -203,12 +266,19 @@ bool AttrSlice::EqualAttrs(AttrSlice other, Scratch* scratch) const {
     *value = CAST;                                                            \
     return Status::OK();                                                      \
   }                                                                           \
+<<<<<<< HEAD
   Status GetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,           \
+=======
+  Status GetNodeAttr(const AttrSlice& attrs, const string& attr_name,         \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                      std::vector<TYPE>* value) {                              \
     const AttrValue* attr_value;                                              \
     TF_RETURN_IF_ERROR(attrs.Find(attr_name, &attr_value));                   \
     TF_RETURN_IF_ERROR(AttrValueHasType(*attr_value, "list(" ATTR_TYPE ")")); \
+<<<<<<< HEAD
     value->reserve(attr_value->list().FIELD().size());                        \
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (const auto& v : attr_value->list().FIELD()) {                        \
       __VA_ARGS__;                                                            \
       value->APPEND_OP(CAST);                                                 \
@@ -216,6 +286,7 @@ bool AttrSlice::EqualAttrs(AttrSlice other, Scratch* scratch) const {
     return Status::OK();                                                      \
   }
 
+<<<<<<< HEAD
 #define DEFINE_TRY_GET_ATTR(TYPE, FIELD, ATTR_TYPE, APPEND_OP, CAST, ...) \
   bool TryGetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,      \
                       TYPE* value) {                                      \
@@ -276,10 +347,22 @@ DEFINE_TRY_GET_ATTR(
     })
 DEFINE_GET_ATTR(float, f, "float", emplace_back, v, ;)
 DEFINE_TRY_GET_ATTR(float, f, "float", emplace_back, v, ;)
+=======
+DEFINE_GET_ATTR(string, s, "string", emplace_back, v, ;)
+DEFINE_GET_ATTR(int64, i, "int", emplace_back, v, ;)
+DEFINE_GET_ATTR(int32, i, "int", emplace_back, static_cast<int32>(v),
+                if (static_cast<int64>(static_cast<int32>(v)) != v) {
+                  return errors::InvalidArgument("Attr ", attr_name,
+                                                 " has value ", v,
+                                                 " out of range for an int32");
+                })
+DEFINE_GET_ATTR(float, f, "float", emplace_back, v, ;)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // std::vector<bool> specialization does not have emplace_back until
 // c++14, so we have to use push_back (see
 // http://en.cppreference.com/w/cpp/container/vector/emplace_back)
 DEFINE_GET_ATTR(bool, b, "bool", push_back, v, ;)
+<<<<<<< HEAD
 DEFINE_TRY_GET_ATTR(bool, b, "bool", push_back, v, ;)
 DEFINE_GET_ATTR(DataType, type, "type", emplace_back, static_cast<DataType>(v),
                 ;)
@@ -365,6 +448,22 @@ bool TryGetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,
 }
 
 Status GetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,
+=======
+DEFINE_GET_ATTR(DataType, type, "type", emplace_back, static_cast<DataType>(v),
+                ;)
+DEFINE_GET_ATTR(TensorShapeProto, shape, "shape", emplace_back, v, ;)
+DEFINE_GET_ATTR(TensorShape, shape, "shape", emplace_back, TensorShape(v), ;)
+DEFINE_GET_ATTR(Tensor, tensor, "tensor", emplace_back, t, Tensor t;
+                if (!t.FromProto(v)) {
+                  return errors::InvalidArgument(
+                      "Attr ", attr_name, " has value ", v.ShortDebugString(),
+                      " that can't be converted to a Tensor");
+                })
+
+#undef DEFINE_GET_ATTR
+
+Status GetNodeAttr(const AttrSlice& attrs, const string& attr_name,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                    DataTypeVector* value) {
   const AttrValue* attr_value;
   TF_RETURN_IF_ERROR(attrs.Find(attr_name, &attr_value));
@@ -375,7 +474,11 @@ Status GetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,
   return Status::OK();
 }
 
+<<<<<<< HEAD
 Status GetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,
+=======
+Status GetNodeAttr(const AttrSlice& attrs, const string& attr_name,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                    const TensorProto** value) {
   const AttrValue* attr_value;
   TF_RETURN_IF_ERROR(attrs.Find(attr_name, &attr_value));
@@ -384,6 +487,7 @@ Status GetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,
   return Status::OK();
 }
 
+<<<<<<< HEAD
 bool TryGetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,
                     const TensorProto** value) {
   const AttrValue* attr_value = attrs.Find(attr_name);
@@ -399,6 +503,9 @@ bool TryGetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,
 }
 
 Status GetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,
+=======
+Status GetNodeAttr(const AttrSlice& attrs, const string& attr_name,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                    const NameAttrList** value) {
   const AttrValue* attr_value;
   TF_RETURN_IF_ERROR(attrs.Find(attr_name, &attr_value));
@@ -407,6 +514,7 @@ Status GetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,
   return Status::OK();
 }
 
+<<<<<<< HEAD
 bool TryGetNodeAttr(const AttrSlice& attrs, StringPiece attr_name,
                     const NameAttrList** value) {
   const AttrValue* attr_value = attrs.Find(attr_name);
@@ -426,12 +534,22 @@ namespace {  // Helper for InOutTypesForNode().
 template <class NodeDefOrAttrSlice>
 Status AddArgToSig(const NodeDefOrAttrSlice& node_or_attrs,
                    const OpDef::ArgDef& arg_def, DataTypeVector* sig) {
+=======
+namespace {  // Helper for InOutTypesForNode().
+
+Status AddArgToSig(const NodeDef& node_def, const OpDef::ArgDef& arg_def,
+                   DataTypeVector* sig) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const int original_size = sig->size();
   if (!arg_def.number_attr().empty()) {
     // Same type repeated "repeats" times.
     int32 repeats = -1;
+<<<<<<< HEAD
     TF_RETURN_IF_ERROR(
         GetNodeAttr(node_or_attrs, arg_def.number_attr(), &repeats));
+=======
+    TF_RETURN_IF_ERROR(GetNodeAttr(node_def, arg_def.number_attr(), &repeats));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (repeats < 0) {
       return errors::InvalidArgument("Value for number_attr() ", repeats,
                                      " < 0");
@@ -439,8 +557,12 @@ Status AddArgToSig(const NodeDefOrAttrSlice& node_or_attrs,
 
     if (!arg_def.type_attr().empty()) {
       DataType dtype;
+<<<<<<< HEAD
       TF_RETURN_IF_ERROR(
           GetNodeAttr(node_or_attrs, arg_def.type_attr(), &dtype));
+=======
+      TF_RETURN_IF_ERROR(GetNodeAttr(node_def, arg_def.type_attr(), &dtype));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       for (int i = 0; i < repeats; ++i) {
         sig->push_back(dtype);
       }
@@ -455,12 +577,20 @@ Status AddArgToSig(const NodeDefOrAttrSlice& node_or_attrs,
   } else if (!arg_def.type_attr().empty()) {
     const AttrValue* attr_value;
     TF_RETURN_IF_ERROR(
+<<<<<<< HEAD
         AttrSlice(node_or_attrs).Find(arg_def.type_attr(), &attr_value));
+=======
+        AttrSlice(node_def).Find(arg_def.type_attr(), &attr_value));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     sig->push_back(attr_value->type());
   } else if (!arg_def.type_list_attr().empty()) {
     const AttrValue* attr_value;
     TF_RETURN_IF_ERROR(
+<<<<<<< HEAD
         AttrSlice(node_or_attrs).Find(arg_def.type_list_attr(), &attr_value));
+=======
+        AttrSlice(node_def).Find(arg_def.type_list_attr(), &attr_value));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (int dtype : attr_value->list().type()) {
       sig->push_back(static_cast<DataType>(dtype));
     }
@@ -481,6 +611,7 @@ Status AddArgToSig(const NodeDefOrAttrSlice& node_or_attrs,
 
 }  // namespace
 
+<<<<<<< HEAD
 Status InputTypeForNode(const NodeDef& node_def, const OpDef& op_def,
                         int input_port, DataType* input_type) {
   DataTypeVector input_types;
@@ -521,12 +652,20 @@ Status OutputTypeForNode(const NodeDef& node_def, const OpDef& op_def,
 
 Status OutputTypesForNode(const NodeDef& node_def, const OpDef& op_def,
                           DataTypeVector* outputs) {
+=======
+Status InOutTypesForNode(const NodeDef& node_def, const OpDef& op_def,
+                         DataTypeVector* inputs, DataTypeVector* outputs) {
+  for (const auto& arg : op_def.input_arg()) {
+    TF_RETURN_IF_ERROR(AddArgToSig(node_def, arg, inputs));
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (const auto& arg : op_def.output_arg()) {
     TF_RETURN_IF_ERROR(AddArgToSig(node_def, arg, outputs));
   }
   return Status::OK();
 }
 
+<<<<<<< HEAD
 Status OutputTypesForNode(const AttrSlice& attrs, const OpDef& op_def,
                           DataTypeVector* outputs) {
   for (const auto& arg : op_def.output_arg()) {
@@ -554,23 +693,42 @@ Status ValidateNodeDef(const NodeDef& node_def, const OpDef& op_def) {
     return errors::InvalidArgument(
         "NodeDef op '", node_def.op(), "' does not match ",
         SummarizeOpDef(op_def), "; NodeDef: ", FormatNodeDefForError(node_def));
+=======
+Status ValidateNodeDef(const NodeDef& node_def, const OpDef& op_def) {
+  if (node_def.op() != op_def.name()) {
+    return errors::InvalidArgument("NodeDef op '", node_def.op(),
+                                   "' does not match ", SummarizeOpDef(op_def),
+                                   "; NodeDef: ", SummarizeNodeDef(node_def));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   bool seen_control = false;
   size_t num_inputs = 0;
   // TODO(josh11b): Unify the input field validation.
   for (const string& input : node_def.input()) {
+<<<<<<< HEAD
     if (absl::StartsWith(input, "^")) {
+=======
+    if (StringPiece(input).starts_with("^")) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       seen_control = true;
       if (input.find(':') != string::npos) {
         return errors::InvalidArgument("Control input '", input,
                                        "' must not have ':' in NodeDef: ",
+<<<<<<< HEAD
                                        FormatNodeDefForError(node_def));
+=======
+                                       SummarizeNodeDef(node_def));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     } else if (seen_control) {
       return errors::InvalidArgument("Non-control input '", input,
                                      "' after control input in NodeDef: ",
+<<<<<<< HEAD
                                      FormatNodeDefForError(node_def));
+=======
+                                     SummarizeNodeDef(node_def));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     } else {
       ++num_inputs;
     }
@@ -580,17 +738,27 @@ Status ValidateNodeDef(const NodeDef& node_def, const OpDef& op_def) {
   for (const auto& attr : op_def.attr()) {
     if (!gtl::InsertIfNotPresent(&op_attrs, attr.name(), &attr)) {
       return errors::InvalidArgument("OpDef has duplicate attr name '",
+<<<<<<< HEAD
                                      attr.name(),
                                      "': ", SummarizeOpDef(op_def));
+=======
+                                     attr.name(), "': ",
+                                     SummarizeOpDef(op_def));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   for (const auto& attr : node_def.attr()) {
     // Allow internal optional attributes with names starting with "_".
+<<<<<<< HEAD
     if (absl::StartsWith(attr.first, "_")) {
+=======
+    if (StringPiece(attr.first).starts_with("_")) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       continue;
     }
     auto iter = op_attrs.find(attr.first);
     if (iter == op_attrs.end()) {
+<<<<<<< HEAD
       // A common cause of this error is that TensorFlow has made a
       // backwards-compatible change to the NodeDef (e.g., adding a
       // new attr with a default value), but the binary consuming the
@@ -612,6 +780,15 @@ Status ValidateNodeDef(const NodeDef& node_def, const OpDef& op_def) {
           "; NodeDef: ", FormatNodeDefForError(node_def), "; ",
           SummarizeOpDef(op_def));
     }
+=======
+      return errors::InvalidArgument("NodeDef mentions attr '", attr.first,
+                                     "' not in ", SummarizeOpDef(op_def),
+                                     "; NodeDef: ", SummarizeNodeDef(node_def));
+    }
+    TF_RETURN_WITH_CONTEXT_IF_ERROR(
+        ValidateAttrValue(attr.second, *iter->second), "; NodeDef: ",
+        SummarizeNodeDef(node_def), "; ", SummarizeOpDef(op_def));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Keep track of which attr names have (not) been found in the NodeDef.
     op_attrs.erase(iter);
   }
@@ -623,10 +800,17 @@ Status ValidateNodeDef(const NodeDef& node_def, const OpDef& op_def) {
       if (!attrs.empty()) strings::StrAppend(&attrs, "', '");
       strings::StrAppend(&attrs, attr_pair.first);
     }
+<<<<<<< HEAD
     return errors::InvalidArgument(
         "NodeDef missing attr", op_attrs.size() == 1 ? " '" : "s '", attrs,
         "' from ", SummarizeOpDef(op_def),
         "; NodeDef: ", FormatNodeDefForError(node_def));
+=======
+    return errors::InvalidArgument("NodeDef missing attr",
+                                   op_attrs.size() == 1 ? " '" : "s '", attrs,
+                                   "' from ", SummarizeOpDef(op_def),
+                                   "; NodeDef: ", SummarizeNodeDef(node_def));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Validate the number of inputs.
@@ -637,7 +821,11 @@ Status ValidateNodeDef(const NodeDef& node_def, const OpDef& op_def) {
     return errors::InvalidArgument(
         "NodeDef expected inputs '", DataTypeVectorString(inputs),
         "' do not match ", num_inputs, " inputs specified; ",
+<<<<<<< HEAD
         SummarizeOpDef(op_def), "; NodeDef: ", FormatNodeDefForError(node_def));
+=======
+        SummarizeOpDef(op_def), "; NodeDef: ", SummarizeNodeDef(node_def));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   return Status::OK();
@@ -645,6 +833,7 @@ Status ValidateNodeDef(const NodeDef& node_def, const OpDef& op_def) {
 
 namespace {  // Helpers for NameRangesForNode()
 
+<<<<<<< HEAD
 Status ComputeArgRange(const AttrSlice& attrs, const OpDef::ArgDef& arg_def,
                        const OpDef& op_def, int* num) {
   if (!arg_def.number_attr().empty()) {
@@ -653,24 +842,49 @@ Status ComputeArgRange(const AttrSlice& attrs, const OpDef::ArgDef& arg_def,
   } else if (!arg_def.type_list_attr().empty()) {
     const AttrValue* attr_value;
     TF_RETURN_IF_ERROR(attrs.Find(arg_def.type_list_attr(), &attr_value));
+=======
+Status ComputeArgRange(const NodeDef& node_def, const OpDef::ArgDef& arg_def,
+                       const OpDef& op_def, int* num) {
+  if (!arg_def.number_attr().empty()) {
+    // Same type repeated "num" times.
+    return GetNodeAttr(node_def, arg_def.number_attr(), num);
+  } else if (!arg_def.type_list_attr().empty()) {
+    const AttrValue* attr_value;
+    TF_RETURN_IF_ERROR(
+        AttrSlice(node_def).Find(arg_def.type_list_attr(), &attr_value));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     *num = attr_value->list().type_size();
   } else if (!arg_def.type_attr().empty() || arg_def.type() != DT_INVALID) {
     *num = 1;
   } else {
+<<<<<<< HEAD
     return errors::InvalidArgument(
         "Argument '", arg_def.name(),
         "' incorrectly specified in op definition: ", SummarizeOpDef(op_def));
+=======
+    return errors::InvalidArgument("Argument '", arg_def.name(),
+                                   "' incorrectly specified in op definition: ",
+                                   SummarizeOpDef(op_def));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return Status::OK();
 }
 
+<<<<<<< HEAD
 Status NameRangesHelper(const AttrSlice& attrs,
+=======
+Status NameRangesHelper(const NodeDef& node_def,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                         const protobuf::RepeatedPtrField<OpDef::ArgDef>& args,
                         const OpDef& op_def, NameRangeMap* result) {
   int start = 0;
   int num;
   for (const auto& arg : args) {
+<<<<<<< HEAD
     TF_RETURN_IF_ERROR(ComputeArgRange(attrs, arg, op_def, &num));
+=======
+    TF_RETURN_IF_ERROR(ComputeArgRange(node_def, arg, op_def, &num));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     (*result)[arg.name()] = std::make_pair(start, start + num);
     start += num;
   }
@@ -679,6 +893,7 @@ Status NameRangesHelper(const AttrSlice& attrs,
 
 }  // namespace
 
+<<<<<<< HEAD
 Status NameRangesForNode(const AttrSlice& attrs, const OpDef& op_def,
                          NameRangeMap* inputs, NameRangeMap* outputs) {
   if (inputs != nullptr) {
@@ -689,6 +904,13 @@ Status NameRangesForNode(const AttrSlice& attrs, const OpDef& op_def,
     return NameRangesHelper(attrs, op_def.output_arg(), op_def, outputs);
   }
   return Status::OK();
+=======
+Status NameRangesForNode(const NodeDef& node_def, const OpDef& op_def,
+                         NameRangeMap* inputs, NameRangeMap* outputs) {
+  TF_RETURN_IF_ERROR(
+      NameRangesHelper(node_def, op_def.input_arg(), op_def, inputs));
+  return NameRangesHelper(node_def, op_def.output_arg(), op_def, outputs);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void AddDefaultsToNodeDef(const OpDef& op_def, NodeDef* node_def) {
@@ -702,6 +924,7 @@ void AddDefaultsToNodeDef(const OpDef& op_def, NodeDef* node_def) {
 
 namespace {
 
+<<<<<<< HEAD
 using ::tensorflow::tstring;
 using ::tensorflow::strings::Scanner;
 
@@ -769,14 +992,27 @@ bool IsValidControlInputName(StringPiece sp) {
         .Any(Scanner::LETTER_DIGIT_DASH_DOT_SLASH_UNDERSCORE);
   }
 }
+=======
+static RE2* valid_op_name_pattern = new RE2("[A-Za-z0-9.][A-Za-z0-9_.\\-/]*");
+static RE2* valid_data_input_pattern =
+    new RE2("[A-Za-z0-9.][A-Za-z0-9_.\\-/]*(\\:(0|([1-9][0-9]*)))?");
+static RE2* valid_control_input_pattern =
+    new RE2("\\^[A-Za-z0-9.][A-Za-z0-9_.\\-/]*");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace
 
 Status ValidateOpInput(const string& input_name, bool* is_control_input) {
   *is_control_input = false;
+<<<<<<< HEAD
   if (IsValidDataInputName(input_name)) {
     return Status::OK();
   } else if (IsValidControlInputName(input_name)) {
+=======
+  if (RE2::FullMatch(input_name, *valid_data_input_pattern)) {
+    return Status::OK();
+  } else if (RE2::FullMatch(input_name, *valid_control_input_pattern)) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     *is_control_input = true;
     return Status::OK();
   } else {
@@ -784,16 +1020,28 @@ Status ValidateOpInput(const string& input_name, bool* is_control_input) {
   }
 }
 
+<<<<<<< HEAD
 Status ValidateNodeName(const string& node_name) {
   if (IsValidNodeName(node_name)) {
     return Status::OK();
   } else {
     return errors::InvalidArgument("Illegal op name '", node_name, "'");
+=======
+Status ValidateOpName(const string& op_name) {
+  if (RE2::FullMatch(op_name, *valid_op_name_pattern)) {
+    return Status::OK();
+  } else {
+    return errors::InvalidArgument("Illegal op name '", op_name, "'");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
 Status ValidateExternalNodeDefSyntax(const NodeDef& node_def) {
+<<<<<<< HEAD
   Status s = ValidateNodeName(node_def.name());
+=======
+  Status s = ValidateOpName(node_def.name());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!s.ok()) {
     return AttachDef(s, node_def);
   }
@@ -815,6 +1063,7 @@ Status ValidateExternalNodeDefSyntax(const NodeDef& node_def) {
   return Status::OK();
 }
 
+<<<<<<< HEAD
 Status AttachDef(const Status& status, const NodeDef& node_def,
                  bool allow_multiple_formatted_node) {
   Status ret = status;
@@ -913,4 +1162,13 @@ Status AddPrefixAndSuffixToNode(StringPiece prefix, StringPiece suffix,
   return Status::OK();
 }
 
+=======
+Status AttachDef(const Status& status, const NodeDef& node_def) {
+  Status ret = status;
+  errors::AppendToMessage(
+      &ret, strings::StrCat(" [[Node: ", SummarizeNodeDef(node_def), "]]"));
+  return ret;
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

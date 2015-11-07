@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // A program with a main that is suitable for unittests, including those
 // that also define microbenchmarks.  Based on whether the user specified
 // the --benchmark_filter flag which specifies which benchmarks to run,
 // we will either run benchmarks or run the gtest tests in the program.
 
+<<<<<<< HEAD
 #include "tensorflow/core/platform/platform.h"
 
 #if defined(PLATFORM_GOOGLE) || defined(__ANDROID__)
@@ -29,15 +33,33 @@ limitations under the License.
 #include "absl/strings/match.h"
 #include "tensorflow/core/platform/stacktrace_handler.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include <iostream>
+
+#include "tensorflow/core/platform/port.h"
+
+#if defined(PLATFORM_GOOGLE) || defined(PLATFORM_POSIX_ANDROID) || \
+    defined(PLATFORM_GOOGLE_ANDROID)
+// main() is supplied by gunit_main
+#else
+#include "gtest/gtest.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/platform/test_benchmark.h"
 
 GTEST_API_ int main(int argc, char** argv) {
   std::cout << "Running main() from test_main.cc\n";
 
+<<<<<<< HEAD
   tensorflow::testing::InstallStacktraceHandler();
   testing::InitGoogleTest(&argc, argv);
   for (int i = 1; i < argc; i++) {
     if (absl::StartsWith(argv[i], "--benchmarks=")) {
+=======
+  testing::InitGoogleTest(&argc, argv);
+  for (int i = 1; i < argc; i++) {
+    if (tensorflow::StringPiece(argv[i]).starts_with("--benchmarks=")) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       const char* pattern = argv[i] + strlen("--benchmarks=");
       tensorflow::testing::Benchmark::Run(pattern);
       return 0;

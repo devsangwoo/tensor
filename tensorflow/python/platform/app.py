@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,3 +39,18 @@ def run(main=None, argv=None):
   main = main or _sys.modules['__main__'].main
 
   _run(main=main, argv=argv, flags_parser=_parse_flags_tolerate_undef)
+=======
+"""Switch between depending on pyglib.app or an OSS replacement."""
+# pylint: disable=unused-import
+# pylint: disable=g-import-not-at-top
+# pylint: disable=wildcard-import
+import tensorflow.python.platform
+import control_imports
+if control_imports.USE_OSS and control_imports.OSS_APP:
+  from tensorflow.python.platform.default._app import *
+else:
+  from tensorflow.python.platform.google._app import *
+
+# Import 'flags' into this module
+from tensorflow.python.platform import flags
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

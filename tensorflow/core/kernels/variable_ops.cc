@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #define EIGEN_USE_THREADS
 #include "tensorflow/core/kernels/variable_ops.h"
 
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/register_types.h"
 #include "tensorflow/core/lib/core/errors.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/types.h"
 
 namespace tensorflow {
@@ -177,10 +181,18 @@ class IsVariableInitializedOp : public OpKernel {
 
 REGISTER_KERNEL_BUILDER(Name("Variable").Device(DEVICE_CPU), VariableOp);
 REGISTER_KERNEL_BUILDER(Name("VariableV2").Device(DEVICE_CPU), VariableOp);
+=======
+#include "tensorflow/core/platform/port.h"
+
+namespace tensorflow {
+
+REGISTER_KERNEL_BUILDER(Name("Variable").Device(DEVICE_CPU), VariableOp);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 REGISTER_KERNEL_BUILDER(Name("TemporaryVariable").Device(DEVICE_CPU),
                         TemporaryVariableOp);
 REGISTER_KERNEL_BUILDER(Name("DestroyTemporaryVariable").Device(DEVICE_CPU),
                         DestroyTemporaryVariableOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("IsVariableInitialized").Device(DEVICE_CPU),
                         IsVariableInitializedOp);
 
@@ -238,5 +250,27 @@ TF_CALL_GPU_NUMBER_TYPES(REGISTER_GPU_KERNELS);
 TF_CALL_int64(REGISTER_GPU_KERNELS);
 #undef REGISTER_GPU_KERNELS
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+
+#if GOOGLE_CUDA
+// Only register 'Variable' on GPU for the subset of types also supported by
+// 'Assign' (see dense_update_ops.cc.)
+#define REGISTER_GPU_KERNELS(type)                                       \
+  REGISTER_KERNEL_BUILDER(                                               \
+      Name("Variable").Device(DEVICE_GPU).TypeConstraint<type>("dtype"), \
+      VariableOp);                                                       \
+  REGISTER_KERNEL_BUILDER(Name("TemporaryVariable")                      \
+                              .Device(DEVICE_GPU)                        \
+                              .TypeConstraint<type>("dtype"),            \
+                          TemporaryVariableOp);                          \
+  REGISTER_KERNEL_BUILDER(Name("DestroyTemporaryVariable")               \
+                              .Device(DEVICE_GPU)                        \
+                              .TypeConstraint<type>("T"),                \
+                          DestroyTemporaryVariableOp);
+
+TF_CALL_GPU_NUMBER_TYPES(REGISTER_GPU_KERNELS);
+#undef REGISTER_GPU_KERNELS
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

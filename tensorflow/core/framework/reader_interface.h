@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,19 @@ limitations under the License.
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_READER_INTERFACE_H_
+#define TENSORFLOW_FRAMEWORK_READER_INTERFACE_H_
+
+#include <memory>
+#include <string>
+#include <vector>
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/resource_mgr.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -41,10 +55,19 @@ class ReaderInterface;
 // so see ../ops/io_ops.cc for detailed descriptions.
 //
 // All descendants of this class must be thread-safe.
+<<<<<<< HEAD
+=======
+//
+// See the design document here:
+// https://docs.google.com/document/d/1UAgZOoeehYr20TdzW2CoZ30V-aqQphU4SwKXsW7eJv4/edit#
+
+// TODO(josh11b): Switch this to Async.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class ReaderInterface : public ResourceBase {
  public:
   // Read a single record into *key / *value.  May get more work from
   // *queue if the current work is complete.  Sets the status on
+<<<<<<< HEAD
   // *context with an OutOfRange Status if the current work is
   // complete and the queue is done (closed and empty).
   // This method may block.
@@ -64,6 +87,14 @@ class ReaderInterface : public ResourceBase {
                          std::vector<tstring>* value,
                          OpKernelContext* context) = 0;
 
+=======
+  // *context with an OutOfRange Status if the the current work is
+  // complete and the queue is done (closed and empty).
+  // This method may block.
+  virtual void Read(QueueInterface* queue, string* key, string* value,
+                    OpKernelContext* context) = 0;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Restore this reader to its newly-constructed state.
   virtual Status Reset() = 0;
 
@@ -73,11 +104,19 @@ class ReaderInterface : public ResourceBase {
 
   // -- Serialization/Restoration support --
   // Not all readers will support saving and restoring state.
+<<<<<<< HEAD
   virtual Status SerializeState(tstring* state) = 0;
   // Note: Must Reset on error.
   virtual Status RestoreState(const tstring& state) = 0;
 
   string DebugString() const override { return "a reader"; }
+=======
+  virtual Status SerializeState(string* state) = 0;
+  // Note: Must Reset on error.
+  virtual Status RestoreState(const string& state) = 0;
+
+  string DebugString() override { return "a reader"; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  protected:
   virtual ~ReaderInterface() {}
@@ -85,4 +124,8 @@ class ReaderInterface : public ResourceBase {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_READER_INTERFACE_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_READER_INTERFACE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

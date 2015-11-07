@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,10 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_KERNELS_LOOKUP_UTIL_H_
 #define TENSORFLOW_CORE_KERNELS_LOOKUP_UTIL_H_
+=======
+#ifndef THIRD_PARTY_TENSORFLOW_CORE_KERNELS_LOOKUP_UTIL_H_
+#define THIRD_PARTY_TENSORFLOW_CORE_KERNELS_LOOKUP_UTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/framework/lookup_interface.h"
 #include "tensorflow/core/framework/op_kernel.h"
@@ -25,6 +30,7 @@ namespace lookup {
 
 // Gets the LookupTable stored in the ctx->resource_manager() with key
 // passed by attribute with name input_name, returns null if the table
+<<<<<<< HEAD
 // doesn't exist. Use GetResourceLookupTable() or GetReferenceLookupTable() if
 // the input dtype is known.
 Status GetLookupTable(StringPiece input_name, OpKernelContext* ctx,
@@ -33,17 +39,28 @@ Status GetResourceLookupTable(StringPiece input_name, OpKernelContext* ctx,
                               LookupInterface** table);
 Status GetReferenceLookupTable(StringPiece input_name, OpKernelContext* ctx,
                                LookupInterface** table);
+=======
+// doesn't exist.
+Status GetLookupTable(const string& input_name, OpKernelContext* ctx,
+                      LookupInterface** table);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Gets the InitializableLookupTable stored in the
 // ctx->resource_manager() with key passed by attribute with name
 // input_name, returns null if the table doesn't exist.
+<<<<<<< HEAD
 Status GetInitializableLookupTable(StringPiece input_name, OpKernelContext* ctx,
+=======
+Status GetInitializableLookupTable(const string& input_name,
+                                   OpKernelContext* ctx,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                    InitializableLookupTable** table);
 
 // Verify that the given key_dtype and value_dtype matches the corresponding
 // table's data types.
 Status CheckTableDataTypes(const LookupInterface& table, DataType key_dtype,
                            DataType value_dtype, const string& table_name);
+<<<<<<< HEAD
 
 Status InitializeTableFromTextFile(const string& filename, int64 vocab_size,
                                    char delimiter, int32 key_index,
@@ -54,3 +71,9 @@ Status InitializeTableFromTextFile(const string& filename, int64 vocab_size,
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_LOOKUP_UTIL_H_
+=======
+}  // namespace lookup
+}  // namespace tensorflow
+
+#endif  // THIRD_PARTY_TENSORFLOW_CORE_KERNELS_LOOKUP_UTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

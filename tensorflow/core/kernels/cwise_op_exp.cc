@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,4 +28,13 @@ REGISTER5(UnaryOp, GPU, "Exp", functor::exp, float, Eigen::half, double,
 #if TENSORFLOW_USE_SYCL
 REGISTER2(UnaryOp, SYCL, "Exp", functor::exp, float, double);
 #endif  // TENSORFLOW_USE_SYCL
+=======
+#include "tensorflow/core/kernels/cwise_ops_common.h"
+
+namespace tensorflow {
+REGISTER3(UnaryOp, CPU, "Exp", functor::exp, float, double, complex64);
+#if GOOGLE_CUDA
+REGISTER2(UnaryOp, GPU, "Exp", functor::exp, float, double);
+#endif
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,6 +42,39 @@ static Status ReadEntireFile(Env* env, const string& filename, T* contents) {
   io::RandomAccessInputStream input_stream(file.get());
   io::BufferedInputStream in(&input_stream, 1 << 20);
   TF_RETURN_IF_ERROR(in.ReadAll(contents));
+=======
+// See docs in ../ops/io_ops.cc.
+
+#include <memory>
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/reader_op_kernel.h"
+#include "tensorflow/core/kernels/reader_base.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/public/tensor_shape.h"
+
+namespace tensorflow {
+
+static Status ReadEntireFile(Env* env, const string& filename,
+                             string* contents) {
+  uint64 file_size = 0;
+  TF_RETURN_IF_ERROR(env->GetFileSize(filename, &file_size));
+  contents->resize(file_size);
+  RandomAccessFile* file;
+  TF_RETURN_IF_ERROR(env->NewRandomAccessFile(filename, &file));
+  std::unique_ptr<RandomAccessFile> make_sure_file_gets_deleted(file);
+  StringPiece data;
+  TF_RETURN_IF_ERROR(file->Read(0, file_size, &data, &(*contents)[0]));
+  if (data.size() != file_size) {
+    return errors::DataLoss("Truncated read of '", filename, "' expected ",
+                            file_size, " got ", data.size());
+  }
+  if (data.data() != &(*contents)[0]) {
+    memmove(&(*contents)[0], data.data(), data.size());
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return Status::OK();
 }
 
@@ -50,7 +84,11 @@ class WholeFileReader : public ReaderBase {
       : ReaderBase(strings::StrCat("WholeFileReader '", node_name, "'")),
         env_(env) {}
 
+<<<<<<< HEAD
   Status ReadLocked(tstring* key, tstring* value, bool* produced,
+=======
+  Status ReadLocked(string* key, string* value, bool* produced,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                     bool* at_end) override {
     *key = current_work();
     TF_RETURN_IF_ERROR(ReadEntireFile(env_, *key, value));
@@ -61,6 +99,7 @@ class WholeFileReader : public ReaderBase {
 
   // Stores state in a ReaderBaseState proto, since WholeFileReader has
   // no additional state beyond ReaderBase.
+<<<<<<< HEAD
   Status SerializeStateLocked(tstring* state) override {
     ReaderBaseState base_state;
     SaveBaseState(&base_state);
@@ -73,6 +112,20 @@ class WholeFileReader : public ReaderBase {
     if (!ParseProtoUnlimited(&base_state, state)) {
       return errors::InvalidArgument("Could not parse state for ", name(), ": ",
                                      absl::CEscape(state));
+=======
+  Status SerializeStateLocked(string* state) override {
+    ReaderBaseState base_state;
+    SaveBaseState(&base_state);
+    base_state.SerializeToString(state);
+    return Status::OK();
+  }
+
+  Status RestoreStateLocked(const string& state) override {
+    ReaderBaseState base_state;
+    if (!ParseProtoUnlimited(&base_state, state)) {
+      return errors::InvalidArgument("Could not parse state for ", name(), ": ",
+                                     str_util::CEscape(state));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     TF_RETURN_IF_ERROR(RestoreBaseState(base_state));
     return Status::OK();
@@ -94,8 +147,11 @@ class WholeFileReaderOp : public ReaderOpKernel {
 
 REGISTER_KERNEL_BUILDER(Name("WholeFileReader").Device(DEVICE_CPU),
                         WholeFileReaderOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("WholeFileReaderV2").Device(DEVICE_CPU),
                         WholeFileReaderOp);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 class ReadFileOp : public OpKernel {
  public:
@@ -112,13 +168,19 @@ class ReadFileOp : public OpKernel {
     OP_REQUIRES_OK(context, context->allocate_output("contents",
                                                      TensorShape({}), &output));
     OP_REQUIRES_OK(context,
+<<<<<<< HEAD
                    ReadEntireFile(context->env(), input->scalar<tstring>()(),
                                   &output->scalar<tstring>()()));
+=======
+                   ReadEntireFile(context->env(), input->scalar<string>()(),
+                                  &output->scalar<string>()()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 REGISTER_KERNEL_BUILDER(Name("ReadFile").Device(DEVICE_CPU), ReadFileOp);
 
+<<<<<<< HEAD
 class WriteFileOp : public OpKernel {
  public:
   using OpKernel::OpKernel;
@@ -147,4 +209,6 @@ class WriteFileOp : public OpKernel {
 };
 
 REGISTER_KERNEL_BUILDER(Name("WriteFile").Device(DEVICE_CPU), WriteFileOp);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

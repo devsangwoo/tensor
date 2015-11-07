@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,10 +22,17 @@ limitations under the License.
 
 // Do nothing for this platform.
 
+=======
+#ifndef THIRD_PARTY_TENSORFLOW_CORE_PLATFORM_DEFAULT_DYNAMIC_ANNOTATIONS_H_
+#define THIRD_PARTY_TENSORFLOW_CORE_PLATFORM_DEFAULT_DYNAMIC_ANNOTATIONS_H_
+
+// Do nothing for this platform
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #define TF_ANNOTATE_MEMORY_IS_INITIALIZED(ptr, bytes) \
   do {                                                \
   } while (0)
 
+<<<<<<< HEAD
 #define TF_ANNOTATE_BENIGN_RACE(ptr, description) \
   do {                                            \
   } while (0)
@@ -32,3 +40,6 @@ limitations under the License.
 #define TF_ATTRIBUTE_NO_SANITIZE_MEMORY
 
 #endif  // TENSORFLOW_CORE_PLATFORM_DEFAULT_DYNAMIC_ANNOTATIONS_H_
+=======
+#endif  // THIRD_PARTY_TENSORFLOW_CORE_PLATFORM_DEFAULT_DYNAMIC_ANNOTATIONS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

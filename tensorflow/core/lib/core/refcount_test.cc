@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +17,11 @@ limitations under the License.
 #include "tensorflow/core/lib/core/refcount.h"
 
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/lib/core/refcount.h"
+
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace core {
@@ -30,7 +36,11 @@ class MyRef : public RefCounted {
   ~MyRef() override { destroyed++; }
 };
 
+<<<<<<< HEAD
 class RefTest : public ::testing::Test {
+=======
+class RefTest : public testing::Test {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  public:
   RefTest() {
     constructed = 0;

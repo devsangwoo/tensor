@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -203,17 +204,45 @@ string SummarizeString(const string& str) {
   } else {
     return strings::StrCat("\"", escaped, "\"");
   }
+=======
+#include "tensorflow/core/framework/attr_value_util.h"
+
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/lib/strings/str_util.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/platform/regexp.h"
+
+namespace tensorflow {
+
+namespace {
+
+string SummarizeString(const string& str) {
+  return strings::StrCat("\"", str_util::CEscape(str), "\"");
+}
+
+string SummarizeShape(const TensorShapeProto& proto) {
+  TensorShape shape(proto);
+  return shape.ShortDebugString();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 string SummarizeTensor(const TensorProto& tensor_proto) {
   Tensor t;
   if (!t.FromProto(tensor_proto)) {
+<<<<<<< HEAD
     return strings::StrCat(
         "<Invalid TensorProto: ", tensor_proto.ShortDebugString(), ">");
+=======
+    return strings::StrCat("<Invalid TensorProto: ",
+                           tensor_proto.ShortDebugString(), ">");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return t.DebugString();
 }
 
+<<<<<<< HEAD
 string SummarizeFunc(const NameAttrList& func) {
   std::vector<string> entries;
   for (auto p : func.attr()) {
@@ -224,6 +253,8 @@ string SummarizeFunc(const NameAttrList& func) {
   return strings::StrCat(func.name(), "[", absl::StrJoin(entries, ", "), "]");
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 
 string SummarizeAttrValue(const AttrValue& attr_value) {
@@ -237,6 +268,7 @@ string SummarizeAttrValue(const AttrValue& attr_value) {
     case AttrValue::kB:
       return attr_value.b() ? "true" : "false";
     case AttrValue::kType:
+<<<<<<< HEAD
       return EnumName_DataType(attr_value.type());
     case AttrValue::kShape:
       return PartialTensorShape::DebugString(attr_value.shape());
@@ -287,6 +319,64 @@ string SummarizeAttrValue(const AttrValue& attr_value) {
     }
     case AttrValue::kFunc: {
       return SummarizeFunc(attr_value.func());
+=======
+      return DataType_Name(attr_value.type());
+    case AttrValue::kShape:
+      return SummarizeShape(attr_value.shape());
+    case AttrValue::kTensor:
+      return SummarizeTensor(attr_value.tensor());
+    case AttrValue::kList: {
+      string ret = "[";
+      if (attr_value.list().s_size() > 0) {
+        for (int i = 0; i < attr_value.list().s_size(); ++i) {
+          if (i > 0) strings::StrAppend(&ret, ", ");
+          strings::StrAppend(&ret, SummarizeString(attr_value.list().s(i)));
+        }
+      } else if (attr_value.list().i_size() > 0) {
+        for (int i = 0; i < attr_value.list().i_size(); ++i) {
+          if (i > 0) strings::StrAppend(&ret, ", ");
+          strings::StrAppend(&ret, attr_value.list().i(i));
+        }
+      } else if (attr_value.list().f_size() > 0) {
+        for (int i = 0; i < attr_value.list().f_size(); ++i) {
+          if (i > 0) strings::StrAppend(&ret, ", ");
+          strings::StrAppend(&ret, attr_value.list().f(i));
+        }
+      } else if (attr_value.list().b_size() > 0) {
+        for (int i = 0; i < attr_value.list().b_size(); ++i) {
+          if (i > 0) strings::StrAppend(&ret, ", ");
+          strings::StrAppend(&ret, attr_value.list().b(i) ? "true" : "false");
+        }
+      } else if (attr_value.list().type_size() > 0) {
+        for (int i = 0; i < attr_value.list().type_size(); ++i) {
+          if (i > 0) strings::StrAppend(&ret, ", ");
+          strings::StrAppend(&ret, DataType_Name(attr_value.list().type(i)));
+        }
+      } else if (attr_value.list().shape_size() > 0) {
+        for (int i = 0; i < attr_value.list().shape_size(); ++i) {
+          if (i > 0) strings::StrAppend(&ret, ", ");
+          strings::StrAppend(&ret, SummarizeShape(attr_value.list().shape(i)));
+        }
+      } else if (attr_value.list().tensor_size() > 0) {
+        for (int i = 0; i < attr_value.list().tensor_size(); ++i) {
+          if (i > 0) strings::StrAppend(&ret, ", ");
+          strings::StrAppend(&ret,
+                             SummarizeTensor(attr_value.list().tensor(i)));
+        }
+      }
+      strings::StrAppend(&ret, "]");
+      return ret;
+    }
+    case AttrValue::kFunc: {
+      std::vector<string> entries;
+      for (auto p : attr_value.func().attr()) {
+        entries.push_back(
+            strings::StrCat(p.first, "=", SummarizeAttrValue(p.second)));
+      }
+      sort(entries.begin(), entries.end());
+      return strings::StrCat(attr_value.func().name(), "[",
+                             str_util::Join(entries, ", "), "]");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     case AttrValue::kPlaceholder:
       return strings::StrCat("$", attr_value.placeholder());
@@ -299,6 +389,7 @@ string SummarizeAttrValue(const AttrValue& attr_value) {
 Status AttrValueHasType(const AttrValue& attr_value, StringPiece type) {
   int num_set = 0;
 
+<<<<<<< HEAD
 #define VALIDATE_FIELD(name, type_string, oneof_case)                         \
   do {                                                                        \
     if (attr_value.has_list()) {                                              \
@@ -318,6 +409,27 @@ Status AttrValueHasType(const AttrValue& attr_value, StringPiece type) {
       }                                                                       \
       ++num_set;                                                              \
     }                                                                         \
+=======
+#define VALIDATE_FIELD(name, type_string, oneof_case)                      \
+  do {                                                                     \
+    if (attr_value.has_list()) {                                           \
+      if (attr_value.list().name##_size() > 0) {                           \
+        if (type != "list(" type_string ")") {                             \
+          return errors::InvalidArgument(                                  \
+              "AttrValue had value with type list(" type_string ") when ", \
+              type, " expected");                                          \
+        }                                                                  \
+        ++num_set;                                                         \
+      }                                                                    \
+    } else if (attr_value.value_case() == AttrValue::oneof_case) {         \
+      if (type != type_string) {                                           \
+        return errors::InvalidArgument(                                    \
+            "AttrValue had value with type " type_string " when ", type,   \
+            " expected");                                                  \
+      }                                                                    \
+      ++num_set;                                                           \
+    }                                                                      \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   } while (false)
 
   VALIDATE_FIELD(s, "string", kS);
@@ -327,6 +439,7 @@ Status AttrValueHasType(const AttrValue& attr_value, StringPiece type) {
   VALIDATE_FIELD(type, "type", kType);
   VALIDATE_FIELD(shape, "shape", kShape);
   VALIDATE_FIELD(tensor, "tensor", kTensor);
+<<<<<<< HEAD
   VALIDATE_FIELD(func, "func", kFunc);
 
 #undef VALIDATE_FIELD
@@ -346,6 +459,32 @@ Status AttrValueHasType(const AttrValue& attr_value, StringPiece type) {
     if (num_set) {
       return errors::InvalidArgument(
           "AttrValue missing value with expected type '", type, "'");
+=======
+
+#undef VALIDATE_FIELD
+
+  if (attr_value.value_case() == AttrValue::kFunc) {
+    if (type != "func") {
+      return errors::InvalidArgument(
+          "AttrValue had value with type 'func' when ", type, " expected");
+    }
+    ++num_set;
+  }
+
+  if (attr_value.value_case() == AttrValue::kPlaceholder) {
+    return errors::InvalidArgument(
+        "AttrValue had value with unexpected type 'placeholder");
+  }
+
+  // If the attr type is 'list', we expect attr_value.has_list() to be true.
+  // However, proto3's attr_value.has_list() can be false when set to an empty
+  // list. So we simply check if has_list is false and some other field in
+  // attr_value is set to flag the error.
+  if (StringPiece(type).starts_with("list(") && !attr_value.has_list()) {
+    if (num_set) {
+      return errors::InvalidArgument(
+          "AttrValue missing value with expected type ", type);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     } else {
       // Indicate that we have a list, but an empty one.
       ++num_set;
@@ -353,6 +492,7 @@ Status AttrValueHasType(const AttrValue& attr_value, StringPiece type) {
   }
 
   // Okay to have an empty list, but not to be missing a non-list value.
+<<<<<<< HEAD
   if (num_set == 0 && !absl::StartsWith(type, "list(")) {
     return errors::InvalidArgument(
         "AttrValue missing value with expected type '", type, "'");
@@ -365,6 +505,15 @@ Status AttrValueHasType(const AttrValue& attr_value, StringPiece type) {
       return errors::InvalidArgument("AttrValue has invalid DataType enum: ",
                                      attr_value.type());
     }
+=======
+  if (num_set == 0 && !StringPiece(type).starts_with("list(")) {
+    return errors::InvalidArgument(
+        "AttrValue missing value with expected type ", type);
+  }
+
+  // Ref types and DT_INVALID are illegal.
+  if (type == "type") {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (IsRefType(attr_value.type())) {
       return errors::InvalidArgument(
           "AttrValue must not have reference type value of ",
@@ -376,10 +525,13 @@ Status AttrValueHasType(const AttrValue& attr_value, StringPiece type) {
   } else if (type == "list(type)") {
     for (auto as_int : attr_value.list().type()) {
       const DataType dtype = static_cast<DataType>(as_int);
+<<<<<<< HEAD
       if (!DataType_IsValid(dtype)) {
         return errors::InvalidArgument("AttrValue has invalid DataType enum: ",
                                        as_int);
       }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if (IsRefType(dtype)) {
         return errors::InvalidArgument(
             "AttrValue must not have reference type value of ",
@@ -397,6 +549,7 @@ Status AttrValueHasType(const AttrValue& attr_value, StringPiece type) {
 bool ParseAttrValue(StringPiece type, StringPiece text, AttrValue* out) {
   // Parse type.
   string field_name;
+<<<<<<< HEAD
   bool is_list = absl::ConsumePrefix(&type, "list(");
   if (absl::ConsumePrefix(&type, "string")) {
     field_name = "s";
@@ -415,11 +568,35 @@ bool ParseAttrValue(StringPiece type, StringPiece text, AttrValue* out) {
   } else if (absl::ConsumePrefix(&type, "func")) {
     field_name = "func";
   } else if (absl::ConsumePrefix(&type, "placeholder")) {
+=======
+  bool is_list = type.Consume("list(");
+  if (type.Consume("string")) {
+    field_name = "s";
+  } else if (type.Consume("int")) {
+    field_name = "i";
+  } else if (type.Consume("float")) {
+    field_name = "f";
+  } else if (type.Consume("bool")) {
+    field_name = "b";
+  } else if (type.Consume("type")) {
+    field_name = "type";
+  } else if (type.Consume("shape")) {
+    field_name = "shape";
+  } else if (type.Consume("tensor")) {
+    field_name = "tensor";
+  } else if (type.Consume("func")) {
+    field_name = "func";
+  } else if (type.Consume("placeholder")) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     field_name = "placeholder";
   } else {
     return false;
   }
+<<<<<<< HEAD
   if (is_list && !absl::ConsumePrefix(&type, ")")) {
+=======
+  if (is_list && !type.Consume(")")) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return false;
   }
 
@@ -428,6 +605,7 @@ bool ParseAttrValue(StringPiece type, StringPiece text, AttrValue* out) {
   if (is_list) {
     // TextFormat parser considers "i: 7" to be the same as "i: [7]",
     // but we only want to allow list values with [].
+<<<<<<< HEAD
     StringPiece cleaned = text;
     str_util::RemoveLeadingWhitespace(&cleaned);
     str_util::RemoveTrailingWhitespace(&cleaned);
@@ -438,6 +616,12 @@ bool ParseAttrValue(StringPiece type, StringPiece text, AttrValue* out) {
     cleaned.remove_prefix(1);
     str_util::RemoveLeadingWhitespace(&cleaned);
     if (cleaned.size() == 1) {
+=======
+    if (!RE2::FullMatch(ToRegexpStringPiece(text), "\\s*\\[.*\\]\\s*")) {
+      return false;
+    }
+    if (RE2::FullMatch(ToRegexpStringPiece(text), "\\s*\\[\\s*\\]\\s*")) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // User wrote "[]", so return empty list without invoking the TextFormat
       // parse which returns an error for "i: []".
       out->Clear();
@@ -449,6 +633,7 @@ bool ParseAttrValue(StringPiece type, StringPiece text, AttrValue* out) {
     to_parse = strings::StrCat(field_name, ": ", text);
   }
 
+<<<<<<< HEAD
   return ProtoParseFromString(to_parse, out);
 }
 
@@ -463,6 +648,21 @@ void SetAttrValue(const AttrValue& value, AttrValue* out) { *out = value; }
     for (const auto& v : value) {                                         \
       out->mutable_list()->add_##FIELD(v);                                \
     }                                                                     \
+=======
+  // Parse if we can.
+  return protobuf::TextFormat::ParseFromString(to_parse, out);
+}
+
+#define DEFINE_SET_ATTR_VALUE_ONE(ARG_TYPE, FIELD) \
+  void SetAttrValue(ARG_TYPE value, AttrValue* out) { out->set_##FIELD(value); }
+
+#define DEFINE_SET_ATTR_VALUE_LIST(ARG_TYPE, FIELD)              \
+  void SetAttrValue(ARG_TYPE value, AttrValue* out) {            \
+    out->mutable_list(); /* create list() even if value empty */ \
+    for (const auto& v : value) {                                \
+      out->mutable_list()->add_##FIELD(v);                       \
+    }                                                            \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
 #define DEFINE_SET_ATTR_VALUE_BOTH(ARG_TYPE, FIELD) \
@@ -481,6 +681,7 @@ DEFINE_SET_ATTR_VALUE_LIST(const std::vector<bool>&, b)
 DEFINE_SET_ATTR_VALUE_LIST(std::initializer_list<bool>, b)
 DEFINE_SET_ATTR_VALUE_BOTH(DataType, type)
 
+<<<<<<< HEAD
 #ifdef USE_TSTRING
 void SetAttrValue(const tstring& value, AttrValue* out) {
   out->set_s(value.data(), value.size());
@@ -494,10 +695,13 @@ void SetAttrValue(gtl::ArraySlice<tstring> value, AttrValue* out) {
 }
 #endif
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 void SetAttrValue(StringPiece value, AttrValue* out) {
   out->set_s(value.data(), value.size());
 }
 
+<<<<<<< HEAD
 void SetAttrValue(const gtl::ArraySlice<StringPiece> value, AttrValue* out) {
   out->mutable_list()->Clear();  // Create list() even if value empty.
   for (const auto& v : value) {
@@ -512,10 +716,13 @@ void MoveAttrValue(std::vector<string>&& value, AttrValue* out) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 void SetAttrValue(const TensorShape& value, AttrValue* out) {
   value.AsProto(out->mutable_shape());
 }
 
+<<<<<<< HEAD
 void SetAttrValue(const TensorShapeProto& value, AttrValue* out) {
   *out->mutable_shape() = value;
 }
@@ -541,6 +748,10 @@ void SetAttrValue(gtl::ArraySlice<TensorShapeProto> value, AttrValue* out) {
 void SetAttrValue(const gtl::ArraySlice<PartialTensorShape> value,
                   AttrValue* out) {
   out->mutable_list()->Clear();  // Create list() even if value empty.
+=======
+void SetAttrValue(const gtl::ArraySlice<TensorShape> value, AttrValue* out) {
+  out->mutable_list();  // Create list() even if value empty.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (const auto& v : value) {
     v.AsProto(out->mutable_list()->add_shape());
   }
@@ -555,7 +766,11 @@ void SetAttrValue(const Tensor& value, AttrValue* out) {
 }
 
 void SetAttrValue(const gtl::ArraySlice<Tensor> value, AttrValue* out) {
+<<<<<<< HEAD
   out->mutable_list()->Clear();  // Create list() even if value empty.
+=======
+  out->mutable_list();  // Create list() even if value empty.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (const auto& v : value) {
     if (v.NumElements() > 1) {
       v.AsProtoTensorContent(out->mutable_list()->add_tensor());
@@ -570,7 +785,11 @@ void SetAttrValue(const TensorProto& value, AttrValue* out) {
 }
 
 void SetAttrValue(const gtl::ArraySlice<TensorProto> value, AttrValue* out) {
+<<<<<<< HEAD
   out->mutable_list()->Clear();  // Create list() even if value empty.
+=======
+  out->mutable_list();  // Create list() even if value empty.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (const auto& v : value) {
     *out->mutable_list()->add_tensor() = v;
   }
@@ -580,6 +799,7 @@ void SetAttrValue(const NameAttrList& value, AttrValue* out) {
   *out->mutable_func() = value;
 }
 
+<<<<<<< HEAD
 void SetAttrValue(gtl::ArraySlice<NameAttrList> value, AttrValue* out) {
   out->mutable_list()->Clear();  // Create list() even if value empty.
   for (const auto& v : value) {
@@ -601,10 +821,24 @@ bool FastAreAttrValuesEqual(const AttrValue& a, const AttrValue& b) {
 
 uint64 FastAttrValueHash(const AttrValue& a) {
   return AttrValueHash(a, FastTensorProtoHash);
+=======
+bool AreAttrValuesEqual(const AttrValue& a, const AttrValue& b) {
+  string a_str, b_str;
+  a.SerializeToString(&a_str);
+  b.SerializeToString(&b_str);
+  // Note: it should be safe to compare proto serializations of the attr
+  // values since at most one field should be set in each (indeed, it
+  // must be the same field if they are to compare equal).
+  // Exception: there are multiple equivalent representations of
+  // TensorProtos.  So a return value of true implies a == b, but not the
+  // converse.
+  return a_str == b_str;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 bool HasPlaceHolder(const AttrValue& val) {
   switch (val.value_case()) {
+<<<<<<< HEAD
     case AttrValue::kList: {
       for (const NameAttrList& func : val.list().func()) {
         for (const auto& p : func.attr()) {
@@ -615,6 +849,8 @@ bool HasPlaceHolder(const AttrValue& val) {
       }
       break;
     }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     case AttrValue::kFunc:
       for (const auto& p : val.func().attr()) {
         if (HasPlaceHolder(p.second)) {
@@ -630,6 +866,7 @@ bool HasPlaceHolder(const AttrValue& val) {
   return false;
 }
 
+<<<<<<< HEAD
 bool SubstitutePlaceholders(const SubstituteFunc& substitute,
                             AttrValue* value) {
   switch (value->value_case()) {
@@ -643,6 +880,10 @@ bool SubstitutePlaceholders(const SubstituteFunc& substitute,
       }
       break;
     }
+=======
+bool SubstitutePlaceholders(SubstituteFunc substitute, AttrValue* value) {
+  switch (value->value_case()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     case AttrValue::kFunc:
       for (auto& p : *(value->mutable_func()->mutable_attr())) {
         if (!SubstitutePlaceholders(substitute, &p.second)) {

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 package org.tensorflow.demo;
 
 import android.content.Context;
@@ -26,7 +29,11 @@ import org.tensorflow.demo.Classifier.Recognition;
 
 import java.util.List;
 
+<<<<<<< HEAD
 public class RecognitionScoreView extends View implements ResultsView {
+=======
+public class RecognitionScoreView extends View {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   private static final float TEXT_SIZE_DIP = 24;
   private List<Recognition> results;
   private final float textSizePx;
@@ -46,7 +53,10 @@ public class RecognitionScoreView extends View implements ResultsView {
     bgPaint.setColor(0xcc4285f4);
   }
 
+<<<<<<< HEAD
   @Override
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   public void setResults(final List<Recognition> results) {
     this.results = results;
     postInvalidate();

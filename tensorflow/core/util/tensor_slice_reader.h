@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +35,26 @@ limitations under the License.
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/types.h"
+=======
+// The utility to read checkpoints for google brain tensor ops and v3
+// checkpoints for dist_belief.
+//
+
+#ifndef TENSORFLOW_UTIL_TENSOR_SLICE_READER_H_
+#define TENSORFLOW_UTIL_TENSOR_SLICE_READER_H_
+
+#include <unordered_map>
+
+#include "tensorflow/core/framework/tensor_slice.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/lib/gtl/map_util.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor_shape.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/saved_tensor_slice.pb.h"
 #include "tensorflow/core/util/saved_tensor_slice_util.h"
 #include "tensorflow/core/util/tensor_slice_set.h"
@@ -62,7 +83,10 @@ class TensorSliceReader {
   typedef std::function<Status(const string&, Table**)> OpenTableFunction;
 
   static const int kLoadAllShards = -1;
+<<<<<<< HEAD
   TensorSliceReader(const string& filepattern);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TensorSliceReader(const string& filepattern, OpenTableFunction open_function);
   TensorSliceReader(const string& filepattern, OpenTableFunction open_function,
                     int preferred_shard);
@@ -96,6 +120,7 @@ class TensorSliceReader {
     return tensors_;
   }
 
+<<<<<<< HEAD
   // Returns value for one tensor. Only single slice checkpoints are supported
   // at the moment.
   Status GetTensor(const string& name,
@@ -113,11 +138,19 @@ class TensorSliceReader {
   // Returns a string containing names and shapes of all the tensors.
   const string DebugString() const;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  private:
   friend class TensorSliceWriteTestHelper;
 
   void LoadShard(int shard) const;
   void LoadAllShards() const;
+<<<<<<< HEAD
+=======
+  void RegisterTensorSlice(const string& name, const TensorShape& shape,
+                           DataType type, const string& tag,
+                           const TensorSlice& slice) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   const TensorSliceSet* FindTensorSlice(
       const string& name, const TensorSlice& slice,
@@ -169,6 +202,7 @@ bool TensorSliceReader::CopySliceData(const string& name,
     CHECK_GE(idx, 0) << "Failed to find the index for filename " << fname;
     // We read a record in the corresponding sstable
     const string key = EncodeTensorNameSlice(name, slice_s);
+<<<<<<< HEAD
     if (!sss_[idx]->Get(key, &value)) {
       VLOG(1) << "Failed to seek to the record for tensor " << name
               << ", slice " << slice_s.DebugString()
@@ -181,6 +215,15 @@ bool TensorSliceReader::CopySliceData(const string& name,
               << slice_s.DebugString() << ": computed key = " << key;
       return false;
     }
+=======
+    CHECK(sss_[idx]->Get(key, &value))
+        << "Failed to seek to the record for tensor " << name << ", slice "
+        << slice_s.DebugString() << ": computed key = " << key;
+    SavedTensorSlices sts;
+    CHECK(ParseProtoUnlimited(&sts, value))
+        << "Failed to parse the record for tensor " << name << ", slice "
+        << slice_s.DebugString() << ": computed key = " << key;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     CopyDataFromTensorSliceToTensorSlice(
         tss->shape(), slice_s, slice,
         checkpoint::TensorProtoData<T>(sts.data().data()), data);
@@ -192,4 +235,8 @@ bool TensorSliceReader::CopySliceData(const string& name,
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_UTIL_TENSOR_SLICE_READER_H_
+=======
+#endif  // TENSORFLOW_UTIL_TENSOR_SLICE_READER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,12 @@ limitations under the License.
 #define TENSORFLOW_CORE_KERNELS_ADJUST_CONTRAST_OP_H_
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor_types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_ADJUST_CONTRAST_OP_H_
+#define TENSORFLOW_KERNELS_ADJUST_CONTRAST_OP_H_
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -35,6 +42,7 @@ struct AdjustContrast {
     const int width = input.dimension(2);
     const int channels = input.dimension(3);
 
+<<<<<<< HEAD
     Eigen::array<int, 4> scalar_broadcast;
     scalar_broadcast[0] = batch;
     scalar_broadcast[1] = height;
@@ -57,6 +65,19 @@ struct AdjustContrast {
 #else
     Eigen::IndexList<Eigen::type2index<1>, Eigen::type2index<2> >
         reduction_axis;
+=======
+    Eigen::array<int, 4> scalar_broadcast{{batch, height, width, channels}};
+#if !defined(EIGEN_HAS_INDEX_LIST)
+    Eigen::array<int, 2> reduction_axis{{1, 2}};
+    Eigen::array<int, 4> scalar{{1, 1, 1, 1}};
+    Eigen::array<int, 4> broadcast_dims{{1, height, width, 1}};
+    Eigen::Tensor<int, 4>::Dimensions reshape_dims{{batch, 1, 1, channels}};
+#else
+    Eigen::IndexList<Eigen::type2index<1>, Eigen::type2index<2> >
+        reduction_axis;
+    Eigen::IndexList<Eigen::type2index<1>, Eigen::type2index<1>,
+                     Eigen::type2index<1>, Eigen::type2index<1> > scalar;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Eigen::IndexList<Eigen::type2index<1>, int, int, Eigen::type2index<1> >
         broadcast_dims;
     broadcast_dims.set(1, height);
@@ -66,6 +87,7 @@ struct AdjustContrast {
     reshape_dims.set(0, batch);
     reshape_dims.set(3, channels);
 #endif
+<<<<<<< HEAD
     Eigen::Sizes<1, 1, 1, 1> scalar;
     float num_reduced_coeffs = height * width;
     mean_values.device(d) =
@@ -73,6 +95,13 @@ struct AdjustContrast {
          num_reduced_coeffs)
             .reshape(reshape_dims)
             .broadcast(broadcast_dims);
+=======
+    mean_values.device(d) = input.template cast<float>()
+                                .mean(reduction_axis)
+                                .eval()
+                                .reshape(reshape_dims)
+                                .broadcast(broadcast_dims);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     auto contrast_factor_tensor =
         contrast_factor.reshape(scalar).broadcast(scalar_broadcast);
@@ -86,6 +115,7 @@ struct AdjustContrast {
   }
 };
 
+<<<<<<< HEAD
 // Functor used by AdjustContrastOpv2 to do the computations.
 template <typename Device, typename T>
 struct AdjustContrastv2 {
@@ -158,3 +188,9 @@ struct AdjustContrastv2 {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_ADJUST_CONTRAST_OP_H_
+=======
+}  // namespace functor
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_KERNELS_ADJUST_CONTRAST_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

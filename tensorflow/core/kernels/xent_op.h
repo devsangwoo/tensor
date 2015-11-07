@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,14 @@ limitations under the License.
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 
 #include "tensorflow/core/framework/tensor_types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_XENT_OP_H_
+#define TENSORFLOW_KERNELS_XENT_OP_H_
+// Functor definition for XentOp, must be compilable by nvcc.
+
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -34,11 +43,15 @@ struct XentFunctor {
   // scratch: temporary tensor, dims: batch_size, 1
   // loss: output tensor for the loss, dims: batch_size.
   // backprop: output tensor for the backprop, dims: batch_size, num_classes.
+<<<<<<< HEAD
   void operator()(const Device &d,
                   const Eigen::DSizes<Eigen::DenseIndex, 2> &shape,
                   const Eigen::array<Eigen::DenseIndex, 2> &logits_bcast,
                   const Eigen::array<Eigen::DenseIndex, 2> &labels_bcast,
                   typename TTypes<T>::ConstMatrix logits,
+=======
+  void operator()(const Device& d, typename TTypes<T>::ConstMatrix logits,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   typename TTypes<T>::ConstMatrix labels,
                   typename TTypes<T>::Matrix scratch,
                   typename TTypes<T>::Vec loss,
@@ -50,24 +63,37 @@ struct XentFunctor {
 // specializations for both device types.
 template <typename Device, typename T>
 struct XentEigenImpl {
+<<<<<<< HEAD
   static void Compute(const Device &d,
                       const Eigen::DSizes<Eigen::DenseIndex, 2> &shape,
                       const Eigen::array<Eigen::DenseIndex, 2> &logits_bcast,
                       const Eigen::array<Eigen::DenseIndex, 2> &labels_bcast,
                       typename TTypes<T>::ConstMatrix logits,
+=======
+  static void Compute(const Device& d, typename TTypes<T>::ConstMatrix logits,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                       typename TTypes<T>::ConstMatrix labels,
                       typename TTypes<T>::Matrix scratch,
                       typename TTypes<T>::Vec loss,
                       typename TTypes<T>::Matrix backprop) {
+<<<<<<< HEAD
     // NOTE(touts): This duplicates some of the computations in softmax_op
+=======
+    // NOTE(mdevin): This duplicates some of the computations in softmax_op
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // because we need the intermediate (logits -max(logits)) values to
     // avoid a log(exp()) in the computation of the loss.
 
     const int kBatchDim = 0;
     const int kClassDim = 1;
 
+<<<<<<< HEAD
     const int batch_size = shape[kBatchDim];
     const int num_classes = shape[kClassDim];
+=======
+    const int batch_size = logits.dimension(kBatchDim);
+    const int num_classes = logits.dimension(kClassDim);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // These arrays are used to reduce along the class dimension, and broadcast
 // the resulting value to all classes.
@@ -93,23 +119,35 @@ struct XentEigenImpl {
 #endif
 
     // max_logits along classes.
+<<<<<<< HEAD
     scratch.reshape(batch_only).device(d) =
         logits.broadcast(logits_bcast).maximum(along_class);
 
     // logits - max_logits.
     backprop.device(d) =
         logits.broadcast(logits_bcast) - scratch.broadcast(one_by_class);
+=======
+    scratch.reshape(batch_only).device(d) = logits.maximum(along_class);
+
+    // logits - max_logits.
+    backprop.device(d) = logits - scratch.broadcast(one_by_class);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // sum(exp(logits - max_logits)) along classes.
     scratch.reshape(batch_only).device(d) = backprop.exp().sum(along_class);
 
+<<<<<<< HEAD
     // NOTE(keveman): Eigen on GPU dispatches to an optimized implementation
+=======
+    // NOTE(keveman): Eigen on GPU dispatches to an optimized implementaion
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // for an expression of the form lhs = rhs.sum().
     // lhs = -rhs.sum() doesn't match the above pattern, so folding in the
     // negation before calling sum().
     //  sum(-labels *
     //     ((logits - max_logits) - log(sum(exp(logits - max_logits)))))
     //  along classes
+<<<<<<< HEAD
     loss.device(d) = (labels.broadcast(labels_bcast) *
                       (scratch.log().eval().broadcast(one_by_class) - backprop))
                          .eval()
@@ -119,10 +157,25 @@ struct XentEigenImpl {
     //   prob = exp(logits - max_logits) / sum(exp(logits - max_logits))
     backprop.device(d) = (backprop.exp() / scratch.broadcast(one_by_class)) -
                          labels.broadcast(labels_bcast);
+=======
+    loss.device(d) =
+        (labels * (scratch.log().eval().broadcast(one_by_class) - backprop))
+            .eval()
+            .sum(along_class);
+
+    // backprop: prob - labels, where
+    //   prob = exp(logits - max_logits) / sum(exp(logits - max_logits))
+    backprop.device(d) =
+        (backprop.exp() / scratch.broadcast(one_by_class)) - labels;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 }  // namespace functor
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_XENT_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_XENT_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

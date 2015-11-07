@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,13 @@ package org.tensorflow.demo.env;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.os.Environment;
+=======
+package org.tensorflow.demo.env;
+
+import android.graphics.Bitmap;
+import android.os.Environment;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -28,6 +36,7 @@ public class ImageUtils {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = new Logger();
 
+<<<<<<< HEAD
   static {
     try {
       System.loadLibrary("tensorflow_demo");
@@ -36,6 +45,8 @@ public class ImageUtils {
     }
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   /**
    * Utility method to compute the allocated size in bytes of a YUV420SP image
    * of the given dimensions.
@@ -57,6 +68,7 @@ public class ImageUtils {
    * @param bitmap The bitmap to save.
    */
   public static void saveBitmap(final Bitmap bitmap) {
+<<<<<<< HEAD
     saveBitmap(bitmap, "preview.png");
   }
 
@@ -67,6 +79,8 @@ public class ImageUtils {
    * @param filename The location to save the bitmap to.
    */
   public static void saveBitmap(final Bitmap bitmap, final String filename) {
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     final String root =
         Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "tensorflow";
     LOGGER.i("Saving %dx%d bitmap to %s.", bitmap.getWidth(), bitmap.getHeight(), root);
@@ -76,7 +90,11 @@ public class ImageUtils {
       LOGGER.i("Make dir failed");
     }
 
+<<<<<<< HEAD
     final String fname = filename;
+=======
+    final String fname = "preview.png";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     final File file = new File(myDir, fname);
     if (file.exists()) {
       file.delete();
@@ -91,6 +109,7 @@ public class ImageUtils {
     }
   }
 
+<<<<<<< HEAD
   // This value is 2 ^ 18 - 1, and is used to clamp the RGB values before their ranges
   // are normalized to eight bits.
   static final int kMaxChannelValue = 262143;
@@ -211,11 +230,14 @@ public class ImageUtils {
   private static native void convertYUV420SPToARGB8888(
       byte[] input, int[] output, int width, int height, boolean halfSize);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   /**
    * Converts YUV420 semi-planar data to ARGB 8888 data using the supplied width
    * and height. The input and output must already be allocated and non-null.
    * For efficiency, no error checking is performed.
    *
+<<<<<<< HEAD
    * @param y
    * @param u
    * @param v
@@ -236,6 +258,16 @@ public class ImageUtils {
       int uvRowStride,
       int uvPixelStride,
       boolean halfSize);
+=======
+   * @param input The array of YUV 4:2:0 input data.
+   * @param output A pre-allocated array for the ARGB 8:8:8:8 output data.
+   * @param width The width of the input image.
+   * @param height The height of the input image.
+   * @param halfSize If true, downsample to 50% in each dimension, otherwise not.
+   */
+  public static native void convertYUV420SPToARGB8888(
+      byte[] input, int[] output, int width, int height, boolean halfSize);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   /**
    * Converts YUV420 semi-planar data to RGB 565 data using the supplied width
@@ -247,7 +279,11 @@ public class ImageUtils {
    * @param width The width of the input image.
    * @param height The height of the input image.
    */
+<<<<<<< HEAD
   private static native void convertYUV420SPToRGB565(
+=======
+  public static native void convertYUV420SPToRGB565(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       byte[] input, byte[] output, int width, int height);
 
   /**
@@ -260,7 +296,11 @@ public class ImageUtils {
    * @param width The width of the input image.
    * @param height The height of the input image.
    */
+<<<<<<< HEAD
   private static native void convertARGB8888ToYUV420SP(
+=======
+  public static native void convertARGB8888ToYUV420SP(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       int[] input, byte[] output, int width, int height);
 
   /**
@@ -273,6 +313,7 @@ public class ImageUtils {
    * @param width The width of the input image.
    * @param height The height of the input image.
    */
+<<<<<<< HEAD
   private static native void convertRGB565ToYUV420SP(
       byte[] input, byte[] output, int width, int height);
 
@@ -341,4 +382,8 @@ public class ImageUtils {
 
     return matrix;
   }
+=======
+  public static native void convertRGB565ToYUV420SP(
+      byte[] input, byte[] output, int width, int height);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }

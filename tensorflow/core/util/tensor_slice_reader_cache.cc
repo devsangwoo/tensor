@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,11 @@ limitations under the License.
 
 #include <utility>
 
+=======
+#include "tensorflow/core/util/tensor_slice_reader_cache.h"
+
+#include "tensorflow/core/lib/gtl/stl_util.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/platform/logging.h"
 
 namespace tensorflow {
@@ -25,7 +31,13 @@ namespace checkpoint {
 
 TensorSliceReaderCacheWrapper::TensorSliceReaderCacheWrapper() {}
 TensorSliceReaderCacheWrapper::~TensorSliceReaderCacheWrapper() {
+<<<<<<< HEAD
   delete cache_;
+=======
+  if (cache_) {
+    delete cache_;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   cache_ = nullptr;
 }
 
@@ -37,8 +49,12 @@ const TensorSliceReader* TensorSliceReaderCacheWrapper::GetReader(
   if (!cache_) {
     cache_ = new TensorSliceReaderCache;
   }
+<<<<<<< HEAD
   return cache_->GetReader(filepattern, std::move(open_function),
                            preferred_shard);
+=======
+  return cache_->GetReader(filepattern, open_function, preferred_shard);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TensorSliceReaderCache::TensorSliceReaderCache() {}
@@ -54,6 +70,7 @@ const TensorSliceReader* TensorSliceReaderCache::GetReader(
     TensorSliceReader::OpenTableFunction open_function, int preferred_shard) {
   mutex_lock l(mu_);
 
+<<<<<<< HEAD
 #if defined(__GXX_RTTI) || defined(_CPPRTTI)
   // Get the function pointer from the open_function value.
   TensorSliceReaderCache::OpenFuncType* func_ptr =
@@ -69,6 +86,14 @@ const TensorSliceReader* TensorSliceReaderCache::GetReader(
     // We could not get the pointer, no caching is possible.
     LOG(WARNING) << "Caching disabled because the open function is a lambda or "
                     "RTTI is not enabled in this build.";
+=======
+  // Get the function pointer from the open_function value.
+  TensorSliceReaderCache::OpenFuncType* func_ptr =
+      open_function.target<TensorSliceReaderCache::OpenFuncType>();
+  if (!func_ptr) {
+    // We could not get the pointer, no caching is possible.
+    LOG(WARNING) << "Caching disabled because the open function is a lambda.";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return nullptr;
   }
 
@@ -90,11 +115,19 @@ const TensorSliceReader* TensorSliceReaderCache::GetReader(
     mu_.lock();
     if (tmp_reader->status().ok()) {
       reader = tmp_reader;
+<<<<<<< HEAD
       readers_[filepattern] = std::make_pair(*func_ptr, reader);
     } else {
       delete tmp_reader;
     }
     CHECK_EQ(size_t{1}, still_opening_.erase(filepattern));
+=======
+      readers_[filepattern] = make_pair(*func_ptr, reader);
+    } else {
+      delete tmp_reader;
+    }
+    CHECK_EQ(1, still_opening_.erase(filepattern));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     VLOG(1) << "Cached TensorSliceReader for " << filepattern << ": " << reader;
   } else {
     auto cached_val = readers_[filepattern];

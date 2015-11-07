@@ -1,11 +1,16 @@
 syntax = "proto3";
 
 package tensorflow;
+<<<<<<< HEAD
 option cc_enable_arenas = true;
 option java_outer_classname = "KernelDefProtos";
 option java_multiple_files = true;
 option java_package = "org.tensorflow.framework";
 option go_package = "github.com/tensorflow/tensorflow/tensorflow/go/core/framework";
+=======
+// option cc_enable_arenas = true;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import "tensorflow/core/framework/attr_value.proto";
 
 message KernelDef {
@@ -33,6 +38,7 @@ message KernelDef {
   // won't be used unless the user specifies a "_kernel" attr with
   // value matching this.
   string label = 5;
+<<<<<<< HEAD
 
   // Prioritization of kernel amongst different devices. By default we assume
   // priority is 0. The higher the priority the better. By default (i.e. if
@@ -44,3 +50,6 @@ message KernelDef {
 message KernelList {
   repeated KernelDef kernel = 1;
 };
+=======
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifndef TENSORFLOW_PYTHON_FRAMEWORK_PYTHON_OP_GEN_H_
 #define TENSORFLOW_PYTHON_FRAMEWORK_PYTHON_OP_GEN_H_
 
 #include <string>
+<<<<<<< HEAD
 #include <vector>
 #include "tensorflow/core/framework/op_def.pb.h"
 #include "tensorflow/core/framework/op_gen_lib.h"
@@ -36,6 +40,17 @@ void PrintPythonOps(const OpList& ops, const ApiDefMap& api_defs,
 // the binary encoded OpList proto, and `op_list_len` should be the
 // length of that buffer.
 string GetPythonWrappers(const char* op_list_buf, size_t op_list_len);
+=======
+#include "tensorflow/core/framework/op_def.pb.h"
+#include "tensorflow/core/platform/port.h"
+
+namespace tensorflow {
+
+// Result is printed to stdout.  hidden_ops should be a comma-separated
+// list of Op names that should get a leading _ in the output.
+void PrintPythonOps(const OpList& ops, const string& hidden_ops,
+                    bool require_shapes);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +13,28 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/lib/histogram/histogram.h"
 #include <float.h>
 #include <math.h>
+<<<<<<< HEAD
 #include <vector>
 #include "tensorflow/core/framework/summary.pb.h"
 
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/framework/summary.pb.h"
+
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace tensorflow {
 namespace histogram {
 
@@ -59,7 +72,11 @@ Histogram::Histogram(gtl::ArraySlice<double> custom_bucket_limits)
                             custom_bucket_limits.end()),
       bucket_limits_(custom_bucket_limits_) {
 #ifndef NDEBUG
+<<<<<<< HEAD
   DCHECK_GT(bucket_limits_.size(), size_t{0});
+=======
+  DCHECK_GT(bucket_limits_.size(), 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Verify that the bucket boundaries are strictly increasing
   for (size_t i = 1; i < bucket_limits_.size(); i++) {
     DCHECK_GT(bucket_limits_[i], bucket_limits_[i - 1]);
@@ -115,6 +132,7 @@ void Histogram::Add(double value) {
 
 double Histogram::Median() const { return Percentile(50.0); }
 
+<<<<<<< HEAD
 // Linearly map the variable x from [x0, x1] unto [y0, y1]
 double Histogram::Remap(double x, double x0, double x1, double y0,
                         double y1) const {
@@ -152,6 +170,26 @@ double Histogram::Percentile(double p) const {
     }
 
     cumsum_prev = cumsum;
+=======
+double Histogram::Percentile(double p) const {
+  if (num_ == 0.0) return 0.0;
+  double threshold = num_ * (p / 100.0);
+  double sum = 0;
+  for (size_t b = 0; b < buckets_.size(); b++) {
+    sum += buckets_[b];
+    if (sum >= threshold) {
+      // Scale linearly within this bucket
+      double left_point = (b == 0) ? min_ : bucket_limits_[b - 1];
+      double right_point = bucket_limits_[b];
+      double left_sum = sum - buckets_[b];
+      double right_sum = sum;
+      double pos = (threshold - left_sum) / (right_sum - left_sum);
+      double r = left_point + (right_point - left_point) * pos;
+      if (r < min_) r = min_;
+      if (r > max_) r = max_;
+      return r;
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return max_;
 }

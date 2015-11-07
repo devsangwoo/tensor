@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,10 +24,20 @@ limitations under the License.
     defined(PLATFORM_GOOGLE_IOS) || defined(GOOGLE_LOGGING) ||      \
     defined(__EMSCRIPTEN__)
 #include "tensorflow/core/platform/google/logging.h"
+=======
+#ifndef TENSORFLOW_PLATFORM_LOGGING_H_
+#define TENSORFLOW_PLATFORM_LOGGING_H_
+
+#include "tensorflow/core/platform/port.h"  // To pick up PLATFORM_define
+
+#if defined(PLATFORM_GOOGLE) || defined(PLATFORM_GOOGLE_ANDROID)
+#include "base/logging.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #else
 #include "tensorflow/core/platform/default/logging.h"
 #endif
 
+<<<<<<< HEAD
 namespace tensorflow {
 
 namespace internal {
@@ -39,3 +50,6 @@ void LogString(const char* fname, int line, int severity,
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_PLATFORM_LOGGING_H_
+=======
+#endif  // TENSORFLOW_PLATFORM_LOGGING_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

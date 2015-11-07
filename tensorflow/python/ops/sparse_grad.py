@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -323,3 +324,17 @@ def _SparseToDenseGrad(op, grad):
       array_ops.zeros_like(sparse_indices),
       array_ops.zeros_like(output_shape), sparse_values_grad, default_value_grad
   ]
+=======
+"""Gradients for operators defined in sparse_ops.py."""
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import sparse_ops
+
+
+ops.NoGradient("SparseToDense")
+
+
+ops.NoGradient("SparseConcat")
+
+
+ops.NoGradient("SparseReorder")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,11 @@ limitations under the License.
 
 #include <numeric>
 
+=======
+#ifndef TENSORFLOW_LIB_GTL_EDIT_DISTANCE_H_
+#define TENSORFLOW_LIB_GTL_EDIT_DISTANCE_H_
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/lib/gtl/inlined_vector.h"
 
@@ -49,6 +55,7 @@ inline int64 LevenshteinDistance(const gtl::ArraySlice<T>& s,
   const int64 s_size = s.size();
   const int64 t_size = t.size();
 
+<<<<<<< HEAD
   if (t_size > s_size) return LevenshteinDistance(t, s, cmp);
 
   const T* s_data = s.data();
@@ -91,6 +98,41 @@ inline int64 LevenshteinDistance(const gtl::ArraySlice<T>& s,
     }
   }
   return scratch[t_size - 1];
+=======
+  if (s_size == 0) return t_size;
+  if (t_size == 0) return s_size;
+  if (s == t) return 0;
+  if (t_size > s_size) return LevenshteinDistance(t, s, cmp);
+
+  // Create work vectors
+  gtl::InlinedVector<int64, 32> scratch0(t_size + 1);
+  gtl::InlinedVector<int64, 32> scratch1(t_size + 1);
+
+  int64* previous = scratch0.data();
+  int64* current = scratch1.data();
+
+  // Initialize previous row of distances
+  std::iota(scratch0.begin(), scratch0.end(), 0);
+
+  for (int64 i = 0; i < s_size; ++i) {
+    // Swap current and previous rows for next iteration
+    std::swap(previous, current);
+
+    // Calculate current row distances from previous row
+    current[0] = i + 1;
+
+    // Fill in the rest of the row
+    for (int64 j = 0; j < t_size; ++j) {
+      const int64 cost = cmp(s[i], t[j]) ? 0 : 1;
+      current[j + 1] =
+          std::min(current[j] + 1,                 // deletion cost
+                   std::min(previous[j + 1] + 1,   // insertion cost
+                            previous[j] + cost));  // substitution cost
+    }
+  }
+
+  return current[t_size];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 template <typename Container1, typename Container2, typename Cmp>

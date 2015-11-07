@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +27,20 @@ limitations under the License.
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/public/version.h"
+=======
+#include "tensorflow/core/framework/op_segment.h"
+
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include <gtest/gtest.h>
+#include "tensorflow/core/lib/core/status_test_util.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -36,6 +51,10 @@ class OpSegmentTest : public ::testing::Test {
   std::vector<NodeDef> float_nodedefs_;
 
   OpSegmentTest() : device_(Env::Default()) {
+<<<<<<< HEAD
+=======
+    RequireDefaultOps();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (int i = 0; i < 10; ++i) {
       NodeDef def;
       TF_CHECK_OK(NodeDefBuilder(strings::StrCat("op", i), "Mul")
@@ -64,8 +83,13 @@ class OpSegmentTest : public ::testing::Test {
   OpSegment::CreateKernelFn GetFn(const NodeDef* ndef) {
     return [this, ndef](OpKernel** kernel) {
       Status s;
+<<<<<<< HEAD
       auto created = CreateOpKernel(DEVICE_CPU, &device_, cpu_allocator(),
                                     *ndef, TF_GRAPH_DEF_VERSION, &s);
+=======
+      auto created =
+          CreateOpKernel(DEVICE_CPU, &device_, cpu_allocator(), *ndef, &s);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if (s.ok()) {
         *kernel = created.release();
       }
@@ -83,12 +107,20 @@ TEST_F(OpSegmentTest, Basic) {
   for (int i = 0; i < 10; ++i) {
     // Register in session A.
     auto* ndef = &float_nodedefs_[i];
+<<<<<<< HEAD
     TF_EXPECT_OK(opseg.FindOrCreate("A", ndef->name(), &op, GetFn(ndef)));
+=======
+    EXPECT_OK(opseg.FindOrCreate("A", ndef->name(), &op, GetFn(ndef)));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ValidateOpAndTypes(op, *ndef, DT_FLOAT);
 
     // Register in session B.
     ndef = &int32_nodedefs_[i];
+<<<<<<< HEAD
     TF_EXPECT_OK(opseg.FindOrCreate("B", ndef->name(), &op, GetFn(ndef)));
+=======
+    EXPECT_OK(opseg.FindOrCreate("B", ndef->name(), &op, GetFn(ndef)));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ValidateOpAndTypes(op, *ndef, DT_INT32);
   }
 
@@ -97,6 +129,7 @@ TEST_F(OpSegmentTest, Basic) {
   };
   for (int i = 0; i < 10; ++i) {
     // Lookup op in session A.
+<<<<<<< HEAD
     TF_EXPECT_OK(
         opseg.FindOrCreate("A", strings::StrCat("op", i), &op, reterr));
     ValidateOpAndTypes(op, float_nodedefs_[i], DT_FLOAT);
@@ -104,6 +137,13 @@ TEST_F(OpSegmentTest, Basic) {
     // Lookup op in session B.
     TF_EXPECT_OK(
         opseg.FindOrCreate("B", strings::StrCat("op", i), &op, reterr));
+=======
+    EXPECT_OK(opseg.FindOrCreate("A", strings::StrCat("op", i), &op, reterr));
+    ValidateOpAndTypes(op, float_nodedefs_[i], DT_FLOAT);
+
+    // Lookup op in session B.
+    EXPECT_OK(opseg.FindOrCreate("B", strings::StrCat("op", i), &op, reterr));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ValidateOpAndTypes(op, int32_nodedefs_[i], DT_INT32);
   }
 
@@ -140,7 +180,11 @@ TEST_F(OpSegmentTest, AddRemoveHolds) {
 
   // Thread1 register the op and wants to ensure it alive.
   opseg.AddHold("foo");
+<<<<<<< HEAD
   TF_EXPECT_OK(opseg.FindOrCreate("foo", ndef.name(), &op, GetFn(&ndef)));
+=======
+  EXPECT_OK(opseg.FindOrCreate("foo", ndef.name(), &op, GetFn(&ndef)));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Thread2 starts some execution needs "op" to be alive.
   opseg.AddHold("foo");

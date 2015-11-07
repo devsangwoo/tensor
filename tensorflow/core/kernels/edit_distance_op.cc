@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/array_ops.cc.
 
 #define EIGEN_USE_THREADS
 
 #include <limits>
 
+<<<<<<< HEAD
 #include <vector>
 #include "tensorflow/core/common_runtime/device.h"
 #include "tensorflow/core/framework/op.h"
@@ -31,6 +35,19 @@ limitations under the License.
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/util/sparse/sparse_tensor.h"
 
+=======
+#include "tensorflow/core/common_runtime/device.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/op.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/lib/gtl/edit_distance.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/util/sparse/sparse_tensor.h"
+
+#include "tensorflow/core/platform/logging.h"
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace tensorflow {
 
 namespace {
@@ -119,6 +136,7 @@ class EditDistanceOp : public OpKernel {
                             *hypothesis_shape, *truth_indices, *truth_values,
                             *truth_shape));
 
+<<<<<<< HEAD
     TensorShape hypothesis_st_shape;
     OP_REQUIRES_OK(
         ctx, TensorShapeUtils::MakeShape(hypothesis_shape->vec<int64>().data(),
@@ -128,11 +146,18 @@ class EditDistanceOp : public OpKernel {
     OP_REQUIRES_OK(ctx, TensorShapeUtils::MakeShape(
                             truth_shape->vec<int64>().data(),
                             truth_shape->NumElements(), &truth_st_shape));
+=======
+    TensorShape hypothesis_st_shape = TensorShapeUtils::MakeShape(
+        hypothesis_shape->vec<int64>().data(), hypothesis_shape->NumElements());
+    TensorShape truth_st_shape = TensorShapeUtils::MakeShape(
+        truth_shape->vec<int64>().data(), truth_shape->NumElements());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Assume indices are sorted in row-major order.
     std::vector<int64> sorted_order(truth_st_shape.dims());
     std::iota(sorted_order.begin(), sorted_order.end(), 0);
 
+<<<<<<< HEAD
     sparse::SparseTensor hypothesis;
     OP_REQUIRES_OK(ctx, sparse::SparseTensor::Create(
                             *hypothesis_indices, *hypothesis_values,
@@ -142,6 +167,12 @@ class EditDistanceOp : public OpKernel {
     OP_REQUIRES_OK(ctx, sparse::SparseTensor::Create(
                             *truth_indices, *truth_values, truth_st_shape,
                             sorted_order, &truth));
+=======
+    sparse::SparseTensor hypothesis(*hypothesis_indices, *hypothesis_values,
+                                    hypothesis_st_shape, sorted_order);
+    sparse::SparseTensor truth(*truth_indices, *truth_values, truth_st_shape,
+                               sorted_order);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Group dims 0, 1, ..., RANK - 1.  The very last dim is assumed
     // to store the variable length sequences.
@@ -149,7 +180,11 @@ class EditDistanceOp : public OpKernel {
     std::iota(group_dims.begin(), group_dims.end(), 0);
 
     TensorShape output_shape;
+<<<<<<< HEAD
     for (int d = 0; d < static_cast<int>(group_dims.size()); ++d) {
+=======
+    for (int d = 0; d < group_dims.size(); ++d) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       output_shape.AddDim(std::max(hypothesis_st_shape.dim_size(d),
                                    truth_st_shape.dim_size(d)));
     }
@@ -184,13 +219,18 @@ class EditDistanceOp : public OpKernel {
 
       if (g_truth == g_hypothesis) {
         auto loc = std::inner_product(g_truth.begin(), g_truth.end(),
+<<<<<<< HEAD
                                       output_strides.begin(), int64{0});
+=======
+                                      output_strides.begin(), 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         output_t(loc) =
             gtl::LevenshteinDistance<T>(truth_seq, hypothesis_seq, cmp);
         if (normalize_) output_t(loc) /= truth_seq.size();
 
         ++hypothesis_iter;
         ++truth_iter;
+<<<<<<< HEAD
       } else if (g_truth > g_hypothesis) {  // zero-length truth
         auto loc = std::inner_product(g_hypothesis.begin(), g_hypothesis.end(),
                                       output_strides.begin(), int64{0});
@@ -202,20 +242,41 @@ class EditDistanceOp : public OpKernel {
       } else {  // zero-length hypothesis
         auto loc = std::inner_product(g_truth.begin(), g_truth.end(),
                                       output_strides.begin(), int64{0});
+=======
+      } else if (g_truth > g_hypothesis) {  // missing truth @ this hypothesis
+        auto loc = std::inner_product(g_hypothesis.begin(), g_hypothesis.end(),
+                                      output_strides.begin(), 0);
+        output_t(loc) = hypothesis_seq.size();
+        if (normalize_) output_t(loc) /= 0.0;
+        ++hypothesis_iter;
+      } else {  // missing hypothesis @ this truth
+        auto loc = std::inner_product(g_truth.begin(), g_truth.end(),
+                                      output_strides.begin(), 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         output_t(loc) = (normalize_) ? 1.0 : truth_seq.size();
         ++truth_iter;
       }
     }
+<<<<<<< HEAD
     while (hypothesis_iter != hypothesis_grouper.end()) {  // zero-length truths
+=======
+    while (hypothesis_iter != hypothesis_grouper.end()) {  // missing truths
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       sparse::Group hypothesis_j = *hypothesis_iter;
       std::vector<int64> g_hypothesis = hypothesis_j.group();
       auto hypothesis_seq = hypothesis_j.values<T>();
       auto loc = std::inner_product(g_hypothesis.begin(), g_hypothesis.end(),
+<<<<<<< HEAD
                                     output_strides.begin(), int64{0});
       output_t(loc) = hypothesis_seq.size();
       if (normalize_ && output_t(loc) != 0.0f) {
         output_t(loc) = std::numeric_limits<float>::infinity();
       }
+=======
+                                    output_strides.begin(), 0);
+      output_t(loc) = hypothesis_seq.size();
+      if (normalize_) output_t(loc) /= 0.0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       ++hypothesis_iter;
     }
     while (truth_iter != truth_grouper.end()) {  // missing hypotheses
@@ -223,7 +284,11 @@ class EditDistanceOp : public OpKernel {
       std::vector<int64> g_truth = truth_i.group();
       auto truth_seq = truth_i.values<T>();
       auto loc = std::inner_product(g_truth.begin(), g_truth.end(),
+<<<<<<< HEAD
                                     output_strides.begin(), int64{0});
+=======
+                                    output_strides.begin(), 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       output_t(loc) = (normalize_) ? 1.0 : truth_seq.size();
       ++truth_iter;
     }
@@ -240,7 +305,11 @@ class EditDistanceOp : public OpKernel {
       Name("EditDistance").Device(DEVICE_CPU).TypeConstraint<T>("T"), \
       EditDistanceOp<T>);
 
+<<<<<<< HEAD
 TF_CALL_POD_STRING_TYPES(REGISTER_CPU_KERNEL);
+=======
+TF_CALL_ALL_TYPES(REGISTER_CPU_KERNEL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #undef REGISTER_CPU_KERNEL
 

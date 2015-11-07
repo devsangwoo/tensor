@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +31,16 @@ limitations under the License.
 //   into TF_CALL_float, TF_CALL_double, etc. so they filter by target platform
 //   as well.
 // If you change the lists of types, please also update the list in types.cc.
+=======
+#ifndef TENSORFLOW_FRAMEWORK_REGISTER_TYPES_H_
+#define TENSORFLOW_FRAMEWORK_REGISTER_TYPES_H_
+// This file is used by cuda code and must remain compilable by nvcc.
+
+#include "tensorflow/core/platform/port.h"
+
+// Macros to apply another macro to lists of supported types.  If you change
+// the lists of types, please also update the list in types.cc.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 // See example uses of these macros in core/ops.
 //
@@ -44,14 +55,21 @@ limitations under the License.
 // This can be used to register a different template instantiation of
 // an OpKernel for different signatures, e.g.:
 /*
+<<<<<<< HEAD
    #define REGISTER_PARTITION(type)                                      \
      REGISTER_KERNEL_BUILDER(                                            \
          Name("Partition").Device(DEVICE_CPU).TypeConstraint<type>("T"), \
          PartitionOp<type>);
+=======
+   #define REGISTER_PARTITION(type)                                  \
+     REGISTER_TF_OP_KERNEL("partition", DEVICE_CPU, #type ", int32", \
+                           PartitionOp<type>);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
    TF_CALL_ALL_TYPES(REGISTER_PARTITION)
    #undef REGISTER_PARTITION
 */
 
+<<<<<<< HEAD
 #if !defined(IS_MOBILE_PLATFORM) || defined(SUPPORT_SELECTIVE_REGISTRATION) || \
     defined(ANDROID_TEGRA)
 
@@ -232,3 +250,66 @@ limitations under the License.
 #endif  // __ANDROID_TYPES_SLIM__
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_REGISTER_TYPES_H_
+=======
+#ifndef __ANDROID__
+
+// Call "m" for all number types that support the comparison operations "<" and
+// ">".
+#define TF_CALL_REAL_NUMBER_TYPES(m) \
+  m(float);                          \
+  m(double);                         \
+  m(int64);                          \
+  m(int32);                          \
+  m(uint8);                          \
+  m(int16);                          \
+  m(int8)
+
+#define TF_CALL_REAL_NUMBER_TYPES_NO_INT32(m) \
+  m(float);                                   \
+  m(double);                                  \
+  m(int64);                                   \
+  m(uint8);                                   \
+  m(int16);                                   \
+  m(int8)
+
+// Call "m" for all number types, including complex64.
+#define TF_CALL_NUMBER_TYPES(m) \
+  TF_CALL_REAL_NUMBER_TYPES(m); \
+  m(complex64)
+
+#define TF_CALL_NUMBER_TYPES_NO_INT32(m) \
+  TF_CALL_REAL_NUMBER_TYPES_NO_INT32(m); \
+  m(complex64)
+
+// Call "m" on all types.
+#define TF_CALL_ALL_TYPES(m) \
+  TF_CALL_NUMBER_TYPES(m);   \
+  m(bool);                   \
+  m(string)
+
+// Call "m" on all types supported on GPU.
+#define TF_CALL_GPU_NUMBER_TYPES(m) \
+  m(float);                         \
+  m(double)
+
+#else  // __ANDROID__
+
+#define TF_CALL_REAL_NUMBER_TYPES(m) \
+  m(float);                          \
+  m(int32)
+
+#define TF_CALL_NUMBER_TYPES(m) TF_CALL_REAL_NUMBER_TYPES(m)
+
+#define TF_CALL_REAL_NUMBER_TYPES_NO_INT32(m) m(float)
+
+#define TF_CALL_NUMBER_TYPES_NO_INT32(m) TF_CALL_REAL_NUMBER_TYPES_NO_INT32(m)
+
+#define TF_CALL_ALL_TYPES(m) TF_CALL_REAL_NUMBER_TYPES(m)
+
+// Maybe we could put an empty macro here for Android?
+#define TF_CALL_GPU_NUMBER_TYPES(m) m(float)
+
+#endif  // __ANDROID__
+
+#endif  // TENSORFLOW_FRAMEWORK_REGISTER_TYPES_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

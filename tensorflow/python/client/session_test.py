@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -73,6 +74,37 @@ class SessionTest(test_util.TensorFlowTestCase):
   def setUp(self):
     super(SessionTest, self).setUp()
     warnings.simplefilter('always')
+=======
+"""Tests for tensorflow.python.client.session.Session."""
+import threading
+import time
+
+import tensorflow.python.platform
+
+import numpy as np
+
+from tensorflow.core.framework import config_pb2
+from tensorflow.core.lib.core import error_codes_pb2
+from tensorflow.python.client import session
+from tensorflow.python.framework import ops
+from tensorflow.python.framework import tensor_util
+from tensorflow.python.framework import test_util
+from tensorflow.python.framework import types
+from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import constant_op
+from tensorflow.python.ops import control_flow_ops
+from tensorflow.python.ops import math_ops
+from tensorflow.python.ops import state_ops
+from tensorflow.python.ops import variables
+from tensorflow.python.platform import googletest
+
+
+# NOTE(mrry): Dummy shape registration for op used in the tests.
+ops.RegisterShape('ConstructionFails')(None)
+
+
+class SessionTest(test_util.TensorFlowTestCase):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testUseExistingGraph(self):
     with ops.Graph().as_default() as g, ops.device('/cpu:0'):
@@ -94,7 +126,11 @@ class SessionTest(test_util.TensorFlowTestCase):
 
   def testCreate(self):
     with session.Session():
+<<<<<<< HEAD
       inp = constant_op.constant(10.0, shape=[2, 3], name='W1')
+=======
+      inp = constant_op.constant(10.0, name='W1')
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       copy = array_ops.identity(inp)
       # Test with feed.
       # TODO(mrry): Investigate why order='F' didn't work.
@@ -103,6 +139,7 @@ class SessionTest(test_util.TensorFlowTestCase):
       self.assertAllEqual(arr, copy_val)
       # Test without feed.
       copy_val = copy.eval()
+<<<<<<< HEAD
       self.assertAllEqual(
           np.asarray(
               [[10.0, 10.0, 10.0], [10.0, 10.0, 10.0]], dtype=np.float32),
@@ -160,6 +197,18 @@ class SessionTest(test_util.TensorFlowTestCase):
       results = s.run([inp], options=run_options)
       self.assertAllEqual([30.0], results)
 
+=======
+      self.assertAllEqual(np.asarray(10.0, dtype=np.float32), copy_val)
+
+  def testManyCPUs(self):
+    # TODO(keveman): Implement ListDevices and test for the number of
+    # devices returned by ListDevices.
+    with session.Session(
+        config=config_pb2.ConfigProto(device_count={'CPU': 2})):
+      inp = constant_op.constant(10.0, name='W1')
+      self.assertAllEqual(inp.eval(), 10.0)
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testErrorsReported(self):
     with session.Session() as s:
       constant_op.constant(10.0, name='W1')
@@ -168,6 +217,7 @@ class SessionTest(test_util.TensorFlowTestCase):
 
   def testErrorPayload(self):
     with session.Session():
+<<<<<<< HEAD
       a = array_ops.placeholder(dtypes.float32)
       with self.assertRaisesOpError(lambda e: e.op == a.op):
         a.eval()
@@ -185,12 +235,29 @@ class SessionTest(test_util.TensorFlowTestCase):
       with self.assertRaisesOpError(exc_predicate):
         # Run with a bogus handle.
         s.partial_run('foo', r1, feed_dict={a: 1, b: 2})
+=======
+      a = array_ops.placeholder(types.float32)
+      with self.assertRaisesOpError(lambda e: e.op == a.op):
+        a.eval()
+
+  def testOpConstructionErrorPayload(self):
+    with session.Session():
+      failing_op = ops.get_default_graph().create_op(
+          'ConstructionFails', [], [], name='f')
+
+      def exc_predicate(e):
+        return (e.op == failing_op
+                and e.error_code == error_codes_pb2.INVALID_ARGUMENT)
+      with self.assertRaisesOpError(exc_predicate):
+        failing_op.run()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testErrorBasedOn(self):
     with session.Session() as sess:
       a = constant_op.constant(0.0, shape=[2, 3])
       # NOTE(mrry): The original_op is nonsense, but used here to test that the
       #   errors are reported correctly.
+<<<<<<< HEAD
       with sess.graph._original_op(a.op):
         b = array_ops.identity(a, name='id')
       with sess.graph._original_op(b.op):
@@ -543,6 +610,22 @@ class SessionTest(test_util.TensorFlowTestCase):
       self.assertEqual(b_val, res['g']['b'])
       self.assertEqual(c_val, res['g']['c'])
 
+=======
+      # pylint: disable=protected-access
+      with sess.graph._original_op(a.op):
+        b = array_ops.identity(a, name='id')
+      with sess.graph._original_op(b.op):
+        c = array_ops.placeholder(types.float32)
+      # pylint: enable=protected-access
+
+      def exc_predicate(e):
+        return (e.op == c.op
+                and e.op._original_op == b.op
+                and e.op._original_op._original_op == a.op)
+      with self.assertRaisesOpError(exc_predicate):
+        c.eval()
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testFetchTensorObject(self):
     with session.Session() as s:
       a = constant_op.constant(1.0, shape=[1, 2])
@@ -557,6 +640,7 @@ class SessionTest(test_util.TensorFlowTestCase):
       a_val, b_val = s.run([a, b])  # Test multiple fetches.
       self.assertAllEqual([[1.0, 1.0]], a_val)
       self.assertAllEqual([[2.0, 2.0, 2.0], [2.0, 2.0, 2.0]], b_val)
+<<<<<<< HEAD
       results_with_dict = s.run({'a': [a], 'b': b, 'z': [a, b]})
       self.assertAllEqual([[1.0, 1.0]], results_with_dict['a'][0])
       self.assertAllEqual([[2.0, 2.0, 2.0], [2.0, 2.0, 2.0]],
@@ -581,6 +665,12 @@ class SessionTest(test_util.TensorFlowTestCase):
   def testFetchScalar(self):
     with session.Session() as s:
       for scalar in np.int32, np.int64, np.float16, np.float32, np.float64:
+=======
+
+  def testFetchScalar(self):
+    with session.Session() as s:
+      for scalar in np.int32, np.int64, np.float32, np.float64:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         x = scalar(7)
         y = scalar(8)
         tf_x = constant_op.constant(x, shape=[])
@@ -594,6 +684,7 @@ class SessionTest(test_util.TensorFlowTestCase):
         xy, = s.run([tf_xy])
         self.assertEqual(scalar, type(xy))
         self.assertEqual(x + y, xy)
+<<<<<<< HEAD
         # Dict fetch
         xy = s.run({'xy': tf_xy})['xy']
         self.assertEqual(scalar, type(xy))
@@ -604,6 +695,8 @@ class SessionTest(test_util.TensorFlowTestCase):
         self.assertEqual(scalar, type(xy[0][0][0]))
         self.assertEqual(scalar, type(xy[1]))
         self.assertEqual(scalar, type(xy[2][0]))
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testFetchOperationObject(self):
     with session.Session() as s:
@@ -618,8 +711,14 @@ class SessionTest(test_util.TensorFlowTestCase):
       indices = np.array([[3, 2, 0], [4, 5, 1]]).astype(np.int64)
       values = np.array([1.0, 2.0]).astype(np.float32)
       shape = np.array([7, 9, 2]).astype(np.int64)
+<<<<<<< HEAD
       sp = sparse_tensor.SparseTensor(
           constant_op.constant(indices), constant_op.constant(values),
+=======
+      sp = ops.SparseTensor(
+          constant_op.constant(indices),
+          constant_op.constant(values),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           constant_op.constant(shape))
       # Single fetch, use as tuple
       sp_out = s.run(sp)
@@ -631,7 +730,11 @@ class SessionTest(test_util.TensorFlowTestCase):
       sp_out = s.run(sp)
       self.assertAllEqual(sp_out.indices, indices)
       self.assertAllEqual(sp_out.values, values)
+<<<<<<< HEAD
       self.assertAllEqual(sp_out.dense_shape, shape)
+=======
+      self.assertAllEqual(sp_out.shape, shape)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       # Tuple fetch, use as tuple
       indices_out, values_out, shape_out = s.run(sp)
       self.assertAllEqual(indices_out, indices)
@@ -646,6 +749,7 @@ class SessionTest(test_util.TensorFlowTestCase):
       sp_out, = s.run([sp])
       self.assertAllEqual(sp_out.indices, indices)
       self.assertAllEqual(sp_out.values, values)
+<<<<<<< HEAD
       self.assertAllEqual(sp_out.dense_shape, shape)
       # Dict fetch (single value), use as tuple
       indices_out, values_out, shape_out = s.run({'sp': sp})['sp']
@@ -680,12 +784,16 @@ class SessionTest(test_util.TensorFlowTestCase):
       self.assertAllEqual(sp_out[1].indices, indices)
       self.assertAllEqual(sp_out[1].values, values)
       self.assertAllEqual(sp_out[1].dense_shape, shape)
+=======
+      self.assertAllEqual(sp_out.shape, shape)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testFeedSparseTensor(self):
     with session.Session() as s:
       indices = np.array([[3, 2, 0], [4, 5, 1]]).astype(np.int64)
       values = np.array([1.0, 2.0]).astype(np.float32)
       shape = np.array([7, 9, 2]).astype(np.int64)
+<<<<<<< HEAD
       sp = sparse_tensor.SparseTensor(
           array_ops.placeholder(dtype=np.int64, shape=(2, 3)),
           array_ops.placeholder(dtype=np.float32, shape=(2,)),
@@ -781,18 +889,37 @@ class SessionTest(test_util.TensorFlowTestCase):
           [sp_indices, sp_values, sp_shape], {
               sp: (indices, values, shape)
           })
+=======
+      sp = ops.SparseTensor(
+          array_ops.placeholder(dtype=np.int64, shape=(2, 3)),
+          array_ops.placeholder(dtype=np.float32, shape=(2,)),
+          array_ops.placeholder(dtype=np.int64, shape=(3,)),)
+      sp_indices = array_ops.identity(sp.indices)
+      sp_values = array_ops.identity(sp.values)
+      sp_shape = array_ops.identity(sp.shape)
+      sp2 = ops.SparseTensor(sp_indices, sp_values, sp_shape)
+      # Feed with tuple
+      indices_out, values_out, shape_out = s.run(
+          [sp_indices, sp_values, sp_shape], {sp: (indices, values, shape)})
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       self.assertAllEqual(indices_out, indices)
       self.assertAllEqual(values_out, values)
       self.assertAllEqual(shape_out, shape)
       # Feed with SparseTensorValue
       indices_out, values_out, shape_out = s.run(
+<<<<<<< HEAD
           [sp_indices, sp_values, sp_shape], {
               sp: sparse_tensor.SparseTensorValue(indices, values, shape)
           })
+=======
+          [sp_indices, sp_values, sp_shape],
+          {sp: ops.SparseTensorValue(indices, values, shape)})
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       self.assertAllEqual(indices_out, indices)
       self.assertAllEqual(values_out, values)
       self.assertAllEqual(shape_out, shape)
       # Feed with SparseTensorValue, fetch SparseTensorValue
+<<<<<<< HEAD
       sp2_out = s.run(sp2, {
           sp: sparse_tensor.SparseTensorValue(indices, values, shape)
       })
@@ -958,6 +1085,12 @@ class SessionTest(test_util.TensorFlowTestCase):
       self.assertAllEqual(ind2_out.values, values)
       self.assertAllEqual(ind2_out.indices, indices)
       self.assertAllEqual(ind2_out.dense_shape, dense_shape)
+=======
+      sp2_out = s.run(sp2, {sp: ops.SparseTensorValue(indices, values, shape)})
+      self.assertAllEqual(sp2_out.indices, indices)
+      self.assertAllEqual(sp2_out.values, values)
+      self.assertAllEqual(sp2_out.shape, shape)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testExtendWithStatelessOperations(self):
     with session.Session() as s:
@@ -1022,12 +1155,19 @@ class SessionTest(test_util.TensorFlowTestCase):
       fed_c_val = c.eval(feed_dict={a.name: [[4.0, 4.0]]})
       self.assertAllEqual([[16.0, 16.0, 16.0]], fed_c_val)
 
+<<<<<<< HEAD
   @test_util.run_v1_only('b/120545219')
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testOperationRunMethod(self):
     with session.Session():
       a = constant_op.constant(1.0, shape=[1, 2])
       b = constant_op.constant(2.0, shape=[1, 2], name='b')
+<<<<<<< HEAD
       v = variables.VariableV1(a, a.dtype)
+=======
+      v = variables.Variable(a, a.dtype)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       assign_a_to_v = state_ops.assign(v, a)
 
       assign_a_to_v.eval()
@@ -1104,9 +1244,14 @@ class SessionTest(test_util.TensorFlowTestCase):
     constructed_events = [threading.Event() for _ in range(10)]
     continue_event = threading.Event()
     for i, constructed_event in enumerate(constructed_events):
+<<<<<<< HEAD
       t = self.checkedThread(
           target=self._testDefaultGraphInThread,
           args=(constructed_event, continue_event, i))
+=======
+      t = self.checkedThread(target=self._testDefaultGraphInThread,
+                             args=(constructed_event, continue_event, i))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       threads.append(t)
     for t in threads:
       t.start()
@@ -1125,7 +1270,10 @@ class SessionTest(test_util.TensorFlowTestCase):
         ev.wait()
         val = c.eval(session=sess)
         self.assertEqual(val, 5.0)
+<<<<<<< HEAD
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       threads = [self.checkedThread(target=run_step) for _ in range(100)]
       for t in threads:
         t.start()
@@ -1133,6 +1281,7 @@ class SessionTest(test_util.TensorFlowTestCase):
       for t in threads:
         t.join()
 
+<<<<<<< HEAD
   @staticmethod
   def _build_graph():
     time.sleep(random.random() * 0.1)
@@ -1201,6 +1350,8 @@ class SessionTest(test_util.TensorFlowTestCase):
       for t in run_threads:
         t.join()
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testRunFeedDict(self):
     with session.Session() as s:
       x = array_ops.zeros([2])
@@ -1214,6 +1365,7 @@ class SessionTest(test_util.TensorFlowTestCase):
       y = s.run(2 * x, feed_dict={x: [1, 1]})
       assert (y == 2 * np.ones(2)).all()
 
+<<<<<<< HEAD
       # Test nested tuple keys
       z = (((array_ops.zeros([2]),),), array_ops.zeros([2]),
            (array_ops.zeros([2]),))
@@ -1238,6 +1390,19 @@ class SessionTest(test_util.TensorFlowTestCase):
       self.assertAllEqual(d.eval(), 6.0)
       e = constant_op.constant(7.0, name='e')
       self.assertEqual(len(sess.graph_def.node), 3)
+=======
+  def testGraphDef(self):
+    with session.Session() as sess:
+      self.assertProtoEquals('', sess.graph_def)
+      c = constant_op.constant(5.0, name='c')
+      self.assertEquals(len(sess.graph_def.node), 1)
+      d = constant_op.constant(6.0, name='d')
+      self.assertEquals(len(sess.graph_def.node), 2)
+      self.assertAllEqual(c.eval(), 5.0)
+      self.assertAllEqual(d.eval(), 6.0)
+      e = constant_op.constant(7.0, name='e')
+      self.assertEquals(len(sess.graph_def.node), 3)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       self.assertAllEqual(e.eval(), 7.0)
 
   def testUseAfterClose(self):
@@ -1259,13 +1424,17 @@ class SessionTest(test_util.TensorFlowTestCase):
             lambda e: 'Attempted to use a closed Session.' in str(e)):
           while True:
             sess.run(c)
+<<<<<<< HEAD
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       t = threading.Thread(target=update_thread)
       t.start()
       time.sleep(0.1)
       sess.close()
       t.join()
 
+<<<<<<< HEAD
   def testUseEmptyGraph(self):
     with session.Session() as sess:
       with self.assertRaisesRegexp(RuntimeError, 'The Session graph is empty.'):
@@ -1276,6 +1445,8 @@ class SessionTest(test_util.TensorFlowTestCase):
         sess.run({})
 
   @test_util.run_v1_only('b/120545219')
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testNotEntered(self):
     # pylint: disable=protected-access
     self.assertEqual(ops._default_session_stack.get_default(), None)
@@ -1291,7 +1462,10 @@ class SessionTest(test_util.TensorFlowTestCase):
           ValueError, lambda e: 'No default session is registered.' in str(e)):
         c_2.eval()
 
+<<<<<<< HEAD
   @test_util.run_v1_only('b/120545219')
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testInteractive(self):
     with ops.device('/cpu:0'):
       sess = session.InteractiveSession()
@@ -1304,6 +1478,7 @@ class SessionTest(test_util.TensorFlowTestCase):
       self.assertAllEqual([[24.0]], e.eval())
       sess.close()
 
+<<<<<<< HEAD
   @test_util.run_v1_only('b/120545219')
   def testMultipleInteractiveSessionsWarning(self):
     # Reinitialize the global state to ensure that the expected warnings will
@@ -1376,6 +1551,8 @@ class SessionTest(test_util.TensorFlowTestCase):
 
     sess.close()
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testSharedGraph(self):
     with ops.Graph().as_default() as g, ops.device('/cpu:0'):
       a = constant_op.constant(1.0, shape=[1, 2])
@@ -1396,12 +1573,25 @@ class SessionTest(test_util.TensorFlowTestCase):
       self.assertAllEqual(a2_val, [[1.0, 1.0]])
 
   def testFeedAndFetch(self):
+<<<<<<< HEAD
     with session.Session() as sess:
       for dtype in [
           dtypes.float16, dtypes.float32, dtypes.float64, dtypes.int32,
           dtypes.uint8, dtypes.int16, dtypes.int8, dtypes.int64, dtypes.bool,
           dtypes.complex64, dtypes.complex128
       ]:
+=======
+    with session.Session():
+      for dtype in [types.float32,
+                    types.float64,
+                    types.int32,
+                    types.uint8,
+                    types.int16,
+                    types.int8,
+                    types.int64,
+                    types.bool,
+                    types.complex64]:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         for shape in [(32, 4, 128), (37,), (2, 0, 6), (0, 0, 0)]:
           np_dtype = dtype.as_numpy_dtype
 
@@ -1410,16 +1600,23 @@ class SessionTest(test_util.TensorFlowTestCase):
 
           np_array = np.random.randint(-10, 10, shape)
 
+<<<<<<< HEAD
           if dtype == dtypes.bool:
             np_array = np_array > 0
           elif dtype == dtypes.complex64:
             np_array = np.sqrt(np_array.astype(np_dtype))
           elif dtype == dtypes.complex64:
+=======
+          if dtype == types.bool:
+            np_array = np_array > 0
+          elif dtype == types.complex64:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             np_array = np.sqrt(np_array.astype(np_dtype))
           else:
             np_array = np_array.astype(np_dtype)
 
           self.assertAllEqual(np_array,
+<<<<<<< HEAD
                               sess.run(out_t, feed_dict={
                                   feed_t: np_array
                               }))
@@ -1537,6 +1734,9 @@ class SessionTest(test_util.TensorFlowTestCase):
       with self.assertRaisesRegexp(TypeError,
                                    'is not compatible with Tensor type'):
         sess.run(out_t, feed_dict={feed_int_explicit_int32: largest_int64})
+=======
+                              out_t.eval(feed_dict={feed_t: np_array}))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testStringFetch(self):
     with session.Session():
@@ -1544,18 +1744,28 @@ class SessionTest(test_util.TensorFlowTestCase):
         size = 1
         for s in shape:
           size *= s
+<<<<<<< HEAD
         c_list = np.array(
             [compat.as_bytes(str(i)) for i in xrange(size)],
             dtype=np.object).reshape(shape) if size > 0 else []
+=======
+        c_list = np.array([str(i) for i in xrange(size)],
+                          dtype=np.object).reshape(shape) if size > 0 else []
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         c = constant_op.constant(c_list)
         self.assertAllEqual(c.eval(), c_list)
 
   def testStringFeed(self):
+<<<<<<< HEAD
     with session.Session() as sess:
+=======
+    with session.Session():
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       for shape in [(32, 4, 128), (37,), (2, 0, 6), (0, 0, 0)]:
         size = 1
         for s in shape:
           size *= s
+<<<<<<< HEAD
         c_list = np.array(
             [compat.as_bytes(str(i)) for i in xrange(size)],
             dtype=np.object).reshape(shape)
@@ -1574,11 +1784,24 @@ class SessionTest(test_util.TensorFlowTestCase):
     with session.Session():
       c_list = [b'\n\x01\x00', b'\n\x00\x01']
       feed_t = array_ops.placeholder(dtype=dtypes.string, shape=[2])
+=======
+        c_list = np.array([str(i) for i in xrange(size)],
+                          dtype=np.object).reshape(shape)
+        feed_t = array_ops.placeholder(dtype=types.string, shape=shape)
+        c = array_ops.identity(feed_t)
+        self.assertAllEqual(c.eval(feed_dict={feed_t: c_list}), c_list)
+
+  def testStringFeedWithNullCharacters(self):
+    with session.Session():
+      c_list = ['\n\x01\x00', '\n\x00\x01']
+      feed_t = array_ops.placeholder(dtype=types.string, shape=[2])
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       c = array_ops.identity(feed_t)
       out = c.eval(feed_dict={feed_t: c_list})
       self.assertEqual(c_list[0], out[0])
       self.assertEqual(c_list[1], out[1])
 
+<<<<<<< HEAD
   def testStringFeedWithUnicode(self):
     with session.Session():
       c_list = [
@@ -2049,6 +2272,11 @@ class SessionTest(test_util.TensorFlowTestCase):
       sess = session.Session()
       self.assertEqual(
           sess._config.graph_options.rewrite_options.min_graph_nodes, -1)
+=======
+  def testInvalidTargetFails(self):
+    with self.assertRaises(RuntimeError):
+      session.Session("INVALID_TARGET")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 if __name__ == '__main__':

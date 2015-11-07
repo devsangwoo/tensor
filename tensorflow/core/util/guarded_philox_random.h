@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,14 @@ limitations under the License.
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_GUARDED_PHILOX_RANDOM_H_
+#define TENSORFLOW_KERNELS_GUARDED_PHILOX_RANDOM_H_
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/lib/random/philox_random.h"
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -49,19 +58,27 @@ class GuardedPhiloxRandom {
 
   // Initialize with given seeds.
   void Init(int64 seed, int64 seed2);
+<<<<<<< HEAD
   void Init(random::PhiloxRandom::ResultType counter,
             random::PhiloxRandom::Key key);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Reserve a certain number of 128-bit samples.
   // This function is thread safe.  The returned generator is valid for the
   // given number of samples, and can be used without a lock.
   random::PhiloxRandom ReserveSamples128(int64 samples);
 
+<<<<<<< HEAD
   // Reserve a certain number of 32-bit samples.
+=======
+  // Reserve a certain number of 32-bit samples
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   random::PhiloxRandom ReserveSamples32(int64 samples) {
     return ReserveSamples128((samples + 3) / 4);
   }
 
+<<<<<<< HEAD
   // Reserve enough random samples in the generator for the given output count.
   random::PhiloxRandom ReserveRandomOutputs(int64 output_count,
                                             int multiplier) {
@@ -69,6 +86,8 @@ class GuardedPhiloxRandom {
     return ReserveSamples128(conservative_sample_count);
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  private:
   mutex mu_;
   random::PhiloxRandom generator_ GUARDED_BY(mu_);
@@ -79,4 +98,8 @@ class GuardedPhiloxRandom {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_UTIL_GUARDED_PHILOX_RANDOM_H_
+=======
+#endif  // TENSORFLOW_KERNELS_GUARDED_PHILOX_RANDOM_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

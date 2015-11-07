@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +23,16 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_UTIL_SPARSE_GROUP_ITERATOR_H_
+#define TENSORFLOW_UTIL_SPARSE_GROUP_ITERATOR_H_
+
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace sparse {
@@ -78,20 +89,27 @@ class GroupIterable {
   typedef gtl::ArraySlice<int64> VarDimArray;
 
   GroupIterable(Tensor ix, Tensor vals, int dims, const VarDimArray& group_dims)
+<<<<<<< HEAD
       : ix_(ix),
         ix_matrix_(ix_.matrix<int64>()),
         vals_(vals),
         dims_(dims),
         group_dims_(group_dims.begin(), group_dims.end()) {}
+=======
+      : ix_(ix), vals_(vals), dims_(dims), group_dims_(group_dims) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   class IteratorStep;
 
   IteratorStep begin() { return IteratorStep(this, 0); }
+<<<<<<< HEAD
   IteratorStep at(int64 loc) {
     CHECK(loc >= 0 && loc <= ix_.dim_size(0))
         << "loc provided must lie between 0 and " << ix_.dim_size(0);
     return IteratorStep(this, loc);
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   IteratorStep end() { return IteratorStep(this, ix_.dim_size(0)); }
 
   template <typename TIX>
@@ -114,11 +132,17 @@ class GroupIterable {
 
     void UpdateEndOfGroup();
     bool operator!=(const IteratorStep& rhs) const;
+<<<<<<< HEAD
     bool operator==(const IteratorStep& rhs) const;
     IteratorStep& operator++();    // prefix ++
     IteratorStep operator++(int);  // postfix ++
     Group operator*() const { return Group(iter_, loc_, next_loc_); }
     int64 loc() const { return loc_; }
+=======
+    IteratorStep& operator++();    // prefix ++
+    IteratorStep operator++(int);  // postfix ++
+    Group operator*() const { return Group(iter_, loc_, next_loc_); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
    private:
     GroupIterable* iter_;
@@ -128,11 +152,18 @@ class GroupIterable {
 
  private:
   friend class Group;
+<<<<<<< HEAD
   const Tensor ix_;
   const TTypes<int64>::ConstMatrix ix_matrix_;
   Tensor vals_;
   const int dims_;
   const gtl::InlinedVector<int64, 8> group_dims_;
+=======
+  Tensor ix_;
+  Tensor vals_;
+  const int dims_;
+  const VarDimArray group_dims_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // Implementation of Group::values<T>()
@@ -145,4 +176,8 @@ typename TTypes<T>::UnalignedVec Group::values() const {
 }  // namespace sparse
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_UTIL_SPARSE_GROUP_ITERATOR_H_
+=======
+#endif  // TENSORFLOW_UTIL_SPARSE_GROUP_ITERATOR_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

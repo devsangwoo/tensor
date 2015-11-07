@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +30,20 @@ limitations under the License.
 #include "tensorflow/core/lib/gtl/map_util.h"
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/thread_annotations.h"
+=======
+#ifndef TENSORFLOW_KERNELS_LOOKUP_TABLE_OP_H_
+#define TENSORFLOW_KERNELS_LOOKUP_TABLE_OP_H_
+
+#include "tensorflow/core/framework/lookup_interface.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/resource_mgr.h"
+#include "tensorflow/core/kernels/lookup_util.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/platform/thread_annotations.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -42,6 +57,7 @@ class LookupTableOp : public OpKernel {
   // ctx is not owned by this class.
   explicit LookupTableOp(OpKernelConstruction* ctx)
       : OpKernel(ctx), table_handle_set_(false) {
+<<<<<<< HEAD
     if (ctx->output_type(0) == DT_RESOURCE) {
       OP_REQUIRES_OK(ctx, ctx->allocate_persistent(tensorflow::DT_RESOURCE,
                                                    tensorflow::TensorShape({}),
@@ -53,11 +69,17 @@ class LookupTableOp : public OpKernel {
     }
     OP_REQUIRES_OK(
         ctx, ctx->GetAttr("use_node_name_sharing", &use_node_name_sharing_));
+=======
+    OP_REQUIRES_OK(ctx, ctx->allocate_persistent(tensorflow::DT_STRING,
+                                                 tensorflow::TensorShape({2}),
+                                                 &table_handle_, nullptr));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // ctx is not owned by this function.
   void Compute(OpKernelContext* ctx) override {
     mutex_lock l(mu_);
+<<<<<<< HEAD
 
     if (!table_handle_set_) {
       OP_REQUIRES_OK(ctx, cinfo_.Init(ctx->resource_manager(), def(),
@@ -108,17 +130,49 @@ class LookupTableOp : public OpKernel {
       ctx->set_output_ref(0, &mu_, table_handle_.AccessTensor(ctx));
     }
     table_handle_set_ = true;
+=======
+    if (!table_handle_set_) {
+      OP_REQUIRES_OK(ctx, cinfo_.Init(ctx->resource_manager(), def()));
+      auto creator = [this](lookup::LookupInterface** ret) {
+        *ret = new Container();
+        return Status::OK();
+      };
+
+      lookup::LookupInterface* table = nullptr;
+      OP_REQUIRES_OK(
+          ctx, cinfo_.resource_manager()
+                   ->template LookupOrCreate<lookup::LookupInterface>(
+                       cinfo_.container(), cinfo_.name(), &table, creator));
+      core::ScopedUnref unref_me(table);
+
+      OP_REQUIRES_OK(ctx, lookup::CheckTableDataTypes(
+                              *table, DataTypeToEnum<key_dtype>::v(),
+                              DataTypeToEnum<value_dtype>::v(), cinfo_.name()));
+
+      auto h = table_handle_.AccessTensor(ctx)->template flat<string>();
+      h(0) = cinfo_.container();
+      h(1) = cinfo_.name();
+      table_handle_set_ = true;
+    }
+    ctx->set_output_ref(0, &mu_, table_handle_.AccessTensor(ctx));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   ~LookupTableOp() override {
     // If the table object was not shared, delete it.
     if (table_handle_set_ && cinfo_.resource_is_private_to_kernel()) {
+<<<<<<< HEAD
       if (!cinfo_.resource_manager()
                ->template Delete<lookup::LookupInterface>(cinfo_.container(),
                                                           cinfo_.name())
                .ok()) {
         // Do nothing; the resource can have been deleted by session resets.
       }
+=======
+      TF_CHECK_OK(
+          cinfo_.resource_manager()->template Delete<lookup::LookupInterface>(
+              cinfo_.container(), cinfo_.name()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
@@ -127,11 +181,15 @@ class LookupTableOp : public OpKernel {
   PersistentTensor table_handle_ GUARDED_BY(mu_);
   bool table_handle_set_ GUARDED_BY(mu_);
   ContainerInfo cinfo_;
+<<<<<<< HEAD
   bool use_node_name_sharing_;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   TF_DISALLOW_COPY_AND_ASSIGN(LookupTableOp);
 };
 
+<<<<<<< HEAD
 namespace lookup {
 
 // Ensure that the compiler cannot elide a copy into a local, for
@@ -275,3 +333,8 @@ class HashTable : public InitializableLookupTable {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_LOOKUP_TABLE_OP_H_
+=======
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_KERNELS_LOOKUP_TABLE_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -113,10 +114,45 @@ class SaverTest(test.TestCase):
           }, restore_sequentially=True)
       val = save.save(sess, save_path)
       self.assertTrue(isinstance(val, six.string_types))
+=======
+"""Tests for tensorflow.ops.io_ops."""
+import os.path
+import time
+
+import tensorflow.python.platform
+
+import tensorflow as tf
+import numpy as np
+
+from tensorflow.python.platform import gfile
+
+
+class SaverTest(tf.test.TestCase):
+
+  def testBasics(self):
+    save_path = os.path.join(self.get_temp_dir(), "basics")
+
+    with self.test_session() as sess:
+      # Build a graph with 2 parameter nodes, and Save and
+      # Restore nodes for them.
+      v0 = tf.Variable(10.0, name="v0")
+      v1 = tf.Variable(20.0, name="v1")
+      save = tf.train.Saver({"v0": v0, "v1": v1}, restore_sequentially=True)
+      tf.initialize_all_variables().run()
+
+      # Check that the parameter nodes have been initialized.
+      self.assertEqual(10.0, v0.eval())
+      self.assertEqual(20.0, v1.eval())
+
+      # Save the initialized values in the file at "save_path"
+      val = save.save(sess, save_path)
+      self.assertTrue(isinstance(val, basestring))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       self.assertEqual(save_path, val)
 
     # Start a second session.  In that session the parameter nodes
     # have not been initialized either.
+<<<<<<< HEAD
     with self.session(graph=ops_lib.Graph()) as sess:
       v0 = variable_op(-1.0, name="v0")
       v1 = variable_op(-1.0, name="v1")
@@ -414,10 +450,69 @@ class SaverTest(test.TestCase):
       with self.assertRaisesWithPredicateMatch(
           errors_impl.OpError, lambda e: "uninitialized value v" in e.message):
         self.evaluate(v)
+=======
+    with self.test_session() as sess:
+      v0 = tf.Variable(-1.0, name="v0")
+      v1 = tf.Variable(-1.0, name="v1")
+      save = tf.train.Saver({"v0": v0, "v1": v1})
+
+      with self.assertRaisesWithPredicateMatch(
+          tf.OpError, lambda e: "uninitialized value v0" in e.message):
+        sess.run(v0)
+      with self.assertRaisesWithPredicateMatch(
+          tf.OpError, lambda e: "uninitialized value v1" in e.message):
+        sess.run(v1)
 
       # Restore the saved values in the parameter nodes.
       save.restore(sess, save_path)
       # Check that the parameter nodes have been restored.
+      self.assertEqual(10.0, v0.eval())
+      self.assertEqual(20.0, v1.eval())
+
+    # Build another graph with 2 nodes, initialized
+    # differently, and a Restore node for them.
+    with self.test_session() as sess:
+      v0_2 = tf.Variable(1000.0, name="v0")
+      v1_2 = tf.Variable(2000.0, name="v1")
+      save2 = tf.train.Saver({"v0": v0_2, "v1": v1_2})
+      tf.initialize_all_variables().run()
+
+      # Check that the parameter nodes have been initialized.
+      self.assertEqual(1000.0, v0_2.eval())
+      self.assertEqual(2000.0, v1_2.eval())
+      # Restore the values saved earlier in the parameter nodes.
+      save2.restore(sess, save_path)
+      # Check that the parameter nodes have been restored.
+      self.assertEqual(10.0, v0_2.eval())
+      self.assertEqual(20.0, v1_2.eval())
+
+  def testInt64(self):
+    save_path = os.path.join(self.get_temp_dir(), "int64")
+
+    with self.test_session() as sess:
+      # Build a graph with 1 node, and save and restore for them.
+      v = tf.Variable(np.int64(15), name="v")
+      save = tf.train.Saver({"v": v}, restore_sequentially=True)
+      tf.initialize_all_variables().run()
+
+      # Save the initialized values in the file at "save_path"
+      val = save.save(sess, save_path)
+      self.assertTrue(isinstance(val, basestring))
+      self.assertEqual(save_path, val)
+
+      with self.test_session() as sess:
+        v = tf.Variable(np.int64(-1), name="v")
+        save = tf.train.Saver({"v": v})
+
+      with self.assertRaisesWithPredicateMatch(
+          tf.OpError, lambda e: "uninitialized value v" in e.message):
+        sess.run(v)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
+
+      # Restore the saved values in the parameter nodes.
+      save.restore(sess, save_path)
+      # Check that the parameter nodes have been restored.
+<<<<<<< HEAD
       self.assertEqual(np.int64(15), self.evaluate(v))
 
   def testSomeErrors(self):
@@ -492,10 +587,47 @@ class SaverTest(test.TestCase):
       # Save the initialized values in the file at "save_path"
       val = save.save(sess, save_path)
       self.assertTrue(isinstance(val, six.string_types))
+=======
+      self.assertEqual(np.int64(15), v.eval())
+
+  def testSomeErrors(self):
+    with tf.Graph().as_default():
+      v0 = tf.Variable([10.0], name="v0")
+      v1 = tf.Variable([20.0], name="v1")
+      v2 = tf.Variable([20.0], name="v2")
+      v2._set_save_slice_info(tf.Variable.SaveSliceInfo("v1", ""))
+
+      # By default the name used for "v2" will be "v1" and raise an error.
+      with self.assertRaisesRegexp(ValueError, "same name: v1"):
+        tf.train.Saver([v0, v1, v2])
+
+      # The names are different and will work.
+      tf.train.Saver({"vee1": v1, "other": [v2]})
+
+  def testBasicsWithListOfVariables(self):
+    save_path = os.path.join(self.get_temp_dir(), "basics_with_list")
+
+    with self.test_session(graph=tf.Graph()) as sess:
+      # Build a graph with 2 parameter nodes, and Save and
+      # Restore nodes for them.
+      v0 = tf.Variable(10.0, name="v0")
+      v1 = tf.Variable(20.0, name="v1")
+      save = tf.train.Saver([v0, v1])
+      tf.initialize_all_variables().run()
+
+      # Check that the parameter nodes have been initialized.
+      self.assertEqual(10.0, v0.eval())
+      self.assertEqual(20.0, v1.eval())
+
+      # Save the initialized values in the file at "save_path"
+      val = save.save(sess, save_path)
+      self.assertTrue(isinstance(val, basestring))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       self.assertEqual(save_path, val)
 
     # Start a second session.  In that session the variables
     # have not been initialized either.
+<<<<<<< HEAD
     with self.session(graph=ops_lib.Graph()) as sess:
       v0 = variables.VariableV1(-1.0, name="v0")
       v1 = variables.VariableV1(-1.0, name="v1")
@@ -510,10 +642,24 @@ class SaverTest(test.TestCase):
         self.evaluate(v1)
       self.assertEqual(0, len(self.evaluate(v2.keys())))
       self.assertEqual(0, len(self.evaluate(v2.values())))
+=======
+    with self.test_session(graph=tf.Graph()) as sess:
+      v0 = tf.Variable(-1.0, name="v0")
+      v1 = tf.Variable(-1.0, name="v1")
+      save = tf.train.Saver([v0, v1])
+
+      with self.assertRaisesWithPredicateMatch(
+          tf.OpError, lambda e: "uninitialized value v0" in e.message):
+        sess.run(v0)
+      with self.assertRaisesWithPredicateMatch(
+          tf.OpError, lambda e: "uninitialized value v1" in e.message):
+        sess.run(v1)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       # Restore the saved values in the parameter nodes.
       save.restore(sess, save_path)
       # Check that the parameter nodes have been restored.
+<<<<<<< HEAD
       self.assertEqual(10.0, self.evaluate(v0))
       self.assertEqual(20.0, self.evaluate(v1))
       self.assertEqual(b"k1", self.evaluate(v2.keys()))
@@ -555,6 +701,40 @@ class SaverTest(test.TestCase):
       save = saver_module.Saver({var_name: var})
       save.restore(sess, save_path)
       self.assertAllClose(var_value, self.evaluate(var))
+=======
+      self.assertEqual(10.0, v0.eval())
+      self.assertEqual(20.0, v1.eval())
+
+    # Build another graph with 2 nodes, initialized
+    # differently, and a Restore node for them.
+    with self.test_session(graph=tf.Graph()) as sess:
+      v0_2 = tf.Variable(1000.0, name="v0")
+      v1_2 = tf.Variable(2000.0, name="v1")
+      save2 = tf.train.Saver([v0_2, v1_2])
+      tf.initialize_all_variables().run()
+
+      # Check that the parameter nodes have been initialized.
+      self.assertEqual(1000.0, v0_2.eval())
+      self.assertEqual(2000.0, v1_2.eval())
+      # Restore the values saved earlier in the parameter nodes.
+      save2.restore(sess, save_path)
+      # Check that the parameter nodes have been restored.
+      self.assertEqual(10.0, v0_2.eval())
+      self.assertEqual(20.0, v1_2.eval())
+
+  def _SaveAndLoad(self, var_name, var_value, other_value, save_path):
+    with self.test_session() as sess:
+      var = tf.Variable(var_value, name=var_name)
+      save = tf.train.Saver({var_name: var})
+      var.initializer.run()
+      val = save.save(sess, save_path)
+      self.assertEqual(save_path, val)
+    with self.test_session() as sess:
+      var = tf.Variable(other_value, name=var_name)
+      save = tf.train.Saver({var_name: var})
+      save.restore(sess, save_path)
+      self.assertAllClose(var_value, var.eval())
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testCacheRereadsFile(self):
     save_path = os.path.join(self.get_temp_dir(), "cache_rereads")
@@ -564,6 +744,7 @@ class SaverTest(test.TestCase):
     # The cached readers should know to re-read the file.
     self._SaveAndLoad("var1", 1.1, 2.2, save_path)
 
+<<<<<<< HEAD
   @test_util.run_deprecated_v1
   def testAllowEmpty(self):
     save_path = os.path.join(self.get_temp_dir(), "allow_empty")
@@ -698,11 +879,54 @@ class SaverTest(test.TestCase):
 
   @test_util.run_in_graph_and_eager_modes
   def testSaveWithGlobalStep(self, pad_step_number=False):
+=======
+  def testGPU(self):
+    if not tf.test.IsBuiltWithCuda():
+      return
+    save_path = os.path.join(self.get_temp_dir(), "gpu")
+    with tf.Session("", graph=tf.Graph()) as sess:
+      with sess.graph.device("/gpu:0"):
+        v0_1 = tf.Variable(123.45)
+      save = tf.train.Saver({"v0": v0_1})
+      tf.initialize_all_variables().run()
+      save.save(sess, save_path)
+
+    with tf.Session("", graph=tf.Graph()) as sess:
+      with sess.graph.device("/gpu:0"):
+        v0_2 = tf.Variable(543.21)
+      save = tf.train.Saver({"v0": v0_2})
+      tf.initialize_all_variables().run()
+      self.assertAllClose(543.21, v0_2.eval())
+      save.restore(sess, save_path)
+      self.assertAllClose(123.45, v0_2.eval())
+
+  def testVariables(self):
+    save_path = os.path.join(self.get_temp_dir(), "variables")
+    with tf.Session("", graph=tf.Graph()) as sess:
+      one = tf.Variable(1.0)
+      twos = tf.Variable([2.0, 2.0, 2.0])
+      init = tf.initialize_all_variables()
+      save = tf.train.Saver(tf.all_variables())
+      init.run()
+      save.save(sess, save_path)
+
+    with tf.Session("", graph=tf.Graph()) as sess:
+      one = tf.Variable(0.0)
+      twos = tf.Variable([0.0, 0.0, 0.0])
+      # Saver with no arg, defaults to 'all variables'.
+      save = tf.train.Saver()
+      save.restore(sess, save_path)
+      self.assertAllClose(1.0, one.eval())
+      self.assertAllClose([2.0, 2.0, 2.0], twos.eval())
+
+  def testSaveWithGlobalStep(self):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     save_path = os.path.join(self.get_temp_dir(), "ckpt_with_global_step")
     global_step_int = 5
     # Save and reload one Variable named "var0".
     self._SaveAndLoad("var0", 0.0, 1.0, save_path)
     for use_tensor in [True, False]:
+<<<<<<< HEAD
       with self.session(graph=ops_lib.Graph()):
         var = resource_variable_ops.ResourceVariable(1.0, name="var0")
         save = saver_module.Saver(
@@ -1335,10 +1559,107 @@ class MaxToKeepTest(test.TestCase):
       v = variables.VariableV1(10.0, name="v")
       save = saver_module.Saver({"v": v}, max_to_keep=2)
       self.evaluate(variables.global_variables_initializer())
+=======
+      with self.test_session() as sess:
+        var = tf.Variable(1.0, name="var0")
+        save = tf.train.Saver({var.op.name: var})
+        var.initializer.run()
+        if use_tensor:
+          global_step = tf.constant(global_step_int)
+          val = save.save(sess, save_path, global_step=global_step)
+        else:
+          val = save.save(sess, save_path, global_step=global_step_int)
+        expected_save_path = "%s-%d" % (save_path, global_step_int)
+        self.assertEqual(expected_save_path, val)
+
+
+class SaveRestoreShardedTest(tf.test.TestCase):
+
+  def testBasics(self):
+    save_path = os.path.join(self.get_temp_dir(), "sharded")
+
+    # Build a graph with 2 parameter nodes on different devices.
+    with tf.Session(
+        target="",
+        config=tf.ConfigProto(device_count={"CPU": 2})) as sess:
+      with sess.graph.device("/cpu:0"):
+        v0 = tf.Variable(10, name="v0")
+      with sess.graph.device("/cpu:1"):
+        v1 = tf.Variable(20, name="v1")
+      save = tf.train.Saver({"v0": v0, "v1": v1}, sharded=True)
+      tf.initialize_all_variables().run()
+      val = save.save(sess, save_path)
+      self.assertEqual(save_path + "-?????-of-00002", val)
+
+    # Restore a different "v0" from shard 0 of the saved files.
+    with tf.Session(
+        target="",
+        config=tf.ConfigProto(device_count={"CPU": 2})) as sess:
+      with sess.graph.device("/cpu:0"):
+        v0 = tf.Variable(111, name="v0")
+      save = tf.train.Saver({"v0": v0}, sharded=True)
+      tf.initialize_all_variables().run()
+      self.assertEqual(111, v0.eval())
+      save.restore(sess, save_path + "-00000-of-00002")
+      self.assertEqual(10, v0.eval())
+
+    # Restore a different "v1" from shard 1 of the saved files.
+    with tf.Session(
+        target="",
+        config=tf.ConfigProto(device_count={"CPU": 2})) as sess:
+      with sess.graph.device("/cpu:0"):
+        v1 = tf.Variable(222)
+      save = tf.train.Saver({"v1": v1}, sharded=True)
+      tf.initialize_all_variables().run()
+      self.assertEqual(222, v1.eval())
+      save.restore(sess, save_path + "-00001-of-00002")
+      self.assertEqual(20, v1.eval())
+
+    # Now try a restore with the sharded filename.
+    with tf.Session(
+        target="",
+        config=tf.ConfigProto(device_count={"CPU": 2})) as sess:
+      with sess.graph.device("/cpu:0"):
+        v0 = tf.Variable(111, name="v0")
+      with sess.graph.device("/cpu:1"):
+        v1 = tf.Variable(222, name="v1")
+      save = tf.train.Saver({"v0": v0, "v1": v1}, sharded=True)
+      tf.initialize_all_variables().run()
+      self.assertEqual(111, v0.eval())
+      self.assertEqual(222, v1.eval())
+      save_path = os.path.join(self.get_temp_dir(), "sharded")
+      save.restore(sess, save_path + "-?????-of-?????")
+      self.assertEqual(10, v0.eval())
+      self.assertEqual(20, v1.eval())
+
+  def testSaverDef(self):
+    with self.test_session():
+      v0 = tf.Variable(123, name="v0")
+      save = tf.train.Saver({"v0": v0}, sharded=True)
+      sd = save.as_saver_def()
+      self.assertTrue(sd.sharded)
+
+
+class MaxToKeepTest(tf.test.TestCase):
+
+  def testNonSharded(self):
+    save_dir = os.path.join(self.get_temp_dir(), "max_to_keep_non_sharded")
+    try:
+      gfile.DeleteRecursively(save_dir)
+    except gfile.GOSError, _:
+      pass                      # Ignore
+    gfile.MakeDirs(save_dir)
+
+    with self.test_session() as sess:
+      v = tf.Variable(10.0, name="v")
+      save = tf.train.Saver({"v": v}, max_to_keep=2)
+      tf.initialize_all_variables().run()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       self.assertEqual([], save.last_checkpoints)
 
       s1 = save.save(sess, os.path.join(save_dir, "s1"))
       self.assertEqual([s1], save.last_checkpoints)
+<<<<<<< HEAD
       self.assertTrue(checkpoint_management.checkpoint_exists(s1))
       self.assertCheckpointState(
           model_checkpoint_path=s1,
@@ -1366,17 +1687,39 @@ class MaxToKeepTest(test.TestCase):
 
       # Create a second helper, identical to the first.
       save2 = saver_module.Saver(saver_def=save.as_saver_def())
+=======
+      self.assertTrue(gfile.Exists(s1))
+
+      s2 = save.save(sess, os.path.join(save_dir, "s2"))
+      self.assertEqual([s1, s2], save.last_checkpoints)
+      self.assertTrue(gfile.Exists(s1))
+      self.assertTrue(gfile.Exists(s2))
+
+      s3 = save.save(sess, os.path.join(save_dir, "s3"))
+      self.assertEqual([s2, s3], save.last_checkpoints)
+      self.assertFalse(gfile.Exists(s1))
+      self.assertTrue(gfile.Exists(s2))
+      self.assertTrue(gfile.Exists(s3))
+
+      # Create a second helper, identical to the first.
+      save2 = tf.train.Saver(saver_def=save.as_saver_def())
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       save2.set_last_checkpoints(save.last_checkpoints)
 
       # Create a third helper, with the same configuration but no knowledge of
       # previous checkpoints.
+<<<<<<< HEAD
       save3 = saver_module.Saver(saver_def=save.as_saver_def())
+=======
+      save3 = tf.train.Saver(saver_def=save.as_saver_def())
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       # Exercise the first helper.
 
       # Adding s2 again (old s2 is removed first, then new s2 appended)
       s2 = save.save(sess, os.path.join(save_dir, "s2"))
       self.assertEqual([s3, s2], save.last_checkpoints)
+<<<<<<< HEAD
       self.assertFalse(checkpoint_management.checkpoint_exists(s1))
       self.assertFalse(
           checkpoint_management.checkpoint_exists(
@@ -1393,10 +1736,16 @@ class MaxToKeepTest(test.TestCase):
           model_checkpoint_path=s2,
           all_model_checkpoint_paths=[s3, s2],
           save_dir=save_dir)
+=======
+      self.assertFalse(gfile.Exists(s1))
+      self.assertTrue(gfile.Exists(s3))
+      self.assertTrue(gfile.Exists(s2))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       # Adding s1 (s3 should now be deleted as oldest in list)
       s1 = save.save(sess, os.path.join(save_dir, "s1"))
       self.assertEqual([s2, s1], save.last_checkpoints)
+<<<<<<< HEAD
       self.assertFalse(checkpoint_management.checkpoint_exists(s3))
       self.assertFalse(
           checkpoint_management.checkpoint_exists(
@@ -1413,6 +1762,11 @@ class MaxToKeepTest(test.TestCase):
           model_checkpoint_path=s1,
           all_model_checkpoint_paths=[s2, s1],
           save_dir=save_dir)
+=======
+      self.assertFalse(gfile.Exists(s3))
+      self.assertTrue(gfile.Exists(s2))
+      self.assertTrue(gfile.Exists(s1))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       # Exercise the second helper.
 
@@ -1420,6 +1774,7 @@ class MaxToKeepTest(test.TestCase):
       s2 = save2.save(sess, os.path.join(save_dir, "s2"))
       self.assertEqual([s3, s2], save2.last_checkpoints)
       # Created by the first helper.
+<<<<<<< HEAD
       self.assertTrue(checkpoint_management.checkpoint_exists(s1))
       self.assertTrue(
           checkpoint_management.checkpoint_exists(
@@ -1437,10 +1792,17 @@ class MaxToKeepTest(test.TestCase):
           model_checkpoint_path=s2,
           all_model_checkpoint_paths=[s3, s2],
           save_dir=save_dir)
+=======
+      self.assertTrue(gfile.Exists(s1))
+      # Deleted by the first helper.
+      self.assertFalse(gfile.Exists(s3))
+      self.assertTrue(gfile.Exists(s2))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       # Adding s1 (s3 should now be deleted as oldest in list)
       s1 = save2.save(sess, os.path.join(save_dir, "s1"))
       self.assertEqual([s2, s1], save2.last_checkpoints)
+<<<<<<< HEAD
       self.assertFalse(checkpoint_management.checkpoint_exists(s3))
       self.assertFalse(
           checkpoint_management.checkpoint_exists(
@@ -1457,6 +1819,11 @@ class MaxToKeepTest(test.TestCase):
           model_checkpoint_path=s1,
           all_model_checkpoint_paths=[s2, s1],
           save_dir=save_dir)
+=======
+      self.assertFalse(gfile.Exists(s3))
+      self.assertTrue(gfile.Exists(s2))
+      self.assertTrue(gfile.Exists(s1))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       # Exercise the third helper.
 
@@ -1464,6 +1831,7 @@ class MaxToKeepTest(test.TestCase):
       s2 = save3.save(sess, os.path.join(save_dir, "s2"))
       self.assertEqual([s2], save3.last_checkpoints)
       # Created by the first helper.
+<<<<<<< HEAD
       self.assertTrue(checkpoint_management.checkpoint_exists(s1))
       self.assertTrue(
           checkpoint_management.checkpoint_exists(
@@ -1483,10 +1851,17 @@ class MaxToKeepTest(test.TestCase):
           model_checkpoint_path=s2,
           all_model_checkpoint_paths=[s2],
           save_dir=save_dir)
+=======
+      self.assertTrue(gfile.Exists(s1))
+      # Deleted by the first helper.
+      self.assertFalse(gfile.Exists(s3))
+      self.assertTrue(gfile.Exists(s2))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       # Adding s1 (s3 should not be deleted because helper is unaware of it)
       s1 = save3.save(sess, os.path.join(save_dir, "s1"))
       self.assertEqual([s2, s1], save3.last_checkpoints)
+<<<<<<< HEAD
       self.assertFalse(checkpoint_management.checkpoint_exists(s3))
       self.assertFalse(
           checkpoint_management.checkpoint_exists(
@@ -1520,10 +1895,34 @@ class MaxToKeepTest(test.TestCase):
               "v1": v1
           }, sharded=True, max_to_keep=2)
       self.evaluate(variables.global_variables_initializer())
+=======
+      self.assertFalse(gfile.Exists(s3))
+      self.assertTrue(gfile.Exists(s2))
+      self.assertTrue(gfile.Exists(s1))
+
+  def testSharded(self):
+    save_dir = os.path.join(self.get_temp_dir(), "max_to_keep_sharded")
+    try:
+      gfile.DeleteRecursively(save_dir)
+    except gfile.GOSError, _:
+      pass                      # Ignore
+    gfile.MakeDirs(save_dir)
+
+    with tf.Session(
+        target="",
+        config=tf.ConfigProto(device_count={"CPU": 2})) as sess:
+      with sess.graph.device("/cpu:0"):
+        v0 = tf.Variable(111, name="v0")
+      with sess.graph.device("/cpu:1"):
+        v1 = tf.Variable(222, name="v1")
+      save = tf.train.Saver({"v0": v0, "v1": v1}, sharded=True, max_to_keep=2)
+      tf.initialize_all_variables().run()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       self.assertEqual([], save.last_checkpoints)
 
       s1 = save.save(sess, os.path.join(save_dir, "s1"))
       self.assertEqual([s1], save.last_checkpoints)
+<<<<<<< HEAD
       if save._write_version is saver_pb2.SaverDef.V1:
         self.assertEqual(2, len(gfile.Glob(s1)))
       else:
@@ -1698,6 +2097,47 @@ class KeepCheckpointEveryNHoursTest(test.TestCase):
       # Wait till 1 seconds have elapsed so s1 will be old enough to keep.
       # sleep may return early, don't trust it.
       mock_time.time.return_value = start_time + 1.0
+=======
+      self.assertEquals(2, len(gfile.Glob(s1)))
+
+      s2 = save.save(sess, os.path.join(save_dir, "s2"))
+      self.assertEqual([s1, s2], save.last_checkpoints)
+      self.assertEquals(2, len(gfile.Glob(s1)))
+      self.assertEquals(2, len(gfile.Glob(s2)))
+
+      s3 = save.save(sess, os.path.join(save_dir, "s3"))
+      self.assertEqual([s2, s3], save.last_checkpoints)
+      self.assertEquals(0, len(gfile.Glob(s1)))
+      self.assertEquals(2, len(gfile.Glob(s2)))
+      self.assertEquals(2, len(gfile.Glob(s3)))
+
+
+class KeepCheckpointEveryNHoursTest(tf.test.TestCase):
+
+  def testNonSharded(self):
+    save_dir = os.path.join(self.get_temp_dir(),
+                            "keep_checkpoint_every_n_hours")
+    try:
+      gfile.DeleteRecursively(save_dir)
+    except gfile.GOSError, _:
+      pass                      # Ignore
+    gfile.MakeDirs(save_dir)
+
+    with self.test_session() as sess:
+      v = tf.Variable([10.0], name="v")
+      # Run the initializer NOW to avoid the 0.5s overhead of the first Run()
+      # call, which throws the test timing off in fastbuild mode.
+      tf.initialize_all_variables().run()
+      # Create a saver that will keep the last 2 checkpoints plus one every 0.7
+      # seconds.
+      start_time = time.time()
+      save = tf.train.Saver({"v": v}, max_to_keep=2,
+                         keep_checkpoint_every_n_hours=0.7 / 3600)
+      self.assertEqual([], save.last_checkpoints)
+
+      # Wait till 0.7 second have elapsed so s1 will be old enough to keep.
+      time.sleep((time.time() + 0.7) - start_time)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       s1 = save.save(sess, os.path.join(save_dir, "s1"))
       self.assertEqual([s1], save.last_checkpoints)
 
@@ -1721,6 +2161,7 @@ class KeepCheckpointEveryNHoursTest(test.TestCase):
       self.assertEqual([s3, s4], save.last_checkpoints)
 
       # Check that s1 is still here, but s2 is gone.
+<<<<<<< HEAD
       self.assertTrue(checkpoint_management.checkpoint_exists(s1))
       self.assertFalse(checkpoint_management.checkpoint_exists(s2))
       self.assertTrue(checkpoint_management.checkpoint_exists(s3))
@@ -1743,20 +2184,53 @@ class SaveRestoreWithVariableNameMap(test.TestCase):
       # Check that the parameter nodes have been initialized.
       self.assertEqual(10.0, self.evaluate(v0))
       self.assertEqual(20.0, self.evaluate(v1))
+=======
+      self.assertTrue(gfile.Exists(s1))
+      self.assertFalse(gfile.Exists(s2))
+      self.assertTrue(gfile.Exists(s3))
+      self.assertTrue(gfile.Exists(s4))
+
+
+class SaveRestoreWithVariableNameMap(tf.test.TestCase):
+
+  def testNonReshape(self):
+    save_path = os.path.join(self.get_temp_dir(), "basics")
+
+    with self.test_session() as sess:
+      # Build a graph with 2 parameter nodes, and Save and
+      # Restore nodes for them.
+      v0 = tf.Variable(10.0, name="v0")
+      v1 = tf.Variable(20.0, name="v1")
+      save = tf.train.Saver({"save_prefix/v0": v0, "save_prefix/v1": v1})
+      tf.initialize_all_variables().run()
+
+      # Check that the parameter nodes have been initialized.
+      self.assertEqual(10.0, v0.eval())
+      self.assertEqual(20.0, v1.eval())
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       # Save the initialized values in the file at "save_path"
       # Use a variable name map to set the saved tensor names
       val = save.save(sess, save_path)
+<<<<<<< HEAD
       self.assertTrue(isinstance(val, six.string_types))
       self.assertEqual(save_path, val)
 
       # Verify that the original names are not in the Saved file
       save = saver_module.Saver({"v0": v0, "v1": v1})
+=======
+      self.assertTrue(isinstance(val, basestring))
+      self.assertEqual(save_path, val)
+
+      # Verify that the original names are not in the Saved file
+      save = tf.train.Saver({"v0": v0, "v1": v1})
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       with self.assertRaisesOpError("not found in checkpoint"):
         save.restore(sess, save_path)
 
     # Verify that the mapped names are present in the Saved file and can be
     # Restored using remapped names.
+<<<<<<< HEAD
     with self.session(graph=ops_lib.Graph()) as sess:
       v0 = variable_op(-1.0, name="v0")
       v1 = variable_op(-1.0, name="v1")
@@ -3254,3 +3728,43 @@ class TrackableCompatibilityTests(test.TestCase):
 
 if __name__ == "__main__":
   test.main()
+=======
+    with self.test_session() as sess:
+      v0 = tf.Variable(-1.0, name="v0")
+      v1 = tf.Variable(-1.0, name="v1")
+
+      with self.assertRaisesOpError("uninitialized value v0"):
+        sess.run(v0)
+      with self.assertRaisesOpError("uninitialized value v1"):
+        sess.run(v1)
+
+      save = tf.train.Saver({"save_prefix/v0": v0, "save_prefix/v1": v1})
+      save.restore(sess, save_path)
+
+      # Check that the parameter nodes have been restored.
+      self.assertEqual(10.0, v0.eval())
+      self.assertEqual(20.0, v1.eval())
+
+    # Add a prefix to the node names in the current graph and Restore using
+    # remapped names.
+    with self.test_session() as sess:
+      v0 = tf.Variable(-1.0, name="restore_prefix/v0")
+      v1 = tf.Variable(-1.0, name="restore_prefix/v1")
+
+      with self.assertRaisesOpError("uninitialized value restore_prefix/v0"):
+        sess.run(v0)
+      with self.assertRaisesOpError("uninitialized value restore_prefix/v1"):
+        sess.run(v1)
+
+      # Restore the saved values in the parameter nodes.
+      save = tf.train.Saver({"save_prefix/v0": v0, "save_prefix/v1": v1})
+      save.restore(sess, save_path)
+
+      # Check that the parameter nodes have been restored.
+      self.assertEqual(10.0, v0.eval())
+      self.assertEqual(20.0, v1.eval())
+
+
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

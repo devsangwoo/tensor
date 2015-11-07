@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,11 +27,20 @@ limitations under the License.
 
 #include "tensorflow/core/lib/bfloat16/bfloat16.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_NUMERIC_TYPES_H_
+#define TENSORFLOW_FRAMEWORK_NUMERIC_TYPES_H_
+
+#include <complex>
+
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 // Single precision complex.
 typedef std::complex<float> complex64;
+<<<<<<< HEAD
 // Double precision complex.
 typedef std::complex<double> complex128;
 
@@ -144,3 +154,9 @@ struct hash<Eigen::half> {
 #endif  // _MSC_VER
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_NUMERIC_TYPES_H_
+=======
+
+}  // end namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_NUMERIC_TYPES_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

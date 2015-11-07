@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,12 @@ limitations under the License.
 #include <cmath>
 #include <unordered_set>
 #include <vector>
+=======
+#include "tensorflow/core/kernels/range_sampler.h"
+
+#include <vector>
+#include <unordered_set>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/gtl/map_util.h"
@@ -25,8 +32,12 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/numbers.h"
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -61,7 +72,11 @@ namespace {
 // We use batch_size and num_tries, where num_tries is the observed number of
 // tries it took to get batch_size unique values.
 //
+<<<<<<< HEAD
 // Assuming (falsely) that the number of tries to get a batch of batch_size
+=======
+// Assuming (falsely) that the nubmer of tries to get a batch of batch_size
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // distinct values is _always_ num_tries, the probability that the value
 // is in a batch is (1 - (1-p)^num_tries)
 static float ExpectedCountHelper(float p, int batch_size, int num_tries) {
@@ -70,7 +85,11 @@ static float ExpectedCountHelper(float p, int batch_size, int num_tries) {
     return p * batch_size;
   }
   // numerically stable version of (1 - (1-p)^num_tries)
+<<<<<<< HEAD
   return -std::expm1(num_tries * std::log1p(-p));
+=======
+  return -expm1(num_tries * log1p(-p));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace
@@ -98,7 +117,11 @@ void RangeSampler::SampleBatchGetExpectedCountAvoid(
       }
     }
   } else {
+<<<<<<< HEAD
     CHECK_EQ(avoided_values.size(), size_t{0})
+=======
+    CHECK_EQ(avoided_values.size(), 0)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         << "avoided_values only supported with unique=true";
     for (int i = 0; i < batch_size; i++) {
       batch[i] = Sample(rnd);
@@ -106,7 +129,11 @@ void RangeSampler::SampleBatchGetExpectedCountAvoid(
     num_tries = batch_size;
   }
   // Compute the expected counts of the batch and the extra values
+<<<<<<< HEAD
   if (!batch_expected_count.empty()) {
+=======
+  if (batch_expected_count.size() > 0) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     CHECK_EQ(batch_size, batch_expected_count.size());
     for (int i = 0; i < batch_size; i++) {
       batch_expected_count[i] =
@@ -120,7 +147,12 @@ void RangeSampler::SampleBatchGetExpectedCountAvoid(
   }
 }
 
+<<<<<<< HEAD
 AllSampler::AllSampler(int64 range) : RangeSampler(range) {}
+=======
+AllSampler::AllSampler(int64 range)
+    : RangeSampler(range), inv_range_(1.0 / range) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 void AllSampler::SampleBatchGetExpectedCountAvoid(
     random::SimplePhilox* rnd, bool unique, MutableArraySlice<int64> batch,
@@ -132,13 +164,21 @@ void AllSampler::SampleBatchGetExpectedCountAvoid(
   for (int i = 0; i < batch_size; i++) {
     batch[i] = i;
   }
+<<<<<<< HEAD
   if (!batch_expected_count.empty()) {
+=======
+  if (batch_expected_count.size() > 0) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     CHECK_EQ(batch_size, batch_expected_count.size());
     for (int i = 0; i < batch_size; i++) {
       batch_expected_count[i] = 1;
     }
   }
+<<<<<<< HEAD
   CHECK_EQ(size_t{0}, avoided_values.size());
+=======
+  CHECK_EQ(0, avoided_values.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   CHECK_EQ(extras.size(), extras_expected_count.size());
   for (size_t i = 0; i < extras.size(); i++) {
     extras_expected_count[i] = 1;
@@ -155,16 +195,26 @@ int64 UniformSampler::Sample(random::SimplePhilox* rnd) const {
 float UniformSampler::Probability(int64 value) const { return inv_range_; }
 
 LogUniformSampler::LogUniformSampler(int64 range)
+<<<<<<< HEAD
     : RangeSampler(range), log_range_(log1p(range)) {}
+=======
+    : RangeSampler(range), log_range_(log(range + 1)) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 int64 LogUniformSampler::Sample(random::SimplePhilox* rnd) const {
   const int64 value =
       static_cast<int64>(exp(rnd->RandDouble() * log_range_)) - 1;
+<<<<<<< HEAD
   DCHECK_GE(value, 0);
   // Mathematically, value should be <= range_, but might not be due to some
   // floating point roundoff, so we mod by range_.  In practice this case
   // happens never regardless of the value of range_, including and up to
   // DBL_MAX.  But we include it as a guarantee of the function's output.
+=======
+  CHECK_GE(value, 0);
+  // Mathematically, value should be <= range_, but might not be due to some
+  // floating point roundoff, so we mod by range_.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return value % range_;
 }
 
@@ -215,7 +265,11 @@ float UnigramSampler::Probability(int64 value) const {
   return unsafe_sampler_.Probability(value);
 }
 
+<<<<<<< HEAD
 // Overriding at a high level results in far fewer lock acquisitions.
+=======
+// Overriding at a high level results in far fewer lock aquisitions.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 void UnigramSampler::SampleBatchGetExpectedCountAvoid(
     random::SimplePhilox* rnd, bool unique, MutableArraySlice<int64> batch,
     MutableArraySlice<float> batch_expected_count, ArraySlice<int64> extras,
@@ -265,9 +319,12 @@ FixedUnigramSampler::FixedUnigramSampler(int64 range,
 }
 
 float FixedUnigramSampler::Probability(int64 value) const {
+<<<<<<< HEAD
   if (value < 0 || static_cast<size_t>(value) >= weights_.size()) {
     return 0.0;
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return weights_.at(value) / total_weight_;
 }
 
@@ -283,16 +340,23 @@ void FixedUnigramSampler::FillReservedIds(int32 num_reserved_ids) {
 
 Status FixedUnigramSampler::LoadFromFile(Env* env, const string& vocab_file,
                                          float distortion) {
+<<<<<<< HEAD
   std::unique_ptr<RandomAccessFile> file;
   TF_RETURN_IF_ERROR(env->NewRandomAccessFile(vocab_file, &file));
 
   io::InputBuffer in(file.get(), 262144 /*bytes*/);
+=======
+  RandomAccessFile* file;
+  TF_RETURN_IF_ERROR(env->NewRandomAccessFile(vocab_file, &file));
+  io::InputBuffer in(file, 262144 /*bytes*/);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string line;
   int32 word_id = weights_.size();
   while (in.ReadLine(&line).ok()) {
     // The vocabulary file should be in csv like format, with the last
     // field the weight associated with the word.
     std::vector<string> cols = str_util::Split(line, ',');
+<<<<<<< HEAD
     if (cols.empty()) continue;
     // Skip entries that do not belong to this shard.
     if (word_id % num_shards_ == shard_) {
@@ -302,6 +366,17 @@ Status FixedUnigramSampler::LoadFromFile(Env* env, const string& vocab_file,
                                        line);
       }
       w = std::pow(w, distortion);
+=======
+    if (cols.size() == 0) continue;
+    // Skip entries that do not belong to this shard.
+    if (word_id % num_shards_ == shard_) {
+      float w = 0.0;
+      if (!strings::safe_strtof(cols.at(cols.size() - 1).c_str(), &w)) {
+        return errors::InvalidArgument("Wrong vocabulary format at line: ",
+                                       line);
+      }
+      w = pow(w, distortion);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       total_weight_ += w;
       weights_.push_back(w);
     }
@@ -316,7 +391,11 @@ void FixedUnigramSampler::LoadFromUnigrams(const std::vector<float>& unigrams,
   for (float w : unigrams) {
     // Skip entries that do not belong to this shard.
     if (word_id % num_shards_ == shard_) {
+<<<<<<< HEAD
       w = std::pow(w, distortion);
+=======
+      w = pow(w, distortion);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       total_weight_ += w;
       weights_.push_back(w);
     }

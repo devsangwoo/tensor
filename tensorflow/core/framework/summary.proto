@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package tensorflow;
+<<<<<<< HEAD
 option cc_enable_arenas = true;
 option java_outer_classname = "SummaryProtos";
 option java_multiple_files = true;
@@ -14,6 +15,9 @@ message SummaryDescription {
   // Supported values include "scalar", "histogram", "image", "audio"
   string type_hint = 1;
 }
+=======
+// option cc_enable_arenas = true;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Serialization format for histogram module in
 // core/lib/histogram/histogram.h
@@ -33,6 +37,7 @@ message HistogramProto {
   repeated double bucket = 7 [packed = true];
 };
 
+<<<<<<< HEAD
 // A SummaryMetadata encapsulates information on which plugins are able to make
 // use of a certain summary value.
 message SummaryMetadata {
@@ -55,6 +60,8 @@ message SummaryMetadata {
   string summary_description = 3;
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // A Summary is a set of named values to be displayed by the
 // visualizer.
 //
@@ -79,6 +86,7 @@ message Summary {
     bytes encoded_image_string = 4;
   }
 
+<<<<<<< HEAD
   message Audio {
     // Sample rate of the audio in Hz.
     float sample_rate = 1;
@@ -108,14 +116,27 @@ message Summary {
     // tags are associated with which plugins. This saves space.
     SummaryMetadata metadata = 9;
 
+=======
+  message Value {
+    // Tag name for the data.  Will be used as the title of the graph
+    // in the visualizer.
+    //
+    // Tag is usually "op_name:value_name", where "op_name" itself can have
+    // structure to indicate grouping.
+    string tag = 1;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Value associated with the tag.
     oneof value {
       float simple_value = 2;
       bytes obsolete_old_style_histogram = 3;
       Image image = 4;
       HistogramProto histo = 5;
+<<<<<<< HEAD
       Audio audio = 6;
       TensorProto tensor = 8;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 

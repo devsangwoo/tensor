@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +16,17 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_UTIL_PORT_H_
 #define TENSORFLOW_CORE_UTIL_PORT_H_
+=======
+#ifndef TENSORFLOW_UTIL_PORT_H_
+#define TENSORFLOW_UTIL_PORT_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 // Returns true if GOOGLE_CUDA is defined.
 bool IsGoogleCudaEnabled();
 
+<<<<<<< HEAD
 // Returns true if TENSORFLOW_USE_ROCM is defined. (i.e. TF is built with ROCm)
 bool IsBuiltWithROCm();
 
@@ -44,3 +50,8 @@ bool IsMklEnabled();
 }  // end namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_UTIL_PORT_H_
+=======
+}  // end namespace tensorflow
+
+#endif  // TENSORFLOW_UTIL_PORT_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

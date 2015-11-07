@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,13 +33,24 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/lib/strings/strcat.h"
+=======
+#include "tensorflow/core/framework/graph_def_util.h"
+
+#include "tensorflow/core/framework/node_def_util.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 string SummarizeGraphDef(const GraphDef& graph_def) {
   string ret;
+<<<<<<< HEAD
   strings::StrAppend(
       &ret, "versions = ", graph_def.versions().ShortDebugString(), ";\n");
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (const NodeDef& node : graph_def.node()) {
     strings::StrAppend(&ret, SummarizeNodeDef(node), ";\n");
   }
@@ -52,6 +64,7 @@ Status ValidateExternalGraphDefSyntax(const GraphDef& graph_def) {
   return Status::OK();
 }
 
+<<<<<<< HEAD
 Status AddDefaultAttrsToGraphDef(GraphDef* graph_def,
                                  const OpRegistryInterface& op_registry,
                                  int node_offset) {
@@ -263,4 +276,6 @@ Status StrippedOpListForGraph(const GraphDef& graph_def,
   return Status::OK();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

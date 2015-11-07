@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,11 +31,26 @@ limitations under the License.
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/graph/graph.h"
+
+#include <set>
+#include <gtest/gtest.h>
+#include "tensorflow/core/graph/graph_constructor.h"
+#include "tensorflow/core/graph/node_builder.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/lib/random/simple_philox.h"
+#include "tensorflow/core/lib/strings/stringprintf.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/platform/protobuf.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/platform/test_benchmark.h"
 
 namespace tensorflow {
 namespace {
 
+<<<<<<< HEAD
 REGISTER_OP("OneInput").Input("x: float");
 
 REGISTER_OP("OneOutput").Output("y: float");
@@ -56,6 +72,15 @@ class GraphTest : public ::testing::Test {
 
   static void VerifyNodes(Node* node, const std::vector<Node*>& expected_in,
                           const std::vector<Node*>& expected_out) {
+=======
+class GraphTest : public ::testing::Test {
+ protected:
+  GraphTest() : graph_(OpRegistry::Global()) { RequireDefaultOps(); }
+  ~GraphTest() override {}
+
+  static void VerifyNodes(Node* node, std::vector<Node*> expected_in,
+                          std::vector<Node*> expected_out) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     std::vector<Node*> in;
     for (const Edge* e : node->in_edges()) {
       in.push_back(e->src());
@@ -69,6 +94,7 @@ class GraphTest : public ::testing::Test {
     EXPECT_EQ(Stringify(expected_out), Stringify(out));
   }
 
+<<<<<<< HEAD
   void VerifyGraphStats() {
     int nodes = 0;
     for (const Node* n : graph_.nodes()) {
@@ -84,12 +110,15 @@ class GraphTest : public ::testing::Test {
     EXPECT_EQ(edges, graph_.num_edges());
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Node* AddNodeWithName(const string& name) {
     Node* node;
     TF_CHECK_OK(NodeBuilder(name, "NoOp").Finalize(&graph_, &node));
     return node;
   }
 
+<<<<<<< HEAD
   Node* FromNodeDef(const string& name, const string& node_type,
                     int num_inputs) {
     auto builder = NodeDefBuilder(name, node_type);
@@ -137,6 +166,8 @@ class GraphTest : public ::testing::Test {
     return false;
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Graph graph_;
 
  private:
@@ -144,7 +175,10 @@ class GraphTest : public ::testing::Test {
   // are readable.
   static std::vector<string> Stringify(const std::vector<Node*>& nodes) {
     std::vector<string> result;
+<<<<<<< HEAD
     result.reserve(nodes.size());
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (Node* n : nodes) {
       result.push_back(n->DebugString());
     }
@@ -161,7 +195,10 @@ TEST_F(GraphTest, Constructor) {
   VerifyNodes(source, {}, {sink});
   VerifyNodes(sink, {source}, {});
   EXPECT_EQ(2, graph_.num_node_ids());
+<<<<<<< HEAD
   VerifyGraphStats();
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(GraphTest, RemoveThenAdd) {
@@ -175,6 +212,7 @@ TEST_F(GraphTest, RemoveThenAdd) {
   Node* d = AddNodeWithName("D");
   EXPECT_NE(b_id, d->id());  // Ids should not be reused.
   EXPECT_EQ(6, graph_.num_node_ids());
+<<<<<<< HEAD
   VerifyGraphStats();
 }
 
@@ -182,6 +220,14 @@ TEST_F(GraphTest, InNodesAndOutNodes) {
   Node* a = FromNodeDef("A", "OneOutput", 0);
   Node* b = AddNodeWithName("B");
   Node* c = FromNodeDef("C", "OneInput", 1);
+=======
+}
+
+TEST_F(GraphTest, InNodesAndOutNodes) {
+  Node* a = AddNodeWithName("A");
+  Node* b = AddNodeWithName("B");
+  Node* c = AddNodeWithName("C");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   graph_.RemoveNode(b);
   Node* d = AddNodeWithName("D");
 
@@ -211,6 +257,7 @@ TEST_F(GraphTest, InNodesAndOutNodes) {
   VerifyNodes(graph_.sink_node(), {a, graph_.source_node()}, {});  // no more c
   EXPECT_EQ(6, graph_.num_node_ids());
   EXPECT_EQ(5, graph_.num_edge_ids());
+<<<<<<< HEAD
   VerifyGraphStats();
 }
 
@@ -287,13 +334,21 @@ TEST_F(GraphTest, NodeByIndex) {
   TF_ASSERT_OK(c->input_edges(&c_input_edges));
   ASSERT_EQ(1, c_input_edges.size());
   EXPECT_EQ(b_new_c_edge, c_input_edges[0]);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(GraphTest, NodeIteration) {
   // Set up the graph with some holes due to removals.
+<<<<<<< HEAD
   Node* a = FromNodeDef("A", "OneOutput", 0);
   Node* b = AddNodeWithName("B");
   Node* c = FromNodeDef("C", "OneInput", 1);
+=======
+  Node* a = AddNodeWithName("A");
+  Node* b = AddNodeWithName("B");
+  Node* c = AddNodeWithName("C");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   graph_.RemoveNode(b);
   Node* d = AddNodeWithName("D");
   const Edge* source_to_a = graph_.AddControlEdge(graph_.source_node(), a);
@@ -326,7 +381,10 @@ TEST_F(GraphTest, NodeIteration) {
     actual.insert(node->DebugString());
   }
   EXPECT_EQ(expected, actual);
+<<<<<<< HEAD
   VerifyGraphStats();
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 static void CheckType(Node* node, bool b) {
@@ -344,6 +402,7 @@ TEST_F(GraphTest, Type) {
   CheckType(graph_.source_node(), graph_.source_node()->IsSource());
   CheckType(graph_.sink_node(), graph_.sink_node()->IsSink());
   CheckType(op, op->IsOp());
+<<<<<<< HEAD
   VerifyGraphStats();
 }
 
@@ -368,6 +427,8 @@ TEST_F(GraphTest, AddAttr) {
   EXPECT_EQ(Status::OK(), GetNodeAttr(n2->attrs(), "_a", &attr));
   EXPECT_EQ("new_attr", attr);
   EXPECT_NE(Status::OK(), GetNodeAttr(n2->attrs(), "_b", &attr));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // Convert edge iteration results into a sorted string.
@@ -387,8 +448,13 @@ static string EdgeIter(const Graph& g) {
 TEST_F(GraphTest, EdgeIteration) {
   EXPECT_EQ("0->1;", EdgeIter(graph_));
 
+<<<<<<< HEAD
   Node* a = FromNodeDef("A", "OneInputTwoOutputs", 1);
   Node* b = FromNodeDef("B", "OneInput", 1);
+=======
+  Node* a = AddNodeWithName("A");
+  Node* b = AddNodeWithName("B");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ("0->1;", EdgeIter(graph_));  // Since a,b are currently disconnected
 
   graph_.AddEdge(a, 0, b, 0);
@@ -400,7 +466,10 @@ TEST_F(GraphTest, EdgeIteration) {
 
   graph_.AddEdge(a, 1, a, 0);
   EXPECT_EQ("0->1;0->2;2->2;2->3;3->1;", EdgeIter(graph_));
+<<<<<<< HEAD
   VerifyGraphStats();
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(GraphTest, NewName) {
@@ -410,6 +479,7 @@ TEST_F(GraphTest, NewName) {
   EXPECT_NE(a1, a2);
   EXPECT_NE(a1, b1);
   EXPECT_NE(a2, b1);
+<<<<<<< HEAD
   EXPECT_TRUE(absl::StartsWith(a1, "A")) << a1;
 }
 
@@ -666,12 +736,41 @@ static void BM_InEdgeIteration(int iters, int num_nodes,
   const GraphDef graph_def =
       test::CreateGraphDef(num_nodes, num_edges_per_node);
   Graph graph(OpRegistry::Global());
+=======
+  EXPECT_TRUE(StringPiece(a1).starts_with("A")) << a1;
+}
+
+REGISTER_OP("Input").Output("o: float");
+REGISTER_OP("In2Out1").Input("a: float").Input("b: float").Output("o: float");
+
+static void BM_InEdgeIteration(int iters, int num_nodes) {
+  testing::StopTiming();
+  string s;
+  for (int in = 0; in < 10; in++) {
+    s += strings::Printf("node { name: 'in%04d' op: 'Input' }", in);
+  }
+  random::PhiloxRandom philox(301, 17);
+  random::SimplePhilox rnd(&philox);
+  for (int op = 0; op < num_nodes; op++) {
+    s += strings::Printf(
+        "node { name: 'op%04d' op: 'In2Out1' input: ['in%04d', 'in%04d' ] }",
+        op, rnd.Uniform(10), rnd.Uniform(10));
+  }
+
+  Graph graph(OpRegistry::Global());
+  GraphDef graph_def;
+  CHECK(protobuf::TextFormat::ParseFromString(s, &graph_def));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   GraphConstructorOptions opts;
   TF_CHECK_OK(ConvertGraphDefToGraph(opts, graph_def, &graph));
 
   int64 sum = 0;
   testing::StartTiming();
+<<<<<<< HEAD
   for (int i = 0; i < iters; ++i) {
+=======
+  for (int i = 0; i < iters; i += graph.num_node_ids()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (const Node* node : graph.nodes()) {
       for (auto e : node->in_edges()) {
         sum += e->id();
@@ -679,6 +778,7 @@ static void BM_InEdgeIteration(int iters, int num_nodes,
     }
   }
   VLOG(1) << sum;
+<<<<<<< HEAD
   testing::StopTiming();
 }
 BENCHMARK(BM_InEdgeIteration)->ArgPair(10, 2);
@@ -818,6 +918,10 @@ BENCHMARK(BM_RemoveNode)->ArgPair(1 << 6, 16);
 BENCHMARK(BM_RemoveNode)->ArgPair(1 << 9, 16);
 BENCHMARK(BM_RemoveNode)->ArgPair(1 << 12, 16);
 BENCHMARK(BM_RemoveNode)->ArgPair(1 << 15, 16);
+=======
+}
+BENCHMARK(BM_InEdgeIteration)->Range(10, 100000);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace
 }  // namespace tensorflow

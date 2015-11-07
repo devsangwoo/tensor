@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #ifndef CXX11_SRC_FIXEDPOINT_PACKETMATHAVX2_H_
 #define CXX11_SRC_FIXEDPOINT_PACKETMATHAVX2_H_
 #ifdef _MSC_VER
@@ -23,6 +24,10 @@ inline int _mm256_extract_epi8_N0(const __m256i X) {
 inline int _mm256_extract_epi8_N1(const __m256i X) {
   return _mm_extract_epi8(_mm256_extractf128_si256((X), 1 >> 4), 1 % 16);
 }
+=======
+#ifndef THIRD_PARTY_EIGEN3_UNSUPPORTED_EIGEN_CXX11_SRC_FIXEDPOINT_PACKETMATHAVX2_H_
+#define THIRD_PARTY_EIGEN3_UNSUPPORTED_EIGEN_CXX11_SRC_FIXEDPOINT_PACKETMATHAVX2_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace Eigen {
 namespace internal {
@@ -30,6 +35,7 @@ namespace internal {
 typedef struct Packet32q8i {
   __m256i val;
   operator __m256i() const { return val; }
+<<<<<<< HEAD
   Packet32q8i() : val(_mm256_setzero_si256()){};
   Packet32q8i(__m256i val) : val(val) {}
 } Packet32q8i;
@@ -45,19 +51,34 @@ typedef struct Packet32q8u {
   __m256i val;
   operator __m256i() const { return val; }
   Packet32q8u() : val(_mm256_setzero_si256()){};
+=======
+  Packet32q8i();
+  Packet32q8i(__m256i val) : val(val) {}
+} Packet32q8i;
+
+typedef struct Packet32q8u {
+  __m256i val;
+  operator __m256i() const { return val; }
+  Packet32q8u();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Packet32q8u(__m256i val) : val(val) {}
 } Packet32q8u;
 
 typedef struct Packet16q8i {
   __m128i val;
   operator __m128i() const { return val; }
+<<<<<<< HEAD
   Packet16q8i() : val(_mm_setzero_si128()) {}
+=======
+  Packet16q8i();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Packet16q8i(__m128i val) : val(val) {}
 } Packet16q8i;
 
 typedef struct Packet16q8u {
   __m128i val;
   operator __m128i() const { return val; }
+<<<<<<< HEAD
   Packet16q8u() : val(_mm_setzero_si128()) {}
   Packet16q8u(__m128i val) : val(val) {}
 } Packet16q8u;
@@ -73,17 +94,34 @@ typedef struct Packet8q32i {
   __m256i val;
   operator __m256i() const { return val; }
   Packet8q32i() : val(_mm256_setzero_si256()){};
+=======
+  Packet16q8u();
+  Packet16q8u(__m128i val) : val(val) {}
+} Packet16q8u;
+
+typedef struct Packet8q32i {
+  __m256i val;
+  operator __m256i() const { return val; }
+  Packet8q32i();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Packet8q32i(__m256i val) : val(val) {}
 } Packet8q32i;
 
 typedef struct Packet4q32i {
   __m128i val;
   operator __m128i() const { return val; }
+<<<<<<< HEAD
   Packet4q32i() : val(_mm_setzero_si128()) {}
   Packet4q32i(__m128i val) : val(val) {}
 } Packet4q32i;
 
 #ifndef EIGEN_VECTORIZE_AVX512
+=======
+  Packet4q32i();
+  Packet4q32i(__m128i val) : val(val) {}
+} Packet4q32i;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <>
 struct packet_traits<QInt8> : default_packet_traits {
   typedef Packet32q8i type;
@@ -129,6 +167,7 @@ struct packet_traits<QUInt8> : default_packet_traits {
   };
 };
 template <>
+<<<<<<< HEAD
 struct packet_traits<QInt16> : default_packet_traits {
   typedef Packet16q16i type;
   typedef Packet8q16i half;
@@ -151,6 +190,8 @@ struct packet_traits<QInt16> : default_packet_traits {
   };
 };
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 struct packet_traits<QInt32> : default_packet_traits {
   typedef Packet8q32i type;
   typedef Packet4q32i half;
@@ -172,12 +213,16 @@ struct packet_traits<QInt32> : default_packet_traits {
     HasSetLinear = 0
   };
 };
+<<<<<<< HEAD
 #endif
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <>
 struct unpacket_traits<Packet32q8i> {
   typedef QInt8 type;
   typedef Packet16q8i half;
+<<<<<<< HEAD
   enum {
     size = 32,
     alignment = Aligned32,
@@ -221,11 +266,15 @@ struct unpacket_traits<Packet8q16i> {
     masked_load_available = false,
     masked_store_available = false
   };
+=======
+  enum { size = 32 };
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 template <>
 struct unpacket_traits<Packet32q8u> {
   typedef QUInt8 type;
   typedef Packet16q8u half;
+<<<<<<< HEAD
   enum {
     size = 32,
     alignment = Aligned32,
@@ -233,11 +282,15 @@ struct unpacket_traits<Packet32q8u> {
     masked_load_available = false,
     masked_store_available = false
   };
+=======
+  enum { size = 32 };
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 template <>
 struct unpacket_traits<Packet8q32i> {
   typedef QInt32 type;
   typedef Packet4q32i half;
+<<<<<<< HEAD
   enum {
     size = 8,
     alignment = Aligned32,
@@ -245,6 +298,9 @@ struct unpacket_traits<Packet8q32i> {
     masked_load_available = false,
     masked_store_available = false
   };
+=======
+  enum { size = 8 };
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // Unaligned load
@@ -254,16 +310,20 @@ EIGEN_STRONG_INLINE Packet32q8i ploadu<Packet32q8i>(const QInt8* from) {
       reinterpret_cast<const __m256i*>(from));
 }
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE Packet16q8i ploadu<Packet16q8i>(const QInt8* from) {
   EIGEN_DEBUG_UNALIGNED_LOAD return _mm_loadu_si128(
       reinterpret_cast<const __m128i*>(from));
 }
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 EIGEN_STRONG_INLINE Packet32q8u ploadu<Packet32q8u>(const QUInt8* from) {
   EIGEN_DEBUG_UNALIGNED_LOAD return _mm256_loadu_si256(
       reinterpret_cast<const __m256i*>(from));
 }
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE Packet16q16i ploadu<Packet16q16i>(const QInt16* from) {
   EIGEN_DEBUG_UNALIGNED_LOAD return _mm256_loadu_si256(
       reinterpret_cast<const __m256i*>(from));
@@ -274,6 +334,8 @@ EIGEN_STRONG_INLINE Packet8q16i ploadu<Packet8q16i>(const QInt16* from) {
       reinterpret_cast<const __m128i*>(from));
 }
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 EIGEN_STRONG_INLINE Packet8q32i ploadu<Packet8q32i>(const QInt32* from) {
   EIGEN_DEBUG_UNALIGNED_LOAD return _mm256_loadu_si256(
       reinterpret_cast<const __m256i*>(from));
@@ -286,16 +348,20 @@ EIGEN_STRONG_INLINE Packet32q8i pload<Packet32q8i>(const QInt8* from) {
       reinterpret_cast<const __m256i*>(from));
 }
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE Packet16q8i pload<Packet16q8i>(const QInt8* from) {
   EIGEN_DEBUG_ALIGNED_LOAD return _mm_load_si128(
       reinterpret_cast<const __m128i*>(from));
 }
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 EIGEN_STRONG_INLINE Packet32q8u pload<Packet32q8u>(const QUInt8* from) {
   EIGEN_DEBUG_ALIGNED_LOAD return _mm256_load_si256(
       reinterpret_cast<const __m256i*>(from));
 }
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE Packet16q16i pload<Packet16q16i>(const QInt16* from) {
   EIGEN_DEBUG_ALIGNED_LOAD return _mm256_load_si256(
       reinterpret_cast<const __m256i*>(from));
@@ -306,6 +372,8 @@ EIGEN_STRONG_INLINE Packet8q16i pload<Packet8q16i>(const QInt16* from) {
       reinterpret_cast<const __m128i*>(from));
 }
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 EIGEN_STRONG_INLINE Packet8q32i pload<Packet8q32i>(const QInt32* from) {
   EIGEN_DEBUG_ALIGNED_LOAD return _mm256_load_si256(
       reinterpret_cast<const __m256i*>(from));
@@ -318,16 +386,20 @@ EIGEN_STRONG_INLINE void pstoreu<QInt8>(QInt8* to, const Packet32q8i& from) {
       reinterpret_cast<__m256i*>(to), from.val);
 }
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE void pstoreu<QInt8>(QInt8* to, const Packet16q8i& from) {
   EIGEN_DEBUG_UNALIGNED_STORE _mm_storeu_si128(reinterpret_cast<__m128i*>(to),
                                                from.val);
 }
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 EIGEN_STRONG_INLINE void pstoreu<QUInt8>(QUInt8* to, const Packet32q8u& from) {
   EIGEN_DEBUG_UNALIGNED_STORE _mm256_storeu_si256(
       reinterpret_cast<__m256i*>(to), from.val);
 }
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE void pstoreu<QInt16>(QInt16* to, const Packet16q16i& from) {
   EIGEN_DEBUG_UNALIGNED_STORE _mm256_storeu_si256(
       reinterpret_cast<__m256i*>(to), from.val);
@@ -338,6 +410,8 @@ EIGEN_STRONG_INLINE void pstoreu<QInt16>(QInt16* to, const Packet8q16i& from) {
                                                from.val);
 }
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 EIGEN_STRONG_INLINE void pstoreu<QInt32>(QInt32* to, const Packet8q32i& from) {
   EIGEN_DEBUG_UNALIGNED_STORE _mm256_storeu_si256(
       reinterpret_cast<__m256i*>(to), from.val);
@@ -350,6 +424,7 @@ EIGEN_STRONG_INLINE void pstore<QInt32>(QInt32* to, const Packet8q32i& from) {
                                                from.val);
 }
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE void pstore<QInt16>(QInt16* to, const Packet16q16i& from) {
   EIGEN_DEBUG_ALIGNED_STORE _mm256_store_si256(reinterpret_cast<__m256i*>(to),
                                                from.val);
@@ -360,6 +435,8 @@ EIGEN_STRONG_INLINE void pstore<QInt16>(QInt16* to, const Packet8q16i& from) {
                                             from.val);
 }
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 EIGEN_STRONG_INLINE void pstore<QUInt8>(QUInt8* to, const Packet32q8u& from) {
   EIGEN_DEBUG_ALIGNED_STORE _mm256_store_si256(reinterpret_cast<__m256i*>(to),
                                                from.val);
@@ -369,11 +446,14 @@ EIGEN_STRONG_INLINE void pstore<QInt8>(QInt8* to, const Packet32q8i& from) {
   EIGEN_DEBUG_ALIGNED_STORE _mm256_store_si256(reinterpret_cast<__m256i*>(to),
                                                from.val);
 }
+<<<<<<< HEAD
 template <>
 EIGEN_STRONG_INLINE void pstore<QInt8>(QInt8* to, const Packet16q8i& from) {
   EIGEN_DEBUG_ALIGNED_STORE _mm_store_si128(reinterpret_cast<__m128i*>(to),
                                             from.val);
 }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Extract first element.
 template <>
@@ -381,6 +461,7 @@ EIGEN_STRONG_INLINE QInt32 pfirst<Packet8q32i>(const Packet8q32i& a) {
   return _mm_cvtsi128_si32(_mm256_castsi256_si128(a));
 }
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE QInt16 pfirst<Packet16q16i>(const Packet16q16i& a) {
   return _mm256_extract_epi16_N0(a.val);
 }
@@ -391,6 +472,14 @@ EIGEN_STRONG_INLINE QUInt8 pfirst<Packet32q8u>(const Packet32q8u& a) {
 template <>
 EIGEN_STRONG_INLINE QInt8 pfirst<Packet32q8i>(const Packet32q8i& a) {
   return _mm256_extract_epi8_N0(a.val);
+=======
+EIGEN_STRONG_INLINE QUInt8 pfirst<Packet32q8u>(const Packet32q8u& a) {
+  return static_cast<uint8_t>(_mm256_extract_epi8(a.val, 0));
+}
+template <>
+EIGEN_STRONG_INLINE QInt8 pfirst<Packet32q8i>(const Packet32q8i& a) {
+  return _mm256_extract_epi8(a.val, 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // Initialize to constant value.
@@ -414,10 +503,13 @@ EIGEN_STRONG_INLINE Packet8q32i padd<Packet8q32i>(const Packet8q32i& a,
   return _mm256_add_epi32(a.val, b.val);
 }
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE Packet16q16i pset1<Packet16q16i>(const QInt16& from) {
   return _mm256_set1_epi16(from.value);
 }
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 EIGEN_STRONG_INLINE Packet8q32i psub<Packet8q32i>(const Packet8q32i& a,
                                                   const Packet8q32i& b) {
   return _mm256_sub_epi32(a.val, b.val);
@@ -446,6 +538,7 @@ EIGEN_STRONG_INLINE Packet8q32i pmax<Packet8q32i>(const Packet8q32i& a,
 }
 
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE Packet16q16i pmin<Packet16q16i>(const Packet16q16i& a,
                                                     const Packet16q16i& b) {
   return _mm256_min_epi16(a.val, b.val);
@@ -457,6 +550,8 @@ EIGEN_STRONG_INLINE Packet16q16i pmax<Packet16q16i>(const Packet16q16i& a,
 }
 
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 EIGEN_STRONG_INLINE Packet32q8u pmin<Packet32q8u>(const Packet32q8u& a,
                                                   const Packet32q8u& b) {
   return _mm256_min_epu8(a.val, b.val);
@@ -497,6 +592,7 @@ EIGEN_STRONG_INLINE QInt32 predux_max<Packet8q32i>(const Packet8q32i& a) {
 }
 
 template <>
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE QInt16 predux_min<Packet16q16i>(const Packet16q16i& a) {
   __m256i tmp = _mm256_min_epi16(a, _mm256_permute2f128_si256(a, a, 1));
   tmp =
@@ -514,6 +610,8 @@ EIGEN_STRONG_INLINE QInt16 predux_max<Packet16q16i>(const Packet16q16i& a) {
 }
 
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 EIGEN_STRONG_INLINE QUInt8 predux_min<Packet32q8u>(const Packet32q8u& a) {
   __m256i tmp = _mm256_min_epu8(a, _mm256_permute2f128_si256(a, a, 1));
   tmp =
@@ -521,8 +619,13 @@ EIGEN_STRONG_INLINE QUInt8 predux_min<Packet32q8u>(const Packet32q8u& a) {
   tmp = _mm256_min_epu8(tmp, _mm256_shuffle_epi32(tmp, 1));
   tmp = _mm256_min_epu8(tmp,
                         _mm256_shufflelo_epi16(tmp, _MM_SHUFFLE(1, 0, 3, 2)));
+<<<<<<< HEAD
   return std::min(static_cast<uint8_t>(_mm256_extract_epi8_N0(tmp)),
                   static_cast<uint8_t>(_mm256_extract_epi8_N1(tmp)));
+=======
+  return std::min(static_cast<uint8_t>(_mm256_extract_epi8(tmp, 0)),
+                  static_cast<uint8_t>(_mm256_extract_epi8(tmp, 1)));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 template <>
 EIGEN_STRONG_INLINE QUInt8 predux_max<Packet32q8u>(const Packet32q8u& a) {
@@ -532,23 +635,36 @@ EIGEN_STRONG_INLINE QUInt8 predux_max<Packet32q8u>(const Packet32q8u& a) {
   tmp = _mm256_max_epu8(tmp, _mm256_shuffle_epi32(tmp, 1));
   tmp = _mm256_max_epu8(tmp,
                         _mm256_shufflelo_epi16(tmp, _MM_SHUFFLE(1, 0, 3, 2)));
+<<<<<<< HEAD
   return std::max(static_cast<uint8_t>(_mm256_extract_epi8_N0(tmp)),
                   static_cast<uint8_t>(_mm256_extract_epi8_N1(tmp)));
+=======
+  return std::max(static_cast<uint8_t>(_mm256_extract_epi8(tmp, 0)),
+                  static_cast<uint8_t>(_mm256_extract_epi8(tmp, 1)));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 template <>
 EIGEN_STRONG_INLINE QInt8 predux_min<Packet32q8i>(const Packet32q8i& a) {
   __m256i tmp = _mm256_min_epi8(a, _mm256_permute2f128_si256(a, a, 1));
+<<<<<<< HEAD
   tmp =
       _mm256_min_epi8(tmp, _mm256_shuffle_epi32(tmp, _MM_SHUFFLE(1, 0, 3, 2)));
   tmp = _mm256_min_epi8(tmp, _mm256_shuffle_epi32(tmp, 1));
   tmp = _mm256_min_epi8(tmp,
                         _mm256_shufflelo_epi16(tmp, _MM_SHUFFLE(1, 0, 3, 2)));
   return std::min(_mm256_extract_epi8_N0(tmp), _mm256_extract_epi8_N1(tmp));
+=======
+  tmp = _mm256_min_epi8(tmp, _mm256_shuffle_epi32(tmp, _MM_SHUFFLE(1, 0, 3, 2)));
+  tmp = _mm256_min_epi8(tmp, _mm256_shuffle_epi32(tmp, 1));
+  tmp = _mm256_min_epi8(tmp, _mm256_shufflelo_epi16(tmp, _MM_SHUFFLE(1, 0, 3, 2)));
+  return std::min(_mm256_extract_epi8(tmp, 0), _mm256_extract_epi8(tmp, 1));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 template <>
 EIGEN_STRONG_INLINE QInt8 predux_max<Packet32q8i>(const Packet32q8i& a) {
   __m256i tmp = _mm256_max_epi8(a, _mm256_permute2f128_si256(a, a, 1));
+<<<<<<< HEAD
   tmp =
       _mm256_max_epi8(tmp, _mm256_shuffle_epi32(tmp, _MM_SHUFFLE(1, 0, 3, 2)));
   tmp = _mm256_max_epi8(tmp, _mm256_shuffle_epi32(tmp, 1));
@@ -592,3 +708,76 @@ struct functor_traits<scalar_product_op<QInt32, double>> {
 }  // end namespace Eigen
 
 #endif  // CXX11_SRC_FIXEDPOINT_PACKETMATHAVX2_H_
+=======
+  tmp = _mm256_max_epi8(tmp, _mm256_shuffle_epi32(tmp, _MM_SHUFFLE(1, 0, 3, 2)));
+  tmp = _mm256_max_epi8(tmp, _mm256_shuffle_epi32(tmp, 1));
+  tmp = _mm256_max_epi8(tmp, _mm256_shufflelo_epi16(tmp, _MM_SHUFFLE(1, 0, 3, 2)));
+  return std::max(_mm256_extract_epi8(tmp, 0), _mm256_extract_epi8(tmp, 1));
+}
+
+// Comparisons
+template <>
+EIGEN_STRONG_INLINE Packet8q32i peq<Packet8q32i>(const Packet8q32i& a,
+                                                 const Packet8q32i& b) {
+  return _mm256_cmpeq_epi32(a.val, b.val);
+}
+template <>
+EIGEN_STRONG_INLINE Packet32q8i peq<Packet32q8i>(const Packet32q8i& a,
+                                                 const Packet32q8i& b) {
+  return _mm256_cmpeq_epi8(a.val, b.val);
+}
+template <>
+EIGEN_STRONG_INLINE Packet32q8u peq<Packet32q8u>(const Packet32q8u& a,
+                                                 const Packet32q8u& b) {
+  return _mm256_cmpeq_epi8(a.val, b.val);
+}
+
+// Note: There are no instructions in AVX2 for unsigned lt/gt comparison.
+// These are added in AVX-512.
+template <>
+EIGEN_STRONG_INLINE Packet8q32i ple<Packet8q32i>(const Packet8q32i& a,
+                                                 const Packet8q32i& b) {
+  const __m256i gt = _mm256_cmpgt_epi32(a.val, b.val);
+  return _mm256_xor_si256(gt, gt);
+}
+template <>
+EIGEN_STRONG_INLINE Packet32q8i ple<Packet32q8i>(const Packet32q8i& a,
+                                                 const Packet32q8i& b) {
+  const __m256i gt = _mm256_cmpgt_epi8(a.val, b.val);
+  return _mm256_xor_si256(gt, gt);
+}
+
+template <>
+EIGEN_STRONG_INLINE Packet8q32i plt<Packet8q32i>(const Packet8q32i& a,
+                                                 const Packet8q32i& b) {
+  return _mm256_cmpgt_epi32(b.val, a.val);
+}
+template <>
+EIGEN_STRONG_INLINE Packet32q8i plt<Packet32q8i>(const Packet32q8i& a,
+                                                 const Packet32q8i& b) {
+  return _mm256_cmpgt_epi8(b.val, a.val);
+}
+
+// Vectorized scaling of Packet32q8i by float.
+template <>
+struct functor_traits<scalar_multiple2_op<QInt32, double>> {
+  enum { Cost = 4 * NumTraits<float>::MulCost, PacketAccess = true };
+};
+
+template <>
+EIGEN_STRONG_INLINE const Packet8q32i
+scalar_multiple2_op<QInt32, double>::packetOp(const Packet8q32i& a) const {
+  __m256d scale = _mm256_set1_pd(m_other);
+  __m256d a_lo = _mm256_cvtepi32_pd(_mm256_castsi256_si128(a));
+  __m128i result_lo = _mm256_cvtpd_epi32(_mm256_mul_pd(scale, a_lo));
+  __m256d a_hi = _mm256_cvtepi32_pd(_mm256_extracti128_si256(a, 1));
+  __m128i result_hi = _mm256_cvtpd_epi32(_mm256_mul_pd(scale, a_hi));
+  return _mm256_insertf128_si256(_mm256_castsi128_si256(result_lo), result_hi,
+                                 1);
+}
+
+}  // end namespace internal
+}  // end namespace Eigen
+
+#endif  // THIRD_PARTY_EIGEN3_UNSUPPORTED_EIGEN_CXX11_SRC_FIXEDPOINT_PACKETMATHAVX2_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

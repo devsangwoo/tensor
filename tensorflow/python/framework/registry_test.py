@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,10 +31,20 @@ def bar():
 
 
 class RegistryTest(test.TestCase, parameterized.TestCase):
+=======
+"""Tests for tensorflow.ops.registry."""
+
+from tensorflow.python.framework import registry
+from tensorflow.python.platform import googletest
+
+
+class RegistryTest(googletest.TestCase):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   class Foo(object):
     pass
 
+<<<<<<< HEAD
   # Test the registry basics on both classes (Foo) and functions (bar).
   @parameterized.parameters([Foo, bar])
   def testRegistryBasics(self, candidate):
@@ -46,10 +57,26 @@ class RegistryTest(test.TestCase, parameterized.TestCase):
     self.assertEqual(myreg.lookup('testKey'), candidate)
     self.assertEqual(
         sorted(myreg.list()), sorted(['testKey', candidate.__name__]))
+=======
+  def testRegisterClass(self):
+    myreg = registry.Registry('testfoo')
+    with self.assertRaises(LookupError):
+      myreg.lookup('Foo')
+    myreg.register(RegistryTest.Foo, 'Foo')
+    assert myreg.lookup('Foo') == RegistryTest.Foo
+
+  def testRegisterFunction(self):
+    myreg = registry.Registry('testbar')
+    with self.assertRaises(LookupError):
+      myreg.lookup('Bar')
+    myreg.register(bar, 'Bar')
+    assert myreg.lookup('Bar') == bar
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testDuplicate(self):
     myreg = registry.Registry('testbar')
     myreg.register(bar, 'Bar')
+<<<<<<< HEAD
     with self.assertRaisesRegexp(
         KeyError, r'Registering two testbar with name \'Bar\'! '
         r'\(Previous registration was in [^ ]+ .*.py:[0-9]+\)'):
@@ -58,3 +85,15 @@ class RegistryTest(test.TestCase, parameterized.TestCase):
 
 if __name__ == '__main__':
   test.main()
+=======
+    with self.assertRaises(KeyError):
+      myreg.register(bar, 'Bar')
+
+
+def bar():
+  pass
+
+
+if __name__ == '__main__':
+  googletest.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

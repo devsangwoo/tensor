@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,12 @@ limitations under the License.
 #include "tensorflow/core/framework/cancellation.h"
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/tensor_shape.h"
+=======
+#include "tensorflow/core/framework/rendezvous.h"
+
+#include <gtest/gtest.h>
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/tensor_types.h"
 #include "tensorflow/core/framework/types.pb.h"
 #include "tensorflow/core/lib/core/errors.h"
@@ -27,6 +34,7 @@ limitations under the License.
 #include "tensorflow/core/lib/core/threadpool.h"
 #include "tensorflow/core/lib/random/simple_philox.h"
 #include "tensorflow/core/lib/strings/strcat.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/mutex.h"
@@ -37,10 +45,22 @@ limitations under the License.
 
 namespace tensorflow {
 namespace {
+=======
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/test.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+
+namespace tensorflow {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TEST(RendezvousTest, Key) {
   const string key = Rendezvous::CreateKey(
       "/job:mnist/replica:1/task:2/CPU:0", 7890,
+<<<<<<< HEAD
       "/job:mnist/replica:1/task:2/device:GPU:0", "var0", FrameAndIter(0, 0));
   EXPECT_EQ(key,
             "/job:mnist/replica:1/task:2/CPU:0;"
@@ -54,11 +74,30 @@ TEST(RendezvousTest, Key) {
   EXPECT_EQ(parsed.src_incarnation, 7890);
   EXPECT_EQ(parsed.src.type, "CPU");
   EXPECT_EQ(parsed.dst_device, "/job:mnist/replica:1/task:2/device:GPU:0");
+=======
+      "/job:mnist/replica:1/task:2/GPU:0", "var0", FrameAndIter(0, 0));
+  EXPECT_EQ(key,
+            "/job:mnist/replica:1/task:2/CPU:0;"
+            "0000000000001ed2;"  // 7890 = 0x1ed2
+            "/job:mnist/replica:1/task:2/GPU:0;"
+            "var0;"
+            "0:0");
+  Rendezvous::ParsedKey parsed;
+  EXPECT_OK(Rendezvous::ParseKey(key, &parsed));
+  EXPECT_EQ(parsed.src_device, "/job:mnist/replica:1/task:2/CPU:0");
+  EXPECT_EQ(parsed.src_incarnation, 7890);
+  EXPECT_EQ(parsed.src.type, "CPU");
+  EXPECT_EQ(parsed.dst_device, "/job:mnist/replica:1/task:2/GPU:0");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(parsed.dst.type, "GPU");
 
   EXPECT_FALSE(Rendezvous::ParseKey("foo;bar;baz", &parsed).ok());
   EXPECT_FALSE(Rendezvous::ParseKey("/job:mnist/replica:1/task:2/CPU:0;"
+<<<<<<< HEAD
                                     "/job:mnist/replica:1/task:2/device:GPU:0;",
+=======
+                                    "/job:mnist/replica:1/task:2/GPU:0;",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                     &parsed)
                    .ok());
   EXPECT_FALSE(
@@ -67,6 +106,7 @@ TEST(RendezvousTest, Key) {
 
 class LocalRendezvousTest : public ::testing::Test {
  public:
+<<<<<<< HEAD
   LocalRendezvousTest() : threads_(Env::Default(), "test", 16) {
     rendez_ = NewLocalRendezvous();
   }
@@ -81,12 +121,34 @@ class LocalRendezvousTest : public ::testing::Test {
 
  private:
   thread::ThreadPool threads_;
+=======
+  LocalRendezvousTest()
+      : threads_(new thread::ThreadPool(Env::Default(), "test", 16)) {
+    rendez_ = NewLocalRendezvous();
+  }
+
+  ~LocalRendezvousTest() override {
+    rendez_->Unref();
+    delete threads_;
+  }
+
+  void SchedClosure(std::function<void()> fn) { threads_->Schedule(fn); }
+
+  Rendezvous* rendez_;
+
+ private:
+  thread::ThreadPool* threads_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // string -> Tensor<string>
 Tensor V(const string& content) {
   Tensor tensor(DT_STRING, TensorShape({}));
+<<<<<<< HEAD
   tensor.scalar<tstring>()() = content;
+=======
+  tensor.scalar<string>()() = content;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return tensor;
 }
 
@@ -94,6 +156,7 @@ Tensor V(const string& content) {
 string V(const Tensor& tensor) {
   CHECK_EQ(tensor.dtype(), DT_STRING);
   CHECK(TensorShapeUtils::IsScalar(tensor.shape()));
+<<<<<<< HEAD
   return tensor.scalar<tstring>()();
 }
 
@@ -114,14 +177,25 @@ const Rendezvous::ParsedKey& KeyFoo() {
 const Rendezvous::ParsedKey& KeyBar() {
   static auto* key = new Rendezvous::ParsedKey(MakeKey("bar"));
   return *key;
+=======
+  return tensor.scalar<string>()();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(LocalRendezvousTest, SendRecv) {
   Rendezvous::Args args;
+<<<<<<< HEAD
   TF_ASSERT_OK(rendez_->Send(KeyFoo(), args, V("hello"), false));
   Tensor val(DT_STRING);
   bool is_dead = false;
   TF_ASSERT_OK(rendez_->Recv(KeyFoo(), args, &val, &is_dead));
+=======
+  ASSERT_OK(rendez_->Send("foo", args, V("hello"), false));
+  EXPECT_TRUE(errors::IsAborted(rendez_->Send("foo", args, V("hello"), false)));
+  Tensor val(DT_STRING);
+  bool is_dead = false;
+  ASSERT_OK(rendez_->Recv("foo", args, &val, &is_dead));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ("hello", V(val));
 }
 
@@ -129,27 +203,45 @@ TEST_F(LocalRendezvousTest, RecvSend) {
   SchedClosure([this]() {
     Env::Default()->SleepForMicroseconds(10000);
     Rendezvous::Args args;
+<<<<<<< HEAD
     TF_ASSERT_OK(rendez_->Send(KeyFoo(), args, V("hello"), false));
+=======
+    ASSERT_OK(rendez_->Send("foo", args, V("hello"), false));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   });
   Tensor val(DT_STRING);
   bool is_dead = false;
   Rendezvous::Args args;
+<<<<<<< HEAD
   TF_ASSERT_OK(rendez_->Recv(KeyFoo(), args, &val, &is_dead));
   EXPECT_EQ("hello", V(val));
 }
 
 TEST_F(LocalRendezvousTest, PingPong) {
+=======
+  ASSERT_OK(rendez_->Recv("foo", args, &val, &is_dead));
+  EXPECT_EQ("hello", V(val));
+}
+
+TEST_F(LocalRendezvousTest, DuplicateWaiterRecv) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   SchedClosure([this]() {
     Tensor t(DT_STRING);
     bool is_dead = false;
     Rendezvous::Args args;
+<<<<<<< HEAD
     TF_ASSERT_OK(rendez_->Recv(KeyFoo(), args, &t, &is_dead));
     TF_ASSERT_OK(rendez_->Send(KeyBar(), args, t, is_dead));
+=======
+    ASSERT_OK(rendez_->Recv("foo", args, &t, &is_dead));
+    ASSERT_OK(rendez_->Send("bar", args, t, is_dead));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   });
   Env::Default()->SleepForMicroseconds(1000000);
   Tensor val(DT_STRING);
   bool val_dead = false;
   Rendezvous::Args args;
+<<<<<<< HEAD
   TF_ASSERT_OK(rendez_->Send(KeyFoo(), args, V("secret msg"), val_dead));
   TF_ASSERT_OK(rendez_->Recv(KeyBar(), args, &val, &val_dead));
   EXPECT_EQ("secret msg", V(val));
@@ -273,6 +365,30 @@ TEST_F(LocalRendezvousTest, CancelMultiple) {
   EXPECT_FALSE(s3.ok());
 
   delete cm;
+=======
+  EXPECT_TRUE(errors::IsAborted(rendez_->Recv("foo", args, &val, &val_dead)));
+  ASSERT_OK(rendez_->Send("foo", args, V("secret msg"), val_dead));
+  ASSERT_OK(rendez_->Recv("bar", args, &val, &val_dead));
+  EXPECT_EQ("secret msg", V(val));
+}
+
+TEST_F(LocalRendezvousTest, DuplicateSerialRecv) {
+  SchedClosure([this]() {
+    Tensor t(DT_STRING);
+    bool is_dead = false;
+    Rendezvous::Args args;
+    ASSERT_OK(rendez_->Recv("foo", args, &t, &is_dead));
+    ASSERT_OK(rendez_->Send("bar", args, t, is_dead));
+  });
+  Env::Default()->SleepForMicroseconds(1000000);
+  Tensor val(DT_STRING);
+  bool val_dead = false;
+  Rendezvous::Args args;
+  ASSERT_OK(rendez_->Send("foo", args, V("secret msg"), val_dead));
+  ASSERT_OK(rendez_->Recv("bar", args, &val, &val_dead));
+  EXPECT_EQ("secret msg", V(val));
+  EXPECT_TRUE(errors::IsAborted(rendez_->Recv("foo", args, &val, &val_dead)));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // A simple structure that behaves a bit like a blocking counter.  The
@@ -280,11 +396,16 @@ TEST_F(LocalRendezvousTest, CancelMultiple) {
 // thread waits for done to be notified.
 struct BlockingState {
   mutex lock;
+<<<<<<< HEAD
   int counter = 0;
+=======
+  int counter;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Notification done;
 };
 
 TEST_F(LocalRendezvousTest, RandomSendRecv) {
+<<<<<<< HEAD
   // We are scheduling 2*N closures in the this->threads_, which is
   // configured with only 16 threads. Furthermore, because the
   // threadpool may execute the closures in an arbitrary order, we
@@ -307,6 +428,28 @@ TEST_F(LocalRendezvousTest, RandomSendRecv) {
                                        const Rendezvous::Args& sender_args,
                                        const Rendezvous::Args& recver_args,
                                        const Tensor& val, const bool val_dead) {
+=======
+  static const int N = 1000;
+  BlockingState state;
+  state.counter = N;
+  for (int i = 0; i < N; ++i) {
+    SchedClosure([this, i]() {
+      random::PhiloxRandom philox(testing::RandomSeed() + i, 17);
+      random::SimplePhilox rnd(&philox);
+      Env::Default()->SleepForMicroseconds(1000 + rnd.Uniform(10000));
+      Rendezvous::Args args;
+      ASSERT_OK(rendez_->Send(strings::StrCat(i), args, V(strings::StrCat(i)),
+                              false));
+    });
+    SchedClosure([this, &state, i]() {
+      random::PhiloxRandom philox(testing::RandomSeed() + N + i, 17);
+      random::SimplePhilox rnd(&philox);
+      Env::Default()->SleepForMicroseconds(1000 + rnd.Uniform(10000));
+      Tensor val(DT_STRING);
+      bool val_dead = false;
+      Rendezvous::Args args;
+      ASSERT_OK(rendez_->Recv(strings::StrCat(i), args, &val, &val_dead));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       EXPECT_EQ(strings::StrCat(i), V(val));
       bool done = false;
       {
@@ -319,18 +462,22 @@ TEST_F(LocalRendezvousTest, RandomSendRecv) {
       if (done) {
         state.done.Notify();
       }
+<<<<<<< HEAD
     };
     micros = 100 + rnd.Uniform(1000);
     SchedClosure([this, i, micros, recv_done]() {
       Env::Default()->SleepForMicroseconds(micros);
       rendez_->RecvAsync(MakeKey(strings::StrCat(i)), Rendezvous::Args(),
                          recv_done);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     });
   }
 
   state.done.WaitForNotification();
 }
 
+<<<<<<< HEAD
 void RandomSleep() {
   if (std::rand() % 10 == 0) {
     Env::Default()->SleepForMicroseconds(1000);
@@ -355,6 +502,8 @@ TEST_F(LocalRendezvousTest, MultiSends) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST_F(LocalRendezvousTest, RecvAbort) {
   rendez_->Ref();
   SchedClosure([this]() {
@@ -364,7 +513,11 @@ TEST_F(LocalRendezvousTest, RecvAbort) {
   Tensor val(DT_STRING);
   bool val_dead = false;
   Rendezvous::Args args;
+<<<<<<< HEAD
   Status status = rendez_->Recv(KeyFoo(), args, &val, &val_dead);
+=======
+  Status status = rendez_->Recv("foo", args, &val, &val_dead);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_TRUE(errors::IsAborted(status));
 }
 
@@ -380,7 +533,11 @@ TEST_F(LocalRendezvousTest, RecvSleepAbort) {
   Tensor val(DT_STRING);
   bool val_dead = false;
   Rendezvous::Args args;
+<<<<<<< HEAD
   Status status = rendez_->Recv(KeyFoo(), args, &val, &val_dead);
+=======
+  Status status = rendez_->Recv("foo", args, &val, &val_dead);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_TRUE(errors::IsAborted(status));
 }
 
@@ -389,9 +546,14 @@ TEST_F(LocalRendezvousTest, AbortThenRecvOrSend) {
   Tensor val(DT_STRING);
   bool val_dead = false;
   Rendezvous::Args args;
+<<<<<<< HEAD
   EXPECT_TRUE(errors::IsAborted(rendez_->Send(KeyFoo(), args, val, val_dead)));
   EXPECT_TRUE(
       errors::IsAborted(rendez_->Recv(KeyFoo(), args, &val, &val_dead)));
+=======
+  EXPECT_TRUE(errors::IsAborted(rendez_->Send("foo", args, val, val_dead)));
+  EXPECT_TRUE(errors::IsAborted(rendez_->Recv("foo", args, &val, &val_dead)));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 class DummyDeviceContext : public DeviceContext {
@@ -400,12 +562,15 @@ class DummyDeviceContext : public DeviceContext {
   ~DummyDeviceContext() override {}
   int stream_id() const { return stream_id_; }
 
+<<<<<<< HEAD
   void CopyTensorInSameDevice(const Tensor* input_tensor, Device* device,
                               Tensor* output_tensor,
                               StatusCallback done) const override {
     done(Status::OK());
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  private:
   const int stream_id_;
 };
@@ -414,11 +579,16 @@ TEST_F(LocalRendezvousTest, TransferDummyDeviceContext) {
   Rendezvous::Args args;
   args.device_context = new DummyDeviceContext(123);
 
+<<<<<<< HEAD
   TF_ASSERT_OK(rendez_->Send(KeyFoo(), args, V("hello"), false));
+=======
+  ASSERT_OK(rendez_->Send("foo", args, V("hello"), false));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Notification n;
   Rendezvous::Args args1;
   args1.device_context = new DummyDeviceContext(1);
+<<<<<<< HEAD
   rendez_->RecvAsync(
       KeyFoo(), args1,
       [&n](const Status& s, const Rendezvous::Args& send_args,
@@ -428,22 +598,45 @@ TEST_F(LocalRendezvousTest, TransferDummyDeviceContext) {
                           ->stream_id());
         n.Notify();
       });
+=======
+  rendez_->RecvAsync("foo", args1, [&n](const Status& s,
+                                        const Rendezvous::Args& send_args,
+                                        const Rendezvous::Args& recv_args,
+                                        const Tensor& val, bool is_dead) {
+    CHECK_EQ(123,
+             dynamic_cast<const DummyDeviceContext*>(send_args.device_context)
+                 ->stream_id());
+    n.Notify();
+  });
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   n.WaitForNotification();
   args.device_context->Unref();
   args1.device_context->Unref();
 }
 
+<<<<<<< HEAD
 void BM_SendRecv(int iters) {
+=======
+static void BM_SendRecv(int iters) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Rendezvous* rendez = NewLocalRendezvous();
   Tensor orig = V("val");
   Tensor val(DT_STRING, TensorShape({}));
   bool is_dead = false;
   Rendezvous::Args args;
+<<<<<<< HEAD
   if (iters > 0) {
     while (iters--) {
       TF_CHECK_OK(rendez->Send(KeyFoo(), args, orig, is_dead));
       TF_CHECK_OK(rendez->Recv(KeyFoo(), args, &val, &is_dead));
+=======
+  Status s;
+  if (iters > 0) {
+    while (iters--) {
+      s = rendez->Send("foo", args, orig, is_dead);
+      s = rendez->Recv("foo", args, &val, &is_dead);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     CHECK_EQ(V(val), V(orig));
   }
@@ -451,6 +644,7 @@ void BM_SendRecv(int iters) {
 }
 BENCHMARK(BM_SendRecv);
 
+<<<<<<< HEAD
 void BM_RecvSend(int iters) {
   Rendezvous* rendez = NewLocalRendezvous();
   Tensor orig = V("val");
@@ -485,15 +679,30 @@ void BM_PingPong(int iters) {
   // The main thread sends "foo" for iters times and receives "bar"
   // for iters times.  The other thread sends "bar" for iters times
   // and receives "foo" for iters times.
+=======
+static void BM_RecvSend(int iters) {
+  thread::ThreadPool* pool = new thread::ThreadPool(Env::Default(), "test", 1);
+
+  // The main thread sends "foo" for iters/2 times and receives "bar"
+  // for iters/2 times.  The other thread sends "bar" for iters/2
+  // times and receives "foo" for iters/2 times.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Rendezvous* rendez = NewLocalRendezvous();
   pool->Schedule([rendez, iters]() {
     Tensor bar = V("bar");
     Tensor foo(DT_STRING, TensorShape({}));
     bool is_dead = false;
     Rendezvous::Args args;
+<<<<<<< HEAD
     for (int i = 0; i < iters; ++i) {
       TF_CHECK_OK(rendez->Recv(KeyFoo(), args, &foo, &is_dead));
       TF_CHECK_OK(rendez->Send(KeyBar(), args, bar, is_dead));
+=======
+    Status s;
+    for (int i = 0; i < iters / 2; ++i) {
+      s = rendez->Recv("foo", args, &foo, &is_dead);
+      s = rendez->Send("bar", args, bar, is_dead);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     CHECK_EQ("foo", V(foo));
   });
@@ -501,6 +710,7 @@ void BM_PingPong(int iters) {
   Tensor bar(DT_STRING, TensorShape({}));
   bool is_dead = false;
   Rendezvous::Args args;
+<<<<<<< HEAD
   args.cancellation_manager = cm;
   for (int i = 0; i < iters; ++i) {
     TF_CHECK_OK(rendez->Send(KeyFoo(), args, foo, is_dead));
@@ -513,4 +723,16 @@ void BM_PingPong(int iters) {
 BENCHMARK(BM_PingPong);
 
 }  // namespace
+=======
+  Status s;
+  for (int i = 0; i < iters / 2; ++i) {
+    s = rendez->Send("foo", args, foo, is_dead);
+    s = rendez->Recv("bar", args, &bar, &is_dead);
+  }
+  CHECK_EQ("bar", V(bar));
+  delete pool;
+}
+BENCHMARK(BM_RecvSend);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,19 @@ REGISTER2(UnaryOp, CPU, "ComplexAbs", functor::abs, complex64, complex128);
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 REGISTER4(UnaryOp, GPU, "Abs", functor::abs, Eigen::half, float, double, int64);
 REGISTER2(UnaryOp, GPU, "ComplexAbs", functor::abs, complex64, complex128);
+=======
+#include "tensorflow/core/kernels/cwise_ops_common.h"
+
+namespace tensorflow {
+REGISTER4(UnaryOp, CPU, "Abs", functor::abs, float, double, int32, int64);
+#ifndef __ANDROID__
+REGISTER_KERNEL_BUILDER(Name("ComplexAbs").Device(DEVICE_CPU),
+                        UnaryOp<CPUDevice, functor::abs<complex64>>);
+#endif
+#if GOOGLE_CUDA
+REGISTER3(UnaryOp, GPU, "Abs", functor::abs, float, double, int64);
+#endif
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // A special GPU kernel for int32.
 // TODO(b/25387198): Also enable int32 in device memory. This kernel
@@ -33,6 +47,7 @@ REGISTER_KERNEL_BUILDER(Name("Abs")
                             .HostMemory("y")
                             .TypeConstraint<int32>("T"),
                         UnaryOp<CPUDevice, functor::abs<int32>>);
+<<<<<<< HEAD
 #endif
 
 #if TENSORFLOW_USE_SYCL
@@ -44,4 +59,7 @@ REGISTER_KERNEL_BUILDER(Name("Abs")
                             .TypeConstraint<int32>("T"),
                         UnaryOp<CPUDevice, functor::abs<int32>>);
 #endif  // TENSORFLOW_USE_SYCL
+=======
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

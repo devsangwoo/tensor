@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/kernels/reduction_ops_common.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 #define REGISTER_CPU_KERNELS(type)                                          \
   REGISTER_KERNEL_BUILDER(Name("Prod")                                      \
                               .Device(DEVICE_CPU)                           \
@@ -56,10 +60,30 @@ TF_CALL_int32(REGISTER_GPU_KERNELS);
 TF_CALL_complex64(REGISTER_GPU_KERNELS);
 TF_CALL_complex128(REGISTER_GPU_KERNELS);
 #endif
+=======
+#define REGISTER_CPU_KERNELS(type)                               \
+  REGISTER_KERNEL_BUILDER(                                       \
+      Name("Prod").Device(DEVICE_CPU).TypeConstraint<type>("T"), \
+      ReductionOp<CPUDevice, type, Eigen::internal::ProdReducer<type>>);
+TF_CALL_REAL_NUMBER_TYPES(REGISTER_CPU_KERNELS);
+#undef REGISTER_CPU_KERNELS
+
+#if GOOGLE_CUDA
+
+#define REGISTER_GPU_KERNELS(type)          \
+  REGISTER_KERNEL_BUILDER(                  \
+      Name("Prod")                          \
+          .Device(DEVICE_GPU)               \
+          .TypeConstraint<type>("T")        \
+          .HostMemory("reduction_indices"), \
+      ReductionOp<GPUDevice, type, Eigen::internal::ProdReducer<type>>);
+REGISTER_GPU_KERNELS(float);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef REGISTER_GPU_KERNELS
 
 #endif
 
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 #define REGISTER_SYCL_KERNELS(type)                                         \
   REGISTER_KERNEL_BUILDER(Name("Prod")                                      \
@@ -82,4 +106,6 @@ REGISTER_SYCL_KERNELS(double);
 #undef REGISTER_SYCL_KERNELS
 #endif  // TENSORFLOW_USE_SYCL
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

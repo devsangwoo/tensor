@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ## Some of TensorFlow's code is derived from Caffe, which is subject to the following copyright notice:
+=======
+Some of TensorFlow's code is derived from Caffe, which is subject to the following copyright notice:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 COPYRIGHT
 

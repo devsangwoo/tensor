@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,11 +40,26 @@ limitations under the License.
 #include "tensorflow/core/common_runtime/mkl_cpu_allocator.h"
 #include "tensorflow/core/platform/cpu_info.h"
 #endif
+=======
+#include "tensorflow/core/common_runtime/threadpool_device.h"
+
+#include "tensorflow/core/common_runtime/local_device.h"
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/framework/device_base.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/graph/types.h"
+#include "tensorflow/core/lib/hash/hash.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/tracing.h"
+#include "tensorflow/core/public/session_options.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 ThreadPoolDevice::ThreadPoolDevice(const SessionOptions& options,
                                    const string& name, Bytes memory_limit,
+<<<<<<< HEAD
                                    const DeviceLocality& locality,
                                    Allocator* allocator)
     : LocalDevice(options, Device::BuildDeviceAttributes(
@@ -86,12 +102,37 @@ Allocator* ThreadPoolDevice::GetScopedAllocator(AllocatorAttributes attr,
   }
   LOG(FATAL) << "Unexpected call to ThreadPoolDevice::GetScopedAllocator "
              << "attr.scope_id = " << attr.scope_id;
+=======
+                                   BusAdjacency bus_adjacency,
+                                   Allocator* allocator)
+    : LocalDevice(options, Device::BuildDeviceAttributes(
+                               name, DEVICE_CPU, memory_limit, bus_adjacency),
+                  allocator),
+      allocator_(allocator) {}
+
+ThreadPoolDevice::~ThreadPoolDevice() {}
+
+void ThreadPoolDevice::Compute(OpKernel* op_kernel, OpKernelContext* context) {
+  if (port::Tracing::IsActive()) {
+    // TODO(pbar) We really need a useful identifier of the graph node.
+    const uint64 id = Hash64(op_kernel->name());
+    port::Tracing::ScopedActivity region(port::Tracing::EventCategory::kCompute,
+                                         id);
+    op_kernel->Compute(context);
+  } else {
+    op_kernel->Compute(context);
+  }
+}
+
+Allocator* ThreadPoolDevice::GetAllocator(AllocatorAttributes attr) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return allocator_;
 }
 
 Status ThreadPoolDevice::MakeTensorFromProto(
     const TensorProto& tensor_proto, const AllocatorAttributes alloc_attrs,
     Tensor* tensor) {
+<<<<<<< HEAD
   if (tensor_proto.dtype() > 0 && tensor_proto.dtype() <= DataType_MAX) {
     Tensor parsed(tensor_proto.dtype());
     if (parsed.FromProto(allocator_, tensor_proto)) {
@@ -138,4 +179,15 @@ REGISTER_MEM_ALLOCATOR("MklCPUAllocator", (DisableMKL() ? 50 : 200),
 }  // namespace
 #endif  // INTEL_MKL
 
+=======
+  Tensor parsed(tensor_proto.dtype());
+  if (!parsed.FromProto(cpu_allocator(), tensor_proto)) {
+    return errors::InvalidArgument("Cannot parse tensor from proto: ",
+                                   tensor_proto.DebugString());
+  }
+  *tensor = parsed;
+  return Status::OK();
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

@@ -2,6 +2,7 @@
 # TensorFlow is a computational framework, primarily for use in machine
 # learning applications.
 
+<<<<<<< HEAD
 load("//tensorflow:tensorflow.bzl", "VERSION", "tf_cc_shared_object", "tf_custom_op_library_additional_deps_impl", "tf_native_cc_binary")
 load(
     "//tensorflow/core/platform:build_config.bzl",
@@ -35,10 +36,16 @@ package(
     default_visibility = [":internal"],
     licenses = ["notice"],  # Apache 2.0
 )
+=======
+package(default_visibility = [":internal"])
+
+licenses(["notice"])  # Apache 2.0
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 exports_files([
     "LICENSE",
     "ACKNOWLEDGMENTS",
+<<<<<<< HEAD
     # The leakr files are used by //third_party/cloud_tpu and
     # //third_party/tensorboard/google:copybara_config_test.
     "leakr_badwords.dic",
@@ -884,10 +891,37 @@ gen_api_init_files(
     output_package = "tensorflow._api.v2",
     root_file_name = "v2.py",
     root_init_template = "$(location api_template.__init__.py)",
+=======
+])
+
+package_group(
+    name = "internal",
+    packages = ["//tensorflow/..."],
+)
+
+sh_binary(
+    name = "swig",
+    srcs = ["tools/swig/swig.sh"],
+    data = glob(["tools/swig/**"]),
+)
+
+filegroup(
+    name = "all_files",
+    srcs = glob(
+        ["**/*"],
+        exclude = [
+            "**/METADATA",
+            "**/OWNERS",
+            "g3doc/sitemap.md",
+        ],
+    ),
+    visibility = ["//tensorflow:__subpackages__"],
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 )
 
 py_library(
     name = "tensorflow_py",
+<<<<<<< HEAD
     srcs_version = "PY2AND3",
     visibility = ["//visibility:public"],
     deps = select({
@@ -914,4 +948,9 @@ py_library(
     srcs_version = "PY2AND3",
     visibility = ["//visibility:public"],
     deps = ["//tensorflow/python:no_contrib"],
+=======
+    srcs = ["__init__.py"],
+    visibility = ["//visibility:public"],
+    deps = ["//tensorflow/python"],
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 )

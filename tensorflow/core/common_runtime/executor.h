@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +29,18 @@ limitations under the License.
 #include "tensorflow/core/lib/core/threadpool_interface.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/macros.h"
+=======
+#ifndef TENSORFLOW_COMMON_RUNTIME_EXECUTOR_H_
+#define TENSORFLOW_COMMON_RUNTIME_EXECUTOR_H_
+
+#include "tensorflow/core/common_runtime/device.h"
+#include "tensorflow/core/framework/rendezvous.h"
+#include "tensorflow/core/graph/graph.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/lib/core/notification.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -42,7 +55,11 @@ class StepStatsCollector;
 //   Rendezvous* rendezvous = NewNaiveRendezvous();
 //   TF_CHECK_OK(rendezvous->Send("input", some_input_tensor));
 //   TF_CHECK_OK(executor->Run({ExecutorOpts, rendezvous, nullptr}));
+<<<<<<< HEAD
 //   TF_CHECK_OK(rendezvous->Recv("output", &output_tensor));
+=======
+//   TF_CHECK_OK(rendezvous->Recv("input", &output_tensor));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //   ... ...
 //
 // Multiple threads can call Executor::Run concurrently.
@@ -59,11 +76,14 @@ class Executor {
   // are alive at least until done is invoked. All pointers to the
   // argument objects can be nullptr.
   //
+<<<<<<< HEAD
   // "step_id" is a process-wide unique identifier for the step being
   // run. Executors on different devices may receive the same step_id
   // in the case that a step runs Ops on more than one device. The
   // step_id is used for tracking resource usage of a given step.
   //
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // RunAsync() uses the given "rendezvous", if not null, as the
   // mechanism to communicate inputs and outputs of the underlying
   // graph computation.
@@ -77,12 +97,18 @@ class Executor {
   //
   // RunAsync() uses "cancellation_manager", if not nullptr, to
   // register callbacks that should be called if the graph computation
+<<<<<<< HEAD
   // is canceled. Note that the callbacks merely unblock any
   // long-running computation, and a canceled step will terminate by
+=======
+  // is cancelled. Note that the callbacks merely unblock any
+  // long-running computation, and a cancelled step will terminate by
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // returning/calling the DoneCallback as usual.
   //
   // RunAsync() dispatches closures to "runner". Typically, "runner"
   // is backed up by a bounded threadpool.
+<<<<<<< HEAD
   typedef std::function<Status(const int64, const DeviceMgr*, Rendezvous** r)>
       RendezvousFactory;
 
@@ -102,6 +128,13 @@ class Executor {
 
     // If true, calls Sync() on the device.
     bool sync_on_finish = false;
+=======
+  struct Args {
+    Rendezvous* rendezvous = nullptr;
+    StepStatsCollector* stats_collector = nullptr;
+    FunctionCallFrame* call_frame = nullptr;
+    CancellationManager* cancellation_manager = nullptr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     typedef std::function<void()> Closure;
     typedef std::function<void(Closure)> Runner;
@@ -111,7 +144,11 @@ class Executor {
   virtual void RunAsync(const Args& args, DoneCallback done) = 0;
 
   // Synchronous wrapper for RunAsync().
+<<<<<<< HEAD
   virtual Status Run(const Args& args) {
+=======
+  Status Run(const Args& args) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Status ret;
     Notification n;
     RunAsync(args, [&ret, &n](const Status& s) {
@@ -125,29 +162,49 @@ class Executor {
 
 // Creates an Executor that computes the given "graph".
 //
+<<<<<<< HEAD
 // If successful, returns the constructed executor in "*executor". Otherwise,
 // returns an error status.
+=======
+// If successful, returns the constructed executor in "*executor". The
+// caller keeps the ownership of "device". The returned executor takes
+// the ownership of "graph". Otherwise, returns an error status.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 // "params" provides a set of context for the executor. We expect that
 // different context would provide different implementations.
 struct LocalExecutorParams {
   Device* device;
 
+<<<<<<< HEAD
   const SessionMetadata* session_metadata = nullptr;
 
   // The library runtime support.
   FunctionLibraryRuntime* function_library = nullptr;
+=======
+  // The library runtime support.
+  FunctionLibraryRuntime* function_library;
+
+  // True iff the computation contains control flow nodes.
+  bool has_control_flow;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // create_kernel returns an instance of op kernel based on NodeDef.
   // delete_kernel is called for every kernel used by the executor
   // when the executor is deleted.
   std::function<Status(const NodeDef&, OpKernel**)> create_kernel;
   std::function<void(OpKernel*)> delete_kernel;
+<<<<<<< HEAD
 
   Executor::RendezvousFactory rendezvous_factory;
 };
 ::tensorflow::Status NewLocalExecutor(const LocalExecutorParams& params,
                                       const Graph& graph, Executor** executor);
+=======
+};
+::tensorflow::Status NewLocalExecutor(const LocalExecutorParams& params,
+                                      const Graph* graph, Executor** executor);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // A class to help run multiple executors in parallel and wait until
 // all of them are complete.
@@ -166,7 +223,11 @@ class ExecutorBarrier {
   //
   // 'done' is called after the last executor completes, and
   // ExecutorBarrier is deleted.
+<<<<<<< HEAD
   ExecutorBarrier(size_t num, Rendezvous* r, StatusCallback done)
+=======
+  ExecutorBarrier(int num, Rendezvous* r, StatusCallback done)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       : rendez_(r), done_cb_(done), pending_(num) {}
 
   ~ExecutorBarrier() {}
@@ -183,6 +244,7 @@ class ExecutorBarrier {
 
   mutable mutex mu_;
   int pending_ GUARDED_BY(mu_) = 0;
+<<<<<<< HEAD
   StatusGroup status_group_ GUARDED_BY(mu_);
 
   void WhenDone(const Status& s) {
@@ -207,10 +269,29 @@ class ExecutorBarrier {
 
       status_group_.Update(s);
 
+=======
+  Status status_ GUARDED_BY(mu_);
+
+  void WhenDone(const Status& s) {
+    bool error = false;
+    StatusCallback done = nullptr;
+    Status status;
+    {
+      mutex_lock l(mu_);
+      // If we are the first error encountered, mark the status
+      // appropriately and later trigger an abort of the Rendezvous
+      // object by this thread only.
+      if (status_.ok() && !s.ok()) {
+        error = true;
+        status_ = s;
+      }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // If this is the last call to WhenDone, call the final callback
       // below.
       if (--pending_ == 0) {
         CHECK(done_cb_ != nullptr);
+<<<<<<< HEAD
         std::swap(done, done_cb_);
         status = status_group_.as_summary_status();
       }
@@ -227,6 +308,18 @@ class ExecutorBarrier {
       if (!status.ok()) {
         VLOG(1) << "ExecutorBarrier finished with bad status: " << status;
       }
+=======
+        done = done_cb_;
+        done_cb_ = nullptr;
+      }
+      status = status_;
+    }
+    if (error) {
+      rendez_->StartAbort(status);
+    }
+    if (done != nullptr) {
+      delete this;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       done(status);
     }
   }
@@ -240,12 +333,34 @@ class ExecutorBarrier {
 // access the functions in the "flib". The caller takes ownership of
 // returned "*kernel".
 Status CreateNonCachedKernel(Device* device, FunctionLibraryRuntime* flib,
+<<<<<<< HEAD
                              const NodeDef& ndef, int graph_def_version,
                              OpKernel** kernel);
+=======
+                             const NodeDef& ndef, OpKernel** kernel);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Deletes "kernel" returned by CreateKernel.
 void DeleteNonCachedKernel(OpKernel* kernel);
 
+<<<<<<< HEAD
 }  // end namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_COMMON_RUNTIME_EXECUTOR_H_
+=======
+// Creates a kernel based on "ndef" on device "device". The kernel can
+// access the functions in the "flib". The caller does not take
+// ownership of returned "*kernel". If a kernel has been created for
+// ndef.name(), returns the same kernel instance.
+Status CreateCachedKernel(Device* device, const string& session,
+                          FunctionLibraryRuntime* flib, const NodeDef& ndef,
+                          OpKernel** kernel);
+
+// Deletes "kernel" returned by CreateCachedKernel.
+void DeleteCachedKernel(Device* device, const string& session,
+                        OpKernel* kernel);
+
+}  // end namespace tensorflow
+
+#endif  // TENSORFLOW_COMMON_RUNTIME_EXECUTOR_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

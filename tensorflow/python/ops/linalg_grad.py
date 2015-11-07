@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,12 +47,22 @@ from tensorflow.python.ops import linalg_ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops.linalg import linalg_impl as _linalg
 
+=======
+"""Gradients for operators defined in linalg_ops.py."""
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import control_flow_ops
+from tensorflow.python.ops import constant_op
+from tensorflow.python.ops import linalg_ops
+from tensorflow.python.ops import math_ops
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 @ops.RegisterGradient("MatrixInverse")
 def _MatrixInverseGrad(op, grad):
   """Gradient for MatrixInverse."""
   ainv = op.outputs[0]
   return -math_ops.matmul(
+<<<<<<< HEAD
       ainv, math_ops.matmul(grad, ainv, adjoint_b=True), adjoint_a=True)
 
 
@@ -925,3 +936,17 @@ def _MatmulExtractingThreeDiagonals(x, y_tr):
     subdiag = math_ops.reduce_sum(
         x * array_ops.pad(y_tr[..., :-1, :], subdiag_pad), axis=-1)
   return array_ops.stack([superdiag, diag, subdiag], axis=-2)
+=======
+      ainv,
+      math_ops.matmul(grad, ainv, transpose_b=True),
+      transpose_a=True)
+
+@ops.RegisterGradient("BatchMatrixInverse")
+def _BatchMatrixInverseGrad(op, grad):
+  """Gradient for BatchMatrixInverse."""
+  ainv = op.outputs[0]
+  return -math_ops.batch_matmul(
+      ainv,
+      math_ops.batch_matmul(grad, ainv, adj_y=True),
+      adj_x=True)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

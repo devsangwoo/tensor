@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,13 @@ limitations under the License.
 #include "tensorflow/core/lib/core/threadpool.h"
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include <gtest/gtest.h>
+
+#include "tensorflow/core/lib/core/notification.h"
+#include "tensorflow/core/lib/core/threadpool.h"
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -67,9 +75,13 @@ TEST(NotificationTest, TestMultipleThreadsWaitingOnNotification) {
       ++counter;
     });
   }
+<<<<<<< HEAD
 
   // Sleep 1 second.
   Env::Default()->SleepForMicroseconds(1 * 1000 * 1000);
+=======
+  sleep(1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   EXPECT_EQ(0, counter);
 
@@ -78,11 +90,14 @@ TEST(NotificationTest, TestMultipleThreadsWaitingOnNotification) {
   EXPECT_EQ(4, counter);
 }
 
+<<<<<<< HEAD
 TEST(NotificationTest, TestWaitWithTimeoutOnNotifiedNotification) {
   Notification n;
   n.Notify();
   EXPECT_TRUE(WaitForNotificationWithTimeout(&n, 1000 * 1000));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

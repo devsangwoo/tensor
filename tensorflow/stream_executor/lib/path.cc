@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,11 +23,26 @@ namespace port {
 namespace internal {
 
 static bool IsAbsolutePath(absl::string_view path) {
+=======
+#include "tensorflow/stream_executor/lib/path.h"
+#include "tensorflow/stream_executor/lib/strcat.h"
+
+using ::perftools::gputools::port::StringPiece;
+using ::perftools::gputools::port::StrAppend;
+
+namespace perftools {
+namespace gputools {
+namespace port {
+namespace internal {
+
+static bool IsAbsolutePath(port::StringPiece path) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return !path.empty() && path[0] == '/';
 }
 
 // For an array of paths of length count, append them all together,
 // ensuring that the proper path separators are inserted between them.
+<<<<<<< HEAD
 string JoinPathImpl(std::initializer_list<absl::string_view> paths) {
   string result;
 
@@ -35,11 +51,22 @@ string JoinPathImpl(std::initializer_list<absl::string_view> paths) {
 
     if (result.empty()) {
       result = string(path);
+=======
+string JoinPathImpl(std::initializer_list<port::StringPiece> paths) {
+  string result;
+
+  for (port::StringPiece path : paths) {
+    if (path.empty()) continue;
+
+    if (result.empty()) {
+      result = path.ToString();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       continue;
     }
 
     if (result[result.size() - 1] == '/') {
       if (IsAbsolutePath(path)) {
+<<<<<<< HEAD
         absl::StrAppend(&result, path.substr(1));
       } else {
         absl::StrAppend(&result, path);
@@ -49,6 +76,17 @@ string JoinPathImpl(std::initializer_list<absl::string_view> paths) {
         absl::StrAppend(&result, path);
       } else {
         absl::StrAppend(&result, "/", path);
+=======
+        StrAppend(&result, path.substr(1));
+      } else {
+        StrAppend(&result, path);
+      }
+    } else {
+      if (IsAbsolutePath(path)) {
+        StrAppend(&result, path);
+      } else {
+        StrAppend(&result, "/", path);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     }
   }
@@ -58,4 +96,9 @@ string JoinPathImpl(std::initializer_list<absl::string_view> paths) {
 
 }  // namespace internal
 }  // namespace port
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

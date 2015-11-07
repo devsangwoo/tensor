@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,12 +19,25 @@ limitations under the License.
 #include "tensorflow/core/lib/random/simple_philox.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/graph/tensor_id.h"
+#include <gtest/gtest.h>
+#include "tensorflow/core/lib/random/simple_philox.h"
+#include "tensorflow/core/platform/logging.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/platform/test_benchmark.h"
 
 namespace tensorflow {
 namespace {
 
+<<<<<<< HEAD
 string ParseHelper(const string& n) { return ParseTensorName(n).ToString(); }
+=======
+static string ParseHelper(const string& n) {
+  TensorId id = ParseTensorName(n);
+  return strings::StrCat(id.first, ":", id.second);
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TEST(TensorIdTest, ParseTensorName) {
   EXPECT_EQ(ParseHelper("W1"), "W1:0");
@@ -31,15 +45,25 @@ TEST(TensorIdTest, ParseTensorName) {
   EXPECT_EQ(ParseHelper("W1:1"), "W1:1");
   EXPECT_EQ(ParseHelper("W1:17"), "W1:17");
   EXPECT_EQ(ParseHelper("xyz1_17"), "xyz1_17:0");
+<<<<<<< HEAD
   EXPECT_EQ(ParseHelper("^foo"), "^foo");
 }
 
 uint32 Skewed(random::SimplePhilox* rnd, int max_log) {
+=======
+}
+
+static uint32 Skewed(random::SimplePhilox* rnd, int max_log) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const uint32 space = 1 << (rnd->Rand32() % (max_log + 1));
   return rnd->Rand32() % space;
 }
 
+<<<<<<< HEAD
 void BM_ParseTensorName(int iters, int arg) {
+=======
+static void BM_ParseTensorName(int iters, int arg) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   testing::StopTiming();
   random::PhiloxRandom philox(301, 17);
   random::SimplePhilox rnd(&philox);
@@ -69,9 +93,12 @@ void BM_ParseTensorName(int iters, int arg) {
       case 4:
         name = "weights:17";
         break;
+<<<<<<< HEAD
       case 5:
         name = "^weights";
         break;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       default:
         LOG(FATAL) << "Unexpected arg";
         break;
@@ -88,6 +115,7 @@ void BM_ParseTensorName(int iters, int arg) {
   }
   VLOG(2) << sum;  // Prevent compiler from eliminating loop body
 }
+<<<<<<< HEAD
 BENCHMARK(BM_ParseTensorName)->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
 
 TEST(TensorIdTest, IsTensorIdControl) {
@@ -103,6 +131,9 @@ TEST(TensorIdTest, IsTensorIdControl) {
   tensor_id = ParseTensorName(input);
   EXPECT_FALSE(IsTensorIdControl(tensor_id));
 }
+=======
+BENCHMARK(BM_ParseTensorName)->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace
 }  // namespace tensorflow

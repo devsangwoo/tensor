@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +28,16 @@ namespace tensorflow {
 class GraphDef;
 class NodeDef;
 
+=======
+#ifndef TENSORFLOW_FRAMEWORK_GRAPH_DEF_UTIL_H_
+#define TENSORFLOW_FRAMEWORK_GRAPH_DEF_UTIL_H_
+
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/public/status.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Produce a human-readable version of a GraphDef that is more concise
 // than a text-format proto.
 string SummarizeGraphDef(const GraphDef& graph_def);
@@ -45,6 +56,7 @@ string SummarizeGraphDef(const GraphDef& graph_def);
 // NodeName     = [A-Za-z0-9.], [A-Za-z0-9_./] *
 Status ValidateExternalGraphDefSyntax(const GraphDef& graph_def);
 
+<<<<<<< HEAD
 // Adds default attributes to NodeDefs in 'graph_def' starting
 // from the 'node_offset' node in 'graph_def'.
 //
@@ -133,3 +145,8 @@ Status StrippedOpListForGraph(const GraphDef& graph_def,
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_GRAPH_DEF_UTIL_H_
+=======
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_GRAPH_DEF_UTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

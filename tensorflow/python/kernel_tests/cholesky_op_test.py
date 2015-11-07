@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -93,6 +94,30 @@ class CholeskyOpTest(test.TestCase):
 
   def _verifyCholeskyBase(self, sess, x, chol, verification):
     chol_np, verification_np = self.evaluate([chol, verification])
+=======
+"""Tests for tensorflow.ops.tf.Cholesky."""
+import tensorflow.python.platform
+
+import numpy as np
+import tensorflow as tf
+
+
+class CholeskyOpTest(tf.test.TestCase):
+
+  def _verifyCholesky(self, x):
+    with self.test_session() as sess:
+      # Verify that LL^T == x.
+      if x.ndim == 2:
+        chol = tf.cholesky(x)
+        verification = tf.matmul(chol,
+                                 chol,
+                                 transpose_a=False,
+                                 transpose_b=True)
+      else:
+        chol = tf.batch_cholesky(x)
+        verification = tf.batch_matmul(chol, chol, adj_x=False, adj_y=True)
+      chol_np, verification_np = sess.run([chol, verification])
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     self.assertAllClose(x, verification_np)
     self.assertShapeEqual(x, chol)
     # Check that the cholesky is lower triangular, and has positive diagonal
@@ -104,6 +129,7 @@ class CholeskyOpTest(test.TestCase):
         self.assertAllClose(chol_matrix, np.tril(chol_matrix))
         self.assertTrue((np.diag(chol_matrix) > 0.0).all())
 
+<<<<<<< HEAD
   def _verifyCholesky(self, x):
     # Verify that LL^T == x.
     with self.cached_session(use_gpu=True) as sess:
@@ -120,6 +146,10 @@ class CholeskyOpTest(test.TestCase):
       complex_data += np.triu(-1j * data, 1).astype(dtype)
       complex_data += data
       self._verifyCholesky(complex_data)
+=======
+  def testBasic(self):
+    self._verifyCholesky(np.array([[4., -1., 2.], [-1., 6., 0], [2., 0., 5.]]))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testBatch(self):
     simple_array = np.array([[[1., 0.], [0., 5.]]])  # shape (1, 2, 2)
@@ -134,6 +164,7 @@ class CholeskyOpTest(test.TestCase):
       matrices[i] = np.dot(matrices[i].T, matrices[i])
     self._verifyCholesky(matrices)
 
+<<<<<<< HEAD
     # Generate random complex valued positive-definite matrices.
     matrices = np.random.rand(10, 5, 5) + 1j * np.random.rand(10, 5, 5)
     for i in xrange(10):
@@ -170,11 +201,31 @@ class CholeskyOpTest(test.TestCase):
         # All rows of the matrix below add to zero
         self._verifyCholesky(
             np.array([[1., -1., 0.], [-1., 1., -1.], [0., -1., 1.]]))
+=======
+  def testNonSquareMatrix(self):
+    with self.assertRaises(ValueError):
+      tf.cholesky(np.array([[1., 2., 3.], [3., 4., 5.]]))
+
+  def testWrongDimensions(self):
+    tensor3 = tf.constant([1., 2.])
+    with self.assertRaises(ValueError):
+      tf.cholesky(tensor3)
+
+  def testNotInvertible(self):
+    # The input should be invertible.
+    with self.test_session():
+      with self.assertRaisesOpError("LLT decomposition was not successful. The "
+                                    "input might not be valid."):
+        # All rows of the matrix below add to zero
+        self._verifyCholesky(np.array([[1., -1., 0.], [-1., 1., -1.], [0., -1.,
+                                                                       1.]]))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testEmpty(self):
     self._verifyCholesky(np.empty([0, 2, 2]))
     self._verifyCholesky(np.empty([2, 0, 0]))
 
+<<<<<<< HEAD
   @test_util.run_deprecated_v1
   def testConcurrentExecutesWithoutError(self):
     with self.session(use_gpu=True) as sess:
@@ -387,3 +438,8 @@ class CholeskyBenchmark(test.Benchmark):
 
 if __name__ == "__main__":
   test.main()
+=======
+
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

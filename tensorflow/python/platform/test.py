@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -106,3 +107,11 @@ def is_built_with_rocm():
 def is_built_with_gpu_support():
   """Returns whether TensorFlow was built with GPU (i.e. CUDA or ROCm) support."""
   return is_built_with_cuda() or is_built_with_rocm()
+=======
+from tensorflow.python.platform.googletest import GetTempDir
+from tensorflow.python.platform.googletest import main
+from tensorflow.python.framework.test_util import TensorFlowTestCase as TestCase
+from tensorflow.python.framework.test_util import IsGoogleCudaEnabled as IsBuiltWithCuda
+
+get_temp_dir = GetTempDir
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

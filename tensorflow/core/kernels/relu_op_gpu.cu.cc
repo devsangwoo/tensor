@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,22 +15,33 @@ limitations under the License.
 ==============================================================================*/
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define EIGEN_USE_GPU
 
 #include <stdio.h>
 
+<<<<<<< HEAD
 #include "third_party/eigen3/Eigen/Core"
 #include "tensorflow/core/framework/register_types.h"
 #include "tensorflow/core/framework/tensor_types.h"
 #include "tensorflow/core/kernels/relu_op_functor.h"
 #include "tensorflow/core/util/gpu_kernel_helper.h"
 #include "tensorflow/core/util/gpu_launch_config.h"
+=======
+#include "tensorflow/core/kernels/relu_op.h"
+
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/tensor_types.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::GpuDevice GPUDevice;
 
+<<<<<<< HEAD
 namespace functor {
 
 #if GOOGLE_CUDA
@@ -175,3 +187,17 @@ template struct functor::Relu<GPUDevice, qint8>;
 }  // end namespace tensorflow
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+// Definition of the GPU implementations declared in relu_op.cc.
+#define DEFINE_GPU_KERNELS(T)                      \
+  template struct functor::Relu<GPUDevice, T>;     \
+  template struct functor::ReluGrad<GPUDevice, T>; \
+  template struct functor::Relu6<GPUDevice, T>;    \
+  template struct functor::Relu6Grad<GPUDevice, T>;
+
+TF_CALL_GPU_NUMBER_TYPES(DEFINE_GPU_KERNELS);
+
+}  // end namespace tensorflow
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

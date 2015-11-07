@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +17,12 @@ limitations under the License.
 #include "tensorflow/stream_executor/plugin.h"
 
 namespace stream_executor {
+=======
+#include "tensorflow/stream_executor/plugin.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Mostly-arbitrary ID only used as a sentinel "not otherwise initialized"
 // value. This value should never [need to] be specified aside by initialization
@@ -50,4 +57,9 @@ PluginConfig& PluginConfig::SetRng(PluginId rng) {
   return *this;
 }
 
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,16 +30,34 @@ limitations under the License.
 #include "tensorflow/core/kernels/image_resizer_state.h"
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/platform/logging.h"
+=======
+// See docs in ../ops/image_ops.cc
+#define EIGEN_USE_THREADS
+
+#include <memory>
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
+<<<<<<< HEAD
 typedef Eigen::GpuDevice GPUDevice;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename Device, typename T>
 class ResizeNearestNeighborOp : public OpKernel {
  public:
   explicit ResizeNearestNeighborOp(OpKernelConstruction* context)
+<<<<<<< HEAD
       : OpKernel(context) {
     OP_REQUIRES_OK(context, context->GetAttr("align_corners", &align_corners_));
     OP_REQUIRES_OK(
@@ -238,11 +257,37 @@ class ResizeNearestNeighborOpGrad : public OpKernel {
     auto sizes = shape_t.vec<int32>();
     OP_REQUIRES(context, sizes(0) > 0 && sizes(1) > 0,
                 errors::InvalidArgument("shape_t's elements must be positive"));
+=======
+      : OpKernel(context) {}
+
+  void Compute(OpKernelContext* context) override {
+    const Tensor& input = context->input(0);
+    OP_REQUIRES(context, input.dims() == 4,
+                errors::InvalidArgument("input must be 4-dimensional",
+                                        input.shape().ShortDebugString()));
+    const Tensor& shape_t = context->input(1);
+    OP_REQUIRES(context, shape_t.dims() == 1,
+                errors::InvalidArgument("shape_t must be 1-dimensional",
+                                        shape_t.shape().ShortDebugString()));
+    OP_REQUIRES(context, shape_t.NumElements() == 2,
+                errors::InvalidArgument("shape_t must have two elements",
+                                        shape_t.shape().ShortDebugString()));
+
+    auto Svec = shape_t.vec<int32>();
+    // Initialize shape to the batch size of the input, then add
+    // the rest of the dimensions
+    Tensor* output = nullptr;
+    OP_REQUIRES_OK(context, context->allocate_output(
+                                0, TensorShape({input.dim_size(0), Svec(0),
+                                                Svec(1), input.dim_size(3)}),
+                                &output));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     const int64 batch_size = input.dim_size(0);
     const int64 in_height = input.dim_size(1);
     const int64 in_width = input.dim_size(2);
     const int64 channels = input.dim_size(3);
+<<<<<<< HEAD
 
     const int64 out_height = sizes(0);
     const int64 out_width = sizes(1);
@@ -342,10 +387,31 @@ struct ResizeNearestNeighborGrad<CPUDevice, T, half_pixel_centers,
         for (Eigen::Index b = 0; b < batch_size; ++b) {
           for (Eigen::Index c = 0; c < channels; ++c) {
             output(b, out_y, out_x, c) += input(b, y, x, c);
+=======
+    const int64 out_height = output->dim_size(1);
+    const int64 out_width = output->dim_size(2);
+
+    typename TTypes<T, 4>::ConstTensor input_data = input.tensor<T, 4>();
+    typename TTypes<T, 4>::Tensor output_data = output->tensor<T, 4>();
+
+    const float height_scale = in_height / static_cast<float>(out_height);
+    const float width_scale = in_width / static_cast<float>(out_width);
+
+    for (int b = 0; b < batch_size; ++b) {
+      for (int y = 0; y < out_height; ++y) {
+        const int in_y = std::min(static_cast<int64>(floorf(y * height_scale)),
+                                  (in_height - 1));
+        for (int x = 0; x < out_width; ++x) {
+          const int in_x = std::min(static_cast<int64>(floorf(x * width_scale)),
+                                    (in_width - 1));
+          for (int c = 0; c < channels; ++c) {
+            output_data(b, y, x, c) = input_data(b, in_y, in_x, c);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           }
         }
       }
     }
+<<<<<<< HEAD
     return true;
   }
 };
@@ -387,4 +453,23 @@ TF_CALL_GPU_NUMBER_TYPES(REGISTER_KERNEL);
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 
+=======
+  }
+};
+
+#define REGISTER_KERNEL(T)                              \
+  REGISTER_KERNEL_BUILDER(Name("ResizeNearestNeighbor") \
+                              .Device(DEVICE_CPU)       \
+                              .TypeConstraint<T>("T")   \
+                              .HostMemory("size"),      \
+                          ResizeNearestNeighborOp<CPUDevice, T>);
+
+REGISTER_KERNEL(uint8);
+REGISTER_KERNEL(int8);
+REGISTER_KERNEL(int32);
+REGISTER_KERNEL(float);
+REGISTER_KERNEL(double);
+#undef REGISTER_KERNEL
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

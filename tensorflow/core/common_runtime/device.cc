@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,23 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/common_runtime/device.h"
 
 #include "tensorflow/core/framework/op_segment.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/random/random.h"
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/types.h"
 
 namespace tensorflow {
 
 Device::Device(Env* env, const DeviceAttributes& device_attributes)
+=======
+#include "tensorflow/core/platform/port.h"
+
+namespace tensorflow {
+
+Device::Device(Env* env, const DeviceAttributes& device_attributes,
+               Allocator* device_allocator)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     : DeviceBase(env), device_attributes_(device_attributes) {
   CHECK(DeviceNameUtils::ParseFullName(name(), &parsed_name_))
       << "Invalid device name: " << name();
   rmgr_ = new ResourceMgr(parsed_name_.job);
 }
 
+<<<<<<< HEAD
 Device::~Device() {
   if (rmgr_ != nullptr) {
     DeleteResourceMgr();
@@ -37,11 +50,18 @@ Device::~Device() {
 }
 
 void Device::Sync(const DoneCallback& done) { done(Sync()); }
+=======
+Device::~Device() { delete rmgr_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // static
 DeviceAttributes Device::BuildDeviceAttributes(
     const string& name, DeviceType device, Bytes memory_limit,
+<<<<<<< HEAD
     const DeviceLocality& locality, const string& physical_device_desc) {
+=======
+    BusAdjacency bus_adjacency, const string& physical_device_desc) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   DeviceAttributes da;
   da.set_name(name);
   do {
@@ -49,7 +69,11 @@ DeviceAttributes Device::BuildDeviceAttributes(
   } while (da.incarnation() == 0);  // This proto field must not be zero
   da.set_device_type(device.type());
   da.set_memory_limit(memory_limit.value());
+<<<<<<< HEAD
   *da.mutable_locality() = locality;
+=======
+  da.set_bus_adjacency(bus_adjacency);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   da.set_physical_device_desc(physical_device_desc);
   return da;
 }

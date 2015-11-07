@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,11 +59,125 @@ from tensorflow.python.ops import tensor_array_ops
 from tensorflow.python.ops import unconnected_gradients
 from tensorflow.python.ops import variable_scope
 from tensorflow.python.ops import variables
+=======
+"""Tests for tensorflow.ops.gradients."""
+import warnings
+
+import tensorflow.python.platform
+
+import numpy as np
+
+from tensorflow.python.framework import ops
+from tensorflow.python.framework import test_util
+from tensorflow.python.framework import types
+# pylint: disable=unused-import
+from tensorflow.python.ops import array_grad
+from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import constant_op
+from tensorflow.python.ops import data_flow_grad
+from tensorflow.python.ops import data_flow_ops
+from tensorflow.python.ops import gradients
+from tensorflow.python.ops import math_grad
+from tensorflow.python.ops import math_ops
+from tensorflow.python.ops import nn_grad
+from tensorflow.python.ops import state_grad
+# pylint: enable=unused-import
+from tensorflow.python.ops.constant_op import constant
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 from tensorflow.python.ops.nn_ops import bias_add
 from tensorflow.python.platform import googletest
 
 
+<<<<<<< HEAD
 class GradientsTest(test_util.TensorFlowTestCase, parameterized.TestCase):
+=======
+def _OpsBetween(graph, to_ops, from_ops):
+  """Build the list of operations between two lists of Operations.
+
+  Args:
+    graph: a Graph.
+    to_ops: list of Operations.
+    from_ops: list of Operations.
+
+  Returns:
+    The list of operations between "from_ops" and "to_ops", sorted by
+    decreasing operation id. This list contains all elements of to_ops.
+
+    TODO(mdevin): Think about returning an empty list if from_ops are not
+    reachable from to_ops.  Presently it returns to_ops in that case.
+  """
+  # List of booleans, indexed by operation id, indicating if
+  # an op is reached from the output of "input_ops".
+  reached_ops = [False] * (graph._last_id + 1)
+  # We only care to reach up to "output_ops" so we mark the
+  # output ops as reached to avoid recursing past them.
+  for op in to_ops:
+    reached_ops[op._id] = True
+  gradients._MarkReachedOps(from_ops, reached_ops)
+  between_ops = gradients._GatherInputs(to_ops, reached_ops)
+  between_ops.sort(lambda x, y: y._id - x._id)
+  return between_ops
+
+
+class GradientsTest(test_util.TensorFlowTestCase):
+
+  def _OpNames(self, op_list):
+    return ["%s/%d" % (str(op.name), op._id) for op in op_list]
+
+  def _assertOpListEqual(self, ops1, ops2):
+    self.assertEquals(self._OpNames(ops1), self._OpNames(ops2))
+
+  def testOpsBetweenSimple(self):
+    with ops.Graph().as_default() as g:
+      t1 = constant(1.0)
+      t2 = constant(2.0)
+      t3 = array_ops.pack([t1, t2])
+    # Full graph
+    self._assertOpListEqual([t3.op, t2.op, t1.op],
+                            _OpsBetween(g, [t3.op], [t1.op, t2.op]))
+    # Only t1, t3.
+    self._assertOpListEqual([t3.op, t1.op],
+                            _OpsBetween(g, [t3.op], [t1.op]))
+
+  def testOpsBetweenUnreachable(self):
+    with ops.Graph().as_default() as g:
+      t1 = constant(1.0)
+      t2 = constant(2.0)
+      _ = array_ops.pack([t1, t2])
+      t4 = constant(1.0)
+      t5 = constant(2.0)
+      t6 = array_ops.pack([t4, t5])
+    # Elements of to_ops are always listed.
+    self._assertOpListEqual([t6.op], _OpsBetween(g, [t6.op], [t1.op]))
+
+  def testOpsBetweenCut(self):
+    with ops.Graph().as_default() as g:
+      t1 = constant(1.0)
+      t2 = constant(2.0)
+      t3 = array_ops.pack([t1, t2])
+      t4 = constant([1.0])
+      t5 = array_ops.concat(0, [t4, t3])
+      t6 = constant([2.0])
+      t7 = array_ops.concat(0, [t5, t6])
+    self._assertOpListEqual([t7.op, t5.op, t4.op],
+                            _OpsBetween(g, [t7.op], [t4.op]))
+
+  def testOpsBetweenCycle(self):
+    with ops.Graph().as_default() as g:
+      t1 = constant(1.0)
+      t2 = constant(2.0)
+      t3 = array_ops.pack([t1, t2])
+      t4 = array_ops.concat(0, [t3, t3, t3])
+      t5 = constant([1.0])
+      t6 = array_ops.concat(0, [t4, t5])
+      t7 = array_ops.concat(0, [t6, t3])
+    self._assertOpListEqual([t6.op, t4.op, t3.op],
+                            _OpsBetween(g, [t6.op], [t3.op]))
+    self._assertOpListEqual([t7.op, t6.op, t5.op, t4.op, t3.op, t1.op],
+                            _OpsBetween(g, [t7.op], [t1.op, t5.op]))
+    self._assertOpListEqual([t6.op, t5.op, t4.op, t3.op, t2.op],
+                            _OpsBetween(g, [t6.op], [t2.op, t5.op]))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testGradients(self):
     with ops.Graph().as_default():
@@ -82,7 +197,11 @@ class GradientsTest(test_util.TensorFlowTestCase, parameterized.TestCase):
       w = constant(1.0, shape=[2, 2])
       x = constant(1.0, shape=[2, 2])
       wx = math_ops.matmul(w, x)
+<<<<<<< HEAD
       split_wx = array_ops.split(value=wx, num_or_size_splits=2, axis=0)
+=======
+      split_wx = array_ops.split(0, 2, wx)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       c = math_ops.reduce_sum(split_wx[1])
       gw = gradients.gradients(c, [w])[0]
     self.assertEquals("MatMul", gw.op.type)
@@ -91,6 +210,7 @@ class GradientsTest(test_util.TensorFlowTestCase, parameterized.TestCase):
     with ops.Graph().as_default() as g:
       w = constant(1.0, shape=[1, 1])
       x = constant(1.0, shape=[1, 2])
+<<<<<<< HEAD
       with g.device("/device:GPU:0"):
         wx = math_ops.matmul(w, x)
       gw = gradients.gradients(wx, [w], colocate_gradients_with_ops=True)[0]
@@ -99,11 +219,22 @@ class GradientsTest(test_util.TensorFlowTestCase, parameterized.TestCase):
   def testColocateGradientsWithAggregation(self):
     with ops.Graph().as_default() as g:
       with g.device("/device:GPU:1"):
+=======
+      with g.device("/gpu:0"):
+        wx = math_ops.matmul(w, x)
+      gw = gradients.gradients(wx, [w], colocate_gradients_with_ops=True)[0]
+    self.assertEquals("/gpu:0", gw.device)
+
+  def testColocateGradientsWithAggregation(self):
+    with ops.Graph().as_default() as g:
+      with g.device("/gpu:1"):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         w = constant(1.0, shape=[1, 1])
       x = constant(1.0, shape=[1, 2])
       y = constant(1.0, shape=[1, 2])
       wx = math_ops.matmul(w, x)
       wy = math_ops.matmul(w, y)
+<<<<<<< HEAD
       with g.device("/device:GPU:0"):
         z = wx + wy
 
@@ -148,17 +279,30 @@ class GradientsTest(test_util.TensorFlowTestCase, parameterized.TestCase):
       with session.Session():
         # Make sure the placer doesn't complain.
         self.evaluate(gz_x)
+=======
+      with g.device("/gpu:0"):
+        z = wx + wy
+      gw1 = gradients.gradients(z, [w], colocate_gradients_with_ops=True)[0]
+      self.assertEquals("/gpu:1", gw1.device)
+      gw2 = gradients.gradients(z, [w], colocate_gradients_with_ops=False)[0]
+      self.assertEquals(None, gw2.device)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testBoundaryStop(self):
     # Test that we don't differentiate 'x'. The gradient function for 'x' is
     # set explicitly to None so we will get an exception if the gradient code
     # tries to differentiate 'x'.
+<<<<<<< HEAD
     with ops.Graph().as_default():
+=======
+    with ops.Graph().as_default() as g:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       c = constant(1.0)
       x = array_ops.identity(c)
       y = x + 1.0
       z = y + 1
       grads = gradients.gradients(z, [x])
+<<<<<<< HEAD
       self.assertTrue(all(x is not None for x in grads))
 
   @test_util.run_v1_only("b/120545219")
@@ -166,20 +310,37 @@ class GradientsTest(test_util.TensorFlowTestCase, parameterized.TestCase):
     # Test that we differentiate both 'x' and 'y' correctly when x is a
     # predecessor of y.
     with self.cached_session():
+=======
+      self.assertTrue(all([x for x in grads]))
+
+  def testBoundaryContinue(self):
+    # Test that we differentiate both 'x' and 'y' correctly when x is a
+    # predecessor of y.
+    with self.test_session():
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       x = constant(1.0)
       y = x * 2.0
       z = y * 3.0
       grads = gradients.gradients(z, [x, y])
+<<<<<<< HEAD
       self.assertTrue(all(x is not None for x in grads))
       self.assertEqual(6.0, grads[0].eval())
 
   @test_util.run_v1_only("b/120545219")
   def testAggregationMethodAccumulateN(self):
     with self.cached_session():
+=======
+      self.assertTrue(all([x for x in grads]))
+      self.assertEqual(6.0, grads[0].eval())
+
+  def testAggregationMethodAccumulateN(self):
+    with self.test_session():
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       x = constant(1.0)
       y = x * 2.0
       z = y + y + y + y + y + y + y + y + y + y
       grads = gradients.gradients(
+<<<<<<< HEAD
           z, [x, y],
           aggregation_method=gradients.AggregationMethod.
           EXPERIMENTAL_ACCUMULATE_N)
@@ -190,10 +351,23 @@ class GradientsTest(test_util.TensorFlowTestCase, parameterized.TestCase):
   @test_util.run_v1_only("b/120545219")
   def testAggregationMethodAddN(self):
     with self.cached_session():
+=======
+          z,
+          [x, y],
+          aggregation_method=
+          gradients.AggregationMethod.EXPERIMENTAL_ACCUMULATE_N)
+      self.assertTrue(all([x for x in grads]))
+      self.assertEqual(20.0, grads[0].eval())
+      self.assertEqual(10.0, grads[1].eval())
+
+  def testAggregationMethodAddN(self):
+    with self.test_session():
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       x = constant(1.0)
       y = x * 2.0
       z = y + y + y + y + y + y + y + y + y + y
       grads = gradients.gradients(
+<<<<<<< HEAD
           z, [x, y], aggregation_method=gradients.AggregationMethod.ADD_N)
       self.assertTrue(all(x is not None for x in grads))
       self.assertEqual(20.0, grads[0].eval())
@@ -202,17 +376,36 @@ class GradientsTest(test_util.TensorFlowTestCase, parameterized.TestCase):
   @test_util.run_v1_only("b/120545219")
   def testAggregationMethodTree(self):
     with self.cached_session():
+=======
+          z,
+          [x, y],
+          aggregation_method=gradients.AggregationMethod.ADD_N)
+      self.assertTrue(all([x for x in grads]))
+      self.assertEqual(20.0, grads[0].eval())
+      self.assertEqual(10.0, grads[1].eval())
+
+  def testAggregationMethodTree(self):
+    with self.test_session():
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       x = constant(1.0)
       y = x * 2.0
       z = y + y + y + y + y + y + y + y + y + y
       grads = gradients.gradients(
+<<<<<<< HEAD
           z, [x, y],
           aggregation_method=gradients.AggregationMethod.EXPERIMENTAL_TREE)
       self.assertTrue(all(x is not None for x in grads))
+=======
+          z,
+          [x, y],
+          aggregation_method=gradients.AggregationMethod.EXPERIMENTAL_TREE)
+      self.assertTrue(all([x for x in grads]))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       self.assertEqual(20.0, grads[0].eval())
       self.assertEqual(10.0, grads[1].eval())
 
   def testNoGradientForStringOutputs(self):
+<<<<<<< HEAD
     with ops.Graph().as_default():
 
       def _TestOpGrad(_, float_grad, string_grad):
@@ -629,6 +822,23 @@ class FunctionGradientsTest(test_util.TensorFlowTestCase):
         return g[0]
 
       self.assertEqual(Foo().numpy(), 4.0)
+=======
+    with ops.Graph().as_default() as g:
+      @ops.RegisterGradient("TestOp")
+      def _TestOpGrad(op, float_grad, string_grad):
+        """Gradient function for TestOp."""
+        self.assertEquals(float_grad.dtype, types.float32)
+        self.assertFalse(string_grad)
+        return float_grad
+      ops.RegisterShape("TestOp")(None)
+
+      c = constant(1.0)
+      x, y = g.create_op("TestOp", [c], [types.float32, types.string]).outputs
+      z = x * 2.0
+      w = z * 3.0
+      grads = gradients.gradients(z, [c])
+      self.assertTrue(isinstance(grads[0], ops.Tensor))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 class StopGradientTest(test_util.TensorFlowTestCase):
@@ -641,6 +851,7 @@ class StopGradientTest(test_util.TensorFlowTestCase):
     assert igrad is None
 
 
+<<<<<<< HEAD
 class PreventGradientTest(test_util.TensorFlowTestCase):
 
   def testPreventGradient(self):
@@ -654,6 +865,10 @@ class PreventGradientTest(test_util.TensorFlowTestCase):
 class HessianVectorProductTest(test_util.TensorFlowTestCase):
 
   @test_util.run_v1_only("b/120545219")
+=======
+class HessianVectorProductTest(test_util.TensorFlowTestCase):
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testHessianVectorProduct(self):
     # Manually compute the Hessian explicitly for a low-dimensional problem
     # and check that HessianVectorProduct matches multiplication by the
@@ -669,12 +884,17 @@ class HessianVectorProductTest(test_util.TensorFlowTestCase):
     hess_value = mat_value + mat_value.T
     hess_v_value = np.dot(hess_value, v_value)
     for use_gpu in [False, True]:
+<<<<<<< HEAD
       with self.cached_session(use_gpu=use_gpu):
+=======
+      with self.test_session(use_gpu=use_gpu):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         mat = constant_op.constant(mat_value)
         v = constant_op.constant(v_value)
         x = constant_op.constant(x_value)
         mat_x = math_ops.matmul(mat, x, name="Ax")
         x_mat_x = math_ops.matmul(array_ops.transpose(x), mat_x, name="xAx")
+<<<<<<< HEAD
         hess_v = gradients_impl._hessian_vector_product(x_mat_x, [x], [v])[0]
         hess_v_actual = self.evaluate(hess_v)
       self.assertAllClose(hess_v_value, hess_v_actual)
@@ -778,10 +998,22 @@ class IndexedSlicesToTensorTest(test_util.TensorFlowTestCase):
   @test_util.run_v1_only("b/120545219")
   def testIndexedSlicesToTensor(self):
     with self.cached_session():
+=======
+        hess_v = gradients._hessian_vector_product(x_mat_x, [x], [v])[0]
+        hess_v_actual = hess_v.eval()
+      self.assertAllClose(hess_v_value, hess_v_actual)
+
+
+class IndexedSlicesToTensorTest(test_util.TensorFlowTestCase):
+
+  def testIndexedSlicesToTensor(self):
+    with self.test_session():
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       np_val = np.random.rand(4, 4, 4, 4).astype(np.float32)
       c = constant_op.constant(np_val)
       c_sparse = math_ops._as_indexed_slices(c)
       self.assertAllEqual(np_val.shape, c_sparse.dense_shape.eval())
+<<<<<<< HEAD
       c_dense = math_ops.multiply(c_sparse, 1.0)
       self.assertAllClose(np_val, self.evaluate(c_dense))
 
@@ -805,10 +1037,18 @@ class IndexedSlicesToTensorTest(test_util.TensorFlowTestCase):
   @test_util.run_v1_only("b/120545219")
   def testInt64Indices(self):
     with self.cached_session():
+=======
+      c_dense = math_ops.mul(c_sparse, 1.0)
+      self.assertAllClose(np_val, c_dense.eval())
+
+  def testInt64Indices(self):
+    with self.test_session():
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       np_val = np.random.rand(4, 4, 4, 4).astype(np.float32)
       c = constant_op.constant(np_val)
       c_sparse = math_ops._as_indexed_slices(c)
       c_sparse = ops.IndexedSlices(
+<<<<<<< HEAD
           c_sparse.values,
           math_ops.cast(c_sparse.indices, dtypes.int64), c_sparse.dense_shape)
       self.assertAllEqual(np_val.shape, c_sparse.dense_shape.eval())
@@ -1505,6 +1745,44 @@ class GradPassThroughTest(test_util.TensorFlowTestCase):
       y = custom_gradient.grad_pass_through(lambda v: x * v)(z)
     grads = tape.gradient(y, x)
     self.assertIsNone(grads)
+=======
+          c_sparse.values, math_ops.cast(c_sparse.indices, types.int64),
+          c_sparse.dense_shape)
+      self.assertAllEqual(np_val.shape, c_sparse.dense_shape.eval())
+      c_dense = math_ops.mul(c_sparse, 1.0)
+      self.assertAllClose(np_val, c_dense.eval())
+
+  def testWarnings(self):
+    # Smaller than the threshold: no warning.
+    c_sparse = ops.IndexedSlices(array_ops.placeholder(types.float32),
+                                 array_ops.placeholder(types.int32),
+                                 constant([4, 4, 4, 4]))
+    with warnings.catch_warnings(record=True) as w:
+      math_ops.mul(c_sparse, 1.0)
+    self.assertEqual(0, len(w))
+
+    # Greater than or equal to the threshold: warning.
+    c_sparse = ops.IndexedSlices(array_ops.placeholder(types.float32),
+                                 array_ops.placeholder(types.int32),
+                                 constant([100, 100, 100, 100]))
+    with warnings.catch_warnings(record=True) as w:
+      math_ops.mul(c_sparse, 1.0)
+    self.assertEqual(1, len(w))
+    self.assertTrue(
+        "with 100000000 elements. This may consume a large amount of memory."
+        in str(w[0].message))
+
+    # Unknown dense shape: warning.
+    c_sparse = ops.IndexedSlices(array_ops.placeholder(types.float32),
+                                 array_ops.placeholder(types.int32),
+                                 array_ops.placeholder(types.int32))
+    with warnings.catch_warnings(record=True) as w:
+      math_ops.mul(c_sparse, 1.0)
+    self.assertEqual(1, len(w))
+    self.assertTrue(
+        "of unknown shape. This may consume a large amount of memory."
+        in str(w[0].message))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 if __name__ == "__main__":

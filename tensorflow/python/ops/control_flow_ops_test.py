@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,6 +68,23 @@ class GroupTestCase(test_util.TensorFlowTestCase):
 
   def _StripNode(self, nd):
     snode = node_def_pb2.NodeDef(name=nd.name, op=nd.op, input=nd.input)
+=======
+"""Tests for control_flow_ops.py."""
+import tensorflow.python.platform
+
+from tensorflow.core.framework import graph_pb2
+from tensorflow.python.framework import ops
+from tensorflow.python.framework.test_util import TensorFlowTestCase
+from tensorflow.python.ops import control_flow_ops
+from tensorflow.python.ops import standard_ops as tf
+from tensorflow.python.platform import googletest
+
+
+class GroupTestCase(TensorFlowTestCase):
+
+  def _StripNode(self, nd):
+    snode = graph_pb2.NodeDef(name=nd.name, op=nd.op, input=nd.input)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if nd.device:
       snode.device = nd.device
     return snode
@@ -77,10 +95,17 @@ class GroupTestCase(test_util.TensorFlowTestCase):
 
   def testGroup_NoDevices(self):
     with ops.Graph().as_default() as g:
+<<<<<<< HEAD
       a = constant_op.constant(0, name="a")
       b = constant_op.constant(0, name="b")
       c = constant_op.constant(0, name="c")
       control_flow_ops.group(a.op, b.op, c.op, name="root")
+=======
+      a = tf.constant(0, name="a")
+      b = tf.constant(0, name="b")
+      c = tf.constant(0, name="c")
+      tf.group(a.op, b.op, c.op, name="root")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     gd = g.as_graph_def()
     self.assertProtoEquals("""
       node { name: "a" op: "Const"}
@@ -92,9 +117,15 @@ class GroupTestCase(test_util.TensorFlowTestCase):
   def testGroup_OneDevice(self):
     with ops.Graph().as_default() as g:
       with g.device("/task:0"):
+<<<<<<< HEAD
         a = constant_op.constant(0, name="a")
         b = constant_op.constant(0, name="b")
       control_flow_ops.group(a.op, b.op, name="root")
+=======
+        a = tf.constant(0, name="a")
+        b = tf.constant(0, name="b")
+      tf.group(a.op, b.op, name="root")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     gd = g.as_graph_def()
     self.assertProtoEquals("""
       node { name: "a" op: "Const" device: "/task:0" }
@@ -105,6 +136,7 @@ class GroupTestCase(test_util.TensorFlowTestCase):
   def testGroup_MultiDevice(self):
     with ops.Graph().as_default() as g:
       with g.device("/task:0"):
+<<<<<<< HEAD
         a = constant_op.constant(0, name="a")
         b = constant_op.constant(0, name="b")
       with g.device("/task:1"):
@@ -112,6 +144,15 @@ class GroupTestCase(test_util.TensorFlowTestCase):
         d = constant_op.constant(0, name="d")
       with g.device("/task:2"):
         control_flow_ops.group(a.op, b.op, c.op, d.op, name="root")
+=======
+        a = tf.constant(0, name="a")
+        b = tf.constant(0, name="b")
+      with g.device("/task:1"):
+        c = tf.constant(0, name="c")
+        d = tf.constant(0, name="d")
+      with g.device("/task:2"):
+        tf.group(a.op, b.op, c.op, d.op, name="root")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     gd = g.as_graph_def()
     self.assertProtoEquals("""
       node { name: "a" op: "Const" device: "/task:0"}
@@ -126,6 +167,7 @@ class GroupTestCase(test_util.TensorFlowTestCase):
              device: "/task:2" }
     """, self._StripGraph(gd))
 
+<<<<<<< HEAD
   def testPassingList(self):
     with ops.Graph().as_default() as g:
       a = constant_op.constant(0, name="a")
@@ -1398,6 +1440,19 @@ class AssertTest(test_util.TensorFlowTestCase):
       self.evaluate(whiny(False))
 
     self.assertAllEqual(whiny(True), 5)
+=======
+
+class ShapeTestCase(TensorFlowTestCase):
+
+  def testShape(self):
+    with ops.Graph().as_default():
+      tensor = tf.constant([1.0, 2.0])
+      self.assertEquals([2], tensor.get_shape())
+      self.assertEquals([2],
+                        control_flow_ops.with_dependencies(
+                            [tf.constant(1.0)], tensor).get_shape())
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 if __name__ == "__main__":
   googletest.main()

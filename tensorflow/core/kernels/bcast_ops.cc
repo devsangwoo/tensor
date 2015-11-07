@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +18,16 @@ limitations under the License.
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/framework/op.h"
+#include "tensorflow/core/framework/op_kernel.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/bcast.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 // Given shapes of two tensors, computes the broadcast shape.
 template <typename T>
 class BCastArgsOp : public OpKernel {
@@ -66,15 +73,26 @@ class BCastArgsOp : public OpKernel {
   TF_DISALLOW_COPY_AND_ASSIGN(BCastArgsOp);
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Given shapes of two tensors, computes the reduction indices for the
 // gradient computation.
 //
 // TODO(zhifengc):
 //   1. Adds support for n-ary (n >= 2).
+<<<<<<< HEAD
 template <typename T>
 class BCastGradArgsOp : public OpKernel {
  public:
   explicit BCastGradArgsOp(OpKernelConstruction* ctx) : OpKernel(ctx) {}
+=======
+class BCastGradArgsOp : public OpKernel {
+ public:
+  explicit BCastGradArgsOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+    OP_REQUIRES_OK(
+        ctx, ctx->MatchSignature({DT_INT32, DT_INT32}, {DT_INT32, DT_INT32}));
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void Compute(OpKernelContext* ctx) override {
     OP_REQUIRES(
@@ -85,22 +103,35 @@ class BCastGradArgsOp : public OpKernel {
       const Tensor& in = ctx->input(i);
       OP_REQUIRES(ctx, TensorShapeUtils::IsVector(in.shape()),
                   errors::InvalidArgument("In[", i, "] must be a vector.",
+<<<<<<< HEAD
                                           in.shape().DebugString()));
       BCast::Vec vec;
       for (int64 i = 0; i < in.NumElements(); ++i) {
         vec.push_back(in.vec<T>()(i));
+=======
+                                          in.shape().ShortDebugString()));
+      BCast::Vec vec;
+      for (int64 i = 0; i < in.NumElements(); ++i) {
+        vec.push_back(in.vec<int32>()(i));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
       shapes.push_back(vec);
     }
     BCast bcast(shapes[0], shapes[1]);
     OP_REQUIRES(ctx, bcast.IsValid(),
                 errors::InvalidArgument(
+<<<<<<< HEAD
                     "Incompatible shapes: [", absl::StrJoin(shapes[0], ","),
                     "] vs. [", absl::StrJoin(shapes[1], ","), "]"));
+=======
+                    "Incompatible shapes: [", str_util::Join(shapes[0], ","),
+                    "] vs. [", str_util::Join(shapes[1], ","), "]"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Output(ctx, 0, bcast.grad_x_reduce_idx());
     Output(ctx, 1, bcast.grad_y_reduce_idx());
   }
 
+<<<<<<< HEAD
   bool IsExpensive() override { return false; }
 
  private:
@@ -111,11 +142,20 @@ class BCastGradArgsOp : public OpKernel {
     for (int64 i = 0; i < len; ++i) {
       o->flat<T>()(i) = static_cast<T>(v[i]);
     }
+=======
+ private:
+  void Output(OpKernelContext* ctx, int idx, const BCast::Vec& v) {
+    const int len = v.size();
+    Tensor* o = nullptr;
+    OP_REQUIRES_OK(ctx, ctx->allocate_output(idx, TensorShape({len}), &o));
+    for (int i = 0; i < len; ++i) o->flat<int32>()(i) = v[i];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   TF_DISALLOW_COPY_AND_ASSIGN(BCastGradArgsOp);
 };
 
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("BroadcastArgs")
                             .Device(DEVICE_CPU)
                             .TypeConstraint<int32>("T")
@@ -165,10 +205,15 @@ REGISTER_KERNEL_BUILDER(Name("BroadcastArgs")
 REGISTER_KERNEL_BUILDER(Name("BroadcastGradientArgs")
                             .Device(DEVICE_CPU)
                             .TypeConstraint<int32>("T")
+=======
+REGISTER_KERNEL_BUILDER(Name("BroadcastGradientArgs")
+                            .Device(DEVICE_CPU)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                             .HostMemory("s0")
                             .HostMemory("s1")
                             .HostMemory("r0")
                             .HostMemory("r1"),
+<<<<<<< HEAD
                         BCastGradArgsOp<int32>);
 REGISTER_KERNEL_BUILDER(Name("BroadcastGradientArgs")
                             .Device(DEVICE_CPU)
@@ -189,10 +234,16 @@ REGISTER_KERNEL_BUILDER(Name("BroadcastGradientArgs")
 REGISTER_KERNEL_BUILDER(Name("BroadcastGradientArgs")
                             .Device(DEVICE_GPU)
                             .TypeConstraint<int64>("T")
+=======
+                        BCastGradArgsOp);
+REGISTER_KERNEL_BUILDER(Name("BroadcastGradientArgs")
+                            .Device(DEVICE_GPU)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                             .HostMemory("s0")
                             .HostMemory("s1")
                             .HostMemory("r0")
                             .HostMemory("r1"),
+<<<<<<< HEAD
                         BCastGradArgsOp<int64>);
 
 #if TENSORFLOW_USE_SYCL
@@ -213,4 +264,8 @@ REGISTER_KERNEL_BUILDER(Name("BroadcastGradientArgs")
                             .HostMemory("r1"),
                         BCastGradArgsOp<int64>);
 #endif
+=======
+                        BCastGradArgsOp);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace tensorflow

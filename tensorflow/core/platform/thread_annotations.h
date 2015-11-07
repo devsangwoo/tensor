@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -175,3 +176,19 @@ inline T& ts_unchecked_read(T& v) NO_THREAD_SAFETY_ANALYSIS {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_PLATFORM_THREAD_ANNOTATIONS_H_
+=======
+#ifndef TENSORFLOW_PLATFORM_THREAD_ANNOTATIONS_H_
+#define TENSORFLOW_PLATFORM_THREAD_ANNOTATIONS_H_
+
+#include "tensorflow/core/platform/port.h"
+
+#if defined(PLATFORM_GOOGLE) || defined(PLATFORM_GOOGLE_ANDROID)
+#include "base/thread_annotations.h"
+#elif defined(PLATFORM_POSIX) || defined(PLATFORM_POSIX_ANDROID)
+#include "tensorflow/core/platform/default/thread_annotations.h"
+#else
+#error Define the appropriate PLATFORM_<foo> macro for this platform
+#endif
+
+#endif  // TENSORFLOW_PLATFORM_THREAD_ANNOTATIONS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

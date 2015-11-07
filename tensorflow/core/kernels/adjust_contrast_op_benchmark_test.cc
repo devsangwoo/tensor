@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +18,19 @@ limitations under the License.
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/graph/node_builder.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/public/tensor.h"
+#include <gtest/gtest.h>
+#include "tensorflow/core/common_runtime/kernel_benchmark_testlib.h"
+#include "tensorflow/core/graph/node_builder.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/platform/test_benchmark.h"
 
 namespace tensorflow {
 
 static Graph* BM_AdjustContrast(int batches, int width, int height) {
   Graph* g = new Graph(OpRegistry::Global());
+<<<<<<< HEAD
   Tensor in(DT_FLOAT, TensorShape({batches, width, height, 3}));
   in.flat<float>().setRandom();
   Tensor factor(DT_FLOAT, TensorShape({}));
@@ -33,6 +41,24 @@ static Graph* BM_AdjustContrast(int batches, int width, int height) {
                   .Input(test::graph::Constant(g, in))
                   .Input(test::graph::Constant(g, factor))
                   .Finalize(g, &ret));
+=======
+  Tensor in(DT_UINT8, TensorShape({batches, width, height, 3}));
+  in.flat<uint8>().setRandom();
+  Tensor factor(DT_FLOAT, TensorShape({}));
+  factor.flat<float>().setConstant(1.2);
+  Tensor min_value(DT_FLOAT, TensorShape({}));
+  min_value.flat<float>().setConstant(7.);
+  Tensor max_value(DT_FLOAT, TensorShape({}));
+  max_value.flat<float>().setConstant(250.);
+
+  Node* ret;
+  NodeBuilder(g->NewName("n"), "AdjustContrast")
+      .Input(test::graph::Constant(g, in))
+      .Input(test::graph::Constant(g, factor))
+      .Input(test::graph::Constant(g, min_value))
+      .Input(test::graph::Constant(g, max_value))
+      .Finalize(g, &ret);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return g;
 }
 
@@ -41,6 +67,7 @@ static Graph* BM_AdjustContrast(int batches, int width, int height) {
     testing::ItemsProcessed(iters* B* W* H * 3);                        \
     test::Benchmark(#DEVICE, BM_AdjustContrast(B, W, H)).Run(iters);    \
   }                                                                     \
+<<<<<<< HEAD
   BENCHMARK(BM_AdjustContrast_##DEVICE##_##B##_##W##_##H)
 
 // Benchmark results as of cl/106323955
@@ -63,5 +90,14 @@ BM_AdjustContrastDev(gpu, 32, 299, 299);
 #ifdef TENSORFLOW_USE_SYCL
 BM_AdjustContrastDev(sycl, 32, 299, 299);
 #endif  // TENSORFLOW_USE_SYCL
+=======
+  BENCHMARK(BM_AdjustContrast_##DEVICE##_##B##_##W##_##H);
+
+// Benchmark results as of cl/106323955
+// BM_AdjustContrast_cpu_1_299_299  3416770  22008951  100  11.6M items/s
+
+// BM_AdjustContrast_gpu_32_299_299  37117844  45512374  100  179.8M items/s
+BM_AdjustContrastDev(cpu, 1, 299, 299) BM_AdjustContrastDev(gpu, 32, 299, 299)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

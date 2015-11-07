@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,15 +17,24 @@ limitations under the License.
 #include "tensorflow/core/framework/tracking_allocator.h"
 
 #include "tensorflow/core/platform/env.h"
+=======
+#include "tensorflow/core/framework/tracking_allocator.h"
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/platform/logging.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 TrackingAllocator::TrackingAllocator(Allocator* allocator, bool track_sizes)
+=======
+TrackingAllocator::TrackingAllocator(Allocator* allocator)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     : allocator_(allocator),
       ref_(1),
       allocated_(0),
       high_watermark_(0),
+<<<<<<< HEAD
       total_bytes_(0),
       track_sizes_locally_(track_sizes && !allocator_->TracksAllocationSizes()),
       next_allocation_id_(0) {}
@@ -33,6 +43,12 @@ void* TrackingAllocator::AllocateRaw(
     size_t alignment, size_t num_bytes,
     const AllocationAttributes& allocation_attr) {
   void* ptr = allocator_->AllocateRaw(alignment, num_bytes, allocation_attr);
+=======
+      total_bytes_(0) {}
+
+void* TrackingAllocator::AllocateRaw(size_t alignment, size_t num_bytes) {
+  void* ptr = allocator_->AllocateRaw(alignment, num_bytes);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // If memory is exhausted AllocateRaw returns nullptr, and we should
   // pass this through to the caller
   if (nullptr == ptr) {
@@ -45,6 +61,7 @@ void* TrackingAllocator::AllocateRaw(
       allocated_ += allocated_bytes;
       high_watermark_ = std::max(high_watermark_, allocated_);
       total_bytes_ += allocated_bytes;
+<<<<<<< HEAD
       allocations_.emplace_back(allocated_bytes, Env::Default()->NowMicros());
       ++ref_;
     }
@@ -67,6 +84,13 @@ void* TrackingAllocator::AllocateRaw(
     mutex_lock lock(mu_);
     total_bytes_ += num_bytes;
     allocations_.emplace_back(num_bytes, Env::Default()->NowMicros());
+=======
+      ++ref_;
+    }
+  } else {
+    mutex_lock lock(mu_);
+    total_bytes_ += num_bytes;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ++ref_;
   }
   return ptr;
@@ -84,6 +108,7 @@ void TrackingAllocator::DeallocateRaw(void* ptr) {
   size_t allocated_bytes = 0;
   if (tracks_allocation_sizes) {
     allocated_bytes = allocator_->AllocatedSize(ptr);
+<<<<<<< HEAD
   } else if (track_sizes_locally_) {
     mutex_lock lock(mu_);
     auto itr = in_use_.find(ptr);
@@ -92,6 +117,8 @@ void TrackingAllocator::DeallocateRaw(void* ptr) {
       allocated_bytes = (*itr).second.allocated_size;
       in_use_.erase(itr);
     }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   Allocator* allocator = allocator_;
   {
@@ -99,7 +126,10 @@ void TrackingAllocator::DeallocateRaw(void* ptr) {
     if (tracks_allocation_sizes) {
       CHECK_GE(allocated_, allocated_bytes);
       allocated_ -= allocated_bytes;
+<<<<<<< HEAD
       allocations_.emplace_back(-allocated_bytes, Env::Default()->NowMicros());
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     should_delete = UnRef();
   }
@@ -109,6 +139,7 @@ void TrackingAllocator::DeallocateRaw(void* ptr) {
   }
 }
 
+<<<<<<< HEAD
 bool TrackingAllocator::TracksAllocationSizes() const {
   return track_sizes_locally_ || allocator_->TracksAllocationSizes();
 }
@@ -162,10 +193,29 @@ std::tuple<size_t, size_t, size_t> TrackingAllocator::GetSizes() {
   size_t high_watermark;
   size_t total_bytes;
   size_t still_live_bytes;
+=======
+bool TrackingAllocator::TracksAllocationSizes() {
+  return allocator_->TracksAllocationSizes();
+}
+
+size_t TrackingAllocator::RequestedSize(void* ptr) {
+  return allocator_->RequestedSize(ptr);
+}
+
+size_t TrackingAllocator::AllocatedSize(void* ptr) {
+  return allocator_->AllocatedSize(ptr);
+}
+
+std::pair<size_t, size_t> TrackingAllocator::GetSizesAndUnRef() {
+  size_t high_watermark;
+  size_t total_bytes;
+  bool should_delete;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   {
     mutex_lock lock(mu_);
     high_watermark = high_watermark_;
     total_bytes = total_bytes_;
+<<<<<<< HEAD
     still_live_bytes = allocated_;
   }
   return std::make_tuple(total_bytes, high_watermark, still_live_bytes);
@@ -177,11 +227,14 @@ gtl::InlinedVector<AllocRecord, 4> TrackingAllocator::GetRecordsAndUnRef() {
   {
     mutex_lock lock(mu_);
     allocations.swap(allocations_);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     should_delete = UnRef();
   }
   if (should_delete) {
     delete this;
   }
+<<<<<<< HEAD
   return allocations;
 }
 
@@ -194,6 +247,9 @@ gtl::InlinedVector<AllocRecord, 4> TrackingAllocator::GetCurrentRecords() {
     }
   }
   return allocations;
+=======
+  return std::make_pair(total_bytes, high_watermark);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 bool TrackingAllocator::UnRef() {

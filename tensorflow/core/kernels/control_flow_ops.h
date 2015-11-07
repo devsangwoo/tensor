@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,10 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_KERNELS_CONTROL_FLOW_OPS_H_
 #define TENSORFLOW_CORE_KERNELS_CONTROL_FLOW_OPS_H_
+=======
+#ifndef TENSORFLOW_KERNELS_CONTROL_FLOW_OPS_H_
+#define TENSORFLOW_KERNELS_CONTROL_FLOW_OPS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/framework/op_kernel.h"
 
@@ -32,6 +37,7 @@ class ControlTriggerOp : public OpKernel {
   bool IsExpensive() override { return false; }
 };
 
+<<<<<<< HEAD
 // A switch op has two inputs and two outputs. It forwards the value of
 // Input:0 to the output specified by input:1. Input:1 is a boolean tensor.
 // Input:0 is forwarded to output:0 if input:1 is false, otherwise to
@@ -131,3 +137,8 @@ class LoopCondOp : public OpKernel {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_CONTROL_FLOW_OPS_H_
+=======
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_KERNELS_CONTROL_FLOW_OPS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

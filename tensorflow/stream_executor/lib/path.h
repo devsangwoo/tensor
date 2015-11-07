@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,12 +21,26 @@ limitations under the License.
 #include "tensorflow/stream_executor/platform/port.h"
 
 namespace stream_executor {
+=======
+#ifndef TENSORFLOW_STREAM_EXECUTOR_LIB_PATH_H_
+#define TENSORFLOW_STREAM_EXECUTOR_LIB_PATH_H_
+
+#include "tensorflow/stream_executor/lib/stringpiece.h"
+#include "tensorflow/stream_executor/platform/port.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace port {
 
 namespace internal {
 // TODO(rspringer): Move to cc/implementation file.
 // Not part of the public API.
+<<<<<<< HEAD
 string JoinPathImpl(std::initializer_list<absl::string_view> paths);
+=======
+string JoinPathImpl(std::initializer_list<port::StringPiece> paths);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace internal
 
 // Join multiple paths together.
@@ -41,7 +56,11 @@ string JoinPathImpl(std::initializer_list<absl::string_view> paths);
 // All paths will be treated as relative paths, regardless of whether or not
 // they start with a leading '/'.  That is, all paths will be concatenated
 // together, with the appropriate path separator inserted in between.
+<<<<<<< HEAD
 // Arguments must be convertible to absl::string_view.
+=======
+// Arguments must be convertible to port::StringPiece.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 // Usage:
 // string path = file::JoinPath("/var/log", dirname, filename);
@@ -52,6 +71,11 @@ inline string JoinPath(const T&... args) {
 }
 
 }  // namespace port
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_LIB_PATH_H_

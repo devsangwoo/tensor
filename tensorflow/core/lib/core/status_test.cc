@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,14 +21,25 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/core/status_test_util.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 TEST(Status, OK) {
   EXPECT_EQ(Status::OK().code(), error::OK);
   EXPECT_EQ(Status::OK().error_message(), "");
+<<<<<<< HEAD
   TF_EXPECT_OK(Status::OK());
   TF_ASSERT_OK(Status::OK());
+=======
+  EXPECT_OK(Status::OK());
+  ASSERT_OK(Status::OK());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(Status::OK(), Status());
   Status s;
   EXPECT_TRUE(s.ok());
@@ -58,6 +70,7 @@ TEST(Status, Assign) {
   ASSERT_EQ(a.ToString(), b.ToString());
 }
 
+<<<<<<< HEAD
 TEST(Status, Move) {
   Status a(errors::InvalidArgument("Invalid"));
   Status b(std::move(a));
@@ -71,6 +84,8 @@ TEST(Status, MoveAssign) {
   ASSERT_EQ("Invalid argument: Invalid", b.ToString());
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(Status, Update) {
   Status s;
   s.Update(Status::OK());
@@ -112,6 +127,7 @@ TEST(Status, EqualsDifferentMessage) {
   ASSERT_NE(a, b);
 }
 
+<<<<<<< HEAD
 TEST(StatusGroup, OKStatusGroup) {
   StatusGroup c;
   c.Update(Status::OK());
@@ -184,4 +200,6 @@ static void BM_TF_CHECK_OK(int iters) {
 }
 BENCHMARK(BM_TF_CHECK_OK);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

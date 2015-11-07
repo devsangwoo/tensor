@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,10 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_FRAMEWORK_FAKE_INPUT_H_
 #define TENSORFLOW_CORE_FRAMEWORK_FAKE_INPUT_H_
+=======
+#ifndef TENSORFLOW_FRAMEWORK_FAKE_INPUT_H_
+#define TENSORFLOW_FRAMEWORK_FAKE_INPUT_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/framework/node_def_builder.h"
 #include "tensorflow/core/framework/types.h"
@@ -37,4 +42,8 @@ inline FakeInputFunctor FakeInput(std::initializer_list<DataType> dts) {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_FAKE_INPUT_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_FAKE_INPUT_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

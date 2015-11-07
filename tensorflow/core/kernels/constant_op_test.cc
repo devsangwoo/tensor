@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,6 +93,20 @@ TEST_F(ConstantOpTest, PersistentMemoryTracking) {
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 }
 
+=======
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/common_runtime/kernel_benchmark_testlib.h"
+#include "tensorflow/core/framework/op.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/graph/graph.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Returns graph containing "num" const nodes.  If 'sequential' is
 // true, make sure all constants are executed sequentially in the
 // graph by adding control dependencies.

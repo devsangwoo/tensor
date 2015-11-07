@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +17,10 @@ limitations under the License.
 #include "tensorflow/core/lib/io/inputbuffer.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/platform/logging.h"
+=======
+#include "tensorflow/core/lib/io/inputbuffer.h"
+#include "tensorflow/core/lib/core/errors.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace io {
@@ -28,7 +33,14 @@ InputBuffer::InputBuffer(RandomAccessFile* file, size_t buffer_bytes)
       pos_(buf_),
       limit_(buf_) {}
 
+<<<<<<< HEAD
 InputBuffer::~InputBuffer() { delete[] buf_; }
+=======
+InputBuffer::~InputBuffer() {
+  delete file_;
+  delete[] buf_;
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 Status InputBuffer::FillBuffer() {
   StringPiece data;
@@ -42,6 +54,7 @@ Status InputBuffer::FillBuffer() {
   return s;
 }
 
+<<<<<<< HEAD
 template <typename T>
 Status InputBuffer::ReadLine(T* result) {
   result->clear();
@@ -65,6 +78,26 @@ Status InputBuffer::ReadLine(T* result) {
   } while (limit_ != buf_);
   if (!result->empty() && result->back() == '\r') {
     result->resize(result->size() - 1);
+=======
+Status InputBuffer::ReadLine(string* result) {
+  result->clear();
+  int i;
+  Status s;
+  for (i = 0;; i++) {
+    if (pos_ == limit_) {
+      // Get more data into buffer
+      s = FillBuffer();
+      if (limit_ == buf_) {
+        break;
+      }
+    }
+    char c = *pos_++;
+    if (c == '\n') {
+      // We don't append the '\n' to *result
+      return Status::OK();
+    }
+    *result += c;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   if (errors::IsOutOfRange(s) && !result->empty()) {
     return Status::OK();
@@ -72,17 +105,21 @@ Status InputBuffer::ReadLine(T* result) {
   return s;
 }
 
+<<<<<<< HEAD
 template Status InputBuffer::ReadLine<string>(string* result);
 #ifdef USE_TSTRING
 template Status InputBuffer::ReadLine<tstring>(tstring* result);
 #endif  // USE_TSTRING
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Status InputBuffer::ReadNBytes(int64 bytes_to_read, string* result) {
   result->clear();
   if (bytes_to_read < 0) {
     return errors::InvalidArgument("Can't read a negative number of bytes: ",
                                    bytes_to_read);
   }
+<<<<<<< HEAD
   result->resize(bytes_to_read);
   size_t bytes_read = 0;
   Status status = ReadNBytes(bytes_to_read, &(*result)[0], &bytes_read);
@@ -102,10 +139,19 @@ Status InputBuffer::ReadNBytes(int64 bytes_to_read, char* result,
     if (pos_ == limit_) {
       // Get more data into buffer.
       status = FillBuffer();
+=======
+  result->reserve(bytes_to_read);
+  Status s;
+  while (result->size() < static_cast<size_t>(bytes_to_read)) {
+    if (pos_ == limit_) {
+      // Get more data into buffer
+      s = FillBuffer();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if (limit_ == buf_) {
         break;
       }
     }
+<<<<<<< HEAD
     // Do not go over the buffer boundary.
     const int64 bytes_to_copy =
         std::min<int64>(limit_ - pos_, bytes_to_read - *bytes_read);
@@ -153,6 +199,20 @@ Status InputBuffer::ReadVarintFallback(T* result, int max_bytes) {
   return errors::DataLoss("Stored data longer than ", max_bytes, " bytes.");
 }
 
+=======
+    const int64 bytes_to_copy =
+        std::min<int64>(limit_ - pos_, bytes_to_read - result->size());
+    result->insert(result->size(), pos_, bytes_to_copy);
+    pos_ += bytes_to_copy;
+  }
+  if (errors::IsOutOfRange(s) &&
+      (result->size() == static_cast<size_t>(bytes_to_read))) {
+    return Status::OK();
+  }
+  return s;
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Status InputBuffer::SkipNBytes(int64 bytes_to_skip) {
   if (bytes_to_skip < 0) {
     return errors::InvalidArgument("Can only skip forward, not ",
@@ -179,6 +239,7 @@ Status InputBuffer::SkipNBytes(int64 bytes_to_skip) {
   return s;
 }
 
+<<<<<<< HEAD
 Status InputBuffer::Seek(int64 position) {
   if (position < 0) {
     return errors::InvalidArgument("Seeking to a negative position: ",
@@ -198,5 +259,7 @@ Status InputBuffer::Seek(int64 position) {
   return Status::OK();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace io
 }  // namespace tensorflow

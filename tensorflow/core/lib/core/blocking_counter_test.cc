@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,12 @@ limitations under the License.
 #include "tensorflow/core/lib/core/threadpool.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include <gtest/gtest.h>
+
+#include "tensorflow/core/lib/core/blocking_counter.h"
+#include "tensorflow/core/lib/core/threadpool.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -48,6 +55,7 @@ TEST(BlockingCounterTest, TestMultipleThread) {
 }
 
 }  // namespace
+<<<<<<< HEAD
 
 static void BM_BlockingCounter(int iters, int num_threads,
                                int shards_per_thread) {
@@ -72,4 +80,6 @@ static void BM_BlockingCounter(int iters, int num_threads,
 
 BENCHMARK(BM_BlockingCounter)->RangePair(1, 12, 1, 1000);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

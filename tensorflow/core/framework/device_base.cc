@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -88,5 +89,12 @@ bool IsSymbolicExecutionDevice(const absl::string_view device_name) {
     return false;
   }
 }
+=======
+#include "tensorflow/core/framework/device_base.h"
+
+namespace tensorflow {
+
+DeviceBase::~DeviceBase() {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

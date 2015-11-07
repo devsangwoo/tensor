@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,24 +14,54 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/stream.h"
 
 #include "tensorflow/stream_executor/platform/port.h"
 
+<<<<<<< HEAD
 #include "absl/strings/str_cat.h"
 #include "third_party/eigen3/Eigen/Core"
 #include "tensorflow/stream_executor/blas.h"
 #include "tensorflow/stream_executor/host_or_device_scalar.h"
 #include "tensorflow/stream_executor/lib/stacktrace.h"
+=======
+#include "tensorflow/stream_executor/blas.h"
+#include "tensorflow/stream_executor/lib/strcat.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/platform.h"
 #include "tensorflow/stream_executor/platform/logging.h"
 #include "tensorflow/stream_executor/rng.h"
 #include "tensorflow/stream_executor/stream_executor_internal.h"
 #include "tensorflow/stream_executor/stream_executor_pimpl.h"
 
+<<<<<<< HEAD
 namespace stream_executor {
 
 namespace {
+=======
+namespace perftools {
+namespace gputools {
+
+namespace {
+static internal::StreamInterface *CreateStreamImplementation(
+    StreamExecutor *parent) {
+  PlatformKind platform_kind = parent->platform_kind();
+  if (platform_kind == PlatformKind::kCuda) {
+    return (*internal::MakeCUDAStreamImplementation())(parent);
+  } else if (platform_kind == PlatformKind::kOpenCL ||
+             platform_kind == PlatformKind::kOpenCLAltera) {
+    return (*internal::MakeOpenCLStreamImplementation())(parent);
+  } else if (platform_kind == PlatformKind::kHost) {
+    return internal::MakeHostStreamImplementation(parent);
+  } else {
+    LOG(FATAL) << "cannot create stream implementation for platform kind: "
+               << PlatformKindString(platform_kind);
+  }
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Code to turn parameters to functions on stream into strings that
 // will be VLOG'ed. We need overloads, instead of
 // e.g. BatchDescriptorToVlogString(), as the code that calls these
@@ -59,18 +90,24 @@ string ToVlogString(dnn::ActivationMode mode) {
   return dnn::ActivationModeString(mode);
 }
 
+<<<<<<< HEAD
 string ToVlogString(const dnn::AlgorithmConfig &algo_config) {
   return algo_config.ToString();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 string ToVlogString(dnn::ElementwiseOperation op) {
   return dnn::ElementwiseOperationString(op);
 }
 
+<<<<<<< HEAD
 string ToVlogString(dnn::QuantizedActivationMode mode) {
   return dnn::QuantizedActivationModeString(mode);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 string ToVlogString(blas::Transpose t) { return blas::TransposeString(t); }
 
 string ToVlogString(blas::UpperLower ul) { return blas::UpperLowerString(ul); }
@@ -79,10 +116,13 @@ string ToVlogString(blas::Diagonal d) { return blas::DiagonalString(d); }
 
 string ToVlogString(blas::Side s) { return blas::SideString(s); }
 
+<<<<<<< HEAD
 string ToVlogString(blas::ComputationType ty) {
   return blas::ComputationTypeString(ty);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 string ToVlogString(const void *ptr) {
   if (ptr == nullptr) {
     return "null";
@@ -112,6 +152,7 @@ string ToVlogString(const DeviceMemoryBase &memory) {
 }
 
 string ToVlogString(const DeviceMemoryBase *memory) {
+<<<<<<< HEAD
   return memory == nullptr ? "null" : ToVlogString(*memory);
 }
 
@@ -142,6 +183,24 @@ string ToVlogString(const HostOrDeviceScalar<T> &memory_or_constant) {
 template <class T>
 string ToVlogString(port::ArraySlice<T> elements) {
   string str = absl::StrCat(
+=======
+  return ToVlogString(*memory);
+}
+
+string ToVlogString(int i) { return port::StrCat(i); }
+
+string ToVlogString(uint32 i) { return port::StrCat(i); }
+
+string ToVlogString(uint64 i) { return port::StrCat(i); }
+
+string ToVlogString(float f) { return port::StrCat(f); }
+
+string ToVlogString(double d) { return port::StrCat(d); }
+
+template <class T>
+string ToVlogString(port::ArraySlice<T> elements) {
+  string str = port::StrCat(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       ToVlogString(reinterpret_cast<const void *>(elements.data())), "[",
       elements.size(), "]{");
   const char *separator = "";
@@ -158,7 +217,11 @@ string ToVlogString(port::ArraySlice<T> elements) {
       str += ", ...";
       break;
     }
+<<<<<<< HEAD
     absl::StrAppend(&str, separator, ToVlogString(elements[i]));
+=======
+    port::StrAppend(&str, separator, ToVlogString(elements[i]));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     separator = ", ";
   }
   str += "}";
@@ -170,6 +233,7 @@ string ToVlogString(port::MutableArraySlice<T> elements) {
   return ToVlogString(port::ArraySlice<T>(elements));
 }
 
+<<<<<<< HEAD
 string ToVlogString(dnn::DepthToSpaceLayout depth_to_space_layout) {
   switch (depth_to_space_layout) {
     case dnn::DepthToSpaceLayout::DepthHeightWidth:
@@ -195,6 +259,8 @@ string ToVlogString(dnn::DataType data_type) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Used together with PARAM to VLOG calls made to the stream. Intended
 // to be used like this:
 //
@@ -211,6 +277,7 @@ string CallStr(const char *function_name, Stream *stream,
   // constructing all the strings in params is expensive.
   CHECK(VLOG_IS_ON(1));
 
+<<<<<<< HEAD
   string str = absl::StrCat(stream->DebugStreamPointers(),
                             " Called Stream::", function_name, "(");
   const char *separator = "";
@@ -222,6 +289,15 @@ string CallStr(const char *function_name, Stream *stream,
   if (VLOG_IS_ON(10)) {
     absl::StrAppend(&str, " ", port::CurrentStackTrace(), "\n");
   }
+=======
+  string str = port::StrCat("Called Stream::", function_name, "(");
+  const char *separator = "";
+  for (const auto &param : params) {
+    port::StrAppend(&str, separator, param.first, "=", param.second);
+    separator = ", ";
+  }
+  port::StrAppend(&str, ") stream=", ToVlogString(stream));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return str;
 }
 
@@ -247,8 +323,13 @@ string CallStr(const char *function_name, Stream *stream,
 }  // namespace
 
 Stream::Stream(StreamExecutor *parent)
+<<<<<<< HEAD
     : parent_(parent),
       implementation_(parent->implementation()->GetStreamImplementation()),
+=======
+    : implementation_(CreateStreamImplementation(parent)),
+      parent_(parent),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       allocated_(false),
       ok_(false),
       temporary_memory_manager_(this) {
@@ -257,8 +338,13 @@ Stream::Stream(StreamExecutor *parent)
 
 Stream::Stream(StreamExecutor *parent,
                internal::StreamInterface *implementation)
+<<<<<<< HEAD
     : parent_(parent),
       implementation_(implementation),
+=======
+    : implementation_(implementation),
+      parent_(parent),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       allocated_(false),
       ok_(false),
       temporary_memory_manager_(this) {
@@ -268,6 +354,7 @@ Stream::Stream(StreamExecutor *parent,
 Stream::~Stream() {
   VLOG_CALL();
 
+<<<<<<< HEAD
   // Ensure the stream is completed.
   auto status = BlockHostUntilDone();
   if (!status.ok()) {
@@ -276,12 +363,16 @@ Stream::~Stream() {
   }
   temporary_memory_manager_.ForceDeallocateAll();
   RunAfterBlockHostUntilDoneCallbacks();
+=======
+  temporary_memory_manager_.ForceDeallocateAll();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   if (allocated_) {
     parent_->DeallocateStream(this);
   }
 }
 
+<<<<<<< HEAD
 port::Status Stream::RefreshStatus() {
   port::Status status = parent_->GetStatus(this);
   CheckStatus(status);
@@ -292,6 +383,12 @@ Stream &Stream::Init() {
   VLOG_CALL();
 
   absl::MutexLock lock(&mu_);
+=======
+Stream &Stream::Init() {
+  VLOG_CALL();
+
+  mutex_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   CHECK_EQ(false, allocated_)
       << "stream appears to already have been initialized";
   CHECK(!ok_) << "stream should be in !ok() state pre-initialization";
@@ -337,6 +434,7 @@ Stream &Stream::ThenRecordEvent(Event *event) {
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenBatchNormalizationForward(
     const DeviceMemory<float> &x, const DeviceMemory<float> &scale,
     const DeviceMemory<float> &offset,
@@ -524,11 +622,37 @@ Stream &Stream::ThenFusedConvolveWithAlgorithm(
       }
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenConvolve(
+    const dnn::BatchDescriptor &batch_descriptor,
+    const DeviceMemory<float> &input_data,
+    const dnn::FilterDescriptor &filter_descriptor,
+    const DeviceMemory<float> &filter_data,
+    const dnn::ConvolutionDescriptor &convolution_descriptor,
+    const dnn::BatchDescriptor &output_descriptor,
+    DeviceMemory<float> *output) {
+  VLOG_CALL(PARAM(batch_descriptor), PARAM(input_data),
+            PARAM(filter_descriptor), PARAM(filter_data),
+            PARAM(convolution_descriptor), PARAM(output_descriptor),
+            PARAM(output));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(dnn->DoConvolve(
+          this, batch_descriptor, input_data, filter_descriptor, filter_data,
+          convolution_descriptor, output_descriptor, output));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenFusedConvolveWithAlgorithm(
     const dnn::BatchDescriptor &conv_input_descriptor,
     const DeviceMemory<Eigen::half> &conv_input_data, float conv_input_scale,
@@ -563,11 +687,39 @@ Stream &Stream::ThenFusedConvolveWithAlgorithm(
       }
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenSeparableConvolve(
+    const dnn::BatchDescriptor &batch_descriptor,
+    const DeviceMemory<float> &input_data,
+    const dnn::FilterDescriptor &filter_descriptor, int depth_multiplier,
+    const DeviceMemory<float> &first_weights,
+    const DeviceMemory<float> &second_weights,
+    const dnn::ConvolutionDescriptor &convolution_descriptor,
+    const dnn::BatchDescriptor &output_descriptor,
+    DeviceMemory<float> *output) {
+  VLOG_CALL(
+      PARAM(batch_descriptor), PARAM(input_data), PARAM(filter_descriptor),
+      PARAM(depth_multiplier), PARAM(first_weights), PARAM(second_weights),
+      PARAM(convolution_descriptor), PARAM(output_descriptor), PARAM(output));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(dnn->DoSeparableConvolve(
+          this, batch_descriptor, input_data, filter_descriptor,
+          depth_multiplier, first_weights, second_weights,
+          convolution_descriptor, output_descriptor, output));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenFusedConvolveWithAlgorithm(
     const dnn::BatchDescriptor &conv_input_descriptor,
     const DeviceMemory<int8> &conv_input_data, float conv_input_scale,
@@ -601,11 +753,38 @@ Stream &Stream::ThenFusedConvolveWithAlgorithm(
       }
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenConvolveBackwardData(
+    const dnn::FilterDescriptor &filter_descriptor,
+    const DeviceMemory<float> &filter_data,
+    const dnn::BatchDescriptor &output_descriptor,
+    DeviceMemory<float> backward_output_data,
+    const dnn::ConvolutionDescriptor &convolution_descriptor,
+    const dnn::BatchDescriptor &input_descriptor,
+    DeviceMemory<float> *backward_input_data) {
+  VLOG_CALL(PARAM(filter_descriptor), PARAM(filter_data),
+            PARAM(output_descriptor), PARAM(backward_output_data),
+            PARAM(convolution_descriptor), PARAM(input_descriptor),
+            PARAM(backward_input_data));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(dnn->DoConvolveBackwardData(
+          this, filter_descriptor, filter_data, output_descriptor,
+          backward_output_data, convolution_descriptor, input_descriptor,
+          backward_input_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenFusedConvolveWithAlgorithm(
     const dnn::BatchDescriptor &conv_input_descriptor,
     const DeviceMemory<int8> &conv_input_data, float conv_input_scale,
@@ -639,11 +818,38 @@ Stream &Stream::ThenFusedConvolveWithAlgorithm(
       }
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenConvolveBackwardFilter(
+    const dnn::BatchDescriptor &input_descriptor,
+    const DeviceMemory<float> &input_data,
+    const dnn::BatchDescriptor &output_descriptor,
+    DeviceMemory<float> backward_output_data,
+    const dnn::ConvolutionDescriptor &convolution_descriptor,
+    const dnn::FilterDescriptor &filter_descriptor,
+    DeviceMemory<float> *backward_filter_data) {
+  VLOG_CALL(PARAM(input_descriptor), PARAM(input_data),
+            PARAM(output_descriptor), PARAM(backward_output_data),
+            PARAM(convolution_descriptor), PARAM(filter_descriptor),
+            PARAM(backward_filter_data));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(dnn->DoConvolveBackwardFilter(
+          this, input_descriptor, input_data, output_descriptor,
+          backward_output_data, convolution_descriptor, filter_descriptor,
+          backward_filter_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenConvolveWithAlgorithm(
     const dnn::BatchDescriptor &input_descriptor,
     const DeviceMemory<double> &input_data,
@@ -681,11 +887,31 @@ Stream &Stream::ThenConvolveWithAlgorithm(
       }
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenMatMul(const DeviceMemory<float> &input_data,
+                           const DeviceMemory<float> &weights,
+                           const dnn::BatchDescriptor &input_dimensions,
+                           const dnn::BatchDescriptor &output_dimensions,
+                           DeviceMemory<float> *output_data) {
+  VLOG_CALL(PARAM(input_data), PARAM(weights), PARAM(input_dimensions),
+            PARAM(output_dimensions), PARAM(output_data));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(dnn->DoMatMul(this, input_data, weights, input_dimensions,
+                               output_dimensions, output_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenConvolveWithAlgorithm(
     const dnn::BatchDescriptor &input_descriptor,
     const DeviceMemory<float> &input_data,
@@ -723,11 +949,34 @@ Stream &Stream::ThenConvolveWithAlgorithm(
       }
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenMatMulQuantized(
+    const DeviceMemory<float> &input_data, const DeviceMemory<int8> &weights,
+    const DeviceMemory<float> &weight_scales,
+    const dnn::BatchDescriptor &input_dimensions,
+    const dnn::BatchDescriptor &output_dimensions,
+    DeviceMemory<float> *output_data) {
+  VLOG_CALL(PARAM(input_data), PARAM(weights), PARAM(weight_scales),
+            PARAM(input_dimensions), PARAM(output_dimensions),
+            PARAM(output_data));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(dnn->DoMatMulQuantized(this, input_data, weights,
+                                        weight_scales, input_dimensions,
+                                        output_dimensions, output_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenConvolveWithAlgorithm(
     const dnn::BatchDescriptor &input_descriptor,
     const DeviceMemory<Eigen::half> &input_data,
@@ -765,11 +1014,34 @@ Stream &Stream::ThenConvolveWithAlgorithm(
       }
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenMatMulQuantized(
+    const DeviceMemory<float> &input_data, const DeviceMemory<int16> &weights,
+    const DeviceMemory<float> &weight_scales,
+    const dnn::BatchDescriptor &input_dimensions,
+    const dnn::BatchDescriptor &output_dimensions,
+    DeviceMemory<float> *output_data) {
+  VLOG_CALL(PARAM(input_data), PARAM(weights), PARAM(weight_scales),
+            PARAM(input_dimensions), PARAM(output_dimensions),
+            PARAM(output_data));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(dnn->DoMatMulQuantized(this, input_data, weights,
+                                        weight_scales, input_dimensions,
+                                        output_dimensions, output_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenConvolveWithAlgorithm(
     const dnn::BatchDescriptor &input_descriptor,
     const DeviceMemory<int8> &input_data,
@@ -807,11 +1079,30 @@ Stream &Stream::ThenConvolveWithAlgorithm(
       }
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenBiasAdd(const DeviceMemory<float> &input_data,
+                            const DeviceMemory<float> &biases,
+                            const dnn::BatchDescriptor &dimensions,
+                            DeviceMemory<float> *output_data) {
+  VLOG_CALL(PARAM(input_data), PARAM(biases), PARAM(dimensions),
+            PARAM(output_data));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(
+          dnn->DoBiasAdd(this, input_data, biases, dimensions, output_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenConvolveWithAlgorithm(
     const dnn::BatchDescriptor &input_descriptor,
     const DeviceMemory<int8> &input_data,
@@ -849,11 +1140,33 @@ Stream &Stream::ThenConvolveWithAlgorithm(
       }
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenPoolForward(
+    const dnn::PoolingDescriptor &pooling_dimensions,
+    const dnn::BatchDescriptor &input_dimensions,
+    const DeviceMemory<float> &input_data,
+    const dnn::BatchDescriptor &output_dimensions,
+    DeviceMemory<float> *output_data) {
+  VLOG_CALL(PARAM(pooling_dimensions), PARAM(input_dimensions),
+            PARAM(input_data), PARAM(output_dimensions), PARAM(output_data));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(dnn->DoPoolForward(this, pooling_dimensions, input_dimensions,
+                                    input_data, output_dimensions,
+                                    output_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenConvolve(
     const dnn::BatchDescriptor &input_descriptor,
     const DeviceMemory<float> &input_data,
@@ -1480,20 +1793,33 @@ Stream &Stream::ThenPoolBackward(
 Stream &Stream::ThenPoolBackward(
     const dnn::PoolingDescriptor &pooling_dimensions,
     const dnn::BatchDescriptor &input_dimensions,
+=======
+Stream &Stream::ThenPoolBackward(
+    const dnn::PoolingDescriptor &pooling_dimensions,
+    const dnn::BatchDescriptor &input_dimensions,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     const DeviceMemory<float> &input_data,
     const dnn::BatchDescriptor &output_dimensions,
     const DeviceMemory<float> &output_data,
     const DeviceMemory<float> &input_diff_data,
+<<<<<<< HEAD
     DeviceMemory<float> *output_diff_data,
     ScratchAllocator *workspace_allocator) {
   VLOG_CALL(PARAM(pooling_dimensions), PARAM(input_dimensions),
             PARAM(input_data), PARAM(output_dimensions), PARAM(output_data),
             PARAM(input_diff_data), PARAM(output_diff_data),
             PARAM(workspace_allocator));
+=======
+    DeviceMemory<float> *output_diff_data) {
+  VLOG_CALL(PARAM(pooling_dimensions), PARAM(input_dimensions),
+            PARAM(input_data), PARAM(output_dimensions), PARAM(output_data),
+            PARAM(input_diff_data), PARAM(output_diff_data));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   if (ok()) {
     if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
       CheckError(dnn->DoPoolBackward(this, pooling_dimensions, input_dimensions,
+<<<<<<< HEAD
                                      input_data, output_dimensions, output_data,
                                      input_diff_data, output_diff_data,
                                      workspace_allocator));
@@ -1690,11 +2016,21 @@ Stream &Stream::ThenReshape(const dnn::BatchDescriptor &input_dimensions,
                                 output_dimensions, output_data));
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+                                     input_data, output_dimensions, output_data,
+                                     input_diff_data, output_diff_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenDepthToSpace(
     const dnn::BatchDescriptor &input_dimensions,
     const DeviceMemory<float> &input_data,
@@ -1711,11 +2047,28 @@ Stream &Stream::ThenDepthToSpace(
                                      sqrt_depth_reduction, output_data));
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenNormalize(
+    const dnn::NormalizeDescriptor &normalize_descriptor,
+    const DeviceMemory<float> &input_data, DeviceMemory<float> *output_data) {
+  VLOG_CALL(PARAM(normalize_descriptor), PARAM(input_data), PARAM(output_data));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(dnn->DoNormalize(this, normalize_descriptor, input_data,
+                                  output_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenSpaceToDepth(
     const dnn::BatchDescriptor &input_dimensions,
     const DeviceMemory<float> &input_data,
@@ -1723,20 +2076,38 @@ Stream &Stream::ThenSpaceToDepth(
     const int sqrt_depth_increase, DeviceMemory<float> *output_data) {
   VLOG_CALL(PARAM(input_dimensions), PARAM(input_data),
             PARAM(space_to_depth_layout), PARAM(sqrt_depth_increase),
+=======
+Stream &Stream::ThenActivate(dnn::ActivationMode activation_mode,
+                             const dnn::BatchDescriptor &dimensions,
+                             const DeviceMemory<float> &input_data,
+                             DeviceMemory<float> *output_data) {
+  VLOG_CALL(PARAM(activation_mode), PARAM(dimensions), PARAM(input_data),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             PARAM(output_data));
 
   if (ok()) {
     if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+<<<<<<< HEAD
       CheckError(dnn->DoSpaceToDepth(this, input_dimensions, input_data,
                                      space_to_depth_layout, sqrt_depth_increase,
                                      output_data));
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+      CheckError(dnn->DoActivate(this, activation_mode, dimensions, input_data,
+                                 output_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenElementwiseOperate(
     dnn::ElementwiseOperation operation,
     port::ArraySlice<dnn::BatchDescriptor> input_dimensions,
@@ -1753,24 +2124,51 @@ Stream &Stream::ThenElementwiseOperate(
                                            output_data));
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenDepthConcatenate(
+    port::ArraySlice<dnn::BatchDescriptor> input_dimensions,
+    port::ArraySlice<const DeviceMemory<float> *> input_data,
+    DeviceMemory<float> *output_data) {
+  VLOG_CALL(PARAM(input_dimensions), PARAM(input_data), PARAM(output_data));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(dnn->DoDepthConcatenate(this, input_dimensions, input_data,
+                                         output_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenElementwiseOperateScaledQuantized(
     dnn::ElementwiseOperation operation,
     port::ArraySlice<int> input_multiplicands, int output_divisor,
+=======
+Stream &Stream::ThenElementwiseOperate(
+    dnn::ElementwiseOperation operation,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     port::ArraySlice<dnn::BatchDescriptor> input_dimensions,
     port::ArraySlice<const DeviceMemory<float> *> input_data,
     const dnn::BatchDescriptor &output_dimensions,
     DeviceMemory<float> *output_data) {
+<<<<<<< HEAD
   VLOG_CALL(PARAM(operation), PARAM(input_multiplicands), PARAM(output_divisor),
             PARAM(input_dimensions), PARAM(input_data),
+=======
+  VLOG_CALL(PARAM(operation), PARAM(input_dimensions), PARAM(input_data),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             PARAM(output_dimensions), PARAM(output_data));
 
   if (ok()) {
     if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+<<<<<<< HEAD
       CheckError(dnn->DoElementwiseOperateScaledQuantized(
           this, operation, input_multiplicands, output_divisor,
           input_dimensions, input_data, output_dimensions, output_data));
@@ -1795,11 +2193,22 @@ Stream &Stream::ThenXYPad(const dnn::BatchDescriptor &dimensions,
                               top_pad, bottom_pad, output_data));
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+      CheckError(dnn->DoElementwiseOperate(this, operation, input_dimensions,
+                                           input_data, output_dimensions,
+                                           output_data));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenXYSlice(const dnn::BatchDescriptor &dimensions,
                             const DeviceMemory<float> &input_data,
                             int64 left_trim, int64 right_trim, int64 top_trim,
@@ -1816,11 +2225,28 @@ Stream &Stream::ThenXYSlice(const dnn::BatchDescriptor &dimensions,
                                 output_data));
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenMemcpyD2HQuantized(
+    const DeviceMemory<float> &gpu_unquantized_src,
+    port::MutableArraySlice<uint8> host_dst) {
+  VLOG_CALL(PARAM(gpu_unquantized_src), PARAM(host_dst));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(
+          dnn->DoMemcpyD2HQuantized(this, gpu_unquantized_src, host_dst));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenXYBroadcast(const dnn::BatchDescriptor &dimensions,
                                 const DeviceMemory<float> &input_data,
                                 int64 replicate_x, int64 replicate_y,
@@ -1834,6 +2260,22 @@ Stream &Stream::ThenXYBroadcast(const dnn::BatchDescriptor &dimensions,
                                     replicate_y, output_data));
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+Stream &Stream::ThenMemcpyD2HQuantized(
+    const DeviceMemory<float> &gpu_unquantized_src,
+    port::MutableArraySlice<uint16> host_dst) {
+  VLOG_CALL(PARAM(gpu_unquantized_src), PARAM(host_dst));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(
+          dnn->DoMemcpyD2HQuantized(this, gpu_unquantized_src, host_dst));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -1841,6 +2283,7 @@ Stream &Stream::ThenXYBroadcast(const dnn::BatchDescriptor &dimensions,
 
 Stream &Stream::ThenMemcpyD2HQuantized(
     const DeviceMemory<float> &gpu_unquantized_src,
+<<<<<<< HEAD
     dnn::QuantizedActivationMode mode, void *host_dst, uint64 size) {
   VLOG_CALL(PARAM(gpu_unquantized_src), PARAM(mode), PARAM(host_dst),
             PARAM(size));
@@ -1851,12 +2294,27 @@ Stream &Stream::ThenMemcpyD2HQuantized(
                                            host_dst, size));
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+    port::MutableArraySlice<int32> host_dst) {
+  VLOG_CALL(PARAM(gpu_unquantized_src), PARAM(host_dst));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(
+          dnn->DoMemcpyD2HQuantized(this, gpu_unquantized_src, host_dst));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
 Stream &Stream::ThenMemcpyH2DQuantized(
+<<<<<<< HEAD
     const void *host_src, uint64 size, dnn::QuantizedActivationMode mode,
     DeviceMemory<float> *gpu_unquantized_dst) {
   VLOG_CALL(PARAM(host_src), PARAM(size), PARAM(mode),
@@ -1868,12 +2326,28 @@ Stream &Stream::ThenMemcpyH2DQuantized(
                                            gpu_unquantized_dst));
     } else {
       SetErrorAndLogNoDnnSupport();
+=======
+    port::ArraySlice<uint8> host_src,
+    DeviceMemory<float> *gpu_unquantized_dst) {
+  VLOG_CALL(PARAM(host_src), PARAM(gpu_unquantized_dst));
+
+  if (ok()) {
+    if (dnn::DnnSupport *dnn = parent_->AsDnn()) {
+      CheckError(
+          dnn->DoMemcpyH2DQuantized(this, host_src, gpu_unquantized_dst));
+    } else {
+      SetError();
+      LOG(WARNING)
+          << "attempting to perform DNN operation using StreamExecutor "
+             "without DNN support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
 }
 
 Stream *Stream::GetOrCreateSubStream() {
+<<<<<<< HEAD
   absl::MutexLock lock(&mu_);
 
   // Look for the first reusable sub_stream that is ok, dropping !ok sub_streams
@@ -1907,20 +2381,34 @@ Stream *Stream::GetOrCreateSubStream() {
   }
 
   // No streams are reusable; create a new stream.
+=======
+  mutex_lock lock{mu_};
+  for (auto &stream : sub_streams_) {
+    if (stream.second) {
+      stream.second = false;
+      return stream.first.get();
+    }
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   sub_streams_.emplace_back(std::unique_ptr<Stream>{new Stream{parent_}},
                             false);
   Stream *sub_stream = sub_streams_.back().first.get();
   sub_stream->Init();
+<<<<<<< HEAD
   if (!sub_stream->ok_) {
     LOG(ERROR) << "sub-stream failed to be initialized";
   }
   VLOG(1) << DebugStreamPointers() << " created new sub_stream "
           << sub_stream->DebugStreamPointers();
+=======
+  CHECK(ok_) << "sub-stream failed to be initialized";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   return sub_stream;
 }
 
 void Stream::ReturnSubStream(Stream *sub_stream) {
+<<<<<<< HEAD
   absl::MutexLock lock(&mu_);
 
   // Look for the sub-stream.
@@ -1953,6 +2441,16 @@ void Stream::ReturnSubStream(Stream *sub_stream) {
   LOG(FATAL) << DebugStreamPointers()
              << " did not create the returned sub-stream "
              << sub_stream->DebugStreamPointers();
+=======
+  mutex_lock lock{mu_};
+  for (auto &stream : sub_streams_) {
+    if (stream.first.get() == sub_stream) {
+      stream.second = true;
+      return;
+    }
+  }
+  LOG(FATAL) << "the sub-stream to be returned is not created by this stream";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Stream &Stream::ThenStartTimer(Timer *t) {
@@ -1961,8 +2459,12 @@ Stream &Stream::ThenStartTimer(Timer *t) {
   if (ok()) {
     CheckError(parent_->StartTimer(this, t));
   } else {
+<<<<<<< HEAD
     LOG(INFO) << DebugStreamPointers()
               << " did not enqueue 'start timer': " << t;
+=======
+    LOG(INFO) << "stream " << this << " did not enqueue 'start timer': " << t;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return *this;
 }
@@ -1973,8 +2475,12 @@ Stream &Stream::ThenStopTimer(Timer *t) {
   if (ok()) {
     CheckError(parent_->StopTimer(this, t));
   } else {
+<<<<<<< HEAD
     LOG(INFO) << DebugStreamPointers()
               << " did not enqueue 'stop timer': " << t;
+=======
+    LOG(INFO) << "stream " << this << " did not enqueue 'stop timer': " << t;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return *this;
 }
@@ -1987,8 +2493,22 @@ Stream &Stream::ThenWaitFor(Stream *other) {
     CheckError(parent_->CreateStreamDependency(this, other));
   } else {
     SetError();
+<<<<<<< HEAD
     LOG(INFO) << DebugStreamPointers() << " did not wait for "
               << other->DebugStreamPointers();
+=======
+    LOG(INFO) << "stream " << this << " did not wait for stream: " << other;
+  }
+  return *this;
+}
+
+Stream &Stream::ThenWaitFor(std::vector<std::unique_ptr<Stream>> *others) {
+  VLOG_CALL(PARAM(others));
+
+  for (auto &stream : *others) {
+    CHECK_NE(stream.get(), this);
+    ThenWaitFor(stream.get());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return *this;
 }
@@ -2005,7 +2525,11 @@ Stream &Stream::ThenWaitFor(Event *event) {
                  << "at fault. Monitor for further errors.";
     }
   } else {
+<<<<<<< HEAD
     LOG(INFO) << DebugStreamPointers() << " did not wait for an event.";
+=======
+    LOG(INFO) << "stream " << this << " did not wait for an event.";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return *this;
 }
@@ -2018,6 +2542,7 @@ struct ThenBlasImpl {
   // arguments except the first one of Stream* type.
   Stream &operator()(Stream *stream,
                      bool (blas::BlasSupport::*blas_func)(Stream *, Args...),
+<<<<<<< HEAD
                      Args... args) {
     return Run(stream, blas_func, /*record_error=*/true, args...);
   }
@@ -2045,6 +2570,23 @@ Stream &ThenBlasImpl<Args...>::Run(
     }
     if (record_error) {
       stream->CheckError(ok);
+=======
+                     Args... args);
+};
+
+template <typename... Args>
+Stream &ThenBlasImpl<Args...>::operator()(
+    Stream *stream, bool (blas::BlasSupport::*blas_func)(Stream *, Args...),
+    Args... args) {
+  if (stream->ok()) {
+    if (blas::BlasSupport *blas = stream->parent_->AsBlas()) {
+      stream->CheckError((blas->*blas_func)(stream, args...));
+    } else {
+      stream->CheckError(false);
+      LOG(WARNING)
+          << "attempting to perform BLAS operation using StreamExecutor "
+             "without BLAS support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *stream;
@@ -3635,6 +4177,7 @@ Stream &Stream::ThenBlasTrsv(blas::UpperLower uplo, blas::Transpose trans,
 
 Stream &Stream::ThenBlasGemm(blas::Transpose transa, blas::Transpose transb,
                              uint64 m, uint64 n, uint64 k, float alpha,
+<<<<<<< HEAD
                              const DeviceMemory<Eigen::half> &a, int lda,
                              const DeviceMemory<Eigen::half> &b, int ldb,
                              float beta,
@@ -3653,6 +4196,8 @@ Stream &Stream::ThenBlasGemm(blas::Transpose transa, blas::Transpose transb,
 
 Stream &Stream::ThenBlasGemm(blas::Transpose transa, blas::Transpose transb,
                              uint64 m, uint64 n, uint64 k, float alpha,
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                              const DeviceMemory<float> &a, int lda,
                              const DeviceMemory<float> &b, int ldb, float beta,
                              DeviceMemory<float> *c, int ldc) {
@@ -3660,6 +4205,7 @@ Stream &Stream::ThenBlasGemm(blas::Transpose transa, blas::Transpose transb,
             PARAM(alpha), PARAM(a), PARAM(lda), PARAM(b), PARAM(ldb),
             PARAM(beta), PARAM(c), PARAM(ldc));
 
+<<<<<<< HEAD
   ThenBlasImpl<blas::Transpose, blas::Transpose, uint64, uint64, uint64, float,
                const DeviceMemory<float> &, int, const DeviceMemory<float> &,
                int, float, DeviceMemory<float> *, int> impl;
@@ -4070,6 +4616,71 @@ Stream &Stream::ThenBlasGemmWithAlgorithm(
   return impl(this, &blas::BlasSupport::DoBlasGemmWithAlgorithm, transa, transb,
               m, n, k, alpha, a, lda, b, ldb, beta, c, ldc, computation_type,
               algorithm, output_profile_result);
+=======
+  ThenBlasImpl<blas::Transpose, blas::Transpose, uint64, uint64, uint64, float,
+               const DeviceMemory<float> &, int, const DeviceMemory<float> &,
+               int, float, DeviceMemory<float> *, int> impl;
+  return impl(this, &blas::BlasSupport::DoBlasGemm, transa, transb, m, n, k,
+              alpha, a, lda, b, ldb, beta, c, ldc);
+}
+
+Stream &Stream::ThenBlasGemm(blas::Transpose transa, blas::Transpose transb,
+                             uint64 m, uint64 n, uint64 k, double alpha,
+                             const DeviceMemory<double> &a, int lda,
+                             const DeviceMemory<double> &b, int ldb,
+                             double beta, DeviceMemory<double> *c, int ldc) {
+  VLOG_CALL(PARAM(transa), PARAM(transb), PARAM(m), PARAM(n), PARAM(k),
+            PARAM(alpha), PARAM(a), PARAM(lda), PARAM(b), PARAM(ldb),
+            PARAM(beta), PARAM(c), PARAM(ldc));
+
+  ThenBlasImpl<blas::Transpose, blas::Transpose, uint64, uint64, uint64, double,
+               const DeviceMemory<double> &, int, const DeviceMemory<double> &,
+               int, double, DeviceMemory<double> *, int> impl;
+  return impl(this, &blas::BlasSupport::DoBlasGemm, transa, transb, m, n, k,
+              alpha, a, lda, b, ldb, beta, c, ldc);
+}
+
+Stream &Stream::ThenBlasGemm(blas::Transpose transa, blas::Transpose transb,
+                             uint64 m, uint64 n, uint64 k,
+                             std::complex<float> alpha,
+                             const DeviceMemory<std::complex<float>> &a,
+                             int lda,
+                             const DeviceMemory<std::complex<float>> &b,
+                             int ldb, std::complex<float> beta,
+                             DeviceMemory<std::complex<float>> *c, int ldc) {
+  VLOG_CALL(PARAM(transa), PARAM(transb), PARAM(m), PARAM(n), PARAM(k),
+            PARAM(alpha), PARAM(a), PARAM(lda), PARAM(b), PARAM(ldb),
+            PARAM(beta), PARAM(c), PARAM(ldc));
+
+  ThenBlasImpl<blas::Transpose, blas::Transpose, uint64, uint64, uint64,
+               std::complex<float>, const DeviceMemory<std::complex<float>> &,
+               int, const DeviceMemory<std::complex<float>> &, int,
+               std::complex<float>, DeviceMemory<std::complex<float>> *,
+               int> impl;
+  return impl(this, &blas::BlasSupport::DoBlasGemm, transa, transb, m, n, k,
+              alpha, a, lda, b, ldb, beta, c, ldc);
+}
+
+Stream &Stream::ThenBlasGemm(blas::Transpose transa, blas::Transpose transb,
+                             uint64 m, uint64 n, uint64 k,
+                             std::complex<double> alpha,
+                             const DeviceMemory<std::complex<double>> &a,
+                             int lda,
+                             const DeviceMemory<std::complex<double>> &b,
+                             int ldb, std::complex<double> beta,
+                             DeviceMemory<std::complex<double>> *c, int ldc) {
+  VLOG_CALL(PARAM(transa), PARAM(transb), PARAM(m), PARAM(n), PARAM(k),
+            PARAM(alpha), PARAM(a), PARAM(lda), PARAM(b), PARAM(ldb),
+            PARAM(beta), PARAM(c), PARAM(ldc));
+
+  ThenBlasImpl<blas::Transpose, blas::Transpose, uint64, uint64, uint64,
+               std::complex<double>, const DeviceMemory<std::complex<double>> &,
+               int, const DeviceMemory<std::complex<double>> &, int,
+               std::complex<double>, DeviceMemory<std::complex<double>> *,
+               int> impl;
+  return impl(this, &blas::BlasSupport::DoBlasGemm, transa, transb, m, n, k,
+              alpha, a, lda, b, ldb, beta, c, ldc);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Stream &Stream::ThenBlasHemm(blas::Side side, blas::UpperLower uplo, uint64 m,
@@ -4514,6 +5125,7 @@ Stream &Stream::ThenBlasTrsm(blas::Side side, blas::UpperLower uplo,
 
 Stream &Stream::ThenBlasGemmBatched(
     blas::Transpose transa, blas::Transpose transb, uint64 m, uint64 n,
+<<<<<<< HEAD
     uint64 k, float alpha,
     const port::ArraySlice<DeviceMemory<Eigen::half> *> &a, int lda,
     const port::ArraySlice<DeviceMemory<Eigen::half> *> &b, int ldb, float beta,
@@ -4548,10 +5160,13 @@ Stream &Stream::ThenBlasGemmBatchedWithScratch(
 
 Stream &Stream::ThenBlasGemmBatched(
     blas::Transpose transa, blas::Transpose transb, uint64 m, uint64 n,
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     uint64 k, float alpha, const port::ArraySlice<DeviceMemory<float> *> &a,
     int lda, const port::ArraySlice<DeviceMemory<float> *> &b, int ldb,
     float beta, const port::ArraySlice<DeviceMemory<float> *> &c, int ldc,
     int batch_count) {
+<<<<<<< HEAD
   return ThenBlasGemmBatchedWithScratch(transa, transb, m, n, k, alpha, a, lda,
                                         b, ldb, beta, c, ldc, batch_count,
                                         /*scratch_allocator=*/nullptr);
@@ -4563,6 +5178,8 @@ Stream &Stream::ThenBlasGemmBatchedWithScratch(
     int lda, const port::ArraySlice<DeviceMemory<float> *> &b, int ldb,
     float beta, const port::ArraySlice<DeviceMemory<float> *> &c, int ldc,
     int batch_count, ScratchAllocator *scratch_allocator) {
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   VLOG_CALL(PARAM(transa), PARAM(transb), PARAM(m), PARAM(n), PARAM(k),
             PARAM(alpha), PARAM(a), PARAM(lda), PARAM(b), PARAM(ldb),
             PARAM(beta), PARAM(c), PARAM(ldc), PARAM(batch_count));
@@ -4570,12 +5187,18 @@ Stream &Stream::ThenBlasGemmBatchedWithScratch(
   ThenBlasImpl<blas::Transpose, blas::Transpose, uint64, uint64, uint64, float,
                const port::ArraySlice<DeviceMemory<float> *> &, int,
                const port::ArraySlice<DeviceMemory<float> *> &, int, float,
+<<<<<<< HEAD
                const port::ArraySlice<DeviceMemory<float> *> &, int, int,
                ScratchAllocator *>
       impl;
   return impl(this, &blas::BlasSupport::DoBlasGemmBatched, transa, transb, m, n,
               k, alpha, a, lda, b, ldb, beta, c, ldc, batch_count,
               scratch_allocator);
+=======
+               const port::ArraySlice<DeviceMemory<float> *> &, int, int> impl;
+  return impl(this, &blas::BlasSupport::DoBlasGemmBatched, transa, transb, m, n,
+              k, alpha, a, lda, b, ldb, beta, c, ldc, batch_count);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Stream &Stream::ThenBlasGemmBatched(
@@ -4584,6 +5207,7 @@ Stream &Stream::ThenBlasGemmBatched(
     int lda, const port::ArraySlice<DeviceMemory<double> *> &b, int ldb,
     double beta, const port::ArraySlice<DeviceMemory<double> *> &c, int ldc,
     int batch_count) {
+<<<<<<< HEAD
   return ThenBlasGemmBatchedWithScratch(transa, transb, m, n, k, alpha, a, lda,
                                         b, ldb, beta, c, ldc, batch_count,
                                         /*scratch_allocator=*/nullptr);
@@ -4595,6 +5219,8 @@ Stream &Stream::ThenBlasGemmBatchedWithScratch(
     int lda, const port::ArraySlice<DeviceMemory<double> *> &b, int ldb,
     double beta, const port::ArraySlice<DeviceMemory<double> *> &c, int ldc,
     int batch_count, ScratchAllocator *scratch_allocator) {
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   VLOG_CALL(PARAM(transa), PARAM(transb), PARAM(m), PARAM(n), PARAM(k),
             PARAM(alpha), PARAM(a), PARAM(lda), PARAM(b), PARAM(ldb),
             PARAM(beta), PARAM(c), PARAM(ldc), PARAM(batch_count));
@@ -4602,12 +5228,18 @@ Stream &Stream::ThenBlasGemmBatchedWithScratch(
   ThenBlasImpl<blas::Transpose, blas::Transpose, uint64, uint64, uint64, double,
                const port::ArraySlice<DeviceMemory<double> *> &, int,
                const port::ArraySlice<DeviceMemory<double> *> &, int, double,
+<<<<<<< HEAD
                const port::ArraySlice<DeviceMemory<double> *> &, int, int,
                ScratchAllocator *>
       impl;
   return impl(this, &blas::BlasSupport::DoBlasGemmBatched, transa, transb, m, n,
               k, alpha, a, lda, b, ldb, beta, c, ldc, batch_count,
               scratch_allocator);
+=======
+               const port::ArraySlice<DeviceMemory<double> *> &, int, int> impl;
+  return impl(this, &blas::BlasSupport::DoBlasGemmBatched, transa, transb, m, n,
+              k, alpha, a, lda, b, ldb, beta, c, ldc, batch_count);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Stream &Stream::ThenBlasGemmBatched(
@@ -4618,6 +5250,7 @@ Stream &Stream::ThenBlasGemmBatched(
     std::complex<float> beta,
     const port::ArraySlice<DeviceMemory<std::complex<float>> *> &c, int ldc,
     int batch_count) {
+<<<<<<< HEAD
   return ThenBlasGemmBatchedWithScratch(transa, transb, m, n, k, alpha, a, lda,
                                         b, ldb, beta, c, ldc, batch_count,
                                         /*scratch_allocator=*/nullptr);
@@ -4631,6 +5264,8 @@ Stream &Stream::ThenBlasGemmBatchedWithScratch(
     std::complex<float> beta,
     const port::ArraySlice<DeviceMemory<std::complex<float>> *> &c, int ldc,
     int batch_count, ScratchAllocator *scratch_allocator) {
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   VLOG_CALL(PARAM(transa), PARAM(transb), PARAM(m), PARAM(n), PARAM(k),
             PARAM(alpha), PARAM(a), PARAM(lda), PARAM(b), PARAM(ldb),
             PARAM(beta), PARAM(c), PARAM(ldc), PARAM(batch_count));
@@ -4642,11 +5277,17 @@ Stream &Stream::ThenBlasGemmBatchedWithScratch(
                const port::ArraySlice<DeviceMemory<std::complex<float>> *> &,
                int, std::complex<float>,
                const port::ArraySlice<DeviceMemory<std::complex<float>> *> &,
+<<<<<<< HEAD
                int, int, ScratchAllocator *>
       impl;
   return impl(this, &blas::BlasSupport::DoBlasGemmBatched, transa, transb, m, n,
               k, alpha, a, lda, b, ldb, beta, c, ldc, batch_count,
               scratch_allocator);
+=======
+               int, int> impl;
+  return impl(this, &blas::BlasSupport::DoBlasGemmBatched, transa, transb, m, n,
+              k, alpha, a, lda, b, ldb, beta, c, ldc, batch_count);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Stream &Stream::ThenBlasGemmBatched(
@@ -4657,6 +5298,7 @@ Stream &Stream::ThenBlasGemmBatched(
     std::complex<double> beta,
     const port::ArraySlice<DeviceMemory<std::complex<double>> *> &c, int ldc,
     int batch_count) {
+<<<<<<< HEAD
   return ThenBlasGemmBatchedWithScratch(transa, transb, m, n, k, alpha, a, lda,
                                         b, ldb, beta, c, ldc, batch_count,
                                         /*scratch_allocator=*/nullptr);
@@ -4670,6 +5312,8 @@ Stream &Stream::ThenBlasGemmBatchedWithScratch(
     std::complex<double> beta,
     const port::ArraySlice<DeviceMemory<std::complex<double>> *> &c, int ldc,
     int batch_count, ScratchAllocator *scratch_allocator) {
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   VLOG_CALL(PARAM(transa), PARAM(transb), PARAM(m), PARAM(n), PARAM(k),
             PARAM(alpha), PARAM(a), PARAM(lda), PARAM(b), PARAM(ldb),
             PARAM(beta), PARAM(c), PARAM(ldc), PARAM(batch_count));
@@ -4681,6 +5325,7 @@ Stream &Stream::ThenBlasGemmBatchedWithScratch(
                const port::ArraySlice<DeviceMemory<std::complex<double>> *> &,
                int, std::complex<double>,
                const port::ArraySlice<DeviceMemory<std::complex<double>> *> &,
+<<<<<<< HEAD
                int, int, ScratchAllocator *>
       impl;
   return impl(this, &blas::BlasSupport::DoBlasGemmBatched, transa, transb, m, n,
@@ -4795,6 +5440,11 @@ Stream &Stream::ThenBlasGemmStridedBatched(
   return impl(this, &blas::BlasSupport::DoBlasGemmStridedBatched, transa,
               transb, m, n, k, alpha, a, lda, stride_a, b, ldb, stride_b, beta,
               c, ldc, stride_c, batch_count);
+=======
+               int, int> impl;
+  return impl(this, &blas::BlasSupport::DoBlasGemmBatched, transa, transb, m, n,
+              k, alpha, a, lda, b, ldb, beta, c, ldc, batch_count);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Stream &Stream::ThenSetRngSeed(const uint8 *seed, uint64 seed_bytes) {
@@ -4805,10 +5455,17 @@ Stream &Stream::ThenSetRngSeed(const uint8 *seed, uint64 seed_bytes) {
       CheckError(rng->SetSeed(this, seed, seed_bytes));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers() << " unable to initialize RNG";
     }
   } else {
     LOG(INFO) << DebugStreamPointers()
+=======
+      LOG(INFO) << "stream " << this << " unable to initialize RNG";
+    }
+  } else {
+    LOG(INFO) << "stream " << this
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               << " did not set RNG seed: " << static_cast<const void *>(seed)
               << "; bytes: " << seed_bytes;
   }
@@ -4823,9 +5480,14 @@ Stream &Stream::ThenPopulateRandUniform(DeviceMemory<float> *values) {
       CheckError(rng->DoPopulateRandUniform(this, values));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform RNG operation using StreamExecutor"
                    " without RNG support.";
+=======
+      LOG(INFO) << "attempting to perform RNG operation using StreamExecutor "
+                   "without RNG support.";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -4840,9 +5502,14 @@ Stream &Stream::ThenPopulateRandGaussian(float mean, float sd,
       CheckError(rng->DoPopulateRandGaussian(this, mean, sd, values));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform RNG operation using StreamExecutor"
                    " without RNG support.";
+=======
+      LOG(INFO) << "attempting to perform RNG operation using StreamExecutor "
+                   "without RNG support.";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -4857,9 +5524,14 @@ Stream &Stream::ThenPopulateRandGaussian(double mean, double sd,
       CheckError(rng->DoPopulateRandGaussian(this, mean, sd, values));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform RNG operation using StreamExecutor"
                    " without RNG support.";
+=======
+      LOG(INFO) << "attempting to perform RNG operation using StreamExecutor "
+                   "without RNG support.";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -4873,9 +5545,14 @@ Stream &Stream::ThenPopulateRandUniform(DeviceMemory<double> *values) {
       CheckError(rng->DoPopulateRandUniform(this, values));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform RNG operation using StreamExecutor"
                    " without RNG support.";
+=======
+      LOG(INFO) << "attempting to perform RNG operation using StreamExecutor "
+                   "without RNG support.";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -4890,9 +5567,14 @@ Stream &Stream::ThenPopulateRandUniform(
       CheckError(rng->DoPopulateRandUniform(this, values));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform RNG operation using StreamExecutor"
                    " without RNG support.";
+=======
+      LOG(INFO) << "attempting to perform RNG operation using StreamExecutor "
+                   "without RNG support.";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -4907,9 +5589,15 @@ Stream &Stream::ThenPopulateRandUniform(
       CheckError(rng->DoPopulateRandUniform(this, values));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform RNG operation using StreamExecutor"
                    " without RNG support.";
+=======
+      LOG(INFO) << "stream " << this
+                << " attempting to perform RNG operation using StreamExecutor "
+                   "without RNG support.";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -4922,7 +5610,11 @@ Stream &Stream::ThenMemcpy(void *host_dst, const DeviceMemoryBase &gpu_src,
   if (ok()) {
     CheckError(parent_->Memcpy(this, host_dst, gpu_src, size));
   } else {
+<<<<<<< HEAD
     LOG(INFO) << DebugStreamPointers()
+=======
+    LOG(INFO) << "stream " << this
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               << " did not memcpy device-to-host; source: " << gpu_src.opaque();
   }
   return *this;
@@ -4935,7 +5627,11 @@ Stream &Stream::ThenMemcpy(DeviceMemoryBase *gpu_dst, const void *host_src,
   if (ok()) {
     CheckError(parent_->Memcpy(this, gpu_dst, host_src, size));
   } else {
+<<<<<<< HEAD
     LOG(INFO) << DebugStreamPointers()
+=======
+    LOG(INFO) << "stream " << this
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               << " did not memcpy host-to-device; source: " << host_src;
   }
   return *this;
@@ -4948,7 +5644,11 @@ Stream &Stream::ThenMemcpy(DeviceMemoryBase *gpu_dst,
   if (ok()) {
     CheckError(parent_->MemcpyDeviceToDevice(this, gpu_dst, gpu_src, size));
   } else {
+<<<<<<< HEAD
     LOG(INFO) << DebugStreamPointers()
+=======
+    LOG(INFO) << "stream " << this
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               << " did not memcpy gpu-to-gpu; source: " << &gpu_src;
   }
   return *this;
@@ -4958,28 +5658,45 @@ Stream &Stream::ThenMemZero(DeviceMemoryBase *location, uint64 size) {
   VLOG_CALL(PARAM(location), PARAM(size));
 
   if (ok()) {
+<<<<<<< HEAD
     CheckStatus(parent_->MemZero(this, location, size));
   } else {
     LOG(INFO) << DebugStreamPointers()
+=======
+    CheckError(parent_->MemZero(this, location, size));
+  } else {
+    LOG(INFO) << "stream " << this
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               << " did not memzero GPU location; source: " << location;
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenMemset32(DeviceMemoryBase *location, uint32 pattern,
+=======
+Stream &Stream::ThenMemset32(DeviceMemoryBase *location, const uint32 &pattern,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                              uint64 size) {
   VLOG_CALL(PARAM(location), PARAM(pattern), PARAM(size));
 
   if (ok()) {
+<<<<<<< HEAD
     CheckStatus(parent_->Memset32(this, location, pattern, size));
   } else {
     LOG(INFO) << DebugStreamPointers()
+=======
+    CheckError(parent_->Memset32(this, location, pattern, size));
+  } else {
+    LOG(INFO) << "stream " << this
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               << " did not memset GPU location; source: " << location
               << "; size: " << size << "; pattern: " << std::hex << pattern;
   }
   return *this;
 }
 
+<<<<<<< HEAD
 Stream &Stream::ThenRnnForward(
     const dnn::RnnDescriptor &rnn_desc,
     const dnn::RnnSequenceTensorDescriptor &input_desc,
@@ -5285,6 +6002,23 @@ Stream &Stream::ThenRunAfterNextBlockHostUntilDone(
   }
   absl::MutexLock lock(&mu_);
   after_block_host_until_done_callbacks_.push_back(std::move(callback));
+=======
+Stream &Stream::ThenDoHostCallbackForTest(std::function<void()> callback) {
+  VLOG_CALL(PARAM(callback));
+
+  return ThenDoHostCallback(callback);
+}
+
+Stream &Stream::ThenDoHostCallback(std::function<void()> callback) {
+  VLOG_CALL(PARAM(callback));
+
+  if (ok()) {
+    CheckError(parent_->HostCallback(this, callback));
+  } else {
+    LOG(INFO) << "stream " << this
+              << " was in error state before adding host callback";
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return *this;
 }
 
@@ -5298,9 +6032,14 @@ Stream &Stream::ThenFft(fft::Plan *plan,
       CheckError(fft->DoFft(this, plan, input, output));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform FFT operation using StreamExecutor"
                    " without FFT support";
+=======
+      LOG(INFO) << "attempting to perform FFT operation using StreamExecutor "
+                   "without FFT support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -5316,9 +6055,14 @@ Stream &Stream::ThenFft(fft::Plan *plan,
       CheckError(fft->DoFft(this, plan, input, output));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform FFT operation using StreamExecutor"
                    " without FFT support";
+=======
+      LOG(INFO) << "attempting to perform FFT operation using StreamExecutor "
+                   "without FFT support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -5333,9 +6077,14 @@ Stream &Stream::ThenFft(fft::Plan *plan, const DeviceMemory<float> &input,
       CheckError(fft->DoFft(this, plan, input, output));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform FFT operation using StreamExecutor"
                    " without FFT support";
+=======
+      LOG(INFO) << "attempting to perform FFT operation using StreamExecutor "
+                   "without FFT support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -5350,9 +6099,14 @@ Stream &Stream::ThenFft(fft::Plan *plan, const DeviceMemory<double> &input,
       CheckError(fft->DoFft(this, plan, input, output));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform FFT operation using StreamExecutor"
                    " without FFT support";
+=======
+      LOG(INFO) << "attempting to perform FFT operation using StreamExecutor "
+                   "without FFT support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -5368,9 +6122,14 @@ Stream &Stream::ThenFft(fft::Plan *plan,
       CheckError(fft->DoFft(this, plan, input, output));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform FFT operation using StreamExecutor"
                    " without FFT support";
+=======
+      LOG(INFO) << "attempting to perform FFT operation using StreamExecutor "
+                   "without FFT support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -5386,9 +6145,14 @@ Stream &Stream::ThenFft(fft::Plan *plan,
       CheckError(fft->DoFft(this, plan, input, output));
     } else {
       SetError();
+<<<<<<< HEAD
       LOG(INFO) << DebugStreamPointers()
                 << " attempting to perform FFT operation using StreamExecutor"
                    " without FFT support";
+=======
+      LOG(INFO) << "attempting to perform FFT operation using StreamExecutor "
+                   "without FFT support";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return *this;
@@ -5408,6 +6172,7 @@ Stream &Stream::ThenEnqueueOnBackgroundThread(
   });
 }
 
+<<<<<<< HEAD
 port::Status Stream::BlockHostUntilDone() {
   VLOG_CALL();
 
@@ -5455,3 +6220,35 @@ void Stream::CheckStatus(port::Status status) {
 }
 
 }  // namespace stream_executor
+=======
+bool Stream::BlockHostUntilDone() {
+  VLOG_CALL();
+
+  if (!ok()) {
+    LOG(INFO)
+        << "stream " << this
+        << " did not block host until done; was already in an error state";
+    return false;
+  }
+
+  {
+    // Wait until all active sub-streams have done their tasks.
+    mutex_lock lock{mu_};
+    for (auto &stream : sub_streams_) {
+      if (!stream.second) {
+        CheckError(stream.first->BlockHostUntilDone());
+        // Set this sub-stream as available.
+        stream.second = true;
+      }
+    }
+  }
+
+  temporary_memory_manager_.DeallocateFinalizedTemporaries();
+
+  CheckError(parent_->BlockHostUntilDone(this));
+  return ok();
+}
+
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

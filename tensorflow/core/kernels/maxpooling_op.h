@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +23,15 @@ limitations under the License.
 #include "tensorflow/core/framework/type_traits.h"
 #include "tensorflow/core/kernels/eigen_pooling.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_MAXPOOLING_OP_H_
+#define TENSORFLOW_KERNELS_MAXPOOLING_OP_H_
+// Functor definition for MaxPoolingOp, must be compilable by nvcc.
+
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/NeuralNetworks"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -39,6 +49,7 @@ struct SpatialMaxPooling {
   }
 };
 
+<<<<<<< HEAD
 template <typename Device>
 struct SpatialMaxPooling<Device, qint8> {
   void operator()(const Device& d, typename TTypes<qint8, 4>::Tensor output,
@@ -47,8 +58,14 @@ struct SpatialMaxPooling<Device, qint8> {
                   const Eigen::PaddingType& padding) {}
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace functor
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_MAXPOOLING_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_MAXPOOLING_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

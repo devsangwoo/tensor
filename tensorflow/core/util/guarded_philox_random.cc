@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/guarded_philox_random.h"
 #include "tensorflow/core/lib/random/random.h"
 
@@ -43,6 +46,7 @@ void GuardedPhiloxRandom::Init(int64 seed, int64 seed2) {
   initialized_ = true;
 }
 
+<<<<<<< HEAD
 void GuardedPhiloxRandom::Init(random::PhiloxRandom::ResultType counter,
                                random::PhiloxRandom::Key key) {
   CHECK(!initialized_);
@@ -51,6 +55,8 @@ void GuardedPhiloxRandom::Init(random::PhiloxRandom::ResultType counter,
   initialized_ = true;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 random::PhiloxRandom GuardedPhiloxRandom::ReserveSamples128(int64 samples) {
   CHECK(initialized_);
   mutex_lock lock(mu_);

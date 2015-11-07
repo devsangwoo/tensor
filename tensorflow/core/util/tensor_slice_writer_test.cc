@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +30,18 @@ limitations under the License.
 #include "tensorflow/core/public/version.h"
 #include "tensorflow/core/util/saved_tensor_slice_util.h"
 #include "tensorflow/core/util/tensor_slice_reader.h"
+=======
+#include "tensorflow/core/util/tensor_slice_writer.h"
+
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/lib/io/path.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/util/saved_tensor_slice_util.h"
+#include "tensorflow/core/util/tensor_slice_reader.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/platform/test.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -63,7 +76,11 @@ void ExpectIdenticalIntArrays(const T* expected, int size, const U* actual) {
 
 // Nifty routine to get the size of an array
 template <typename T, unsigned SIZE>
+<<<<<<< HEAD
 inline size_t ArraySize(const T (&v)[SIZE]) {
+=======
+inline size_t ArraySize(const T(&v)[SIZE]) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return SIZE;
 }
 
@@ -155,11 +172,14 @@ void TensorSliceWriteTestHelper::CheckEntries(const string& fname) {
     // We also expect two entries for the tensors
     EXPECT_TRUE(sts.has_meta());
     EXPECT_EQ(4, sts.meta().tensor_size());
+<<<<<<< HEAD
     // We should have written nontrivial version information
     EXPECT_LT(0, TF_CHECKPOINT_VERSION);
     EXPECT_EQ(TF_CHECKPOINT_VERSION, sts.meta().versions().producer());
     EXPECT_EQ(TF_CHECKPOINT_VERSION_MIN_CONSUMER,
               sts.meta().versions().min_consumer());
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // We don't expect any data in the first block.
     EXPECT_FALSE(sts.has_data());
     // The two tensors should be stored in the same order as they are first
@@ -269,6 +289,7 @@ void TensorSliceWriteTestHelper::CheckEntries(const string& fname) {
   }
 }
 
+<<<<<<< HEAD
 template <typename DT>
 size_t BytesPerElementHelper(DT value) {
   SavedSlice ss;
@@ -350,6 +371,8 @@ TEST(TensorSliceWriteTest, SizeErrors) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace checkpoint
 
 }  // namespace tensorflow

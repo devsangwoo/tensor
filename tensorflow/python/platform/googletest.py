@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -271,3 +272,15 @@ class StubOutForTesting(object):
     for (parent, old_child, child_name) in reversed(self.cache):
       setattr(parent, child_name, old_child)
     self.cache = []
+=======
+"""Switch between depending on googletest or unittest."""
+# pylint: disable=unused-import
+# pylint: disable=g-import-not-at-top
+# pylint: disable=wildcard-import
+import tensorflow.python.platform
+import control_imports
+if control_imports.USE_OSS and control_imports.OSS_GOOGLETEST:
+  from tensorflow.python.platform.default._googletest import *
+else:
+  from tensorflow.python.platform.google._googletest import *
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

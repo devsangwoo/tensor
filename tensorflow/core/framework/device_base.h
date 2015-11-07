@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,10 +40,36 @@ struct SyclDevice;
 namespace stream_executor {
 class Stream;
 }  // namespace stream_executor
+=======
+#ifndef TENSORFLOW_FRAMEWORK_DEVICE_BASE_H_
+#define TENSORFLOW_FRAMEWORK_DEVICE_BASE_H_
+
+#include <memory>
+#include <unordered_map>
+
+#include "tensorflow/core/framework/device_attributes.pb.h"
+#include "tensorflow/core/framework/tensor.pb.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/core/refcount.h"
+#include "tensorflow/core/public/status.h"
+
+namespace Eigen {
+class ThreadPoolDevice;
+}  // end namespace Eigen
+
+namespace perftools {
+namespace gputools {
+class Stream;
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 class Device;
+<<<<<<< HEAD
 class DeviceAttributes;
 class Env;
 class EventMgr;
@@ -50,14 +77,22 @@ class OpKernelContext;
 class ResourceMgr;
 class ScopedAllocatorMgr;
 class TensorProto;
+=======
+class Env;
+class EventMgr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace thread {
 class ThreadPool;
 }
 
+<<<<<<< HEAD
 // A wrapper for an Eigen Gpu Device that includes per-op state. The
 // class is defined even for non-GPU devices since the
 // OpKernelContext::Params structure wants to fill it in.
+=======
+// A wrapper for an Eigen Gpu Device that includes per-op state
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class PerOpGpuDevice {
  public:
   virtual ~PerOpGpuDevice() {}
@@ -69,6 +104,7 @@ class PerOpGpuDevice {
 class DeviceContext : public core::RefCounted {
  public:
   ~DeviceContext() override {}
+<<<<<<< HEAD
   virtual stream_executor::Stream* stream() const { return nullptr; }
   virtual void MaintainLifetimeOnStream(const Tensor* t,
                                         stream_executor::Stream* stream) const {
@@ -90,10 +126,26 @@ class DeviceContext : public core::RefCounted {
     done(errors::Unimplemented("Copy in same device not implemented."));
   }
 
+=======
+  virtual perftools::gputools::Stream* stream() const { return nullptr; }
+  virtual void MaintainLifetimeOnStream(
+      const Tensor* t, perftools::gputools::Stream* stream) const {}
+
+  // "cpu_tensor" is a tensor on a CPU. Copies "cpu_tensor" into
+  // "device_tensor" which is on a GPU device "device". "device_tensor"
+  // must be allocated to be of the same size as "cpu_tensor".
+  virtual void CopyCPUTensorToDevice(const Tensor* cpu_tensor, Device* device,
+                                     Tensor* device_tensor,
+                                     StatusCallback done) const {
+    done(errors::Internal("Unrecognized device type in CPU-to-device Copy"));
+  }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // "device_tensor" is a tensor on a non-CPU device.  Copies
   // device_tensor into "cpu_tensor".  "cpu_tensor" must be allocated
   // to be of the same size as "device_tensor".
   virtual void CopyDeviceTensorToCPU(const Tensor* device_tensor,
+<<<<<<< HEAD
                                      StringPiece tensor_name, Device* device,
                                      Tensor* cpu_tensor, StatusCallback done) {
     done(errors::Internal("Unrecognized device type in device-to-CPU Copy"));
@@ -111,6 +163,15 @@ class DeviceContext : public core::RefCounted {
 
 // map[i] is the DeviceContext* for the node with id i, if i < map.size().
 typedef std::vector<DeviceContext*> DeviceContextMap;
+=======
+                                     const string& tensor_name, Device* device,
+                                     Tensor* cpu_tensor, StatusCallback done) {
+    done(errors::Internal("Unrecognized device type in device-to-CPU Copy"));
+  }
+};
+
+typedef std::unordered_map<int, DeviceContext*> DeviceContextMap;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 class DeviceBase {
  public:
@@ -122,7 +183,11 @@ class DeviceBase {
   // Override this to return true for devices that require an Op's
   // compute method to save references to the temporary tensors it
   // allocates until the Op execution completes
+<<<<<<< HEAD
   virtual bool RequiresRecordingAccessedTensors() const { return false; }
+=======
+  virtual bool SaveTemporaryTensors() const { return false; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   struct CpuWorkerThreads {
     int num_threads = 0;
@@ -134,7 +199,11 @@ class DeviceBase {
     cpu_worker_threads_ = t;
   }
 
+<<<<<<< HEAD
   virtual const CpuWorkerThreads* tensorflow_cpu_worker_threads() const {
+=======
+  const CpuWorkerThreads* tensorflow_cpu_worker_threads() const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     CHECK(cpu_worker_threads_ != nullptr);
     return cpu_worker_threads_;
   }
@@ -142,6 +211,7 @@ class DeviceBase {
   // "stream" is used in special circumstances (such as the
   // constructors of Ops) where there is no available OpKernelContext.
   // "default_context" is used by OpKernelContext whenever a device does not
+<<<<<<< HEAD
   // supply a DeviceContext for an op in TryGetDeviceContext() (e.g. when only
   // using a single stream.)
   // "event_mgr" is used to delay deallocation of temporary GPU buffers.
@@ -154,6 +224,16 @@ class DeviceBase {
     DeviceContext* default_context = nullptr;
     EventMgr* event_mgr = nullptr;
     int gpu_id = -1;
+=======
+  // supply a DeviceContext for an op in FillContextMap (e.g. when only
+  // using a single stream.)
+  // "event_mgr" is used to delay deallocation of temporary GPU buffers.
+  // TODO(pbar) Work out how to move this out of DeviceBase.
+  struct GpuDeviceInfo {
+    perftools::gputools::Stream* stream;
+    DeviceContext* default_context;
+    EventMgr* event_mgr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   };
 
   // Does not take ownership.
@@ -161,6 +241,7 @@ class DeviceBase {
     gpu_device_info_ = g;
   }
 
+<<<<<<< HEAD
   virtual const GpuDeviceInfo* tensorflow_gpu_device_info() const {
     return gpu_device_info_;
   }
@@ -177,11 +258,22 @@ class DeviceBase {
 #ifdef TENSORFLOW_USE_SYCL
   void set_eigen_sycl_device(Eigen::SyclDevice* d) { eigen_sycl_device_ = d; }
 #endif
+=======
+  const GpuDeviceInfo* tensorflow_gpu_device_info() const {
+    return gpu_device_info_;
+  }
+
+  // Does not take ownership.
+  void set_eigen_cpu_device(Eigen::ThreadPoolDevice* d) {
+    eigen_cpu_device_ = d;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Return the Allocator implementation to use based on the allocator
   // attributes requested.  See allocator.h for more details.
   virtual Allocator* GetAllocator(AllocatorAttributes /*attr*/) {
     LOG(FATAL) << "GetAllocator() is not implemented.";
+<<<<<<< HEAD
     return nullptr;
   }
 
@@ -236,6 +328,28 @@ class DeviceBase {
   virtual const DeviceAttributes& attributes() const;
   virtual const string& name() const;
 
+=======
+  }
+
+  const Eigen::ThreadPoolDevice* eigen_cpu_device() {
+    CHECK(eigen_cpu_device_ != nullptr);
+    return eigen_cpu_device_;
+  }
+
+  // The caller owns the returned device and must free it by calling
+  // DisposeGpuDevice below
+  virtual const PerOpGpuDevice* MakeGpuDevice(DeviceContext* /*dc*/,
+                                              Allocator* /*allocator*/) {
+    // The OpKernelContext calls this even for devices that do not
+    // implement an eigen_gpu_device
+    return nullptr;
+  }
+
+  virtual const DeviceAttributes& attributes() const {
+    LOG(FATAL) << "Device does not implement attributes()";
+  }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Materializes the given TensorProto into 'tensor' stored in Device
   // memory.  Most devices will want to override this.
   //
@@ -249,6 +363,7 @@ class DeviceBase {
     return errors::Internal("Device does not implement MakeTensorFromProto()");
   }
 
+<<<<<<< HEAD
   // Some devices (i.e. GPUs) may free device memory prior to its actual use
   // being completed on the assumption that subsequent allocations can only be
   // used serially with respect to pending uses.  If this function returns a
@@ -301,3 +416,15 @@ bool IsSymbolicExecutionDevice(absl::string_view device_name);
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_DEVICE_BASE_H_
+=======
+ private:
+  Env* const env_;
+  CpuWorkerThreads* cpu_worker_threads_ = nullptr;
+  GpuDeviceInfo* gpu_device_info_ = nullptr;
+  Eigen::ThreadPoolDevice* eigen_cpu_device_ = nullptr;
+};
+
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_DEVICE_BASE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

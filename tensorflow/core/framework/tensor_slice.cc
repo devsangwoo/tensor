@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,13 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/lib/strings/strcat.h"
 #include "tensorflow/core/platform/logging.h"
+=======
+#include "tensorflow/core/framework/tensor_slice.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/lib/strings/str_util.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -34,8 +42,12 @@ TensorSlice::TensorSlice(const TensorSliceProto& proto) {
   }
 }
 
+<<<<<<< HEAD
 TensorSlice::TensorSlice(
     std::initializer_list<std::pair<int64, int64>> extents) {
+=======
+TensorSlice::TensorSlice(std::initializer_list<std::pair<int, int>> extents) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   starts_.reserve(extents.size());
   lengths_.reserve(extents.size());
   for (const auto& e : extents) {
@@ -49,15 +61,24 @@ Status TensorSlice::Parse(const string& str, TensorSlice* slice) {
   slice->starts_.reserve(items.size());
   slice->lengths_.reserve(items.size());
   for (const string& x : items) {
+<<<<<<< HEAD
     int64 s, l;
+=======
+    int s, l;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (x == "-") {
       // "everything"
       s = 0;
       l = kFullExtent;
     } else {
+<<<<<<< HEAD
       std::vector<string> sl = str_util::Split(x, ',', str_util::SkipEmpty());
       if (sl.size() != 2 || !strings::safe_strto64(sl[0], &s) ||
           !strings::safe_strto64(sl[1], &l)) {
+=======
+      char junk;
+      if (sscanf(x.c_str(), "%d,%d%c", &s, &l, &junk) != 2) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         return errors::InvalidArgument(
             "Expected a pair of numbers or '-' "
             "but got '",
@@ -82,6 +103,7 @@ void TensorSlice::Clear() {
   lengths_.clear();
 }
 
+<<<<<<< HEAD
 bool TensorSlice::IsFull() const {
   for (int d = 0; d < dims(); ++d) {
     if (!IsFullAt(d)) return false;
@@ -89,6 +111,8 @@ bool TensorSlice::IsFull() const {
   return true;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 void TensorSlice::SetFullSlice(int dim) {
   Clear();
   starts_.reserve(dim);
@@ -128,6 +152,10 @@ string TensorSlice::DebugString() const {
     if (!first) {
       buffer.append(":");
     }
+<<<<<<< HEAD
+=======
+    string s;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (IsFullAt(d)) {
       buffer.append("-");
     } else {
@@ -165,8 +193,13 @@ bool TensorSlice::Intersect(const TensorSlice& other,
     } else {
       // If we have an intersection here, it should have a start that is the
       // max of the two starts and an end that is the min of the two ends.
+<<<<<<< HEAD
       int64 s = std::max(start(d), other.start(d));
       int64 l = std::min(end(d), other.end(d)) - s;
+=======
+      int s = std::max(start(d), other.start(d));
+      int l = std::min(end(d), other.end(d)) - s;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if (l > 0) {
         // We have a real intersection
         if (result) {
@@ -187,11 +220,14 @@ bool TensorSlice::Intersect(const TensorSlice& other,
   return true;
 }
 
+<<<<<<< HEAD
 bool TensorSlice::operator==(const TensorSlice& other) const {
   return dims() == other.dims() && starts_ == other.starts_ &&
          lengths_ == other.lengths_;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 void TensorSlice::ComputeRelative(const TensorSlice& sub,
                                   TensorSlice* relative) const {
   DCHECK_EQ(dims(), sub.dims());
@@ -209,6 +245,7 @@ void TensorSlice::ComputeRelative(const TensorSlice& sub,
   }
 }
 
+<<<<<<< HEAD
 void TensorSlice::UpdateToCover(const TensorSlice& other) {
   DCHECK_EQ(dims(), other.dims());
   for (int d = 0; d < dims(); ++d) {
@@ -225,6 +262,8 @@ void TensorSlice::UpdateToCover(const TensorSlice& other) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // static
 bool TensorSlice::HasExtentLength(const TensorSliceProto::Extent& extent) {
   return extent.has_length_case() == TensorSliceProto::Extent::kLength;
@@ -237,7 +276,11 @@ int64 TensorSlice::GetExtentLength(const TensorSliceProto::Extent& extent) {
 }
 
 Status TensorSlice::SliceTensorShape(const TensorShape& shape,
+<<<<<<< HEAD
                                      TensorShape* result_shape) const {
+=======
+                                          TensorShape* result_shape) const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   result_shape->Clear();
   // Mismatching ranks: we can't apply the slice at all.
   if (shape.dims() != dims()) {
@@ -267,6 +310,10 @@ Status TensorSlice::SliceTensorShape(const TensorShape& shape,
   return Status::OK();
 }
 
+<<<<<<< HEAD
 const int64 TensorSlice::kFullExtent = -1;
+=======
+const int TensorSlice::kFullExtent = -1;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

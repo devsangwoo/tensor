@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +27,19 @@ limitations under the License.
 #include "tensorflow/core/platform/types.h"
 #include "tensorflow/core/util/gpu_kernel_helper.h"
 #include "tensorflow/core/util/gpu_launch_config.h"
+=======
+#if GOOGLE_CUDA
+#define EIGEN_USE_GPU
+
+#include <stdio.h>
+#include <assert.h>
+
+#include <math.h>
+#include <algorithm>
+
+#include "tensorflow/core/platform/port.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -36,7 +50,11 @@ typedef Eigen::GpuDevice GPUDevice;
 // A Cuda kernel to check if each element is Inf or Nan. If any exists, the
 // relevant elements in abnormal_detected will be set
 template <typename T>
+<<<<<<< HEAD
 __global__ void CheckNumericsKernel(const T* __restrict__ data, int size,
+=======
+__global__ void CheckNumericsKernel(const T *data, int size,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                     int abnormal_detected[2]) {
   const int32 thread_id = blockIdx.x * blockDim.x + threadIdx.x;
   const int32 total_thread_count = gridDim.x * blockDim.x;
@@ -54,6 +72,7 @@ __global__ void CheckNumericsKernel(const T* __restrict__ data, int size,
   }
 }
 
+<<<<<<< HEAD
 // V2 of CheckNumericsKernel for GPU.
 // Unlike CheckNumericsKernel (V1), this kernel disinguishes -Inf and +Inf.
 // The 3 elements of `abnormal_detected` are used to signify NaN, -Inf and +Inf,
@@ -77,12 +96,15 @@ __global__ void CheckNumericsKernelV2(const T* __restrict__ data, int size,
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 
 // A simple launch pad to launch the Cuda kernels that checks the numerical
 // abnormality in the given array
 template <typename T>
 struct CheckNumericsLaunch {
+<<<<<<< HEAD
   void Run(const GPUDevice& d, const T* data, int size,
            int abnormal_detected[2]) {
     const int32 block_size = d.maxGpuThreadsPerBlock();
@@ -120,3 +142,22 @@ template struct CheckNumericsLaunchV2<double>;
 
 }  // namespace tensorflow
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+  void Run(const GPUDevice &d, const T *data, int size,
+           int abnormal_detected[2]) {
+    const int32 block_size = d.maxCudaThreadsPerBlock();
+    const int32 num_blocks =
+        (d.getNumCudaMultiProcessors() * d.maxCudaThreadsPerMultiProcessor()) /
+        block_size;
+
+    CheckNumericsKernel<T><<<num_blocks, block_size, 0, d.stream()>>>(
+        data, size, abnormal_detected);
+  }
+};
+
+template struct CheckNumericsLaunch<float>;
+template struct CheckNumericsLaunch<double>;
+
+}  // namespace tensorflow
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

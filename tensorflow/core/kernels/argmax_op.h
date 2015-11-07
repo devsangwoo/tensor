@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,11 +21,21 @@ limitations under the License.
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor_types.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_ARGMAX_OP_H_
+#define TENSORFLOW_KERNELS_ARGMAX_OP_H_
+// Generator definition for ArgMaxOp, must be compilable by nvcc.
+
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 namespace functor {
 
+<<<<<<< HEAD
 template <typename Device, typename T, typename Tout>
 struct ArgMax {
 #define DECLARE_COMPUTE_SPEC(Dims)                                             \
@@ -32,6 +43,16 @@ struct ArgMax {
       const Device& d, typename TTypes<T, Dims>::ConstTensor input,            \
       const int32 dimension, typename TTypes<Tout, Dims - 1>::Tensor output) { \
     output.device(d) = input.argmax(dimension).template cast<Tout>();          \
+=======
+template <typename Device, typename T>
+struct ArgMax {
+#define DECLARE_COMPUTE_SPEC(Dims)                                     \
+  EIGEN_ALWAYS_INLINE static void Reduce##Dims(                        \
+      const Device& d, typename TTypes<T, Dims>::ConstTensor input,    \
+      const int32 dimension,                                           \
+      typename TTypes<int64, Dims - 1>::Tensor output) {               \
+    output.device(d) = input.argmax(dimension).template cast<int64>(); \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   DECLARE_COMPUTE_SPEC(1);
@@ -39,12 +60,16 @@ struct ArgMax {
   DECLARE_COMPUTE_SPEC(3);
   DECLARE_COMPUTE_SPEC(4);
   DECLARE_COMPUTE_SPEC(5);
+<<<<<<< HEAD
   DECLARE_COMPUTE_SPEC(6);
   DECLARE_COMPUTE_SPEC(7);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #undef DECLARE_COMPUTE_SPEC
 };
 
+<<<<<<< HEAD
 template <typename Device, typename T, typename Tout>
 struct ArgMin {
 #define DECLARE_COMPUTE_SPEC(Dims)                                             \
@@ -52,6 +77,16 @@ struct ArgMin {
       const Device& d, typename TTypes<T, Dims>::ConstTensor input,            \
       const int32 dimension, typename TTypes<Tout, Dims - 1>::Tensor output) { \
     output.device(d) = input.argmin(dimension).template cast<Tout>();          \
+=======
+template <typename Device, typename T>
+struct ArgMin {
+#define DECLARE_COMPUTE_SPEC(Dims)                                     \
+  EIGEN_ALWAYS_INLINE static void Reduce##Dims(                        \
+      const Device& d, typename TTypes<T, Dims>::ConstTensor input,    \
+      const int32 dimension,                                           \
+      typename TTypes<int64, Dims - 1>::Tensor output) {               \
+    output.device(d) = input.argmin(dimension).template cast<int64>(); \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   DECLARE_COMPUTE_SPEC(1);
@@ -59,8 +94,11 @@ struct ArgMin {
   DECLARE_COMPUTE_SPEC(3);
   DECLARE_COMPUTE_SPEC(4);
   DECLARE_COMPUTE_SPEC(5);
+<<<<<<< HEAD
   DECLARE_COMPUTE_SPEC(6);
   DECLARE_COMPUTE_SPEC(7);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #undef DECLARE_COMPUTE_SPEC
 };
@@ -69,4 +107,8 @@ struct ArgMin {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_ARGMAX_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_ARGMAX_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

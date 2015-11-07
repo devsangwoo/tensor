@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,6 +68,12 @@ static Status ApplyGradientDescentShapeFn(InferenceContext* c) {
   return Status::OK();
 }
 
+=======
+#include "tensorflow/core/framework/op.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 REGISTER_OP("ApplyGradientDescent")
     .Input("var: Ref(T)")
     .Input("alpha: T")
@@ -74,6 +81,7 @@ REGISTER_OP("ApplyGradientDescent")
     .Output("out: Ref(T)")
     .Attr("T: numbertype")
     .Attr("use_locking: bool = false")
+<<<<<<< HEAD
     .SetShapeFn(ApplyGradientDescentShapeFn);
 
 REGISTER_OP("ResourceApplyGradientDescent")
@@ -258,6 +266,18 @@ static Status ApplyAdagradV2ShapeFn(InferenceContext* c, bool sparse) {
   }
   return Status::OK();
 }
+=======
+    .Doc(R"doc(
+Update '*var' by subtracting 'alpha' * 'delta' from it.
+
+var: Should be from a Variable().
+alpha: Scaling factor. Must be a scalar.
+delta: The change.
+out: Same as "var".
+use_locking: If True, the subtraction will be protected by a lock;
+  otherwise the behavior is undefined, but may exhibit less contention.
+)doc");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 REGISTER_OP("ApplyAdagrad")
     .Input("var: Ref(T)")
@@ -267,6 +287,7 @@ REGISTER_OP("ApplyAdagrad")
     .Output("out: Ref(T)")
     .Attr("T: numbertype")
     .Attr("use_locking: bool = false")
+<<<<<<< HEAD
     .Attr("update_slots: bool = true")
     .SetShapeFn([](InferenceContext* c) {
       return ApplyAdagradShapeFn(c, false /* sparse */);
@@ -352,6 +373,22 @@ REGISTER_OP("ResourceApplyProximalAdagrad")
     .SetShapeFn([](InferenceContext* c) {
       return ApplyProximalAdagradShapeFn(c, false /* sparse */);
     });
+=======
+    .Doc(R"doc(
+Update '*var' according to the adagrad scheme.
+
+accum += grad * grad
+var -= lr * grad * (1 / sqrt(accum))
+
+var: Should be from a Variable().
+accum: Should be from a Variable().
+lr: Scaling factor. Must be a scalar.
+grad: The gradient.
+out: Same as "var".
+use_locking: If True, updating of the var and accum tensors will be protected by
+a lock; otherwise the behavior is undefined, but may exhibit less contention.
+)doc");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 REGISTER_OP("SparseApplyAdagrad")
     .Input("var: Ref(T)")
@@ -363,6 +400,7 @@ REGISTER_OP("SparseApplyAdagrad")
     .Attr("T: numbertype")
     .Attr("Tindices: {int32, int64}")
     .Attr("use_locking: bool = false")
+<<<<<<< HEAD
     .Attr("update_slots: bool = true")
     .SetShapeFn([](InferenceContext* c) {
       return ApplyAdagradShapeFn(c, true /* sparse */);
@@ -698,6 +736,24 @@ static Status ApplyMomentumShapeFn(InferenceContext* c, bool sparse) {
   }
   return Status::OK();
 }
+=======
+    .Doc(R"doc(
+Update relevant entries in '*var' and '*accum' according to the adagrad scheme.
+
+That is for rows we have grad for, we update var and accum as follows:
+accum += grad * grad
+var -= lr * grad * (1 / sqrt(accum))
+
+var: Should be from a Variable().
+accum: Should be from a Variable().
+lr: Learning rate. Must be a scalar.
+grad: The gradient.
+indices: A vector of indices into the first dimension of var and accum.
+out: Same as "var".
+use_locking: If True, updating of the var and accum tensors will be protected by
+a lock; otherwise the behavior is undefined, but may exhibit less contention.
+)doc");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 REGISTER_OP("ApplyMomentum")
     .Input("var: Ref(T)")
@@ -708,10 +764,28 @@ REGISTER_OP("ApplyMomentum")
     .Output("out: Ref(T)")
     .Attr("T: numbertype")
     .Attr("use_locking: bool = false")
+<<<<<<< HEAD
     .Attr("use_nesterov: bool = false")
     .SetShapeFn([](InferenceContext* c) {
       return ApplyMomentumShapeFn(c, false /* sparse */);
     });
+=======
+    .Doc(R"doc(
+Update '*var' according to the momentum scheme.
+
+accum = accum * momentum + grad
+var -= lr * accum
+
+var: Should be from a Variable().
+accum: Should be from a Variable().
+lr: Scaling factor. Must be a scalar.
+grad: The gradient.
+momentum: Momentum. Must be a scalar.
+out: Same as "var".
+use_locking: If True, updating of the var and accum tensors will be protected by
+a lock; otherwise the behavior is undefined, but may exhibit less contention.
+)doc");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 REGISTER_OP("SparseApplyMomentum")
     .Input("var: Ref(T)")
@@ -724,6 +798,7 @@ REGISTER_OP("SparseApplyMomentum")
     .Attr("T: numbertype")
     .Attr("Tindices: {int32, int64}")
     .Attr("use_locking: bool = false")
+<<<<<<< HEAD
     .Attr("use_nesterov: bool = false")
     .SetShapeFn([](InferenceContext* c) {
       return ApplyMomentumShapeFn(c, true /* sparse */);
@@ -803,6 +878,26 @@ static Status ApplyAdamShapeFn(InferenceContext* c, bool sparse) {
   }
   return Status::OK();
 }
+=======
+    .Doc(R"doc(
+Update relevant entries in '*var' and '*accum' according to the momentum scheme.
+
+That is for rows we have grad for, we update var and accum as follows:
+
+accum = accum * momentum + grad
+var -= lr * accum
+
+var: Should be from a Variable().
+accum: Should be from a Variable().
+lr: Learning rate. Must be a scalar.
+grad: The gradient.
+indices: A vector of indices into the first dimension of var and accum.
+momentum: Momentum. Must be a scalar.
+out: Same as "var".
+use_locking: If True, updating of the var and accum tensors will be protected by
+a lock; otherwise the behavior is undefined, but may exhibit less contention.
+)doc");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 REGISTER_OP("ApplyAdam")
     .Input("var: Ref(T)")
@@ -818,6 +913,7 @@ REGISTER_OP("ApplyAdam")
     .Output("out: Ref(T)")
     .Attr("T: numbertype")
     .Attr("use_locking: bool = false")
+<<<<<<< HEAD
     .Attr("use_nesterov: bool = false")
     .SetShapeFn([](InferenceContext* c) {
       return ApplyAdamShapeFn(c, false /* sparse */);
@@ -964,6 +1060,30 @@ static Status ApplyCenteredRMSPropShapeFn(InferenceContext* c, bool sparse) {
   }
   return Status::OK();
 }
+=======
+    .Doc(R"doc(
+Update '*var' according to the Adam algorithm.
+
+lr_t <- learning_rate * sqrt(1 - beta2^t) / (1 - beta1^t)
+m_t <- beta1 * m_{t-1} + (1 - beta1) * g_t
+v_t <- beta2 * v_{t-1} + (1 - beta2) * g_t * g_t
+variable <- variable - lr_t * m_t / (sqrt(v_t) + epsilon)
+
+var: Should be from a Variable().
+m: Should be from a Variable().
+v: Should be from a Variable().
+beta1_power: Must be a scalar.
+beta2_power: Must be a scalar.
+lr: Scaling factor. Must be a scalar.
+beta1: Momentum factor. Must be a scalar.
+beta2: Momentum factor. Must be a scalar.
+epsilon: Ridge term. Must be a scalar.
+grad: The gradient.
+out: Same as "var".
+use_locking: If True, updating of the var, m, and v tensors will be protected by
+a lock; otherwise the behavior is undefined, but may exhibit less contention.
+)doc");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 REGISTER_OP("ApplyRMSProp")
     .Input("var: Ref(T)")
@@ -977,6 +1097,7 @@ REGISTER_OP("ApplyRMSProp")
     .Output("out: Ref(T)")
     .Attr("T: numbertype")
     .Attr("use_locking: bool = false")
+<<<<<<< HEAD
     .SetShapeFn([](InferenceContext* c) {
       return ApplyRMSPropShapeFn(c, false /* sparse */);
     });
@@ -1190,5 +1311,28 @@ REGISTER_OP("ResourceApplyPowerSign")
     .SetShapeFn([](InferenceContext* c) {
       return ApplyPowerSignShapeFn(c, /*sparse=*/false);
     });
+=======
+    .Doc(R"doc(
+Update '*var' according to the RMSProp algorithm.
+
+mean_square = decay * mean_square + (1-decay) * gradient ** 2
+Delta = learning_rate * gradient / sqrt(mean_square + epsilon)
+
+ms <- rho * ms_{t-1} + (1-rho) * grad * grad
+mom <- momentum * mom_{t-1} + lr * grad / sqrt(ms + epsilon)
+var <- var - mom
+
+var: Should be from a Variable().
+ms: Should be from a Variable().
+mom: Should be from a Variable().
+lr: Scaling factor. Must be a scalar.
+epsilon: Ridge term. Must be a scalar.
+rho: Decay rate. Must be a scalar.
+grad: The gradient.
+out: Same as "var".
+use_locking: If True, updating of the var, m, and v tensors will be protected by
+a lock; otherwise the behavior is undefined, but may exhibit less contention.
+)doc");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

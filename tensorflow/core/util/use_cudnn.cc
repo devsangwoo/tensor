@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -96,6 +97,25 @@ bool IsCudnnSupportedFilterSize(const int32 filter_rows,
   return in_depth == out_depth && filter_rows == filter_cols &&
          (filter_rows == 1 || filter_rows == 3 || filter_rows == 5 ||
           filter_rows == 7);
+=======
+#include "tensorflow/core/util/use_cudnn.h"
+
+#include <stdlib.h>
+
+#include "tensorflow/core/platform/port.h"
+
+namespace tensorflow {
+
+bool CanUseCudnn() {
+  const char* tf_use_cudnn = getenv("TF_USE_CUDNN");
+  if (tf_use_cudnn != nullptr) {
+    string tf_use_cudnn_str = tf_use_cudnn;
+    if (tf_use_cudnn_str == "0") {
+      return false;
+    }
+  }
+  return true;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

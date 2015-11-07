@@ -6,8 +6,12 @@
 //   - float
 //   - int64
 //
+<<<<<<< HEAD
 // A Feature contains Lists which may hold zero or more values.  These
 // lists are the base values BytesList, FloatList, Int64List.
+=======
+// Base features are contained in Lists which may hold zero or more values.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 // Features are organized into categories by name.  The Features message
 // contains the mapping from name to Feature.
@@ -15,6 +19,7 @@
 // Example Features for a movie recommendation application:
 //   feature {
 //     key: "age"
+<<<<<<< HEAD
 //     value { float_list {
 //       value: 29.0
 //     }}
@@ -73,6 +78,50 @@ message Int64List {
 }
 
 // Containers for non-sequential data.
+=======
+//     float_list {
+//       value: 29.0
+//     }
+//   }
+//   feature {
+//     key: "movie"
+//     bytes_list {
+//       value: "The Shawshank Redemption"
+//       value: "Fight Club"
+//     }
+//   }
+//   feature {
+//     key: "movie_ratings"
+//     float_list {
+//       value: 9.0
+//       value: 9.7
+//     }
+//   }
+//   feature {
+//     key: "suggestion"
+//     bytes_list {
+//       value: "Inception"
+//     }
+//   }
+//   feature {
+//     key: "suggestion_purchased"
+//     int64_list {
+//       value: 1
+//     }
+//   }
+//   feature {
+//     key: "purchase_price"
+//     float_list {
+//       value: 9.99
+//     }
+//   }
+
+syntax = "proto3";
+// option cc_enable_arenas = true;
+
+package tensorflow;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 message Feature {
   // Each feature can be exactly one kind.
   oneof kind {
@@ -87,6 +136,7 @@ message Features {
   map<string, Feature> feature = 1;
 };
 
+<<<<<<< HEAD
 // Containers for sequential data.
 //
 // A FeatureList contains lists of Features.  These may hold zero or more
@@ -103,3 +153,15 @@ message FeatureLists {
   // Map from feature name to feature list.
   map<string, FeatureList> feature_list = 1;
 };
+=======
+// Containers to hold repeated fundamental features.
+message BytesList {
+  repeated bytes value = 1;
+}
+message FloatList {
+  repeated float value = 1 [packed=true];
+}
+message Int64List {
+  repeated int64 value = 1 [packed=true];
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

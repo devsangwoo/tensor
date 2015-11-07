@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +27,11 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/strcat.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/util/proto/proto_utils.h"
+=======
+#include "tensorflow/core/framework/op_gen_lib.h"
+
+#include "tensorflow/core/lib/strings/strcat.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -54,10 +60,17 @@ string WordWrap(StringPiece prefix, StringPiece str, int width) {
     StringPiece to_append = str.substr(0, space);
     str.remove_prefix(space + 1);
     // Remove spaces at break.
+<<<<<<< HEAD
     while (str_util::EndsWith(to_append, " ")) {
       to_append.remove_suffix(1);
     }
     while (absl::ConsumePrefix(&str, " ")) {
+=======
+    while (to_append.ends_with(" ")) {
+      to_append.remove_suffix(1);
+    }
+    while (str.Consume(" ")) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
 
     // Go on to the next line.
@@ -69,6 +82,7 @@ string WordWrap(StringPiece prefix, StringPiece str, int width) {
 }
 
 bool ConsumeEquals(StringPiece* description) {
+<<<<<<< HEAD
   if (absl::ConsumePrefix(description, "=")) {
     while (absl::ConsumePrefix(description,
                                " ")) {  // Also remove spaces after "=".
@@ -190,11 +204,17 @@ static bool FindMultiline(StringPiece line, size_t colon, string* end) {
   }
   if (absl::ConsumePrefix(&line, "<<")) {
     *end = string(line);
+=======
+  if (description->Consume("=")) {
+    while (description->Consume(" ")) {  // Also remove spaces after "=".
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return true;
   }
   return false;
 }
 
+<<<<<<< HEAD
 string PBTxtFromMultiline(StringPiece multiline_pbtxt) {
   string pbtxt;
   // Probably big enough, since the input and output are about the
@@ -545,4 +565,6 @@ void ApiDefMap::UpdateDocs() {
 const tensorflow::ApiDef* ApiDefMap::GetApiDef(const string& name) const {
   return gtl::FindOrNull(map_, name);
 }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

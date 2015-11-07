@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Suite of datatypes to represent data-parallel kernel objects (code entities).
 // Kernel is the untyped variant, whereas TypedKernel takes a type signature
 // to do some template-based helper generation and give compile-time type
@@ -64,17 +67,25 @@ limitations under the License.
 //
 // Users typically won't need to type out the TypedKernel signature in full, it
 // will be typedef'd by automatically generated code; for example, see
+<<<<<<< HEAD
 // stream_executor::executor_sample::VecReduceAddKernel.
+=======
+// perftools::gputools::executor_sample::VecReduceAddKernel.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #ifndef TENSORFLOW_STREAM_EXECUTOR_KERNEL_H_
 #define TENSORFLOW_STREAM_EXECUTOR_KERNEL_H_
 
+<<<<<<< HEAD
 #include <array>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <memory>
 #include <tuple>
 #include <type_traits>
 #include <vector>
 
+<<<<<<< HEAD
 #include "absl/strings/string_view.h"
 #include "tensorflow/stream_executor/device_memory.h"
 #include "tensorflow/stream_executor/kernel_cache_config.h"
@@ -82,6 +93,16 @@ limitations under the License.
 #include "tensorflow/stream_executor/platform/port.h"
 
 namespace stream_executor {
+=======
+#include "tensorflow/stream_executor/device_memory.h"
+#include "tensorflow/stream_executor/kernel_cache_config.h"
+#include "tensorflow/stream_executor/lib/stringpiece.h"
+#include "tensorflow/stream_executor/platform/port.h"
+#include "tensorflow/stream_executor/lib/inlined_vector.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 class DeviceMemoryBase;
 template <typename ElemT>
@@ -134,8 +155,11 @@ class KernelMetadata {
 // Thread-compatible.
 class KernelBase {
  public:
+<<<<<<< HEAD
   KernelBase(KernelBase &&from);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Constructs an "empty" (not-yet-loaded) kernel instance.
   //
   // parent is the StreamExecutor that will be responsible for loading the
@@ -143,6 +167,10 @@ class KernelBase {
   explicit KernelBase(StreamExecutor *parent);
 
   // Test-only constructor that can take a mock KernelInterface implementation.
+<<<<<<< HEAD
+=======
+  // Takes ownership of implementation, it should not be null.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   KernelBase(StreamExecutor *parent, internal::KernelInterface *implementation);
 
   // Releases resources associated with the kernel instance (i.e.
@@ -177,17 +205,30 @@ class KernelBase {
   // Gets the preferred cache configuration for a kernel.
   KernelCacheConfig GetPreferredCacheConfig() const;
 
+<<<<<<< HEAD
   void set_name(absl::string_view name);
+=======
+  void set_name(port::StringPiece name);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const string &name() const { return name_; }
   const string &demangled_name() const { return demangled_name_; }
 
  private:
+<<<<<<< HEAD
   // The StreamExecutor that loads this kernel object.
   StreamExecutor *parent_;
 
   // Implementation delegated to for platform-specific functionality.
   std::unique_ptr<internal::KernelInterface> implementation_;
 
+=======
+  // Implementation delegated to for platform-specific functionality.
+  std::unique_ptr<internal::KernelInterface> implementation_;
+
+  // The StreamExecutor that loads this kernel object.
+  StreamExecutor *parent_;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string name_;
   string demangled_name_;
 
@@ -267,6 +308,7 @@ struct IsSharedDeviceMemory<SharedDeviceMemory<U>> {
   static constexpr bool value = true;
 };
 
+<<<<<<< HEAD
 // Basic data about a kernel argument.
 struct KernelArg {
   bool is_shared;
@@ -481,6 +523,26 @@ class KernelArgsArray : public KernelArgsArrayBase {
   // Number of significant entries in shared_memory_bytes_ and
   // shared_memory_indices_.
   size_t number_of_shared_memory_arguments_;
+=======
+// KernelArg encapsulates the information necessary for a back-end executor to
+// configure a kernel to launch using the given argument.
+struct KernelArg {
+  // Indicates the type of an argument: normal, to be passed to the kernel
+  // in the standard manner, or shared memory, which has distinct
+  // rules for specification per backend.
+  enum Type {
+    kNormal,
+    kSharedMemory,
+  } type;
+
+  // The data to pass to the kernel - either a pointer to device memory, or the
+  // argument value. compact_array is used to prevent smaller args (ex. u8, u64)
+  // from requiring heap allocation.
+  port::InlinedVector<uint8, 4> data;
+
+  // The size of this argument in bytes.
+  uint64 bytes;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // Typed variant of KernelBase, like a typed device function pointer. See the
@@ -496,8 +558,11 @@ class KernelArgsArray : public KernelArgsArrayBase {
 template <typename... Params>
 class TypedKernel : public KernelBase {
  public:
+<<<<<<< HEAD
   static constexpr size_t kNumberOfParameters = sizeof...(Params);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Delegates to KernelBase::KernelBase(), see that constructor.
   explicit TypedKernel(StreamExecutor *parent) : KernelBase(parent) {}
 
@@ -518,6 +583,7 @@ class TypedKernel : public KernelBase {
   //
   // Const refs are taken as parameters on all of the handlers to avoid
   // implicit type promotion of integers.
+<<<<<<< HEAD
   //
   // WARNING: as a performance optimization this method may store pointers to
   // some of the input parameters in the kernel args structure, so any params
@@ -538,12 +604,29 @@ class TypedKernel : public KernelBase {
   // Base case for variadic template expansion - nothing to do!
   void PackOneParamFromList(KernelArgsArray<kNumberOfParameters> *args) const {}
 
+=======
+  void PackParams(std::vector<KernelArg> *args, Params... params) const {
+    PackOneParam(args, params...);
+  }
+
+  template <typename T, typename... RestOfParams>
+  void PackOneParam(std::vector<KernelArg> *args, const T &arg,
+                    const RestOfParams... rest) const {
+    PackOneParam(args, arg);
+    PackOneParam(args, rest...);
+  }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Packs one (non-DeviceMemoryBase) parameter into the arg and sizes array.
   // The enable_if<> is for excluding DeviceMemoryBase args, which have a
   // separate implementation below.
   template <typename T>
   void PackOneParam(
+<<<<<<< HEAD
       KernelArgsArray<kNumberOfParameters> *args, const T &arg,
+=======
+      std::vector<KernelArg> *args, const T &arg,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       typename std::enable_if<!IsDeviceMemoryValueLike<T>::value &&
                               !IsDeviceMemoryPointer<T>::value &&
                               !IsSharedDeviceMemory<T>::value>::type * =
@@ -552,38 +635,73 @@ class TypedKernel : public KernelBase {
                   "cannot pass raw pointer to the device");
     static_assert(!std::is_convertible<T, DeviceMemoryBase>::value,
                   "cannot pass device memory as a normal value");
+<<<<<<< HEAD
     args->add_argument(arg);
+=======
+    const uint8 *arg_ptr = reinterpret_cast<const uint8 *>(&arg);
+    args->emplace_back(KernelArg{
+        KernelArg::kNormal,
+        port::InlinedVector<uint8, 4>{arg_ptr, arg_ptr + sizeof(arg)}, sizeof(arg)});
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // DeviceMemoryBase family reference override.
   template <typename T>
   void PackOneParam(
+<<<<<<< HEAD
       KernelArgsArray<kNumberOfParameters> *args, const T &arg,
       typename std::enable_if<IsDeviceMemoryValueLike<T>::value>::type * =
           nullptr) const {
     args->add_device_memory_argument(arg);
+=======
+      std::vector<KernelArg> *args, const T &arg,
+      typename std::enable_if<IsDeviceMemoryValueLike<T>::value>::type * =
+          nullptr) const {
+    args->emplace_back(parent()->DeviceMemoryToKernelArg(arg));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // DeviceMemoryBase family pointer override.
   template <typename T>
   void PackOneParam(
+<<<<<<< HEAD
       KernelArgsArray<kNumberOfParameters> *args, T arg,
       typename std::enable_if<IsDeviceMemoryPointer<T>::value>::type * =
           nullptr) const {
     DeviceMemoryBase *ptr = static_cast<DeviceMemoryBase *>(arg);
     args->add_device_memory_argument(*ptr);
+=======
+      std::vector<KernelArg> *args, T arg,
+      typename std::enable_if<IsDeviceMemoryPointer<T>::value>::type * =
+          nullptr) const {
+    DeviceMemoryBase *ptr = static_cast<DeviceMemoryBase *>(arg);
+    args->emplace_back(parent()->DeviceMemoryToKernelArg(*ptr));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Dynamic shared device memory has a size, but no associated allocation on
   // the host; internally, the device will allocate storage.
   template <typename T>
   void PackOneParam(
+<<<<<<< HEAD
       KernelArgsArray<kNumberOfParameters> *args, T arg,
       typename std::enable_if<IsSharedDeviceMemory<T>::value>::type * =
           nullptr) const {
     args->add_shared_bytes(arg.size());
   }
 
+=======
+      std::vector<KernelArg> *args, T arg,
+      typename std::enable_if<IsSharedDeviceMemory<T>::value>::type * =
+          nullptr) const {
+    args->emplace_back(KernelArg{KernelArg::kSharedMemory,
+                                 port::InlinedVector<uint8, 4>(), arg.size()});
+  }
+
+  // Base case for variadic template expansion - nothing to do!
+  void PackOneParam(std::vector<KernelArg> *args) const {}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   SE_DISALLOW_COPY_AND_ASSIGN(TypedKernel);
 };
 
@@ -637,8 +755,13 @@ struct KernelInvocationChecker {
   // NOTE: if you encounter an error here, you can see the mismatch by looking
   // at the end of the last error message, which will be of the form:
   //
+<<<<<<< HEAD
   //    ...::Compatible<const stream_executor::DeviceMemory<OneThing> &,
   //                    stream_executor::DeviceMemory<AnotherThing>, true,
+=======
+  //    ...::Compatible<const perftools::gputools::DeviceMemory<OneThing> &,
+  //                    perftools::gputools::DeviceMemory<AnotherThing>, true,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //                    0>'
   //    requested here
   //
@@ -709,6 +832,11 @@ struct KernelParamsOk<TypedKernel<Params...>, Args...> {
       std::tuple<Params...>, std::tuple<Args...>>::CheckAllNoStaticAssert();
 };
 
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_KERNEL_H_

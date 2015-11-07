@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +18,16 @@ limitations under the License.
 
 #include <vector>
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/lib/core/coding.h"
+
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace core {
 
+<<<<<<< HEAD
 TEST(Coding, Fixed16) {
   static const uint16 N = 50000;
 
@@ -41,6 +48,10 @@ TEST(Coding, Fixed16) {
 
 TEST(Coding, Fixed32) {
   static const uint32 N = 100000;
+=======
+TEST(Coding, Fixed32) {
+  static const int N = 100000;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   string s;
   for (uint32 v = 0; v < N; v++) {
@@ -91,10 +102,13 @@ TEST(Coding, Fixed64) {
 // Test that encoding routines generate little-endian encodings
 TEST(Coding, EncodingOutput) {
   char dst[8];
+<<<<<<< HEAD
   EncodeFixed16(dst, 0x0201);
   ASSERT_EQ(0x01, static_cast<int>(dst[0]));
   ASSERT_EQ(0x02, static_cast<int>(dst[1]));
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EncodeFixed32(dst, 0x04030201);
   ASSERT_EQ(0x01, static_cast<int>(dst[0]));
   ASSERT_EQ(0x02, static_cast<int>(dst[1]));
@@ -125,7 +139,11 @@ TEST(Coding, Varint32) {
     uint32 expected = (i / 32) << (i % 32);
     uint32 actual;
     p = GetVarint32Ptr(p, limit, &actual);
+<<<<<<< HEAD
     ASSERT_TRUE(p != nullptr);
+=======
+    ASSERT_TRUE(p != NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ASSERT_EQ(expected, actual);
   }
   ASSERT_EQ(p, s.data() + s.size());
@@ -158,7 +176,11 @@ TEST(Coding, Varint64) {
     ASSERT_TRUE(p < limit);
     uint64 actual;
     p = GetVarint64Ptr(p, limit, &actual);
+<<<<<<< HEAD
     ASSERT_TRUE(p != nullptr);
+=======
+    ASSERT_TRUE(p != NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ASSERT_EQ(values[i], actual);
   }
   ASSERT_EQ(p, limit);
@@ -168,7 +190,11 @@ TEST(Coding, Varint32Overflow) {
   uint32 result;
   string input("\x81\x82\x83\x84\x85\x11");
   ASSERT_TRUE(GetVarint32Ptr(input.data(), input.data() + input.size(),
+<<<<<<< HEAD
                              &result) == nullptr);
+=======
+                             &result) == NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(Coding, Varint32Truncation) {
@@ -177,10 +203,16 @@ TEST(Coding, Varint32Truncation) {
   PutVarint32(&s, large_value);
   uint32 result;
   for (size_t len = 0; len < s.size() - 1; len++) {
+<<<<<<< HEAD
     ASSERT_TRUE(GetVarint32Ptr(s.data(), s.data() + len, &result) == nullptr);
   }
   ASSERT_TRUE(GetVarint32Ptr(s.data(), s.data() + s.size(), &result) !=
               nullptr);
+=======
+    ASSERT_TRUE(GetVarint32Ptr(s.data(), s.data() + len, &result) == NULL);
+  }
+  ASSERT_TRUE(GetVarint32Ptr(s.data(), s.data() + s.size(), &result) != NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ASSERT_EQ(large_value, result);
 }
 
@@ -188,7 +220,11 @@ TEST(Coding, Varint64Overflow) {
   uint64 result;
   string input("\x81\x82\x83\x84\x85\x81\x82\x83\x84\x85\x11");
   ASSERT_TRUE(GetVarint64Ptr(input.data(), input.data() + input.size(),
+<<<<<<< HEAD
                              &result) == nullptr);
+=======
+                             &result) == NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(Coding, Varint64Truncation) {
@@ -197,10 +233,16 @@ TEST(Coding, Varint64Truncation) {
   PutVarint64(&s, large_value);
   uint64 result;
   for (size_t len = 0; len < s.size() - 1; len++) {
+<<<<<<< HEAD
     ASSERT_TRUE(GetVarint64Ptr(s.data(), s.data() + len, &result) == nullptr);
   }
   ASSERT_TRUE(GetVarint64Ptr(s.data(), s.data() + s.size(), &result) !=
               nullptr);
+=======
+    ASSERT_TRUE(GetVarint64Ptr(s.data(), s.data() + len, &result) == NULL);
+  }
+  ASSERT_TRUE(GetVarint64Ptr(s.data(), s.data() + s.size(), &result) != NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ASSERT_EQ(large_value, result);
 }
 

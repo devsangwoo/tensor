@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,11 +29,29 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include <functional>
+#include <memory>
+#include <vector>
+
+#include "tensorflow/core/common_runtime/kernel_benchmark_testlib.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/graph/testlib.h"
+#include "tensorflow/core/graph/node_builder.h"
+#include "tensorflow/core/kernels/ops_testutil.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/tensor.h"
+#include <gtest/gtest.h>
+#include "tensorflow/core/lib/core/status_test_util.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 namespace {
 
+<<<<<<< HEAD
 const int kMaxStrLen = 40;
 
 TensorProto GetRandomInt32TensorProto(int dim, int max_int) {
@@ -68,6 +87,15 @@ static void BM_Unique_INT32(int iters, int dim, int max_int) {
 
   Tensor input(DT_INT32, TensorShape({dim}));
   CHECK(input.FromProto(GetRandomInt32TensorProto(dim, max_int)));
+=======
+static void BM_Unique(int iters, int dim) {
+  testing::StopTiming();
+  RequireDefaultOps();
+  Graph* g = new Graph(OpRegistry::Global());
+
+  Tensor input(DT_INT32, TensorShape({dim}));
+  input.flat<int32>().setRandom();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Node* node;
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), "Unique")
@@ -81,6 +109,7 @@ static void BM_Unique_INT32(int iters, int dim, int max_int) {
   test::Benchmark("cpu", g).Run(iters);
 }
 
+<<<<<<< HEAD
 static void BM_Unique_INT32_Repeat(int iters, int dim, int max_int) {
   testing::StopTiming();
   Graph* g = new Graph(OpRegistry::Global());
@@ -181,6 +210,9 @@ BENCHMARK(BM_Unique_INT32_Repeat)
     ->ArgPair(1024 * 1024, 64 * 1024 * 1024);
 
 BENCHMARK(BM_Unique_STRING)
+=======
+BENCHMARK(BM_Unique)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ->Arg(32)
     ->Arg(256)
     ->Arg(1024)

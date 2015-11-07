@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,11 +21,23 @@ limitations under the License.
 #include "tensorflow/core/common_runtime/gpu/gpu_host_allocator.h"
 #include "tensorflow/core/platform/stream_executor.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#if GOOGLE_CUDA
+
+#include "tensorflow/core/common_runtime/gpu/pool_allocator.h"
+
+#include "tensorflow/stream_executor/multi_platform_manager.h"
+#include "tensorflow/stream_executor/platform.h"
+#include <gtest/gtest.h>
+
+namespace gpu = ::perftools::gputools;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
 
 TEST(PoolAllocatorTest, ZeroSizeBuffers) {
+<<<<<<< HEAD
   se::Platform* platform =
       se::MultiPlatformManager::PlatformWithName("cuda").ValueOrDie();
   PoolAllocator pool(
@@ -33,6 +46,15 @@ TEST(PoolAllocatorTest, ZeroSizeBuffers) {
           platform->GetExecutor(se::StreamExecutorConfig(/*ordinal=*/0))
               .ValueOrDie(),
           0 /*numa_node*/, {}, {}),
+=======
+  gpu::Platform* platform =
+      gpu::MultiPlatformManager::PlatformWithName("cuda").ValueOrDie();
+  PoolAllocator pool(
+      2 /*pool_size_limit*/, false /*auto_resize*/,
+      new CUDAHostAllocator(
+          platform->GetExecutor(gpu::StreamExecutorConfig(/*ordinal=*/0))
+              .ValueOrDie()),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       new NoopRounder, "pool");
 
   EXPECT_EQ(nullptr, pool.AllocateRaw(4 /*alignment*/, 0 /*num_bytes*/));
@@ -44,6 +66,7 @@ TEST(PoolAllocatorTest, ZeroSizeBuffers) {
 }
 
 TEST(PoolAllocatorTest, ZeroSizePool) {
+<<<<<<< HEAD
   se::Platform* platform =
       se::MultiPlatformManager::PlatformWithName("cuda").ValueOrDie();
   PoolAllocator pool(
@@ -52,6 +75,15 @@ TEST(PoolAllocatorTest, ZeroSizePool) {
           platform->GetExecutor(se::StreamExecutorConfig(/*ordinal=*/0))
               .ValueOrDie(),
           0 /*numa_node*/, {}, {}),
+=======
+  gpu::Platform* platform =
+      gpu::MultiPlatformManager::PlatformWithName("cuda").ValueOrDie();
+  PoolAllocator pool(
+      0 /*pool_size_limit*/, false /*auto_resize*/,
+      new CUDAHostAllocator(
+          platform->GetExecutor(gpu::StreamExecutorConfig(/*ordinal=*/0))
+              .ValueOrDie()),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       new NoopRounder, "pool");
 
   EXPECT_EQ(0, pool.get_from_pool_count());
@@ -78,6 +110,7 @@ TEST(PoolAllocatorTest, ZeroSizePool) {
 }
 
 TEST(PoolAllocatorTest, Alignment) {
+<<<<<<< HEAD
   se::Platform* platform =
       se::MultiPlatformManager::PlatformWithName("cuda").ValueOrDie();
   PoolAllocator pool(
@@ -86,6 +119,15 @@ TEST(PoolAllocatorTest, Alignment) {
           platform->GetExecutor(se::StreamExecutorConfig(/*ordinal=*/0))
               .ValueOrDie(),
           0 /*numa_node*/, {}, {}),
+=======
+  gpu::Platform* platform =
+      gpu::MultiPlatformManager::PlatformWithName("cuda").ValueOrDie();
+  PoolAllocator pool(
+      0 /*pool_size_limit*/, false /*auto_resize*/,
+      new CUDAHostAllocator(
+          platform->GetExecutor(gpu::StreamExecutorConfig(/*ordinal=*/0))
+              .ValueOrDie()),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       new NoopRounder, "pool");
   for (int i = 0; i < 16; ++i) {
     size_t alignment = 1 << i;
@@ -100,8 +142,12 @@ TEST(PoolAllocatorTest, Alignment) {
 
 TEST(PoolAllocatorTest, AutoResize) {
   PoolAllocator pool(2 /*pool_size_limit*/, true /*auto_resize*/,
+<<<<<<< HEAD
                      new BasicCPUAllocator(0 /*numa_node*/, {}, {}),
                      new NoopRounder, "pool");
+=======
+                     new BasicCPUAllocator, new NoopRounder, "pool");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Alloc/dealloc 10 sizes just a few times, confirming pool size
   // stays at 2.
@@ -126,6 +172,7 @@ TEST(PoolAllocatorTest, AutoResize) {
 }
 
 TEST(PoolAllocatorTest, CudaHostAllocator) {
+<<<<<<< HEAD
   int alloc_count = 0;
   int64 alloc_size = 0;
   SubAllocator::Visitor alloc_visitor =
@@ -152,6 +199,16 @@ TEST(PoolAllocatorTest, CudaHostAllocator) {
   EXPECT_EQ(0, alloc_size);
   EXPECT_EQ(0, free_count);
   EXPECT_EQ(0, free_size);
+=======
+  gpu::Platform* platform =
+      gpu::MultiPlatformManager::PlatformWithName("cuda").ValueOrDie();
+  PoolAllocator pool(
+      2 /*pool_size_limit*/, false /*auto_resize*/,
+      new CUDAHostAllocator(
+          platform->GetExecutor(gpu::StreamExecutorConfig(/*ordinal=*/0))
+              .ValueOrDie()),
+      new NoopRounder, "pool");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Repeatedly Get a 16-byte value, confirming that there's only
   // one real allocation.
@@ -159,10 +216,13 @@ TEST(PoolAllocatorTest, CudaHostAllocator) {
   EXPECT_EQ(0, pool.get_from_pool_count());
   EXPECT_EQ(1, pool.allocated_count());
   EXPECT_NE(nullptr, p1_16);
+<<<<<<< HEAD
   EXPECT_EQ(1, alloc_count);  // Underlying suballoc of 16 bytes
   // Each suballocation includes a 16B ChunkPrefix.
   static const int kChunkPrefixSize = 16;
   EXPECT_EQ(16 + (alloc_count * kChunkPrefixSize), alloc_size);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   pool.DeallocateRaw(p1_16);
   // Pool contents {16}
   EXPECT_EQ(1, pool.put_count());
@@ -173,9 +233,12 @@ TEST(PoolAllocatorTest, CudaHostAllocator) {
   pool.DeallocateRaw(p2_16);  // Put it back.
   // Pool contents {16}
   EXPECT_EQ(2, pool.put_count());
+<<<<<<< HEAD
   EXPECT_EQ(1, alloc_count);  // Underlying suballoc of 16 bytes
   EXPECT_EQ(16 + (alloc_count * kChunkPrefixSize), alloc_size);
   EXPECT_EQ(0, free_count);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Get two more values of different sizes.
   void* p3_4 = pool.AllocateRaw(4, 4);
@@ -188,9 +251,12 @@ TEST(PoolAllocatorTest, CudaHostAllocator) {
   void* p4_2 = pool.AllocateRaw(4, 2);  // Get a third size buffer.
   EXPECT_NE(nullptr, p4_2);
   EXPECT_EQ(0, pool.evicted_count());
+<<<<<<< HEAD
   EXPECT_EQ(3, alloc_count);
   EXPECT_EQ(16 + 4 + 2 + (alloc_count * kChunkPrefixSize), alloc_size);
   EXPECT_EQ(0, free_count);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // The pool is full: when we put back p4_2, the 16-byte buffer
   // should be evicted since it was least recently inserted.
@@ -198,10 +264,13 @@ TEST(PoolAllocatorTest, CudaHostAllocator) {
   // Pool contents {2, 4}
   EXPECT_EQ(4, pool.put_count());
   EXPECT_EQ(1, pool.evicted_count());
+<<<<<<< HEAD
   EXPECT_EQ(3, alloc_count);
   EXPECT_EQ(16 + 4 + 2 + (alloc_count * kChunkPrefixSize), alloc_size);
   EXPECT_EQ(1, free_count);
   EXPECT_EQ(16 + (free_count * kChunkPrefixSize), free_size);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Re-getting and putting size 2 or 4 should not alter pool size or
   // num-evicted.
@@ -215,20 +284,26 @@ TEST(PoolAllocatorTest, CudaHostAllocator) {
   EXPECT_EQ(6, pool.put_count());
   EXPECT_EQ(3, pool.allocated_count());
   EXPECT_EQ(1, pool.evicted_count());
+<<<<<<< HEAD
   EXPECT_EQ(3, alloc_count);
   EXPECT_EQ(16 + 4 + 2 + (alloc_count * kChunkPrefixSize), alloc_size);
   EXPECT_EQ(1, free_count);
   EXPECT_EQ(16 + (free_count * kChunkPrefixSize), free_size);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   pool.Clear();
   EXPECT_EQ(0, pool.get_from_pool_count());
   EXPECT_EQ(0, pool.put_count());
   EXPECT_EQ(0, pool.allocated_count());
   EXPECT_EQ(0, pool.evicted_count());
+<<<<<<< HEAD
   EXPECT_EQ(3, alloc_count);
   EXPECT_EQ(16 + 4 + 2 + (alloc_count * kChunkPrefixSize), alloc_size);
   EXPECT_EQ(3, free_count);
   EXPECT_EQ(16 + 4 + 2 + (free_count * kChunkPrefixSize), free_size);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(PoolAllocatorTest, Pow2Rounder) {
@@ -243,6 +318,7 @@ TEST(PoolAllocatorTest, Pow2Rounder) {
 }
 
 TEST(PoolAllocatorTest, Name) {
+<<<<<<< HEAD
   se::Platform* platform =
       se::MultiPlatformManager::PlatformWithName("cuda").ValueOrDie();
   PoolAllocator pool(
@@ -251,6 +327,15 @@ TEST(PoolAllocatorTest, Name) {
           platform->GetExecutor(se::StreamExecutorConfig(/*ordinal=*/0))
               .ValueOrDie(),
           0 /*numa_node*/, {}, {}),
+=======
+  gpu::Platform* platform =
+      gpu::MultiPlatformManager::PlatformWithName("cuda").ValueOrDie();
+  PoolAllocator pool(
+      2 /*pool_size_limit*/, false /*auto_resize*/,
+      new CUDAHostAllocator(
+          platform->GetExecutor(gpu::StreamExecutorConfig(/*ordinal=*/0))
+              .ValueOrDie()),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       new NoopRounder, "pool");
   EXPECT_EQ("pool", pool.Name());
 }

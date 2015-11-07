@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,12 +30,19 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/scanner.h"
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/env.h"
+=======
+#include "tensorflow/python/framework/python_op_gen.h"
+
+#include "tensorflow/core/framework/op.h"
+#include "tensorflow/core/framework/op_def.pb.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/platform/init_main.h"
 #include "tensorflow/core/platform/logging.h"
 
 namespace tensorflow {
 namespace {
 
+<<<<<<< HEAD
 Status ReadOpListFromFile(const string& filename,
                           std::vector<string>* op_list) {
   std::unique_ptr<RandomAccessFile> file;
@@ -137,6 +145,12 @@ void PrintAllPythonOps(const std::vector<string>& op_list,
   } else {
     PrintPythonOps(ops, api_def_map, op_list, source_file_name);
   }
+=======
+void PrintAllPythonOps(const char* hidden, bool require_shapes) {
+  OpList ops;
+  OpRegistry::Global()->Export(false, &ops);
+  PrintPythonOps(ops, hidden, require_shapes);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace
@@ -144,6 +158,7 @@ void PrintAllPythonOps(const std::vector<string>& op_list,
 
 int main(int argc, char* argv[]) {
   tensorflow::port::InitMain(argv[0], &argc, &argv);
+<<<<<<< HEAD
 
   tensorflow::string source_file_name =
       tensorflow::InferSourceFileName(argv[0]);
@@ -170,6 +185,12 @@ int main(int argc, char* argv[]) {
     TF_CHECK_OK(tensorflow::ParseOpListCommandLine(argv[2], &op_list));
     tensorflow::PrintAllPythonOps(op_list, api_def_dirs, source_file_name,
                                   tensorflow::string(argv[3]) == "1");
+=======
+  if (argc == 2) {
+    tensorflow::PrintAllPythonOps("", std::string(argv[1]) == "1");
+  } else if (argc == 3) {
+    tensorflow::PrintAllPythonOps(argv[1], std::string(argv[2]) == "1");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   } else {
     return -1;
   }

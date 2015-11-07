@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +27,17 @@ namespace test {
 class Benchmark;
 }
 struct SessionOptions;
+=======
+#ifndef TENSORFLOW_COMMON_RUNTIME_LOCAL_DEVICE_H_
+#define TENSORFLOW_COMMON_RUNTIME_LOCAL_DEVICE_H_
+
+#include "tensorflow/core/common_runtime/device.h"
+#include "tensorflow/core/framework/device_attributes.pb.h"
+
+namespace tensorflow {
+
+class SessionOptions;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // This class is shared by ThreadPoolDevice and GPUDevice and
 // initializes a shared Eigen compute device used by both.  This
@@ -33,6 +45,7 @@ struct SessionOptions;
 // GPUDevice into more 'process-wide' abstractions.
 class LocalDevice : public Device {
  public:
+<<<<<<< HEAD
   LocalDevice(const SessionOptions& options,
               const DeviceAttributes& attributes);
   ~LocalDevice() override;
@@ -56,9 +69,20 @@ class LocalDevice : public Device {
 
   friend class test::Benchmark;
 
+=======
+  LocalDevice(const SessionOptions& options, const DeviceAttributes& attributes,
+              Allocator* device_allocator);
+  ~LocalDevice() override {}
+
+ private:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TF_DISALLOW_COPY_AND_ASSIGN(LocalDevice);
 };
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_COMMON_RUNTIME_LOCAL_DEVICE_H_
+=======
+#endif  // TENSORFLOW_COMMON_RUNTIME_LOCAL_DEVICE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

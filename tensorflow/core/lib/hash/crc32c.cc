@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // A portable implementation of crc32c, optimized to handle
 // four bytes at a time.
 
@@ -24,9 +27,12 @@ limitations under the License.
 namespace tensorflow {
 namespace crc32c {
 
+<<<<<<< HEAD
 extern bool CanAccelerate();
 extern uint32_t AcceleratedExtend(uint32_t crc, const char *buf, size_t size);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static const uint32 table0_[256] = {
     0x00000000, 0xf26b8303, 0xe13b70f7, 0x1350f3f4, 0xc79a971f, 0x35f1141c,
     0x26a1e7e8, 0xd4ca64eb, 0x8ad958cf, 0x78b2dbcc, 0x6be22838, 0x9989ab3b,
@@ -210,11 +216,14 @@ static inline uint32_t LE_LOAD32(const uint8_t *p) {
 }
 
 uint32 Extend(uint32 crc, const char *buf, size_t size) {
+<<<<<<< HEAD
   static bool can_accelerate = CanAccelerate();
   if (can_accelerate) {
     return AcceleratedExtend(crc, buf, size);
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const uint8 *p = reinterpret_cast<const uint8 *>(buf);
   const uint8 *e = p + size;
   uint32 l = crc ^ 0xffffffffu;
@@ -263,6 +272,7 @@ uint32 Extend(uint32 crc, const char *buf, size_t size) {
   return l ^ 0xffffffffu;
 }
 
+<<<<<<< HEAD
 #if defined(PLATFORM_GOOGLE)
 uint32 Extend(uint32 crc, const absl::Cord &cord) {
   absl::CordReader reader(cord);
@@ -274,5 +284,7 @@ uint32 Extend(uint32 crc, const absl::Cord &cord) {
 }
 #endif
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace crc32c
 }  // namespace tensorflow

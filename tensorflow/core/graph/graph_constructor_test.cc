@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +35,19 @@ limitations under the License.
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/public/session.h"
 #include "tensorflow/core/public/version.h"
+=======
+#include "tensorflow/core/graph/graph_constructor.h"
+
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/graph/graph.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/lib/strings/str_util.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/platform/regexp.h"
+#include "tensorflow/core/public/status.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // TODO(josh11b): Test InitCostModel().
 // TODO(josh11b): Test setting the "device" field of a NodeDef.
@@ -44,12 +58,20 @@ namespace {
 
 class GraphConstructorTest : public ::testing::Test {
  protected:
+<<<<<<< HEAD
   GraphConstructorTest() : graph_(OpRegistry::Global()) {}
+=======
+  GraphConstructorTest() : g_(new Graph(OpRegistry::Global())) {
+    RequireDefaultOps();
+  }
+  ~GraphConstructorTest() override {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void Convert(const string& gdef_ascii) {
     CHECK(protobuf::TextFormat::ParseFromString(gdef_ascii, &gdef_));
   }
 
+<<<<<<< HEAD
   void ExpectError(const string& gdef_ascii,
                    const std::vector<string>& expected_error_strs) {
     // Used to verify that errors don't change graph
@@ -85,11 +107,21 @@ class GraphConstructorTest : public ::testing::Test {
     }
 
     EXPECT_EQ(original_graph_description, GraphDebugString());
+=======
+  void ExpectError(const string& gdef_ascii, const string& expected_error_re) {
+    Convert(gdef_ascii);
+    GraphConstructorOptions opts;
+    Status status = ConvertGraphDefToGraph(opts, gdef_, g_.get());
+    EXPECT_FALSE(status.ok());
+    EXPECT_TRUE(RE2::PartialMatch(status.error_message(), expected_error_re))
+        << status;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void ExpectOK(const string& gdef_ascii) {
     Convert(gdef_ascii);
     GraphConstructorOptions opts;
+<<<<<<< HEAD
     TF_CHECK_OK(ConvertGraphDefToGraph(opts, gdef_, &graph_));
   }
 
@@ -112,6 +144,13 @@ class GraphConstructorTest : public ::testing::Test {
 
   Node* FindNode(const string& name) {
     for (Node* n : graph_.nodes()) {
+=======
+    TF_CHECK_OK(ConvertGraphDefToGraph(opts, gdef_, g_.get()));
+  }
+
+  Node* FindNode(const string& name) {
+    for (Node* n : g_->nodes()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if (n->name() == name) return n;
     }
     return nullptr;
@@ -119,6 +158,7 @@ class GraphConstructorTest : public ::testing::Test {
 
   bool HasNode(const string& name) { return FindNode(name) != nullptr; }
 
+<<<<<<< HEAD
   bool HasEdge(const string& src, int src_out, const string& dst, int dst_in) {
     for (const Edge* e : graph_.edges()) {
       if (e->src()->name() == src && e->src_output() == src_out &&
@@ -129,10 +169,46 @@ class GraphConstructorTest : public ::testing::Test {
     return false;
   }
 
+=======
+  void ExpectNodes(const string& nodes) {
+    int count = 0;
+    std::vector<string> actual_nodes;
+    for (Node* n : g_->nodes()) {
+      if (n->IsOp()) {
+        count++;
+        actual_nodes.push_back(n->name());
+      }
+    }
+    std::sort(actual_nodes.begin(), actual_nodes.end());
+
+    LOG(INFO) << "Nodes present: " << str_util::Join(actual_nodes, " ");
+
+    std::vector<string> expected_nodes = str_util::Split(nodes, ',');
+    std::sort(expected_nodes.begin(), expected_nodes.end());
+    for (const string& s : expected_nodes) {
+      Node* n = FindNode(s);
+      EXPECT_TRUE(n != nullptr) << s;
+    }
+
+    EXPECT_TRUE(actual_nodes.size() == expected_nodes.size())
+        << "\nActual:   " << str_util::Join(actual_nodes, ",")
+        << "\nExpected: " << str_util::Join(expected_nodes, ",");
+  }
+
+  bool HasEdge(const string& src, int src_out, const string& dst, int dst_in) {
+    for (const Edge* e : g_->edges()) {
+      if (e->src()->name() == src && e->src_output() == src_out &&
+          e->dst()->name() == dst && e->dst_input() == src_out)
+        return true;
+    }
+    return false;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool HasControlEdge(const string& src, const string& dst) {
     return HasEdge(src, Graph::kControlSlot, dst, Graph::kControlSlot);
   }
 
+<<<<<<< HEAD
   string ColocationGroup(const string& node) {
     Node* n = nullptr;
     for (Node* ni : graph_.nodes()) {
@@ -232,6 +308,26 @@ TEST_F(GraphConstructorTest, InvalidNodeName) {
   ExpectOK("node { name: 'a-B.0/.c_' op: 'ABC' }");
   ExpectOK("node { name: '0123' op: 'ABC' }");
   ExpectOK("node { name: '.0123' op: 'ABC' }");
+=======
+ private:
+  GraphDef gdef_;
+  std::unique_ptr<Graph> g_;
+};
+
+REGISTER_OP("ABC");
+REGISTER_OP("TestParams").Output("o: float");
+REGISTER_OP("TestInput").Output("a: float").Output("b: float");
+REGISTER_OP("TestMul").Input("a: float").Input("b: float").Output("o: float");
+REGISTER_OP("TestInt").Input("a: int32");
+
+TEST_F(GraphConstructorTest, InvalidNodeName) {
+  ExpectError("node { name: 'a:b' op: 'ABC' }",
+              "Node 'a:b': Node name contains invalid characters");
+  ExpectError("node { name: '_abc' op: 'ABC' }",
+              // Can't start with '_'
+              "Node '_abc': Node name contains invalid characters");
+  ExpectOK("node { name: 'a-bc_' op: 'ABC' }");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(GraphConstructorTest, InvalidSourceNodeName) {
@@ -240,7 +336,11 @@ TEST_F(GraphConstructorTest, InvalidSourceNodeName) {
       "node { name: 'input' op: 'TestInput' }"
       "node { name: 't1' op: 'TestMul' input: 'W999' input: 'input' }",
 
+<<<<<<< HEAD
       {"Unknown input node", "W999"});
+=======
+      "Unknown input node.*W999");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(GraphConstructorTest, InvalidSourceNodeIndex) {
@@ -249,7 +349,11 @@ TEST_F(GraphConstructorTest, InvalidSourceNodeIndex) {
       "node { name: 'input' op: 'TestInput' }"
       "node { name: 't1' op: 'TestMul' input: [ 'W1:1', 'input:1' ] }",
 
+<<<<<<< HEAD
       {"Connecting to invalid output 1 of source node W1"});
+=======
+      "Connecting to invalid output 1 of source node W1");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(GraphConstructorTest, GraphWithCycle) {
@@ -258,6 +362,7 @@ TEST_F(GraphConstructorTest, GraphWithCycle) {
       "node { name: 't1' op: 'TestMul' input: [ 'input:0', 't2' ] }"
       "node { name: 't2' op: 'TestMul' input: [ 'input:1', 't1' ] }",
 
+<<<<<<< HEAD
       {"cycle"});
 }
 
@@ -802,6 +907,9 @@ versions {
   ImportGraphDefOptions opts;
   auto s = ImportGraphDef(opts, def, &graph_, nullptr);
   ASSERT_EQ(Status::OK(), s) << s;
+=======
+      "cycle");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(GraphConstructorTest, TypeMismatch) {
@@ -809,6 +917,7 @@ TEST_F(GraphConstructorTest, TypeMismatch) {
       "node { name: 'input' op: 'TestInput' }"
       "node { name: 'int' op: 'TestInt' input: [ 'input' ] }",
 
+<<<<<<< HEAD
       {"Input 0 of node int was passed float from input:0 incompatible with "
        "expected int32."});
 }
@@ -853,6 +962,13 @@ TEST_F(GraphConstructorTest, BadVersion) {
           "GraphDef disallows consumer version ", bad,
           ".  Please upgrade TensorFlow: this version is likely buggy.")});
 }
+=======
+      "Input 0 of node int was passed float from input:0 incompatible with "
+      "expected int32.");
+}
+
+TEST_F(GraphConstructorTest, EmptyGraph) { ExpectOK(""); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TEST_F(GraphConstructorTest, SimpleModel) {
   ExpectOK(
@@ -863,7 +979,11 @@ TEST_F(GraphConstructorTest, SimpleModel) {
   EXPECT_TRUE(HasNode("input"));
   EXPECT_TRUE(HasNode("t1"));
   EXPECT_TRUE(HasEdge("W1", 0, "t1", 0));
+<<<<<<< HEAD
   EXPECT_TRUE(HasEdge("input", 1, "t1", 1));
+=======
+  EXPECT_TRUE(HasEdge("input", 1, "t1", 0));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(GraphConstructorTest, SimpleModelWithControlEdges) {
@@ -877,9 +997,15 @@ TEST_F(GraphConstructorTest, SimpleModelWithControlEdges) {
   EXPECT_TRUE(HasNode("t1"));
   EXPECT_TRUE(HasNode("t2"));
   EXPECT_TRUE(HasEdge("W1", 0, "t1", 0));
+<<<<<<< HEAD
   EXPECT_TRUE(HasEdge("input", 1, "t1", 1));
   EXPECT_TRUE(HasEdge("W1", 0, "t2", 0));
   EXPECT_TRUE(HasEdge("input", 1, "t2", 1));
+=======
+  EXPECT_TRUE(HasEdge("input", 1, "t1", 0));
+  EXPECT_TRUE(HasEdge("W1", 0, "t2", 0));
+  EXPECT_TRUE(HasEdge("input", 1, "t2", 0));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_TRUE(HasControlEdge("W1", "input"));
   EXPECT_TRUE(HasControlEdge("t1", "t2"));
 }
@@ -890,6 +1016,7 @@ TEST_F(GraphConstructorTest, Error_ControlEdgeBeforeRealInput) {
       "node { name: 'input' op: 'TestInput' input: [ '^W1' ] }"
       "node { name: 't1' op: 'TestMul' input: [ 'W1', 'input:1' ] }"
       "node { name: 't2' op: 'TestMul' input: [ 'W1', '^t1', 'input:1' ] }",
+<<<<<<< HEAD
       {"Node 't2': Control dependencies must come after regular dependencies"});
 }
 
@@ -3251,6 +3378,9 @@ TEST_F(GraphConstructorTest, ImportGraphDef_UnknownOps) {
        "tf.contrib, accessing (e.g.) `tf.contrib.resampler` should be done "
        "before importing the graph, as contrib ops are lazily registered "
        "when the module is first accessed."});
+=======
+      "Node 't2': Control dependencies must come after regular dependencies");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace

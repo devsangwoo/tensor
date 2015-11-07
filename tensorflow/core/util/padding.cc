@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +17,16 @@ limitations under the License.
 #include "tensorflow/core/util/padding.h"
 
 #include "tensorflow/core/framework/attr_value.pb.h"
+=======
+#include "tensorflow/core/util/padding.h"
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/node_def_util.h"
 #include "tensorflow/core/lib/core/errors.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 Status GetNodeAttr(const NodeDef& node_def, StringPiece attr_name,
                    Padding* value) {
   string str_value;
@@ -29,18 +35,28 @@ Status GetNodeAttr(const NodeDef& node_def, StringPiece attr_name,
 }
 
 Status GetPaddingFromString(StringPiece str_value, Padding* value) {
+=======
+Status GetNodeAttr(const NodeDef& node_def, const string& attr_name,
+                        Padding* value) {
+  string str_value;
+  TF_RETURN_IF_ERROR(GetNodeAttr(node_def, attr_name, &str_value));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (str_value == "SAME") {
     *value = SAME;
   } else if (str_value == "VALID") {
     *value = VALID;
+<<<<<<< HEAD
   } else if (str_value == "EXPLICIT") {
     *value = EXPLICIT;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   } else {
     return errors::NotFound(str_value, " is not an allowed padding type");
   }
   return Status::OK();
 }
 
+<<<<<<< HEAD
 Status CheckValidPadding(Padding padding_type,
                          const std::vector<int64>& explicit_paddings,
                          int num_dims, TensorFormat data_format) {
@@ -84,4 +100,8 @@ string GetExplicitPaddingsAttrString() {
   return "explicit_paddings: list(int) = []";
 }
 
+=======
+string GetPaddingAttrString() { return "padding: {'SAME', 'VALID'}"; }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace tensorflow

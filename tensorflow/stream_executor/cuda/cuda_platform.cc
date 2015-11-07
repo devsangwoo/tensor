@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,6 +65,22 @@ const DeviceOptions GetDeviceOptionsFromEnv() {
 }
 
 }  // namespace
+=======
+#include "tensorflow/stream_executor/cuda/cuda_platform.h"
+
+#include "tensorflow/stream_executor/cuda/cuda_driver.h"
+#include "tensorflow/stream_executor/lib/error.h"
+#include "tensorflow/stream_executor/lib/initialize.h"
+#include "tensorflow/stream_executor/lib/ptr_util.h"
+#include "tensorflow/stream_executor/lib/status.h"
+#include "tensorflow/stream_executor/lib/stringprintf.h"
+
+namespace perftools {
+namespace gputools {
+namespace cuda {
+
+PLATFORM_DEFINE_ID(kCudaPlatformId);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 CudaPlatform::CudaPlatform()
     : name_("CUDA"), min_numa_node_(0), limit_numa_node_(0) {}
@@ -76,6 +93,7 @@ CudaPlatform::~CudaPlatform() {}
 void CudaPlatform::InspectNumaNodes() {
   // To get NUMA node information, we need to create all executors, so we can
   // examine their device descriptions to see their bus assignments.
+<<<<<<< HEAD
   static std::once_flag once;
   std::call_once(once, [&] {
     StreamExecutorConfig config;
@@ -95,6 +113,32 @@ void CudaPlatform::InspectNumaNodes() {
       }
     }
   });
+=======
+  static bool initialized = false;
+  static mutex numa_mutex(LINKER_INITIALIZED);
+  mutex_lock lock(numa_mutex);
+  if (initialized) {
+    return;
+  }
+
+  StreamExecutorConfig config;
+  for (int i = 0; i < VisibleDeviceCount(); i++) {
+    config.ordinal = i;
+    StreamExecutor* exec = GetExecutor(config).ValueOrDie();
+    if (i == 0) {
+      // NUMA nodes may not start at 0, so set the minimum node  based on the
+      // first executor we see.
+      min_numa_node_ = exec->GetDeviceDescription().numa_node();
+      limit_numa_node_ = min_numa_node_ + 1;
+    } else {
+      min_numa_node_ =
+          std::min(min_numa_node_, exec->GetDeviceDescription().numa_node());
+      limit_numa_node_ = std::max(limit_numa_node_,
+                                  exec->GetDeviceDescription().numa_node() + 1);
+    }
+  }
+  initialized = true;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 int CudaPlatform::BusCount() {
@@ -121,35 +165,59 @@ port::StatusOr<StreamExecutor*> CudaPlatform::FirstExecutorForBus(
     }
   }
 
+<<<<<<< HEAD
   return port::Status(
       port::error::NOT_FOUND,
       absl::StrFormat("Executor for bus %d not found.", bus_ordinal));
 }
 
 Platform::Id CudaPlatform::id() const { return cuda::kCudaPlatformId; }
+=======
+  return port::Status{
+      port::error::NOT_FOUND,
+      port::Printf("Executor for bus %d not found.", bus_ordinal)};
+}
+
+Platform::Id CudaPlatform::id() const { return kCudaPlatformId; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 int CudaPlatform::VisibleDeviceCount() const {
   // Throw away the result - it logs internally, and this [containing] function
   // isn't in the path of user control. It's safe to call this > 1x.
+<<<<<<< HEAD
   if (!gpu::GpuDriver::Init().ok()) {
     return -1;
   }
 
   return GpuDriver::GetDeviceCount();
+=======
+  if (!cuda::CUDADriver::Init().ok()) {
+    return -1;
+  }
+
+  return CUDADriver::GetDeviceCount();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 const string& CudaPlatform::Name() const { return name_; }
 
+<<<<<<< HEAD
 port::StatusOr<std::unique_ptr<DeviceDescription>>
 CudaPlatform::DescriptionForDevice(int ordinal) const {
   return GpuExecutor::CreateDeviceDescription(ordinal);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 port::StatusOr<StreamExecutor*> CudaPlatform::ExecutorForDevice(int ordinal) {
   StreamExecutorConfig config;
   config.ordinal = ordinal;
   config.plugin_config = PluginConfig();
+<<<<<<< HEAD
   config.device_options = GetDeviceOptionsFromEnv();
+=======
+  config.device_options = DeviceOptions::Default();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return GetExecutor(config);
 }
 
@@ -158,18 +226,42 @@ port::StatusOr<StreamExecutor*> CudaPlatform::ExecutorForDeviceWithPluginConfig(
   StreamExecutorConfig config;
   config.ordinal = device_ordinal;
   config.plugin_config = plugin_config;
+<<<<<<< HEAD
   config.device_options = GetDeviceOptionsFromEnv();
+=======
+  config.device_options = DeviceOptions::Default();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return GetExecutor(config);
 }
 
 port::StatusOr<StreamExecutor*> CudaPlatform::GetExecutor(
     const StreamExecutorConfig& config) {
+<<<<<<< HEAD
   return executor_cache_.GetOrCreate(
       config, [&]() { return GetUncachedExecutor(config); });
+=======
+  mutex_lock lock(mu_);
+
+  port::StatusOr<StreamExecutor*> status = executor_cache_.Get(config);
+  if (status.ok()) {
+    return status.ValueOrDie();
+  }
+
+  port::StatusOr<std::unique_ptr<StreamExecutor>> executor =
+      GetUncachedExecutor(config);
+  if (!executor.ok()) {
+    return executor.status();
+  }
+
+  StreamExecutor* naked_executor = executor.ValueOrDie().get();
+  executor_cache_.Insert(config, executor.ConsumeValueOrDie());
+  return naked_executor;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 port::StatusOr<std::unique_ptr<StreamExecutor>>
 CudaPlatform::GetUncachedExecutor(const StreamExecutorConfig& config) {
+<<<<<<< HEAD
   auto executor = absl::make_unique<StreamExecutor>(
       this, absl::make_unique<GpuExecutor>(config.plugin_config),
       config.ordinal);
@@ -180,6 +272,17 @@ CudaPlatform::GetUncachedExecutor(const StreamExecutorConfig& config) {
         absl::StrFormat(
             "failed initializing StreamExecutor for CUDA device ordinal %d: %s",
             config.ordinal, init_status.ToString()));
+=======
+  auto executor = port::MakeUnique<StreamExecutor>(PlatformKind::kCuda,
+                                                   config.plugin_config);
+  auto init_status = executor->Init(config.ordinal, config.device_options);
+  if (!init_status.ok()) {
+    return port::Status{
+        port::error::INTERNAL,
+        port::Printf(
+            "failed initializing StreamExecutor for CUDA device ordinal %d: %s",
+            config.ordinal, init_status.ToString().c_str())};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   return std::move(executor);
@@ -194,11 +297,16 @@ void CudaPlatform::UnregisterTraceListener(TraceListener* listener) {
   LOG(FATAL) << "not yet implemented: unregister CUDA trace listener";
 }
 
+<<<<<<< HEAD
 }  // namespace gpu
+=======
+}  // namespace cuda
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 static void InitializeCudaPlatform() {
   // Disabling leak checking, MultiPlatformManager does not destroy its
   // registered platforms.
+<<<<<<< HEAD
 
   std::unique_ptr<gpu::CudaPlatform> platform(new gpu::CudaPlatform);
   SE_CHECK_OK(MultiPlatformManager::RegisterPlatform(std::move(platform)));
@@ -214,3 +322,15 @@ REGISTER_MODULE_INITIALIZER(cuda_platform,
 REGISTER_MODULE_INITIALIZER_SEQUENCE(cuda_platform, multi_platform_manager);
 REGISTER_MODULE_INITIALIZER_SEQUENCE(multi_platform_manager_listener,
                                      cuda_platform);
+=======
+  
+  std::unique_ptr<cuda::CudaPlatform> platform(new cuda::CudaPlatform);
+  SE_CHECK_OK(MultiPlatformManager::RegisterPlatform(std::move(platform)));
+}
+
+}  // namespace gputools
+}  // namespace perftools
+
+REGISTER_MODULE_INITIALIZER(cuda_platform,
+                            perftools::gputools::InitializeCudaPlatform());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

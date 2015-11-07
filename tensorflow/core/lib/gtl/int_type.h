@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // #status: LEGACY
 // #category: Miscellaneous
 // #summary: Integral types; prefer util/intops/strong_int.h
@@ -158,8 +161,12 @@ limitations under the License.
 #include <ostream>  // NOLINT
 #include <unordered_map>
 
+<<<<<<< HEAD
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace gtl {
@@ -255,6 +262,7 @@ class IntType {
     value_ op arg_value;                             \
     return *this;                                    \
   }
+<<<<<<< HEAD
   INT_TYPE_ASSIGNMENT_OP(+=);
   INT_TYPE_ASSIGNMENT_OP(-=);
   INT_TYPE_ASSIGNMENT_OP(*=);
@@ -262,6 +270,15 @@ class IntType {
   INT_TYPE_ASSIGNMENT_OP(<<=);  // NOLINT
   INT_TYPE_ASSIGNMENT_OP(>>=);  // NOLINT
   INT_TYPE_ASSIGNMENT_OP(%=);
+=======
+  INT_TYPE_ASSIGNMENT_OP(+= );
+  INT_TYPE_ASSIGNMENT_OP(-= );
+  INT_TYPE_ASSIGNMENT_OP(*= );
+  INT_TYPE_ASSIGNMENT_OP(/= );
+  INT_TYPE_ASSIGNMENT_OP(<<= );  // NOLINT
+  INT_TYPE_ASSIGNMENT_OP(>>= );  // NOLINT
+  INT_TYPE_ASSIGNMENT_OP(%= );
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef INT_TYPE_ASSIGNMENT_OP
 
   ThisType& operator=(ValueType arg_value) {
@@ -314,10 +331,17 @@ std::ostream& operator<<(std::ostream& os,  // NOLINT
 INT_TYPE_ARITHMETIC_OP(+);
 INT_TYPE_ARITHMETIC_OP(-);
 INT_TYPE_ARITHMETIC_OP(*);
+<<<<<<< HEAD
 INT_TYPE_ARITHMETIC_OP(/);
 INT_TYPE_ARITHMETIC_OP(<<);  // NOLINT
 INT_TYPE_ARITHMETIC_OP(>>);  // NOLINT
 INT_TYPE_ARITHMETIC_OP(%);
+=======
+INT_TYPE_ARITHMETIC_OP(/ );
+INT_TYPE_ARITHMETIC_OP(<< );  // NOLINT
+INT_TYPE_ARITHMETIC_OP(>> );  // NOLINT
+INT_TYPE_ARITHMETIC_OP(% );
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef INT_TYPE_ARITHMETIC_OP
 
 // -- NON-MEMBER COMPARISON OPERATORS ------------------------------------------
@@ -345,12 +369,21 @@ INT_TYPE_ARITHMETIC_OP(%);
       IntType<IntTypeName, ValueType> id) {                      \
     return val op id.value();                                    \
   }
+<<<<<<< HEAD
 INT_TYPE_COMPARISON_OP(==);  // NOLINT
 INT_TYPE_COMPARISON_OP(!=);  // NOLINT
 INT_TYPE_COMPARISON_OP(<);   // NOLINT
 INT_TYPE_COMPARISON_OP(<=);  // NOLINT
 INT_TYPE_COMPARISON_OP(>);   // NOLINT
 INT_TYPE_COMPARISON_OP(>=);  // NOLINT
+=======
+INT_TYPE_COMPARISON_OP(== );  // NOLINT
+INT_TYPE_COMPARISON_OP(!= );  // NOLINT
+INT_TYPE_COMPARISON_OP(< );   // NOLINT
+INT_TYPE_COMPARISON_OP(<= );  // NOLINT
+INT_TYPE_COMPARISON_OP(> );   // NOLINT
+INT_TYPE_COMPARISON_OP(>= );  // NOLINT
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef INT_TYPE_COMPARISON_OP
 
 }  // namespace gtl

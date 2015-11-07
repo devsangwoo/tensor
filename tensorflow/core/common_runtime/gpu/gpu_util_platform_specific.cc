@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,12 +21,21 @@ limitations under the License.
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/platform/stream_executor.h"
+=======
+#include "tensorflow/core/common_runtime/device.h"
+#include "tensorflow/core/common_runtime/gpu_device_context.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/common_runtime/gpu/gpu_util.h"
+#include "tensorflow/stream_executor/stream.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 void GPUDeviceContext::CopyCPUTensorToDevice(const Tensor* cpu_tensor,
                                              Device* device,
                                              Tensor* device_tensor,
+<<<<<<< HEAD
                                              StatusCallback done,
                                              bool sync_dst_compute) const {
   GPUUtil::CopyCPUTensorToGPU(cpu_tensor, this, device, device_tensor, done,
@@ -34,11 +44,20 @@ void GPUDeviceContext::CopyCPUTensorToDevice(const Tensor* cpu_tensor,
 
 void GPUDeviceContext::CopyDeviceTensorToCPU(const Tensor* device_tensor,
                                              StringPiece tensor_name,
+=======
+                                             StatusCallback done) const {
+  GPUUtil::CopyCPUTensorToGPU(cpu_tensor, this, device, device_tensor, done);
+}
+
+void GPUDeviceContext::CopyDeviceTensorToCPU(const Tensor* device_tensor,
+                                             const string& tensor_name,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                              Device* device, Tensor* cpu_tensor,
                                              StatusCallback done) {
   GPUUtil::CopyGPUTensorToCPU(device, this, device_tensor, cpu_tensor, done);
 }
 
+<<<<<<< HEAD
 void GPUDeviceContext::CopyTensorInSameDevice(const Tensor* input_tensor,
                                               Device* device,
                                               Tensor* output_tensor,
@@ -55,4 +74,6 @@ Status GPUDeviceContext::ThenExecute(Device* device, se::Stream* stream,
   return Status::OK();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

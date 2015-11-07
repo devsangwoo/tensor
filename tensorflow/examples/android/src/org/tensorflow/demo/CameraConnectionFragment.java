@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
  * Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+=======
+ * Copyright 2014 The Android Open Source Project
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +42,17 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
+<<<<<<< HEAD
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.TextUtils;
+=======
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
@@ -51,6 +61,12 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+<<<<<<< HEAD
+=======
+
+import org.tensorflow.demo.env.Logger;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,17 +74,24 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+<<<<<<< HEAD
 import org.tensorflow.demo.env.Logger;
 import org.tensorflow.demo.R; // Explicit import needed for internal Google builds.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 public class CameraConnectionFragment extends Fragment {
   private static final Logger LOGGER = new Logger();
 
+<<<<<<< HEAD
   /**
    * The camera preview size will be chosen to be the smallest frame by pixel size capable of
    * containing a DESIRED_SIZE x DESIRED_SIZE square.
    */
   private static final int MINIMUM_PREVIEW_SIZE = 320;
+=======
+  private RecognitionScoreView scoreView;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   /**
    * Conversion from screen rotation to JPEG orientation.
@@ -111,6 +134,7 @@ public class CameraConnectionFragment extends Fragment {
       };
 
   /**
+<<<<<<< HEAD
    * Callback for Activities to use to initialize their data once the
    * selected preview size is known.
    */
@@ -119,6 +143,8 @@ public class CameraConnectionFragment extends Fragment {
   }
 
   /**
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
    * ID of the current {@link CameraDevice}.
    */
   private String cameraId;
@@ -139,11 +165,14 @@ public class CameraConnectionFragment extends Fragment {
   private CameraDevice cameraDevice;
 
   /**
+<<<<<<< HEAD
    * The rotation in degrees of the camera sensor from the display.
    */
   private Integer sensorOrientation;
 
   /**
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
    * The {@link android.util.Size} of camera preview.
    */
   private Size previewSize;
@@ -192,9 +221,15 @@ public class CameraConnectionFragment extends Fragment {
   private Handler backgroundHandler;
 
   /**
+<<<<<<< HEAD
    * An {@link ImageReader} that handles preview frame capture.
    */
   private ImageReader previewReader;
+=======
+   * An {@link ImageReader} that handles still image capture.
+   */
+  private ImageReader imageReader;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   /**
    * {@link android.hardware.camera2.CaptureRequest.Builder} for the camera preview
@@ -212,6 +247,7 @@ public class CameraConnectionFragment extends Fragment {
   private final Semaphore cameraOpenCloseLock = new Semaphore(1);
 
   /**
+<<<<<<< HEAD
    * A {@link OnImageAvailableListener} to receive frames as they are available.
    */
   private final OnImageAvailableListener imageListener;
@@ -239,6 +275,8 @@ public class CameraConnectionFragment extends Fragment {
   }
 
   /**
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
    * Shows a {@link Toast} on the UI thread.
    *
    * @param text The message to show
@@ -258,6 +296,7 @@ public class CameraConnectionFragment extends Fragment {
 
   /**
    * Given {@code choices} of {@code Size}s supported by a camera, chooses the smallest one whose
+<<<<<<< HEAD
    * width and height are at least as large as the minimum of both, or an exact match if possible.
    *
    * @param choices The list of sizes that the camera supports for the intended output class
@@ -295,6 +334,31 @@ public class CameraConnectionFragment extends Fragment {
       return desiredSize;
     }
 
+=======
+   * width and height are at least as large as the respective requested values, and whose aspect
+   * ratio matches with the specified value.
+   *
+   * @param choices     The list of sizes that the camera supports for the intended output class
+   * @param width       The minimum desired width
+   * @param height      The minimum desired height
+   * @param aspectRatio The aspect ratio
+   * @return The optimal {@code Size}, or an arbitrary one if none were big enough
+   */
+  private static Size chooseOptimalSize(
+      final Size[] choices, final int width, final int height, final Size aspectRatio) {
+    // Collect the supported resolutions that are at least as big as the preview Surface
+    final List<Size> bigEnough = new ArrayList<>();
+    for (final Size option : choices) {
+      // TODO(andrewharp): Choose size intelligently.
+      if (option.getHeight() == 320 && option.getWidth() == 480) {
+        LOGGER.i("Adding size: " + option.getWidth() + "x" + option.getHeight());
+        bigEnough.add(option);
+      } else {
+        LOGGER.i("Not adding size: " + option.getWidth() + "x" + option.getHeight());
+      }
+    }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Pick the smallest of those, assuming we found any
     if (bigEnough.size() > 0) {
       final Size chosenSize = Collections.min(bigEnough, new CompareSizesByArea());
@@ -306,23 +370,36 @@ public class CameraConnectionFragment extends Fragment {
     }
   }
 
+<<<<<<< HEAD
   public static CameraConnectionFragment newInstance(
       final ConnectionCallback callback,
       final OnImageAvailableListener imageListener,
       final int layout,
       final Size inputSize) {
     return new CameraConnectionFragment(callback, imageListener, layout, inputSize);
+=======
+  public static CameraConnectionFragment newInstance() {
+    return new CameraConnectionFragment();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   @Override
   public View onCreateView(
       final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
+<<<<<<< HEAD
     return inflater.inflate(layout, container, false);
+=======
+    return inflater.inflate(R.layout.camera_connection_fragment, container, false);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   @Override
   public void onViewCreated(final View view, final Bundle savedInstanceState) {
     textureView = (AutoFitTextureView) view.findViewById(R.id.texture);
+<<<<<<< HEAD
+=======
+    scoreView = (RecognitionScoreView) view.findViewById(R.id.results);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   @Override
@@ -353,6 +430,7 @@ public class CameraConnectionFragment extends Fragment {
     super.onPause();
   }
 
+<<<<<<< HEAD
   public void setCamera(String cameraId) {
     this.cameraId = cameraId;
   }
@@ -391,12 +469,67 @@ public class CameraConnectionFragment extends Fragment {
         textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
       } else {
         textureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
+=======
+  /**
+   * Sets up member variables related to camera.
+   *
+   * @param width  The width of available size for camera preview
+   * @param height The height of available size for camera preview
+   */
+  private void setUpCameraOutputs(final int width, final int height) {
+    final Activity activity = getActivity();
+    final CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
+    try {
+      for (final String cameraId : manager.getCameraIdList()) {
+        final CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
+
+        // We don't use a front facing camera in this sample.
+        final Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+        if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
+          continue;
+        }
+
+        final StreamConfigurationMap map =
+            characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+        if (map == null) {
+          continue;
+        }
+
+        // For still image captures, we use the largest available size.
+        final Size largest =
+            Collections.max(
+                Arrays.asList(map.getOutputSizes(ImageFormat.YUV_420_888)),
+                new CompareSizesByArea());
+
+        imageReader =
+            ImageReader.newInstance(
+                largest.getWidth(), largest.getHeight(), ImageFormat.YUV_420_888, /*maxImages*/ 2);
+
+        // Danger, W.R.! Attempting to use too large a preview size could  exceed the camera
+        // bus' bandwidth limitation, resulting in gorgeous previews but the storage of
+        // garbage capture data.
+        previewSize =
+            chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class), width, height, largest);
+
+        // We fit the aspect ratio of TextureView to the size of preview we picked.
+        final int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+          textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
+        } else {
+          textureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
+        }
+
+        CameraConnectionFragment.this.cameraId = cameraId;
+        return;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     } catch (final CameraAccessException e) {
       LOGGER.e(e, "Exception!");
     } catch (final NullPointerException e) {
       // Currently an NPE is thrown when the Camera2API is used but not supported on the
       // device this code runs.
+<<<<<<< HEAD
       // TODO(andrewharp): abstract ErrorDialog/RuntimeException handling out into new method and
       // reuse throughout app.
       ErrorDialog.newInstance(getString(R.string.camera_error))
@@ -405,13 +538,22 @@ public class CameraConnectionFragment extends Fragment {
     }
 
     cameraConnectionCallback.onPreviewSizeChosen(previewSize, sensorOrientation);
+=======
+      ErrorDialog.newInstance(getString(R.string.camera_error))
+          .show(getChildFragmentManager(), FRAGMENT_DIALOG);
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   /**
    * Opens the camera specified by {@link CameraConnectionFragment#cameraId}.
    */
   private void openCamera(final int width, final int height) {
+<<<<<<< HEAD
     setUpCameraOutputs();
+=======
+    setUpCameraOutputs(width, height);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     configureTransform(width, height);
     final Activity activity = getActivity();
     final CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
@@ -441,9 +583,15 @@ public class CameraConnectionFragment extends Fragment {
         cameraDevice.close();
         cameraDevice = null;
       }
+<<<<<<< HEAD
       if (null != previewReader) {
         previewReader.close();
         previewReader = null;
+=======
+      if (null != imageReader) {
+        imageReader.close();
+        imageReader = null;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     } catch (final InterruptedException e) {
       throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
@@ -456,7 +604,11 @@ public class CameraConnectionFragment extends Fragment {
    * Starts a background thread and its {@link Handler}.
    */
   private void startBackgroundThread() {
+<<<<<<< HEAD
     backgroundThread = new HandlerThread("ImageListener");
+=======
+    backgroundThread = new HandlerThread("CameraBackground");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     backgroundThread.start();
     backgroundHandler = new Handler(backgroundThread.getLooper());
   }
@@ -475,6 +627,11 @@ public class CameraConnectionFragment extends Fragment {
     }
   }
 
+<<<<<<< HEAD
+=======
+  private final TensorflowImageListener tfPreviewListener = new TensorflowImageListener();
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   private final CameraCaptureSession.CaptureCallback captureCallback =
       new CameraCaptureSession.CaptureCallback() {
         @Override
@@ -511,16 +668,28 @@ public class CameraConnectionFragment extends Fragment {
       LOGGER.i("Opening camera preview: " + previewSize.getWidth() + "x" + previewSize.getHeight());
 
       // Create the reader for the preview frames.
+<<<<<<< HEAD
       previewReader =
           ImageReader.newInstance(
               previewSize.getWidth(), previewSize.getHeight(), ImageFormat.YUV_420_888, 2);
 
       previewReader.setOnImageAvailableListener(imageListener, backgroundHandler);
+=======
+      final ImageReader previewReader =
+          ImageReader.newInstance(
+              previewSize.getWidth(), previewSize.getHeight(), ImageFormat.YUV_420_888, 2);
+
+      previewReader.setOnImageAvailableListener(tfPreviewListener, backgroundHandler);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       previewRequestBuilder.addTarget(previewReader.getSurface());
 
       // Here, we create a CameraCaptureSession for camera preview.
       cameraDevice.createCaptureSession(
+<<<<<<< HEAD
           Arrays.asList(surface, previewReader.getSurface()),
+=======
+          Arrays.asList(surface, imageReader.getSurface(), previewReader.getSurface()),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           new CameraCaptureSession.StateCallback() {
 
             @Override
@@ -559,6 +728,13 @@ public class CameraConnectionFragment extends Fragment {
     } catch (final CameraAccessException e) {
       LOGGER.e(e, "Exception!");
     }
+<<<<<<< HEAD
+=======
+
+    LOGGER.i("Getting assets.");
+    tfPreviewListener.initialize(getActivity().getAssets(), scoreView);
+    LOGGER.i("Tensorflow initialized.");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   /**

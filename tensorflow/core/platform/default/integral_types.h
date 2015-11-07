@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,10 @@ limitations under the License.
 
 // IWYU pragma: private, include "third_party/tensorflow/core/platform/types.h"
 // IWYU pragma: friend third_party/tensorflow/core/platform/types.h
+=======
+#ifndef TENSORFLOW_PLATFORM_DEFAULT_INTEGRAL_TYPES_H_
+#define TENSORFLOW_PLATFORM_DEFAULT_INTEGRAL_TYPES_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -33,4 +38,8 @@ typedef unsigned long long uint64;
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_PLATFORM_DEFAULT_INTEGRAL_TYPES_H_
+=======
+#endif  // TENSORFLOW_PLATFORM_DEFAULT_INTEGRAL_TYPES_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

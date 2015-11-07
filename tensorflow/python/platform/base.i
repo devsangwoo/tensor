@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,19 +25,32 @@ limitations under the License.
   #include "tensorflow/python/lib/core/py_exception_registry.h"
 
   using tensorflow::int64;
+=======
+// Helper macros and typemaps for use in Tensorflow swig files.
+//
+%{
+  #include <memory>
+  #include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   using tensorflow::uint64;
   using tensorflow::string;
 
   template<class T>
       bool _PyObjAs(PyObject *pystr, T* cstr) {
     T::undefined;  // You need to define specialization _PyObjAs<T>
+<<<<<<< HEAD
     return false;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   template<class T>
       PyObject *_PyObjFrom(const T& c) {
     T::undefined;  // You need to define specialization _PyObjFrom<T>
+<<<<<<< HEAD
     return NULL;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
 #ifdef HAS_GLOBAL_STRING
@@ -44,7 +58,17 @@ limitations under the License.
       bool _PyObjAs(PyObject *pystr, ::string* cstr) {
     char *buf;
     Py_ssize_t len;
+<<<<<<< HEAD
     if (PyBytes_AsStringAndSize(pystr, &buf, &len) == -1) return false;
+=======
+#if PY_VERSION_HEX >= 0x03030000
+    if (PyUnicode_Check(pystr)) {
+      buf = PyUnicode_AsUTF8AndSize(pystr, &len);
+      if (!buf) return false;
+    } else  // NOLINT
+#endif
+      if (PyBytes_AsStringAndSize(pystr, &buf, &len) == -1) return false;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (cstr) cstr->assign(buf, len);
     return true;
   }
@@ -53,18 +77,33 @@ limitations under the License.
       bool _PyObjAs(PyObject *pystr, std::string* cstr) {
     char *buf;
     Py_ssize_t len;
+<<<<<<< HEAD
     if (PyBytes_AsStringAndSize(pystr, &buf, &len) == -1) return false;
+=======
+#if PY_VERSION_HEX >= 0x03030000
+    if (PyUnicode_Check(pystr)) {
+      buf = PyUnicode_AsUTF8AndSize(pystr, &len);
+      if (!buf) return false;
+    } else  // NOLINT
+#endif
+      if (PyBytes_AsStringAndSize(pystr, &buf, &len) == -1) return false;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (cstr) cstr->assign(buf, len);
     return true;
   }
 #ifdef HAS_GLOBAL_STRING
   template<>
       PyObject* _PyObjFrom(const ::string& c) {
+<<<<<<< HEAD
     return PyBytes_FromStringAndSize(c.data(), c.size());
+=======
+    return PyString_FromStringAndSize(c.data(), c.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 #endif
   template<>
       PyObject* _PyObjFrom(const std::string& c) {
+<<<<<<< HEAD
     return PyBytes_FromStringAndSize(c.data(), c.size());
   }
 
@@ -99,6 +138,13 @@ limitations under the License.
     }
     Py_DECREF(it);
     return static_cast<bool>(!PyErr_Occurred());
+=======
+    return PyString_FromStringAndSize(c.data(), c.size());
+  }
+
+  PyObject* _SwigString_FromString(const string& s) {
+    return PyUnicode_FromStringAndSize(s.data(), s.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 %}
 
@@ -111,6 +157,7 @@ limitations under the License.
   $1 = &temp;
 }
 
+<<<<<<< HEAD
 %typemap(out) int64_t {
   $result = PyLong_FromLongLong($1);
 }
@@ -121,6 +168,14 @@ limitations under the License.
 
 %typemap(out) const string& {
   $result = PyBytes_FromStringAndSize($1->data(), $1->size());
+=======
+%typemap(out) string {
+  $result = PyString_FromStringAndSize($1.data(), $1.size());
+}
+
+%typemap(out) const string& {
+  $result = PyString_FromStringAndSize($1->data(), $1->size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 %typemap(in, numinputs = 0) string* OUTPUT (string temp) {
@@ -128,7 +183,11 @@ limitations under the License.
 }
 
 %typemap(argout) string * OUTPUT {
+<<<<<<< HEAD
   PyObject *str = PyBytes_FromStringAndSize($1->data(), $1->length());
+=======
+  PyObject *str = PyString_FromStringAndSize($1->data(), $1->length());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!str) SWIG_fail;
   %append_output(str);
 }
@@ -136,12 +195,20 @@ limitations under the License.
 %typemap(argout) string* INOUT = string* OUTPUT;
 
 %typemap(varout) string {
+<<<<<<< HEAD
   $result = PyBytes_FromStringAndSize($1.data(), $1.size());
+=======
+  $result = PyString_FromStringAndSize($1.data(), $1.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 %define _LIST_OUTPUT_TYPEMAP(type, py_converter)
     %typemap(in) std::vector<type>(std::vector<type> temp) {
+<<<<<<< HEAD
   if (!tf_vector_input_helper($input, &temp, _PyObjAs<type>)) {
+=======
+  if (!vector_input_helper($input, &temp, _PyObjAs<type>)) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!PyErr_Occurred())
       PyErr_SetString(PyExc_TypeError, "sequence(type) expected");
     return NULL;
@@ -150,7 +217,11 @@ limitations under the License.
 }
 %typemap(in) const std::vector<type>& (std::vector<type> temp),
    const std::vector<type>* (std::vector<type> temp) {
+<<<<<<< HEAD
   if (!tf_vector_input_helper($input, &temp, _PyObjAs<type>)) {
+=======
+  if (!vector_input_helper($input, &temp, _PyObjAs<type>)) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!PyErr_Occurred())
       PyErr_SetString(PyExc_TypeError, "sequence(type) expected");
     return NULL;
@@ -163,12 +234,28 @@ std::vector<type>* OUTPUT (std::vector<type> temp),
    set<type>* OUTPUT (set<type> temp) {
   $1 = &temp;
 }
+<<<<<<< HEAD
 %enddef
 
 _LIST_OUTPUT_TYPEMAP(string, _SwigBytes_FromString);
 _LIST_OUTPUT_TYPEMAP(long long, PyLong_FromLongLong);
 _LIST_OUTPUT_TYPEMAP(unsigned long long, PyLong_FromUnsignedLongLong);
 _LIST_OUTPUT_TYPEMAP(unsigned int, PyLong_FromUnsignedLong);
+=======
+%typemap(argout) std::vector<type>* OUTPUT, set<type>* OUTPUT, hash_set<type>* OUTPUT {
+  %append_output(list_output_helper($1, &py_converter));
+}
+%typemap(out) std::vector<type> {
+  $result = vector_output_helper(&$1, &py_converter);
+}
+%typemap(out) std::vector<type>*, const std::vector<type>& {
+  $result = vector_output_helper($1, &py_converter);
+}
+%enddef
+
+_LIST_OUTPUT_TYPEMAP(string, _SwigString_FromString);
+_LIST_OUTPUT_TYPEMAP(unsigned long long, PyLong_FromUnsignedLongLong);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 %typemap(in) uint64 {
   // TODO(gps): Check if another implementation
@@ -200,6 +287,7 @@ _LIST_OUTPUT_TYPEMAP(unsigned int, PyLong_FromUnsignedLong);
 %enddef
 
 _COPY_TYPEMAPS(unsigned long long, uint64);
+<<<<<<< HEAD
 _COPY_TYPEMAPS(long long, int64);
 _COPY_TYPEMAPS(unsigned int, mode_t);
 
@@ -217,6 +305,8 @@ _COPY_TYPEMAPS(unsigned int, mode_t);
   $1 = static_cast<void*>(c_string);
   $2 = static_cast<size_t>(py_size);
 }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // SWIG macros for explicit API declaration.
 // Usage:
@@ -228,6 +318,7 @@ _COPY_TYPEMAPS(unsigned int, mode_t);
 %define %ignoreall %ignore ""; %enddef
 %define %unignore %rename("%s") %enddef
 %define %unignoreall %rename("%s") ""; %enddef
+<<<<<<< HEAD
 
 #if SWIG_VERSION < 0x030000
 // Define some C++11 keywords safe to ignore so older SWIG does not choke.
@@ -301,3 +392,5 @@ _COPY_TYPEMAPS(unsigned int, mode_t);
     SWIG_fail;
   }
 }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

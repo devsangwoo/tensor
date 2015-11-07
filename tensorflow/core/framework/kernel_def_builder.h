@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,13 +27,32 @@ namespace tensorflow {
 // Forward declare proto so that kernels don't need to depend on it
 class KernelDef;
 
+=======
+#ifndef TENSORFLOW_FRAMEWORK_KERNEL_DEF_BUILDER_H_
+#define TENSORFLOW_FRAMEWORK_KERNEL_DEF_BUILDER_H_
+
+#include "tensorflow/core/framework/kernel_def.pb.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/platform/port.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Builder class passed to the REGISTER_KERNEL_BUILDER() macro.
 class KernelDefBuilder {
  public:
   // Starts with just the name field set.
   // Caller MUST call Build() and take ownership of the result.
   explicit KernelDefBuilder(const char* op_name);
+<<<<<<< HEAD
   ~KernelDefBuilder();
+=======
+
+  ~KernelDefBuilder() {
+    DCHECK(kernel_def_ == nullptr) << "Did not call Build()";
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Required: specify the type of device this kernel supports.
   // Returns *this.
@@ -43,6 +63,7 @@ class KernelDefBuilder {
   // particular type or list(type) attr (a further restriction than
   // what the Op allows).
   // Returns *this.
+<<<<<<< HEAD
   template <typename T>
   KernelDefBuilder& AttrConstraint(const char* attr_name,
                                    gtl::ArraySlice<T> allowed);
@@ -55,6 +76,8 @@ class KernelDefBuilder {
   // particular type or list(type) attr (a further restriction than
   // what the Op allows).
   // Returns *this.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   KernelDefBuilder& TypeConstraint(const char* attr_name,
                                    gtl::ArraySlice<DataType> allowed);
 
@@ -76,6 +99,7 @@ class KernelDefBuilder {
   // "_kernel" attr.  May only be specified once.  Returns *this.
   KernelDefBuilder& Label(const char* label);
 
+<<<<<<< HEAD
   // Specify a priority number for this kernel.
   KernelDefBuilder& Priority(int32 priority);
 
@@ -83,6 +107,16 @@ class KernelDefBuilder {
   // above calls to this instance.
   // Caller takes ownership of the result.
   const KernelDef* Build();
+=======
+  // Returns a pointer to a KernelDef with fields set based on the
+  // above calls to this instance.
+  // Caller takes ownership of the result.
+  const KernelDef* Build() {
+    KernelDef* r = kernel_def_;
+    kernel_def_ = nullptr;
+    return r;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   KernelDef* kernel_def_;
@@ -93,10 +127,19 @@ class KernelDefBuilder {
 // IMPLEMENTATION
 
 template <class T>
+<<<<<<< HEAD
 KernelDefBuilder& KernelDefBuilder::TypeConstraint(const char* attr_name) {
+=======
+inline KernelDefBuilder& KernelDefBuilder::TypeConstraint(
+    const char* attr_name) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return this->TypeConstraint(attr_name, DataTypeToEnum<T>::v());
 }
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_KERNEL_DEF_BUILDER_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_KERNEL_DEF_BUILDER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

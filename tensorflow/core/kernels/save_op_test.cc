@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,15 +28,36 @@ limitations under the License.
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/framework/types.pb.h"
 #include "tensorflow/core/graph/graph_def_builder.h"
+=======
+#include <functional>
+#include <memory>
+#include <vector>
+
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/framework/fake_input.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/types.pb.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/kernels/ops_testutil.h"
 #include "tensorflow/core/kernels/ops_util.h"
 #include "tensorflow/core/lib/io/path.h"
 #include "tensorflow/core/lib/strings/strcat.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
 #include "tensorflow/core/platform/types.h"
 #include "tensorflow/core/protobuf/config.pb.h"
 #include "tensorflow/core/util/tensor_slice_reader.h"
+=======
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/test.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/util/tensor_slice_reader.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -43,6 +65,7 @@ namespace {
 class SaveOpTest : public OpsTestBase {
  protected:
   void MakeOp() {
+<<<<<<< HEAD
     TF_ASSERT_OK(
         NodeDefBuilder("myop", "Save")
             .Input(FakeInput())
@@ -52,11 +75,22 @@ class SaveOpTest : public OpsTestBase {
                               DT_STRING, DT_COMPLEX64, DT_COMPLEX128, DT_HALF}))
             .Finalize(node_def()));
     TF_ASSERT_OK(InitOp());
+=======
+    RequireDefaultOps();
+    ASSERT_OK(NodeDefBuilder("myop", "Save")
+                  .Input(FakeInput())
+                  .Input(FakeInput())
+                  .Input(FakeInput(
+                      {DT_INT32, DT_FLOAT, DT_DOUBLE, DT_QINT8, DT_QINT32}))
+                  .Finalize(node_def()));
+    ASSERT_OK(InitOp());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 TEST_F(SaveOpTest, Simple) {
   const string filename = io::JoinPath(testing::TmpDir(), "tensor_simple");
+<<<<<<< HEAD
   const string tensornames[] = {
       "tensor_bool",       "tensor_int",    "tensor_float",  "tensor_double",
       "tensor_qint8",      "tensor_qint32", "tensor_uint8",  "tensor_int8",
@@ -75,6 +109,19 @@ TEST_F(SaveOpTest, Simple) {
 
   // Add a 1-d bool tensor
   AddInput<bool>(TensorShape({2}), [](int x) -> bool { return x != 0; });
+=======
+  const string tensornames[] = {"tensor_int", "tensor_float", "tensor_double",
+                                "tensor_qint8", "tensor_qint32"};
+
+  MakeOp();
+  // Add a file name
+  AddInput<string>(TensorShape({}),
+                   [&filename](int x) -> string { return filename; });
+
+  // Add the tensor names
+  AddInput<string>(TensorShape({5}),
+                   [&tensornames](int x) -> string { return tensornames[x]; });
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Add a 1-d integer tensor
   AddInput<int32>(TensorShape({10}), [](int x) -> int32 { return x + 1; });
@@ -96,6 +143,7 @@ TEST_F(SaveOpTest, Simple) {
     return *reinterpret_cast<qint32*>(&x) * qint8(2);
   });
 
+<<<<<<< HEAD
   // Add a 1-d uint8 tensor
   AddInput<uint8>(TensorShape({11}), [](int x) -> uint8 { return x + 1; });
 
@@ -127,10 +175,14 @@ TEST_F(SaveOpTest, Simple) {
     return static_cast<Eigen::half>(x) / Eigen::half(2);
   });
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check that the checkpoint file is properly written
   checkpoint::TensorSliceReader reader(filename,
                                        checkpoint::OpenTableTensorSliceReader);
+<<<<<<< HEAD
   TF_EXPECT_OK(reader.status());
 
   // We expect to find all saved tensors
@@ -154,6 +206,12 @@ TEST_F(SaveOpTest, Simple) {
   }
 
   {
+=======
+  EXPECT_OK(reader.status());
+
+  // We expect to find all saved tensors
+  {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // The 1-d integer tensor
     TensorShape shape;
     DataType type;
@@ -245,6 +303,7 @@ TEST_F(SaveOpTest, Simple) {
       EXPECT_EQ(*reinterpret_cast<qint32*>(&i) * qint8(2), data[i]);
     }
   }
+<<<<<<< HEAD
 
   {
     // The 1-d uint8 tensor
@@ -390,11 +449,14 @@ TEST_F(SaveOpTest, Simple) {
       EXPECT_EQ(static_cast<Eigen::half>(i) / Eigen::half(2), data[i]);
     }
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 class SaveSlicesOpTest : public OpsTestBase {
  protected:
   void MakeOp() {
+<<<<<<< HEAD
     TF_ASSERT_OK(NodeDefBuilder("myop", "SaveSlices")
                      .Input(FakeInput())
                      .Input(FakeInput())
@@ -403,6 +465,17 @@ class SaveSlicesOpTest : public OpsTestBase {
                          {DT_INT32, DT_FLOAT, DT_DOUBLE, DT_QINT8, DT_QINT32}))
                      .Finalize(node_def()));
     TF_ASSERT_OK(InitOp());
+=======
+    RequireDefaultOps();
+    ASSERT_OK(NodeDefBuilder("myop", "SaveSlices")
+                  .Input(FakeInput())
+                  .Input(FakeInput())
+                  .Input(FakeInput())
+                  .Input(FakeInput(
+                      {DT_INT32, DT_FLOAT, DT_DOUBLE, DT_QINT8, DT_QINT32}))
+                  .Finalize(node_def()));
+    ASSERT_OK(InitOp());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -426,6 +499,7 @@ TEST_F(SaveSlicesOpTest, Slices) {
 
   MakeOp();
   // Add a file name
+<<<<<<< HEAD
   AddInput<tstring>(TensorShape({}),
                     [&filename](int x) -> tstring { return filename; });
 
@@ -436,6 +510,17 @@ TEST_F(SaveSlicesOpTest, Slices) {
 
   // Add the tensor shapes and slices
   AddInput<tstring>(TensorShape({5}), [&tensorshapes](int x) -> tstring {
+=======
+  AddInput<string>(TensorShape({}),
+                   [&filename](int x) -> string { return filename; });
+
+  // Add the tensor names
+  AddInput<string>(TensorShape({5}),
+                   [&tensornames](int x) -> string { return tensornames[x]; });
+
+  // Add the tensor shapes and slices
+  AddInput<string>(TensorShape({5}), [&tensorshapes](int x) -> string {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return tensorshapes[x];
   });
 
@@ -459,12 +544,20 @@ TEST_F(SaveSlicesOpTest, Slices) {
     return *reinterpret_cast<qint32*>(&x) * qint8(2);
   });
 
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check that the checkpoint file is properly written
   checkpoint::TensorSliceReader reader(filename,
                                        checkpoint::OpenTableTensorSliceReader);
+<<<<<<< HEAD
   TF_EXPECT_OK(reader.status());
+=======
+  EXPECT_OK(reader.status());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // We expect to find all saved tensors
   {
@@ -555,6 +648,7 @@ TEST_F(SaveSlicesOpTest, Slices) {
 class SaveOpSlices2Test : public OpsTestBase {
  protected:
   void MakeOp() {
+<<<<<<< HEAD
     TF_ASSERT_OK(NodeDefBuilder("myop", "SaveSlices")
                      .Input(FakeInput())
                      .Input(FakeInput())
@@ -562,6 +656,16 @@ class SaveOpSlices2Test : public OpsTestBase {
                      .Input(FakeInput({DT_INT32, DT_INT32, DT_FLOAT}))
                      .Finalize(node_def()));
     TF_ASSERT_OK(InitOp());
+=======
+    RequireDefaultOps();
+    ASSERT_OK(NodeDefBuilder("myop", "SaveSlices")
+                  .Input(FakeInput())
+                  .Input(FakeInput())
+                  .Input(FakeInput())
+                  .Input(FakeInput({DT_INT32, DT_INT32, DT_FLOAT}))
+                  .Finalize(node_def()));
+    ASSERT_OK(InitOp());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -579,6 +683,7 @@ TEST_F(SaveOpSlices2Test, TwoSlices) {
 
   MakeOp();
   // Add a file name
+<<<<<<< HEAD
   AddInput<tstring>(TensorShape({}),
                     [&filename](int x) -> tstring { return filename; });
 
@@ -589,6 +694,17 @@ TEST_F(SaveOpSlices2Test, TwoSlices) {
 
   // Add the tensor shapes and slices
   AddInput<tstring>(TensorShape({3}), [&tensorshapes](int x) -> tstring {
+=======
+  AddInput<string>(TensorShape({}),
+                   [&filename](int x) -> string { return filename; });
+
+  // Add the tensor names
+  AddInput<string>(TensorShape({3}),
+                   [&tensornames](int x) -> string { return tensornames[x]; });
+
+  // Add the tensor shapes and slices
+  AddInput<string>(TensorShape({3}), [&tensorshapes](int x) -> string {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return tensorshapes[x];
   });
 
@@ -603,12 +719,20 @@ TEST_F(SaveOpSlices2Test, TwoSlices) {
   AddInput<float>(TensorShape({2, 4}),
                   [](int x) -> float { return static_cast<float>(x) / 10; });
 
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check that the checkpoint file is properly written
   checkpoint::TensorSliceReader reader(filename,
                                        checkpoint::OpenTableTensorSliceReader);
+<<<<<<< HEAD
   TF_EXPECT_OK(reader.status());
+=======
+  EXPECT_OK(reader.status());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   {
     // Reload the two slices of "four_by_sixteen" into that tensor.
@@ -659,6 +783,7 @@ TEST_F(SaveOpSlices2Test, TwoSlices) {
   }
 }
 
+<<<<<<< HEAD
 // Benchmark-related code below.
 
 static void BM_LargeTensorWrite(int iters, int num_elements) {
@@ -692,5 +817,7 @@ static void BM_LargeTensorWrite(int iters, int num_elements) {
 }
 BENCHMARK(BM_LargeTensorWrite)->Arg((1 << 30) / 4 /* 1GB float tensor */);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

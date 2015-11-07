@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // This file defines the StreamExecutor trace listener, used for inserting
 // non-device-specific instrumentation into the StreamExecutor.
 #ifndef TENSORFLOW_STREAM_EXECUTOR_TRACE_LISTENER_H_
@@ -23,7 +26,12 @@ limitations under the License.
 #include "tensorflow/stream_executor/launch_dim.h"
 #include "tensorflow/stream_executor/lib/status.h"
 
+<<<<<<< HEAD
 namespace stream_executor {
+=======
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 class Stream;
 
@@ -49,7 +57,11 @@ class TraceListener {
   virtual void LaunchSubmit(Stream* stream, const ThreadDim& thread_dims,
                             const BlockDim& block_dims,
                             const KernelBase& kernel,
+<<<<<<< HEAD
                             const KernelArgsArrayBase& args) {}
+=======
+                            const std::vector<KernelArg>& args) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   virtual void SynchronousMemcpyH2DBegin(int64 correlation_id,
                                          const void* host_src, int64 size,
@@ -64,10 +76,18 @@ class TraceListener {
                                             const port::Status* result) {}
 
   virtual void BlockHostUntilDoneBegin(int64 correlation_id, Stream* stream) {}
+<<<<<<< HEAD
   virtual void BlockHostUntilDoneComplete(int64 correlation_id,
                                           const port::Status* result) {}
 };
 
 }  // namespace stream_executor
+=======
+  virtual void BlockHostUntilDoneComplete(int64 correlation_id, bool result) {}
+};
+
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_TRACE_LISTENER_H_

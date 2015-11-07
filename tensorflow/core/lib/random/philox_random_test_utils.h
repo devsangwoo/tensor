@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifndef TENSORFLOW_LIB_RANDOM_PHILOX_RANDOM_TEST_UTILS_H_
 #define TENSORFLOW_LIB_RANDOM_PHILOX_RANDOM_TEST_UTILS_H_
 
@@ -35,8 +38,13 @@ void FillRandoms(PhiloxRandom gen, typename Distribution::ResultElementType* p,
                  int64 size) {
   const int granularity = Distribution::kResultElementCount;
 
+<<<<<<< HEAD
   CHECK(size % granularity == 0)
       << " size: " << size << " granularity: " << granularity;
+=======
+  CHECK(size % granularity == 0) << " size: " << size
+                                 << " granularity: " << granularity;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Distribution dist;
   for (int i = 0; i < size; i += granularity) {

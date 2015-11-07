@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,11 @@ limitations under the License.
 #include "tensorflow/core/framework/cost_graph.pb.h"
 #include "tensorflow/core/framework/step_stats.pb.h"
 #include "tensorflow/core/framework/tensor_description.pb.h"
+=======
+#include "tensorflow/core/graph/costmodel.h"
+
+#include "tensorflow/core/framework/step_stats.pb.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/platform/logging.h"
 
@@ -57,12 +63,21 @@ void CostModel::MergeFromLocal(const Graph& g, const CostModel& cm) {
     const int local_id = cm.Id(n);
     const int global_id = Id(n);
     if (local_id < 0 || global_id < 0) continue;
+<<<<<<< HEAD
     int num_slots = cm.slot_bytes_[local_id].size();
     Ensure(global_id, num_slots);
     count_[global_id] += cm.count_[local_id];
     time_[global_id] += cm.time_[local_id];
     if (num_slots > 0) {
       if (slot_bytes_[global_id].empty()) {
+=======
+    Ensure(global_id);
+    count_[global_id] += cm.count_[local_id];
+    time_[global_id] += cm.time_[local_id];
+    int num_slots = cm.slot_bytes_[local_id].size();
+    if (num_slots > 0) {
+      if (slot_bytes_[global_id].size() == 0) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         slot_bytes_[global_id].resize(num_slots);
       } else {
         CHECK_EQ(num_slots, slot_bytes_[global_id].size());
@@ -78,6 +93,7 @@ void CostModel::MergeFromGlobal(const CostModel& cm) {
   CHECK(is_global_);
   CHECK_EQ(true, cm.is_global());
   const int num_nodes = cm.count_.size();
+<<<<<<< HEAD
   for (int i = num_nodes - 1; i >= 0; --i) {
     count_[i] += cm.count_[i];
     time_[i] += cm.time_[i];
@@ -85,6 +101,15 @@ void CostModel::MergeFromGlobal(const CostModel& cm) {
     Ensure(i, num_slots);
     if (num_slots > 0) {
       if (slot_bytes_[i].empty()) {
+=======
+  Ensure(num_nodes);
+  for (int i = 0; i < num_nodes; ++i) {
+    count_[i] += cm.count_[i];
+    time_[i] += cm.time_[i];
+    int num_slots = cm.slot_bytes_[i].size();
+    if (num_slots > 0) {
+      if (slot_bytes_[i].size() == 0) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         slot_bytes_[i].resize(num_slots);
       } else {
         CHECK_EQ(num_slots, slot_bytes_[i].size());
@@ -106,7 +131,11 @@ void CostModel::MergeFromStats(const NodeNameToCostIdMap& map,
       // copy/send/recv nodes, feed/fetch, etc.
       if (iter == map.end()) continue;
       int32 global_id = iter->second;
+<<<<<<< HEAD
       Ensure(global_id, ns.output_size());
+=======
+      Ensure(global_id);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       int64 elapsed_micros = ns.op_end_rel_micros() - ns.op_start_rel_micros();
       count_[global_id]++;
       time_[global_id] += elapsed_micros;
@@ -122,11 +151,16 @@ void CostModel::MergeFromStats(const NodeNameToCostIdMap& map,
   }
 }
 
+<<<<<<< HEAD
 void CostModel::Ensure(int id, int num_outputs) {
+=======
+void CostModel::Ensure(int id) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (slot_bytes_.size() <= static_cast<size_t>(id)) {
     slot_bytes_.resize(id + 1);
     count_.resize(id + 1);
     time_.resize(id + 1);
+<<<<<<< HEAD
     max_mem_usage_.resize(id + 1);
     max_exec_time_.resize(id + 1);
     output_port_alloc_ids_.resize(id + 1);
@@ -147,12 +181,15 @@ void CostModel::Ensure(int id, int num_outputs) {
     max_mem_usage->output_port_mem.resize(num_outputs, Bytes(-1));
     max_mem_usage->output_port_shape.resize(num_outputs, unknown_shape_);
     max_mem_usage->output_port_type.resize(num_outputs, DT_INVALID);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
 void CostModel::SetNumOutputs(const Node* node, int num_outputs) {
   const int id = Id(node);
   if (id < 0) return;
+<<<<<<< HEAD
   // Do not resize the number of slots before checking its existing number of
   // slots.
   Ensure(id, 0);
@@ -162,6 +199,16 @@ void CostModel::SetNumOutputs(const Node* node, int num_outputs) {
         << "Cannot resize slot_bytes, node=" << node->name();
   }
   Ensure(id, num_outputs);
+=======
+  Ensure(id);
+  auto perslot = &slot_bytes_[id];
+  if (perslot->size() > 0) {
+    CHECK_EQ(num_outputs, perslot->size()) << "Cannot resize slot_bytes, node="
+                                           << node->name();
+  } else {
+    perslot->resize(num_outputs, Bytes(-1));
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void CostModel::RecordCount(const Node* node, int count) {
@@ -210,7 +257,11 @@ void CostModel::RecordTime(const Node* node, Microseconds time) {
   const int id = Id(node);
   if (id < 0) return;
   DCHECK(node->IsOp()) << node->DebugString();
+<<<<<<< HEAD
   Ensure(id, node->num_outputs());
+=======
+  Ensure(id);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   time_[id] += time;
 }
 
@@ -231,6 +282,7 @@ Microseconds CostModel::TimeEstimate(const Node* node) const {
 }
 
 void CostModel::CheckInitialized(const Graph& graph) const {
+<<<<<<< HEAD
   for (const Node* n : graph.op_nodes()) {
     CHECK(static_cast<size_t>(n->id()) < time_.size() &&
           time_[n->id()] >= Microseconds(0))
@@ -327,10 +379,26 @@ void CostModel::RecordMemoryStats(const Node* node,
   for (int64 alloc_id : memory_stats.persistent_tensor_alloc_ids()) {
     if (alloc_id > 0) {
       persistent_alloc_ids_.insert(alloc_id);
+=======
+  for (const Node* n : graph.nodes()) {
+    if (n->IsOp()) {
+      CHECK(static_cast<size_t>(n->id()) < time_.size() &&
+            time_[n->id()] >= Microseconds(0))
+          << ": no time estimate for " << n->DebugString();
+
+      CHECK(static_cast<size_t>(n->id()) < slot_bytes_.size())
+          << ": no size estimate for " << n->DebugString();
+      const auto& perslot = slot_bytes_[n->id()];
+      for (size_t i = 0; i < perslot.size(); i++) {
+        CHECK_GE(perslot[i], Bytes(0)) << ": no size estimate for output# " << i
+                                       << " of " << n->DebugString();
+      }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 }
 
+<<<<<<< HEAD
 void CostModel::RecordMaxExecutionTime(const Node* node, Microseconds time) {
   const int id = Id(node);
   if (id < 0) return;
@@ -375,6 +443,8 @@ bool CostModel::IsPersistentTensor(const Node* node, int64 alloc_id) const {
       .count(alloc_id);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Microseconds CostModel::CopyTimeEstimate(Bytes b, double network_latency_millis,
                                          double estimated_gbps) {
   // TODO(jeff,sanjay): estimate cost based on bandwidth along the
@@ -400,10 +470,13 @@ Microseconds CostModel::ComputationTimeEstimate(int64 math_ops) {
   return Microseconds(math_ops / 1000);
 }
 
+<<<<<<< HEAD
 void CostModel::IncrementUpdateTimes() { update_times_++; }
 
 int32 CostModel::GetUpdateTimes() const { return update_times_; }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // ----------------------------------------------------------------------------
 // InitCostModel
 // ----------------------------------------------------------------------------
@@ -427,7 +500,11 @@ static void AssignSizes(const Graph& g, CostModel* cost_model) {
     if (e->IsControlEdge()) {
       continue;
     }
+<<<<<<< HEAD
     const Node* src = e->src();
+=======
+    Node* src = e->src();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // TODO(josh11b): Get an estimate from the Op
     Bytes size(1);
@@ -461,6 +538,7 @@ static void EstimateComputationCosts(const Graph& g, CostModel* cost_model) {
 }  // namespace
 
 void CostModel::InitFromGraph(const Graph& g) {
+<<<<<<< HEAD
   const int num_node_ids = g.num_node_ids();
   slot_bytes_.reserve(num_node_ids);
   count_.reserve(num_node_ids);
@@ -469,12 +547,15 @@ void CostModel::InitFromGraph(const Graph& g) {
   max_exec_time_.reserve(num_node_ids);
   output_port_alloc_ids_.reserve(num_node_ids);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   AddNodesToCostModel(g, this);
   AssignSizes(g, this);
   EstimateComputationCosts(g, this);
   CheckInitialized(g);
 }
 
+<<<<<<< HEAD
 void CostModel::AddToCostGraphDef(const Graph* graph,
                                   CostGraphDef* cost_graph) const {
   std::vector<const Edge*> inputs;
@@ -543,6 +624,9 @@ void CostModel::AddToCostGraphDef(const Graph* graph,
 }
 
 void CostModel::WriteSummaryToLog() const {
+=======
+void CostModel::WriteToLog() {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   LOG(INFO) << " min_count_=" << min_count_;
   for (size_t i = 0; i < count_.size(); ++i) {
     LOG(INFO) << "Node " << i << " count " << count_[i] << " total time "
@@ -551,6 +635,7 @@ void CostModel::WriteSummaryToLog() const {
   }
 }
 
+<<<<<<< HEAD
 Bytes CostModel::MinTensorMemoryUsage(const TensorShapeProto& tensor_shape,
                                       const DataType& dtype) {
   if (tensor_shape.unknown_rank()) {
@@ -565,4 +650,6 @@ Bytes CostModel::MinTensorMemoryUsage(const TensorShapeProto& tensor_shape,
   return Bytes(num_coefficients * DataTypeSize(dtype));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

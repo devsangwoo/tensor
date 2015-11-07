@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+//
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // TableBuilder provides the interface used to build a Table
 // (an immutable and sorted map from keys to values).
 //
@@ -21,12 +28,21 @@ limitations under the License.
 // non-const method, all threads accessing the same TableBuilder must use
 // external synchronization.
 
+<<<<<<< HEAD
 #ifndef TENSORFLOW_CORE_LIB_IO_TABLE_BUILDER_H_
 #define TENSORFLOW_CORE_LIB_IO_TABLE_BUILDER_H_
 
 #include <stdint.h>
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/io/table_options.h"
+=======
+#ifndef TENSORFLOW_LIB_IO_TABLE_BUILDER_H_
+#define TENSORFLOW_LIB_IO_TABLE_BUILDER_H_
+
+#include <stdint.h>
+#include "tensorflow/core/lib/io/table_options.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 class WritableFile;
@@ -50,10 +66,16 @@ class TableBuilder {
   // REQUIRES: Finish(), Abandon() have not been called
   void Add(const StringPiece& key, const StringPiece& value);
 
+<<<<<<< HEAD
   // Advanced operation: writes any buffered key/value pairs to file.
   // Can be used to ensure that two adjacent entries never live in
   // the same data block.  Most clients should not need to use this method.
   // Does not flush the file itself.
+=======
+  // Advanced operation: flush any buffered key/value pairs to file.
+  // Can be used to ensure that two adjacent entries never live in
+  // the same data block.  Most clients should not need to use this method.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // REQUIRES: Finish(), Abandon() have not been called
   void Flush();
 
@@ -96,4 +118,8 @@ class TableBuilder {
 }  // namespace table
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_LIB_IO_TABLE_BUILDER_H_
+=======
+#endif  // TENSORFLOW_LIB_IO_TABLE_BUILDER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

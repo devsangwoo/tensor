@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // This is a registration-oriented interface for multiple platforms. It will
 // replace the MachineManager singleton interface, as MachineManager does not
 // currently support simultaneous use of multiple platforms.
@@ -22,14 +25,23 @@ limitations under the License.
 // In your BUILD rule, add a dependency on a platform plugin that you'd like
 // to use, such as:
 //
+<<<<<<< HEAD
 //   //third_party/tensorflow/stream_executor/cuda:cuda_platform
 //   //third_party/tensorflow/stream_executor/opencl:opencl_platform
+=======
+//   //perftools/gputools/executor/cuda:cuda_platform
+//   //perftools/gputools/executor/opencl:opencl_platform
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 // This will register platform plugins that can be discovered via this
 // interface. Sample API usage:
 //
 //   port::StatusOr<Platform*> platform_status =
+<<<<<<< HEAD
 //      se::MultiPlatformManager::PlatformWithName("OpenCL");
+=======
+//      gpu::MultiPlatformManager::PlatformWithName("OpenCL");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //   if (!platform_status.ok()) { ... }
 //   Platform* platform = platform_status.ValueOrDie();
 //   LOG(INFO) << platform->VisibleDeviceCount() << " devices visible";
@@ -56,10 +68,17 @@ limitations under the License.
 // And similarly, for standard interfaces (BLAS, RNG, etc.) you can add
 // dependencies on support libraries, e.g.:
 //
+<<<<<<< HEAD
 //    //third_party/tensorflow/stream_executor/cuda:pluton_blas_plugin
 //    //third_party/tensorflow/stream_executor/cuda:cudnn_plugin
 //    //third_party/tensorflow/stream_executor/cuda:cublas_plugin
 //    //third_party/tensorflow/stream_executor/cuda:curand_plugin
+=======
+//    //perftools/gputools/executor/cuda:pluton_blas_plugin
+//    //perftools/gputools/executor/cuda:cudnn_plugin
+//    //perftools/gputools/executor/cuda:cublas_plugin
+//    //perftools/gputools/executor/cuda:curand_plugin
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #ifndef TENSORFLOW_STREAM_EXECUTOR_MULTI_PLATFORM_MANAGER_H_
 #define TENSORFLOW_STREAM_EXECUTOR_MULTI_PLATFORM_MANAGER_H_
@@ -67,6 +86,7 @@ limitations under the License.
 #include <functional>
 #include <map>
 #include <memory>
+<<<<<<< HEAD
 #include <vector>
 
 #include "absl/strings/string_view.h"
@@ -77,6 +97,18 @@ limitations under the License.
 #include "tensorflow/stream_executor/platform/port.h"
 
 namespace stream_executor {
+=======
+#include "tensorflow/stream_executor/platform/port.h"
+
+#include "tensorflow/stream_executor/lib/status.h"
+#include "tensorflow/stream_executor/lib/statusor.h"
+#include "tensorflow/stream_executor/platform.h"
+#include "tensorflow/stream_executor/platform/mutex.h"
+#include "tensorflow/stream_executor/platform/port.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Manages multiple platforms that may be present on the current machine.
 class MultiPlatformManager {
@@ -84,6 +116,7 @@ class MultiPlatformManager {
   // Registers a platform object, returns an error status if the platform is
   // already registered. The associated listener, if not null, will be used to
   // trace events for ALL executors for that platform.
+<<<<<<< HEAD
   // Takes ownership of platform.
   static port::Status RegisterPlatform(std::unique_ptr<Platform> platform);
 
@@ -93,10 +126,18 @@ class MultiPlatformManager {
   //
   // If the platform has not already been initialized, it will be initialized
   // with a default set of parameters.
+=======
+  // Takes ownership of listener.
+  static port::Status RegisterPlatform(std::unique_ptr<Platform> platform);
+
+  // Retrieves the platform registered with the given platform name; e.g.
+  // "CUDA", "OpenCL", ...
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //
   // If the requested platform is not registered, an error status is returned.
   // Ownership of the platform is NOT transferred to the caller --
   // the MultiPlatformManager owns the platforms in a singleton-like fashion.
+<<<<<<< HEAD
   static port::StatusOr<Platform*> PlatformWithName(absl::string_view target);
   static port::StatusOr<Platform*> PlatformWithId(const Platform::Id& id);
 
@@ -106,10 +147,17 @@ class MultiPlatformManager {
   //
   // The platform will be initialized with the given options. If the platform
   // was already initialized, an error will be returned.
+=======
+  static port::StatusOr<Platform*> PlatformWithName(const string& target);
+
+  // Retrieves the platform registered with the given platform ID, which
+  // is an opaque (but comparable) value.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //
   // If the requested platform is not registered, an error status is returned.
   // Ownership of the platform is NOT transferred to the caller --
   // the MultiPlatformManager owns the platforms in a singleton-like fashion.
+<<<<<<< HEAD
   static port::StatusOr<Platform*> InitializePlatformWithName(
       absl::string_view target, const std::map<string, string>& options);
 
@@ -120,6 +168,12 @@ class MultiPlatformManager {
   // Returned Platforms are always initialized.
   static port::StatusOr<std::vector<Platform*>> PlatformsWithFilter(
       const std::function<bool(const Platform*)>& filter);
+=======
+  static port::StatusOr<Platform*> PlatformWithId(const Platform::Id& id);
+
+  // Clears the set of registered platforms, primarily used for testing.
+  static void ClearPlatformRegistry();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Although the MultiPlatformManager "owns" its platforms, it holds them as
   // undecorated pointers to prevent races during program exit (between this
@@ -133,6 +187,7 @@ class MultiPlatformManager {
   // of any platforms registered with it, and leak checking should be disabled
   // during allocation of such Platforms, to avoid spurious reporting at program
   // exit.
+<<<<<<< HEAD
 
   // Interface for a listener that gets notfied at certain events.
   class Listener {
@@ -160,5 +215,44 @@ class MultiPlatformManager {
 // multi_platform_manager_listener);
 DECLARE_MODULE_INITIALIZER(multi_platform_manager);
 DECLARE_MODULE_INITIALIZER(multi_platform_manager_listener);
+=======
+  using PlatformMap = std::map<string, Platform*>;
+
+  // Provides access to the available set of platforms under a lock.
+  static port::Status WithPlatforms(
+      std::function<port::Status(PlatformMap*)> callback) {
+    mutex_lock lock(platforms_mutex_);
+    return callback(GetPlatformMap());
+  }
+
+ private:
+  // mutex that guards the platform map.
+  static mutex platforms_mutex_;
+
+  // TODO(b/22689637): Clean up these two maps; make sure they coexist nicely.
+  // TODO(b/22689637): Move this (whatever the final/"official" map is) to
+  // plugin_regstry.h, along with the associated functionality.
+  // Platform-name-to-object mapping. These platforms are registered via module
+  // initializers, and linkage determines which platforms are available to a
+  // given target.
+  static PlatformMap* GetPlatformMap() {
+    static PlatformMap* instance = new PlatformMap;
+    return instance;
+  }
+
+  // Holds a Platform::Id-to-object mapping.
+  // Unlike platforms_ above, this map does not own its contents.
+  static std::map<Platform::Id, Platform*>* GetPlatformByIdMap() {
+    using PlatformIdMap = std::map<Platform::Id, Platform*>;
+    static PlatformIdMap* instance = new PlatformIdMap;
+    return instance;
+  }
+
+  SE_DISALLOW_COPY_AND_ASSIGN(MultiPlatformManager);
+};
+
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_MULTI_PLATFORM_MANAGER_H_

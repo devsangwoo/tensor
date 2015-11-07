@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,10 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_GRAPH_COLORS_H_
 #define TENSORFLOW_CORE_GRAPH_COLORS_H_
+=======
+#ifndef TENSORFLOW_GRAPH_COLORS_H_
+#define TENSORFLOW_GRAPH_COLORS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -26,4 +31,8 @@ const char* ColorFor(int dindex);
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_GRAPH_COLORS_H_
+=======
+#endif  // TENSORFLOW_GRAPH_COLORS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

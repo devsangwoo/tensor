@@ -7,14 +7,21 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+<<<<<<< HEAD
 #ifndef CXX11_SRC_FIXEDPOINT_MATMATPRODUCT_H_
 #define CXX11_SRC_FIXEDPOINT_MATMATPRODUCT_H_
+=======
+#ifndef EIGEN_CXX11_FIXED_POINT_MAT_MAT_PRODUCT_H
+#define EIGEN_CXX11_FIXED_POINT_MAT_MAT_PRODUCT_H
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace Eigen {
 namespace internal {
 
 // Accumulate the product of 2 QInt8 inputs on 32 bits to prevent
 // overflows
+<<<<<<< HEAD
 template <>
 struct scalar_product_traits<QInt8, QInt8> {
   enum { Defined = 1 };
@@ -26,11 +33,19 @@ struct scalar_product_traits<QInt8, QInt8> {
 template <>
 struct scalar_product_traits<QInt16, QInt16> {
   enum { Defined = 1 };
+=======
+template<> struct scalar_product_traits<QInt8, QInt8>
+{
+  enum {
+    Defined = 1
+  };
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   typedef QInt32 ReturnType;
 };
 
 // Accumulate the product of QInt8 inputs with QUint8 inputs on 32 bits
 // to prevent overflows
+<<<<<<< HEAD
 template <>
 struct scalar_product_traits<QInt8, QUInt8> {
   enum { Defined = 1 };
@@ -42,6 +57,13 @@ struct scalar_product_traits<QInt8, QUInt8> {
 template <>
 struct scalar_product_traits<QUInt8, QInt8> {
   enum { Defined = 1 };
+=======
+template<> struct scalar_product_traits<QInt8, QUInt8>
+{
+  enum {
+    Defined = 1
+  };
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   typedef QInt32 ReturnType;
 };
 
@@ -51,16 +73,26 @@ struct scalar_product_traits<QUInt8, QInt8> {
 // signed 8bit integers
 #ifndef EIGEN_USE_OPTIMIZED_INT8_INT8_MAT_MAT_PRODUCT
 
+<<<<<<< HEAD
 template <bool _ConjLhs, bool _ConjRhs>
 class gebp_traits<QInt8, QInt8, _ConjLhs, _ConjRhs> {
  public:
+=======
+template<bool _ConjLhs, bool _ConjRhs>
+class gebp_traits<QInt8, QInt8, _ConjLhs, _ConjRhs>
+{
+public:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   typedef QInt8 LhsScalar;
   typedef QInt8 RhsScalar;
   typedef QInt32 ResScalar;
 
+<<<<<<< HEAD
   typedef typename packet_traits<LhsScalar>::type LhsPacket;
   typedef LhsPacket LhsPacket4Packing;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   enum {
     // register block size along the M and N directions
     // One for the current implementation
@@ -74,6 +106,7 @@ class gebp_traits<QInt8, QInt8, _ConjLhs, _ConjRhs> {
 };
 
 // The signed 8bit Mat-Mat product itself.
+<<<<<<< HEAD
 template <typename Index, typename DataMapper, int mr, int nr,
           bool ConjugateLhs, bool ConjugateRhs>
 struct gebp_kernel<QInt8, QInt8, Index, DataMapper, mr, nr, ConjugateLhs,
@@ -92,6 +125,24 @@ EIGEN_DONT_INLINE void gebp_kernel<QInt8, QInt8, Index, DataMapper, mr, nr,
 operator()(const DataMapper& res, const QInt8* blockA, const QInt8* blockB,
            Index rows, Index depth, Index cols, QInt32 alpha, Index strideA,
            Index strideB, Index offsetA, Index offsetB) {
+=======
+template<typename Index, typename DataMapper, int mr, int nr, bool ConjugateLhs, bool ConjugateRhs>
+struct gebp_kernel<QInt8, QInt8, Index, DataMapper, mr, nr, ConjugateLhs, ConjugateRhs>
+{
+  EIGEN_DONT_INLINE
+  void operator()(const DataMapper& res, const QInt8* blockA, const QInt8* blockB,
+                  Index rows, Index depth, Index cols, QInt32 alpha,
+                  Index strideA=-1, Index strideB=-1, Index offsetA=0, Index offsetB=0);
+};
+
+template<typename Index, typename DataMapper, int mr, int nr, bool ConjugateLhs, bool ConjugateRhs>
+EIGEN_DONT_INLINE
+void gebp_kernel<QInt8, QInt8, Index, DataMapper, mr, nr, ConjugateLhs, ConjugateRhs>
+::operator()(const DataMapper& res, const QInt8* blockA, const QInt8* blockB,
+             Index rows, Index depth, Index cols, QInt32 alpha,
+             Index strideA, Index strideB, Index offsetA, Index offsetB)
+{
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EIGEN_STATIC_ASSERT(!ConjugateLhs, YOU_MADE_A_PROGRAMMING_MISTAKE);
   EIGEN_STATIC_ASSERT(!ConjugateRhs, YOU_MADE_A_PROGRAMMING_MISTAKE);
 
@@ -121,19 +172,33 @@ operator()(const DataMapper& res, const QInt8* blockA, const QInt8* blockB,
 }
 #endif
 
+<<<<<<< HEAD
 // This definition tackle the case where the lhs is encoded using signed 8bit
 // integers and the rhs using unsigned 8bit integers.
 #ifndef EIGEN_USE_OPTIMIZED_INT8_UINT8_MAT_MAT_PRODUCT
 template <bool _ConjLhs, bool _ConjRhs>
 class gebp_traits<QInt8, QUInt8, _ConjLhs, _ConjRhs> {
  public:
+=======
+
+// This definition tackle the case where the lhs is encoded using signed 8bit
+// integers and the rhs using unsigned 8bit integers.
+#ifndef EIGEN_USE_OPTIMIZED_INT8_UINT8_MAT_MAT_PRODUCT
+template<bool _ConjLhs, bool _ConjRhs>
+class gebp_traits<QInt8, QUInt8, _ConjLhs, _ConjRhs>
+{
+public:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   typedef QInt8 LhsScalar;
   typedef QUInt8 RhsScalar;
   typedef QInt32 ResScalar;
 
+<<<<<<< HEAD
   typedef typename packet_traits<LhsScalar>::type LhsPacket;
   typedef LhsPacket LhsPacket4Packing;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   enum {
     // register block size along the M and N directions
     // One for the current implementation
@@ -147,6 +212,7 @@ class gebp_traits<QInt8, QUInt8, _ConjLhs, _ConjRhs> {
 };
 
 // Mat-Mat product of a signed 8bit lhs with an unsigned 8bit rhs
+<<<<<<< HEAD
 template <typename Index, typename DataMapper, int mr, int nr,
           bool ConjugateLhs, bool ConjugateRhs>
 struct gebp_kernel<QInt8, QUInt8, Index, DataMapper, mr, nr, ConjugateLhs,
@@ -165,6 +231,24 @@ EIGEN_DONT_INLINE void gebp_kernel<QInt8, QUInt8, Index, DataMapper, mr, nr,
 operator()(const DataMapper& res, const QInt8* blockA, const QUInt8* blockB,
            Index rows, Index depth, Index cols, QInt32 alpha, Index strideA,
            Index strideB, Index offsetA, Index offsetB) {
+=======
+template<typename Index, typename DataMapper, int mr, int nr, bool ConjugateLhs, bool ConjugateRhs>
+struct gebp_kernel<QInt8, QUInt8, Index, DataMapper, mr, nr, ConjugateLhs, ConjugateRhs>
+{
+  EIGEN_DONT_INLINE
+  void operator()(const DataMapper& res, const QInt8* blockA, const QUInt8* blockB,
+                  Index rows, Index depth, Index cols, QInt32 alpha,
+                  Index strideA=-1, Index strideB=-1, Index offsetA=0, Index offsetB=0);
+};
+
+template<typename Index, typename DataMapper, int mr, int nr, bool ConjugateLhs, bool ConjugateRhs>
+EIGEN_DONT_INLINE
+void gebp_kernel<QInt8, QUInt8, Index, DataMapper, mr, nr, ConjugateLhs, ConjugateRhs>
+::operator()(const DataMapper& res, const QInt8* blockA, const QUInt8* blockB,
+             Index rows, Index depth, Index cols, QInt32 alpha,
+             Index strideA, Index strideB, Index offsetA, Index offsetB)
+{
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EIGEN_STATIC_ASSERT(!ConjugateLhs, YOU_MADE_A_PROGRAMMING_MISTAKE);
   EIGEN_STATIC_ASSERT(!ConjugateRhs, YOU_MADE_A_PROGRAMMING_MISTAKE);
 
@@ -194,19 +278,33 @@ operator()(const DataMapper& res, const QInt8* blockA, const QUInt8* blockB,
 }
 #endif
 
+<<<<<<< HEAD
 // This definition tackle the case where the khs is encoded using unsigned 8bit
 // integers and the rhs using signed 8bit integers.
 #ifndef EIGEN_USE_OPTIMIZED_UINT8_INT8_MAT_MAT_PRODUCT
 template <bool _ConjLhs, bool _ConjRhs>
 class gebp_traits<QUInt8, QInt8, _ConjLhs, _ConjRhs> {
  public:
+=======
+
+// This definition tackle the case where the khs is encoded using unsigned 8bit
+// integers and the rhs using signed 8bit integers.
+#ifndef EIGEN_USE_OPTIMIZED_UINT8_INT8_MAT_MAT_PRODUCT
+template<bool _ConjLhs, bool _ConjRhs>
+class gebp_traits<QUInt8, QInt8, _ConjLhs, _ConjRhs>
+{
+public:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   typedef QUInt8 LhsScalar;
   typedef QInt8 RhsScalar;
   typedef QInt32 ResScalar;
 
+<<<<<<< HEAD
   typedef typename packet_traits<LhsScalar>::type LhsPacket;
   typedef LhsPacket LhsPacket4Packing;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   enum {
     // register block size along the M and N directions
     // One for the current implementation
@@ -219,6 +317,7 @@ class gebp_traits<QUInt8, QInt8, _ConjLhs, _ConjRhs> {
   };
 };
 
+<<<<<<< HEAD
 // Mat-Mat product of an unsigned 8bit lhs with a signed 8bit rhs
 template <typename Index, typename DataMapper, int mr, int nr,
           bool ConjugateLhs, bool ConjugateRhs>
@@ -310,6 +409,26 @@ EIGEN_DONT_INLINE void gebp_kernel<QInt16, QInt16, Index, DataMapper, mr, nr,
 operator()(const DataMapper& res, const QInt16* blockA, const QInt16* blockB,
            Index rows, Index depth, Index cols, QInt32 alpha, Index strideA,
            Index strideB, Index offsetA, Index offsetB) {
+=======
+
+// Mat-Mat product of an unsigned 8bit lhs with a signed 8bit rhs
+template<typename Index, typename DataMapper, int mr, int nr, bool ConjugateLhs, bool ConjugateRhs>
+struct gebp_kernel<QUInt8, QInt8, Index, DataMapper, mr, nr, ConjugateLhs, ConjugateRhs>
+{
+  EIGEN_DONT_INLINE
+  void operator()(const DataMapper& res, const QUInt8* blockA, const QInt8* blockB,
+                  Index rows, Index depth, Index cols, QInt32 alpha,
+                  Index strideA=-1, Index strideB=-1, Index offsetA=0, Index offsetB=0);
+};
+
+template<typename Index, typename DataMapper, int mr, int nr, bool ConjugateLhs, bool ConjugateRhs>
+EIGEN_DONT_INLINE
+void gebp_kernel<QUInt8, QInt8, Index, DataMapper, mr, nr, ConjugateLhs, ConjugateRhs>
+::operator()(const DataMapper& res, const QUInt8* blockA, const QInt8* blockB,
+             Index rows, Index depth, Index cols, QInt32 alpha,
+             Index strideA, Index strideB, Index offsetA, Index offsetB)
+{
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EIGEN_STATIC_ASSERT(!ConjugateLhs, YOU_MADE_A_PROGRAMMING_MISTAKE);
   EIGEN_STATIC_ASSERT(!ConjugateRhs, YOU_MADE_A_PROGRAMMING_MISTAKE);
 
@@ -342,4 +461,10 @@ operator()(const DataMapper& res, const QInt16* blockA, const QInt16* blockB,
 }  // namespace internal
 }  // namespace Eigen
 
+<<<<<<< HEAD
 #endif  // CXX11_SRC_FIXEDPOINT_MATMATPRODUCT_H_
+=======
+
+
+#endif  // EIGEN_CXX11_FIXED_POINT_MAT_MAT_PRODUCT_H
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

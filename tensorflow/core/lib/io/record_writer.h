@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +28,14 @@ limitations under the License.
 #include "tensorflow/core/platform/cord.h"
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_LIB_IO_RECORD_WRITER_H_
+#define TENSORFLOW_LIB_IO_RECORD_WRITER_H_
+
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -34,6 +43,7 @@ class WritableFile;
 
 namespace io {
 
+<<<<<<< HEAD
 class RecordWriterOptions {
  public:
   enum CompressionType { NONE = 0, ZLIB_COMPRESSION = 1 };
@@ -68,10 +78,20 @@ class RecordWriter {
   //
   // TODO(jhseu): Require that callers explicitly call Close() and remove the
   // implicit Close() call in the destructor.
+=======
+class RecordWriter {
+ public:
+  // Create a writer that will append data to "*dest".
+  // "*dest" must be initially empty.
+  // "*dest" must remain live while this Writer is in use.
+  explicit RecordWriter(WritableFile* dest);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~RecordWriter();
 
   Status WriteRecord(StringPiece slice);
 
+<<<<<<< HEAD
 #if defined(PLATFORM_GOOGLE)
   Status WriteRecord(const absl::Cord& data);
 #endif
@@ -113,10 +133,15 @@ class RecordWriter {
     return crc32c::Mask(crc32c::Value(data));
   }
 #endif
+=======
+ private:
+  WritableFile* const dest_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   TF_DISALLOW_COPY_AND_ASSIGN(RecordWriter);
 };
 
+<<<<<<< HEAD
 void RecordWriter::PopulateHeader(char* header, const char* data, size_t n) {
   core::EncodeFixed64(header + 0, n);
   core::EncodeFixed32(header + sizeof(uint64),
@@ -143,3 +168,9 @@ void RecordWriter::PopulateFooter(char* footer, const absl::Cord& data) {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_LIB_IO_RECORD_WRITER_H_
+=======
+}  // namespace io
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_LIB_IO_RECORD_WRITER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

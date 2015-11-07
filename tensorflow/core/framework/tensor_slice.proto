@@ -1,11 +1,15 @@
 // Protocol buffer representing slices of a tensor
 
 syntax = "proto3";
+<<<<<<< HEAD
 option cc_enable_arenas = true;
 option java_outer_classname = "TensorSliceProtos";
 option java_multiple_files = true;
 option java_package = "org.tensorflow.framework";
 option go_package = "github.com/tensorflow/tensorflow/tensorflow/go/core/framework";
+=======
+// option cc_enable_arenas = true;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 package tensorflow;
 

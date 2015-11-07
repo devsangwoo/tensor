@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,11 +25,32 @@ limitations under the License.
   EXPECT_EQ(::tensorflow::Status::OK(), (statement))
 #define TF_ASSERT_OK(statement) \
   ASSERT_EQ(::tensorflow::Status::OK(), (statement))
+=======
+#ifndef TENSORFLOW_LIB_CORE_STATUS_TEST_UTIL_H_
+#define TENSORFLOW_LIB_CORE_STATUS_TEST_UTIL_H_
+
+#include <gtest/gtest.h>
+#include "tensorflow/core/public/status.h"
+
+// Macros for testing the results of functions that return util::Status.
+
+#define EXPECT_OK(statement) EXPECT_EQ(::tensorflow::Status::OK(), (statement))
+#define ASSERT_OK(statement) ASSERT_EQ(::tensorflow::Status::OK(), (statement))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // There are no EXPECT_NOT_OK/ASSERT_NOT_OK macros since they would not
 // provide much value (when they fail, they would just print the OK status
 // which conveys no more information than EXPECT_FALSE(status.ok());
+<<<<<<< HEAD
 // If you want to check for particular errors, a better alternative is:
 // EXPECT_EQ(..expected tensorflow::error::Code..., status.code());
 
 #endif  // TENSORFLOW_CORE_LIB_CORE_STATUS_TEST_UTIL_H_
+=======
+// If you want to check for particular errors, better alternatives are:
+// EXPECT_EQ(::util::Status(...expected error...), status.StripMessage());
+// EXPECT_THAT(status.ToString(), HasSubstr("expected error"));
+// Also, see testing/lib/util/status_util.h.
+
+#endif  // TENSORFLOW_LIB_CORE_STATUS_TEST_UTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

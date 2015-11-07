@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,17 +36,38 @@ Tensor VecShape(int64 v) {
     shape.vec<int32>()(0) = v;
     return shape;
   }
+=======
+#include <random>
+
+#include "tensorflow/core/common_runtime/kernel_benchmark_testlib.h"
+#include "tensorflow/core/lib/random/philox_random.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/tensor.h"
+#include <gtest/gtest.h>
+
+namespace tensorflow {
+
+Tensor Int32(int32 v) {
+  Tensor t(DT_INT32, TensorShape({}));
+  t.scalar<int32>()() = v;
+  return t;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Graph* RandomUniform(int64 n) {
   Graph* g = new Graph(OpRegistry::Global());
+<<<<<<< HEAD
   test::graph::RandomUniform(g, test::graph::Constant(g, VecShape(n)),
                              DT_FLOAT);
+=======
+  test::graph::RandomUniform(g, test::graph::Constant(g, Int32(n)), DT_FLOAT);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return g;
 }
 
 Graph* RandomNormal(int64 n) {
   Graph* g = new Graph(OpRegistry::Global());
+<<<<<<< HEAD
   test::graph::RandomGaussian(g, test::graph::Constant(g, VecShape(n)),
                               DT_FLOAT);
   return g;
@@ -55,11 +77,25 @@ Graph* TruncatedNormal(int64 n) {
   Graph* g = new Graph(OpRegistry::Global());
   test::graph::TruncatedNormal(g, test::graph::Constant(g, VecShape(n)),
                                DT_FLOAT);
+=======
+  test::graph::RandomGaussian(g, test::graph::Constant(g, Int32(n)), DT_FLOAT);
+  return g;
+}
+
+Graph* RandomParameters(int64 n) {
+  Graph* g = new Graph(OpRegistry::Global());
+  test::graph::RandomParameters(g, test::graph::Constant(g, Int32(n)),
+                                DT_FLOAT);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return g;
 }
 
 #define BM_RNG(DEVICE, RNG)                                   \
+<<<<<<< HEAD
   void BM_##DEVICE##_##RNG(int iters, int arg) {              \
+=======
+  static void BM_##DEVICE##_##RNG(int iters, int arg) {       \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     testing::ItemsProcessed(static_cast<int64>(iters) * arg); \
     test::Benchmark(#DEVICE, RNG(arg)).Run(iters);            \
   }                                                           \
@@ -67,6 +103,7 @@ Graph* TruncatedNormal(int64 n) {
 
 BM_RNG(cpu, RandomUniform);
 BM_RNG(cpu, RandomNormal);
+<<<<<<< HEAD
 BM_RNG(cpu, TruncatedNormal);
 
 BM_RNG(gpu, RandomUniform);
@@ -94,6 +131,15 @@ void BM_cpu_RandomGamma(int iters, int nsamp, int nalpha) {
 BENCHMARK(BM_cpu_RandomGamma)->RangePair(1 << 14, 4 << 15, 2, 50);
 
 void BM_PhiloxRandom(int iters) {
+=======
+BM_RNG(cpu, RandomParameters);
+
+BM_RNG(gpu, RandomUniform);
+BM_RNG(gpu, RandomNormal);
+BM_RNG(gpu, RandomParameters);
+
+static void BM_PhiloxRandom(int iters) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Fill 2M random numbers
   int count = 2 << 20;
 
@@ -117,7 +163,11 @@ void BM_PhiloxRandom(int iters) {
 }
 BENCHMARK(BM_PhiloxRandom);
 
+<<<<<<< HEAD
 void BM_StdMTRandom(int iters) {
+=======
+static void BM_StdMTRandom(int iters) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Fill 2M random numbers
   int count = 2 << 20;
 
@@ -125,11 +175,19 @@ void BM_StdMTRandom(int iters) {
 
   std::mt19937 gen(0x12345);
 
+<<<<<<< HEAD
   uint_fast32_t val = 1;
   for (int i = 0; i < iters; ++i) {
     for (int j = 0; j < count; ++j) {
       /// each invocation of gen() returns 32-bit sample
       uint_fast32_t sample = gen();
+=======
+  int val = 1;
+  for (int i = 0; i < iters; ++i) {
+    for (int j = 0; j < count; ++j) {
+      /// each invocation of gen() returns 32-bit sample
+      uint32 sample = gen();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       // use the result trivially so the compiler does not optimize it away
       val ^= sample;
@@ -141,5 +199,9 @@ void BM_StdMTRandom(int iters) {
 }
 BENCHMARK(BM_StdMTRandom);
 
+<<<<<<< HEAD
 }  // namespace
 }  // namespace tensorflow
+=======
+}  // end namespace tensorflow
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

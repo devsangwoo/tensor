@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,22 +19,33 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+=======
+"""Tests for the SWIG-wrapped events writer."""
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import os.path
 
 from tensorflow.core.framework import summary_pb2
 from tensorflow.core.util import event_pb2
+<<<<<<< HEAD
 from tensorflow.python import _pywrap_events_writer
 from tensorflow.python.framework import errors
 from tensorflow.python.framework import test_util
 from tensorflow.python.lib.io import tf_record
 from tensorflow.python.platform import googletest
 from tensorflow.python.util import compat
+=======
+from tensorflow.python import pywrap_tensorflow
+from tensorflow.python.lib.io import tf_record
+from tensorflow.python.framework import test_util
+from tensorflow.python.platform import googletest
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 class PywrapeventsWriterTest(test_util.TensorFlowTestCase):
 
   def testWriteEvents(self):
     file_prefix = os.path.join(self.get_temp_dir(), "events")
+<<<<<<< HEAD
     writer = _pywrap_events_writer.EventsWriter(compat.as_bytes(file_prefix))
     filename = compat.as_text(writer.FileName())
     event_written = event_pb2.Event(
@@ -42,11 +54,23 @@ class PywrapeventsWriterTest(test_util.TensorFlowTestCase):
         summary=summary_pb2.Summary(
             value=[summary_pb2.Summary.Value(
                 tag="foo", simple_value=89.0)]))
+=======
+    writer = pywrap_tensorflow.EventsWriter(file_prefix)
+    filename = writer.FileName()
+    event_written = event_pb2.Event(
+        wall_time=123.45, step=67,
+        summary=summary_pb2.Summary(
+            value=[summary_pb2.Summary.Value(tag="foo", simple_value=89.0)]))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     writer.WriteEvent(event_written)
     writer.Flush()
     writer.Close()
 
+<<<<<<< HEAD
     with self.assertRaises(errors.NotFoundError):
+=======
+    with self.assertRaises(IOError):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       for r in tf_record.tf_record_iterator(filename + "DOES_NOT_EXIST"):
         self.assertTrue(False)
 
@@ -67,6 +91,7 @@ class PywrapeventsWriterTest(test_util.TensorFlowTestCase):
       next(reader)
 
   def testWriteEventInvalidType(self):
+<<<<<<< HEAD
 
     class _Invalid(object):
 
@@ -75,6 +100,12 @@ class PywrapeventsWriterTest(test_util.TensorFlowTestCase):
 
     with self.assertRaisesRegexp(TypeError, "Invalid"):
       _pywrap_events_writer.EventsWriter(b"foo").WriteEvent(_Invalid())
+=======
+    class _Invalid(object):
+      def __str__(self): return "Invalid"
+    with self.assertRaisesRegexp(TypeError, "Invalid"):
+      pywrap_tensorflow.EventsWriter("foo").WriteEvent(_Invalid())
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 if __name__ == "__main__":

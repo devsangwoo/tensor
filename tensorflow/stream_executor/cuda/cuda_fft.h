@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // CUDA-specific support for FFT functionality -- this wraps the cuFFT library
 // capabilities, and is only included into CUDA implementation code -- it will
 // not introduce cuda headers into other code.
@@ -20,6 +23,7 @@ limitations under the License.
 #ifndef TENSORFLOW_STREAM_EXECUTOR_CUDA_CUDA_FFT_H_
 #define TENSORFLOW_STREAM_EXECUTOR_CUDA_CUDA_FFT_H_
 
+<<<<<<< HEAD
 #include "third_party/gpus/cuda/include/cufft.h"
 #include "tensorflow/stream_executor/fft.h"
 #include "tensorflow/stream_executor/platform/port.h"
@@ -33,10 +37,26 @@ class Stream;
 namespace gpu {
 
 class GpuExecutor;
+=======
+#include "tensorflow/stream_executor/fft.h"
+#include "tensorflow/stream_executor/platform/port.h"
+#include "tensorflow/stream_executor/plugin_registry.h"
+#include "third_party/gpus/cuda/include/cufft.h"
+
+namespace perftools {
+namespace gputools {
+
+class Stream;
+
+namespace cuda {
+
+class CUDAExecutor;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Opaque and unique indentifier for the cuFFT plugin.
 extern const PluginId kCuFftPlugin;
 
+<<<<<<< HEAD
 // CUDAFftPlan uses deferred initialization. Only a single call of
 // Initialize() is allowed to properly create cufft plan and set member
 // variable is_initialized_ to true. Newly added interface that uses member
@@ -51,10 +71,27 @@ class CUDAFftPlan : public fft::Plan {
         scratch_(nullptr),
         scratch_size_bytes_(0),
         is_initialized_(false) {}
+=======
+class CUDAFftPlan : public fft::Plan {
+ public:
+  // Constructor creating 1d FFT plan.
+  CUDAFftPlan(CUDAExecutor *parent, uint64 num_x, fft::Type type);
+  // Constructor creating 2d FFT plan.
+  CUDAFftPlan(CUDAExecutor *parent, uint64 num_x, uint64 num_y, fft::Type type);
+  // Constructor creating 3d FFT plan.
+  CUDAFftPlan(CUDAExecutor *parent, uint64 num_x, uint64 num_y, uint64 num_z,
+              fft::Type type);
+  // Constructor creating batched FFT plan.
+  CUDAFftPlan(CUDAExecutor *parent, int rank, uint64 *elem_count,
+              uint64 *input_embed, uint64 input_stride, uint64 input_distance,
+              uint64 *output_embed, uint64 output_stride,
+              uint64 output_distance, fft::Type type, int batch_count);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~CUDAFftPlan() override;
 
   // Get FFT direction in cuFFT based on FFT type.
   int GetFftDirection() const;
+<<<<<<< HEAD
   cufftHandle GetPlan() const {
     if (IsInitialized()) {
       return plan_;
@@ -89,6 +126,14 @@ class CUDAFftPlan : public fft::Plan {
   DeviceMemory<uint8> scratch_;
   size_t scratch_size_bytes_;
   bool is_initialized_;
+=======
+  cufftHandle GetPlan() const { return plan_; }
+
+ private:
+  CUDAExecutor *parent_;
+  cufftHandle plan_;
+  fft::Type fft_type_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // FFT support for CUDA platform via cuFFT library.
@@ -96,7 +141,11 @@ class CUDAFftPlan : public fft::Plan {
 // This satisfies the platform-agnostic FftSupport interface.
 //
 // Note that the cuFFT handle that this encapsulates is implicitly tied to the
+<<<<<<< HEAD
 // context (and, as a result, the device) that the parent GpuExecutor is tied
+=======
+// context (and, as a result, the device) that the parent CUDAExecutor is tied
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // to. This simply happens as an artifact of creating the cuFFT handle when a
 // CUDA context is active.
 //
@@ -104,13 +153,21 @@ class CUDAFftPlan : public fft::Plan {
 // context of parent_, so all context is explicit.
 class CUDAFft : public fft::FftSupport {
  public:
+<<<<<<< HEAD
   explicit CUDAFft(GpuExecutor* parent) : parent_(parent) {}
+=======
+  explicit CUDAFft(CUDAExecutor *parent) : parent_(parent) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~CUDAFft() override {}
 
   TENSORFLOW_STREAM_EXECUTOR_GPU_FFT_SUPPORT_OVERRIDES
 
  private:
+<<<<<<< HEAD
   GpuExecutor* parent_;
+=======
+  CUDAExecutor *parent_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Two helper functions that execute dynload::cufftExec?2?.
 
@@ -131,7 +188,13 @@ class CUDAFft : public fft::FftSupport {
   SE_DISALLOW_COPY_AND_ASSIGN(CUDAFft);
 };
 
+<<<<<<< HEAD
 }  // namespace gpu
 }  // namespace stream_executor
+=======
+}  // namespace cuda
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_CUDA_CUDA_FFT_H_

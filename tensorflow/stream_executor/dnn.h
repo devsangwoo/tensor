@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Neural Net operation support for StreamExecutor instances.
 //
 // This is an abstract interface for a platform to optionally support common
@@ -22,6 +25,7 @@ limitations under the License.
 #ifndef TENSORFLOW_STREAM_EXECUTOR_DNN_H_
 #define TENSORFLOW_STREAM_EXECUTOR_DNN_H_
 
+<<<<<<< HEAD
 #include <functional>
 #include <limits>
 #include <memory>
@@ -100,6 +104,31 @@ inline absl::Span<int64> AsInt64Slice(T* repeated_field) {
       repeated_field->size());
 }
 
+=======
+#include "tensorflow/stream_executor/device_memory.h"
+#include "tensorflow/stream_executor/lib/array_slice.h"
+#include "tensorflow/stream_executor/lib/status.h"
+#include "tensorflow/stream_executor/platform/logging.h"
+#include "tensorflow/stream_executor/platform/port.h"
+
+namespace perftools {
+namespace gputools {
+
+class Stream;
+
+namespace dnn {
+
+// Describes how an input or output layer's data is formatted.
+// Specify int64 so there's no padding in BatchDescriptor.
+enum class DataLayout : int64 {
+  kYXDepthBatch = 0,  // Same as dist_belief::DF_DEPTH_MAJOR.
+  kYXBatchDepth,      // Same as dist_belief::DF_BATCH_MAJOR.
+  kBatchYXDepth,      // Same as run_brain output, and tensorflow's layout.
+  kBatchDepthYX,      // cuDNN's NCHW layout, data laid out as image, feature,
+                      // maps, rows, columns.
+};
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Returns a string representation of the given data layout.
 string DataLayoutString(DataLayout layout);
 
@@ -110,6 +139,7 @@ enum class QuantizedActivationMode {
   k32Bit = 4,
 };
 
+<<<<<<< HEAD
 // A helper class to convert C/C++ types to the proper enums.
 template <typename T>
 struct ToDataType;
@@ -211,6 +241,8 @@ class RnnStateTensorDescriptor {
 // Returns a string representation of the given quantization mode.
 string QuantizedActivationModeString(QuantizedActivationMode mode);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Describes the dimensions that a layer consumes/produces.
 //
 // This is a matrix (height, width), its "depth" (feature_map_count),
@@ -255,7 +287,10 @@ class BatchDescriptor {
   // Creates a "blank" batch descriptor, which should be initialized via the
   // named argument helpers.
   BatchDescriptor();
+<<<<<<< HEAD
   explicit BatchDescriptor(int ndims);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Clones values from 'other' for initialization.
   void CloneFrom(const BatchDescriptor& other);
@@ -263,6 +298,7 @@ class BatchDescriptor {
   string ToString() const;
   string ToShortString() const;
 
+<<<<<<< HEAD
   // Pre-condition:
   //   value_max_ == 0
   //   value_min_ == 0
@@ -309,6 +345,35 @@ class BatchDescriptor {
   }
   BatchDescriptor& set_spatial_dim(DimIndex dim, int64 value) {
     SetDim(spatial_size(), dim, value);
+=======
+  // Accessors.
+  int64 count() const { return count_; }
+  int64 feature_map_count() const { return feature_map_count_; }
+  int64 height() const { return height_; }
+  int64 width() const { return width_; }
+  float value_max() const { return value_max_; }
+  float value_min() const { return value_min_; }
+  DataLayout layout() const { return layout_; }
+  QuantizedActivationMode quantized_activation_mode() const {
+    return quantized_activation_mode_;
+  }
+
+  // Named-argument helpers for avoiding user error during construction.
+  BatchDescriptor& set_count(int64 value) {
+    count_ = value;
+    return *this;
+  }
+  BatchDescriptor& set_feature_map_count(int64 value) {
+    feature_map_count_ = value;
+    return *this;
+  }
+  BatchDescriptor& set_height(int64 value) {
+    height_ = value;
+    return *this;
+  }
+  BatchDescriptor& set_width(int64 value) {
+    width_ = value;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return *this;
   }
   BatchDescriptor& set_value_max(float value) {
@@ -320,7 +385,11 @@ class BatchDescriptor {
     return *this;
   }
   BatchDescriptor& set_layout(DataLayout layout) {
+<<<<<<< HEAD
     tensor_.set_data_layout(layout);
+=======
+    layout_ = layout;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return *this;
   }
   BatchDescriptor& set_quantized_activation_mode(
@@ -351,6 +420,7 @@ class BatchDescriptor {
   // with dimensions given the 'output' descriptor.
   static int64 FullyConnectedBiasCount(const BatchDescriptor& output);
 
+<<<<<<< HEAD
   // Return a BatchDescriptor for the output of a depth concatenation
   // with the given input descriptors. The inputs should have the same
   // dimensions, except possibly for feature_map_count(), though this
@@ -373,6 +443,29 @@ class BatchDescriptor {
   QuantizedActivationMode quantized_activation_mode_;
 };
 
+=======
+ private:
+  int64 count_;
+  int64 feature_map_count_;
+  int64 height_;
+  int64 width_;
+  float value_max_;
+  float value_min_;
+  DataLayout layout_;
+  QuantizedActivationMode quantized_activation_mode_;
+};
+
+// Describes how a filter is laid out in the memory.
+// Specify int64 so there's no padding in FilterDescriptor.
+enum class FilterLayout : int64 {
+  kOutputInputYX = 0,  // cuDNN's default filter layout, laid out as:
+                       // (major) output feature maps >> input feature maps >>
+                       // rows >> columns (minor).
+  kInputYXOutput,      // Same as dist_belief's default filter layout.
+  kYXInputOutput,      // Same as tensorflow's default filter layout.
+};
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Returns a string representation of the given filter layout.
 string FilterLayoutString(FilterLayout layout);
 
@@ -407,11 +500,16 @@ class FilterDescriptor {
   // be populated by the user via the named-argument helpers below. (See class
   // comment for details.)
   FilterDescriptor();
+<<<<<<< HEAD
   explicit FilterDescriptor(int ndims);
+=======
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~FilterDescriptor();
 
   // Named-argument helpers for avoiding user error during construction.
   FilterDescriptor& set_output_feature_map_count(int64 value) {
+<<<<<<< HEAD
     tensor_.set_dimensions(0, value);
     return *this;
   }
@@ -436,17 +534,42 @@ class FilterDescriptor {
     return *this;
   }
   int ndims() const { return input_filter_dims().size(); }
+=======
+    output_feature_map_count_ = value;
+    return *this;
+  }
+  FilterDescriptor& set_input_feature_map_count(int64 value) {
+    input_feature_map_count_ = value;
+    return *this;
+  }
+  FilterDescriptor& set_input_filter_height(int64 value) {
+    input_filter_height_ = value;
+    return *this;
+  }
+  FilterDescriptor& set_input_filter_width(int64 value) {
+    input_filter_width_ = value;
+    return *this;
+  }
+  FilterDescriptor& set_layout(FilterLayout layout) {
+    layout_ = layout;
+    return *this;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void CloneFrom(const FilterDescriptor& other);
 
   string ToString() const;
   string ToShortString() const;
+<<<<<<< HEAD
   TensorDescriptorProto ToProto(DataType data_type) const;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns the number of weights required as parameters for a convolution
   // using this filter descriptor.
   int64 ComputeWeightCount() const;
 
+<<<<<<< HEAD
   // Returns the number of biases required as parameters for a convolution
   // using this filter descriptor.
   int64 bias_count() const { return output_feature_map_count(); }
@@ -491,6 +614,28 @@ string PadAlignmentString(PadAlignment alignment);
 // Print alignment to str. Needed to use CHECK_EQ between two PadAlignments.
 std::ostream& operator<<(std::ostream& str, dnn::PadAlignment alignment);
 
+=======
+  // Returns the number of biases required as parameters for a convolution using
+  // this filter descriptor.
+  int64 bias_count() const { return output_feature_map_count_; }
+
+  int64 output_feature_map_count() const { return output_feature_map_count_; }
+  int64 input_feature_map_count() const { return input_feature_map_count_; }
+  int64 input_filter_height() const { return input_filter_height_; }
+  int64 input_filter_width() const { return input_filter_width_; }
+  FilterLayout layout() const { return layout_; }
+
+ private:
+  int64 output_feature_map_count_;
+  int64 input_feature_map_count_;
+  int64 input_filter_height_;
+  int64 input_filter_width_;
+  FilterLayout layout_;
+
+  SE_DISALLOW_COPY_AND_ASSIGN(FilterDescriptor);
+};
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Describes a convolution.
 //
 // Uses the named argument construction form:
@@ -504,13 +649,18 @@ std::ostream& operator<<(std::ostream& str, dnn::PadAlignment alignment);
 // Arguments:
 // - zero_padding_height: padding of the "y dimension" of the input data. Note
 //    that this is different from the height of the filter.
+<<<<<<< HEAD
 // - zero_padding_width: analogous to the height above, but in the "x
+=======
+// - zero_padding_width: analogouus to the height above, but in the "x
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //    dimension".
 // - vertical_filter_stride: the convolution slides a 2-dimensional window of
 //    filter-height-by-filter-width over the input layer -- the center of that
 //    window is moved in the "y dimension" according to this stride value.
 // - horizontal_filter_stride: analogous to the vertical stride above, but in
 //    the "x dimension".
+<<<<<<< HEAD
 // - vertical_dilation_rate: there will be (vertical_dilation_rate - 1) skipped
 //   cells between each filter element in the "y dimension".
 // - horizontal_dilation_rate: there will be (horizontal_dilation_rate - 1)
@@ -520,17 +670,23 @@ std::ostream& operator<<(std::ostream& str, dnn::PadAlignment alignment);
 //   we perform convolution. Convolution and cross correlation are related by
 //   rotating the filter by 180 degrees (or equivalently flipping all spatial
 //   dimensions).
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class ConvolutionDescriptor {
  public:
   // By default construction, there is no zero-padding and the filter stride is
   // 1x1 (centering the filter on every cell in the input layer's
   // width-by-height area).
   ConvolutionDescriptor();
+<<<<<<< HEAD
   explicit ConvolutionDescriptor(int ndims);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~ConvolutionDescriptor();
 
   string ToString() const;
   string ToShortString() const;
+<<<<<<< HEAD
   ConvolutionDescriptorProto ToProto() const { return proto_; }
 
   ConvolutionDescriptor& set_zero_padding_height(int64 value) {
@@ -636,6 +792,36 @@ class ConvolutionDescriptor {
 
   ConvolutionDescriptorProto proto_;
 
+=======
+
+  ConvolutionDescriptor& set_zero_padding_height(int64 value) {
+    zero_padding_height_ = value;
+    return *this;
+  }
+  ConvolutionDescriptor& set_zero_padding_width(int64 value) {
+    zero_padding_width_ = value;
+    return *this;
+  }
+  ConvolutionDescriptor& set_vertical_filter_stride(int64 value) {
+    vertical_filter_stride_ = value;
+    return *this;
+  }
+  ConvolutionDescriptor& set_horizontal_filter_stride(int64 value) {
+    horizontal_filter_stride_ = value;
+    return *this;
+  }
+
+  int64 zero_padding_height() const { return zero_padding_height_; }
+  int64 zero_padding_width() const { return zero_padding_width_; }
+  int64 vertical_filter_stride() const { return vertical_filter_stride_; }
+  int64 horizontal_filter_stride() const { return horizontal_filter_stride_; }
+
+ private:
+  int64 zero_padding_height_;
+  int64 zero_padding_width_;
+  int64 vertical_filter_stride_;
+  int64 horizontal_filter_stride_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // TODO(leary) cudnn provides these fields, but need to characterize what
   // their effect is -- they may be boolean rather than integral.
   // int64 upscale_input_x;
@@ -650,6 +836,7 @@ enum class PoolingMode : int64 {
   kAverage,
 };
 
+<<<<<<< HEAD
 // Specify the dimension in which to concatenate inputs in space.
 // Specify int64 so there's no padding in SpaceConcatenateMode.
 enum class SpaceConcatenateMode : int64 {
@@ -660,6 +847,8 @@ enum class SpaceConcatenateMode : int64 {
 // Returns a short name for the pooling mode, e.g. "Avg".
 string ShortPoolingModeString(PoolingMode mode);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Describes a pooling operation to be enqueued onto a stream via a platform's
 // DnnSupport.
 //
@@ -676,13 +865,17 @@ string ShortPoolingModeString(PoolingMode mode);
 class PoolingDescriptor {
  public:
   PoolingDescriptor();
+<<<<<<< HEAD
   explicit PoolingDescriptor(int ndims);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   PoolingDescriptor& set_pooling_mode(PoolingMode value) {
     mode_ = value;
     return *this;
   }
   PoolingDescriptor& set_window_height(int64 value) {
+<<<<<<< HEAD
     SetDim(&window_, DimIndex::Y, value);
     return *this;
   }
@@ -728,12 +921,39 @@ class PoolingDescriptor {
   }
 
   int ndims() const { return ndims_; }
+=======
+    window_height_ = value;
+    return *this;
+  }
+  PoolingDescriptor& set_window_width(int64 value) {
+    window_width_ = value;
+    return *this;
+  }
+  PoolingDescriptor& set_vertical_padding(int64 value) {
+    vertical_padding_ = value;
+    return *this;
+  }
+  PoolingDescriptor& set_horizontal_padding(int64 value) {
+    horizontal_padding_ = value;
+    return *this;
+  }
+  PoolingDescriptor& set_vertical_stride(int64 value) {
+    vertical_stride_ = value;
+    return *this;
+  }
+  PoolingDescriptor& set_horizontal_stride(int64 value) {
+    horizontal_stride_ = value;
+    return *this;
+  }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   void CloneFrom(const PoolingDescriptor& other);
 
   string ToString() const;
   string ToShortString() const;
 
   PoolingMode mode() const { return mode_; }
+<<<<<<< HEAD
   int64 window_height() const { return GetDim(window_, DimIndex::Y); }
   int64 window_width() const { return GetDim(window_, DimIndex::X); }
   int64 window(DimIndex dim) const { return GetDim(window_, dim); }
@@ -891,6 +1111,35 @@ class AlgorithmConfig {
 //
 // Not all StreamExecutors allow wrap_around == true or segment_size
 // != 64. Some do not implement normalization at all.
+=======
+  int64 window_height() const { return window_height_; }
+  int64 window_width() const { return window_width_; }
+  int64 vertical_padding() const { return vertical_padding_; }
+  int64 horizontal_padding() const { return horizontal_padding_; }
+  int64 vertical_stride() const { return vertical_stride_; }
+  int64 horizontal_stride() const { return horizontal_stride_; }
+
+ private:
+  PoolingMode mode_;
+  int64 window_height_;
+  int64 window_width_;
+  int64 vertical_padding_;
+  int64 horizontal_padding_;
+  int64 vertical_stride_;
+  int64 horizontal_stride_;
+
+  SE_DISALLOW_COPY_AND_ASSIGN(PoolingDescriptor);
+};
+
+// Describes a dist_belief local response normalization.
+// The normalization equation is:
+// y_i = x_i / (bias + alpha * (sum_j_{i - range}^{i + range} x_j^2)) ^ beta
+// where x_i is the input in feature map i, y_i is the output.
+// Each feature map is split into segment_size segments for performing the
+// sum_j_. If wrap_around is true, the sum_j_ for y_i on the left and right of
+// a segment wrap around at the edges of the segment, if wrap_around is false
+// zeros are inserted instead.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class NormalizeDescriptor {
  public:
   NormalizeDescriptor();
@@ -944,6 +1193,24 @@ class NormalizeDescriptor {
   float beta_;
   bool wrap_around_;
   int32 segment_size_;
+<<<<<<< HEAD
+=======
+
+  SE_DISALLOW_COPY_AND_ASSIGN(NormalizeDescriptor);
+};
+
+// Describes a kind of non-linearity (threshold-like mathematical function).
+enum class ActivationMode {
+  kSigmoid,
+  // Rectified linear activation: f(x) = x < 0 ? 0 : x
+  kRelu,
+  // Rectified linear activation, where upper maximum is 6.0.
+  kRelu6,
+  // Rectified linear activation, where upper maximum specified by
+  // BatchDescriptor::value_max().
+  kReluX,
+  kTanh,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // Returns a string representation of the given activation mode.
@@ -951,6 +1218,7 @@ string ActivationModeString(ActivationMode mode);
 
 // Describes the operation that DoElementwiseOperation should perform on its
 // inputs.
+<<<<<<< HEAD
 enum class ElementwiseOperation { kAdd, kMultiply };
 
 string ElementwiseOperationString(ElementwiseOperation op);
@@ -988,6 +1256,17 @@ class VersionInfo {
 // * Poor error handling: the API should return Status objects.
 //
 // PrepareForConvolution is an example for how new APIs should be written.
+=======
+enum class ElementwiseOperation {
+  kAdd,
+  kMultiply
+};
+
+string ElementwiseOperationString(ElementwiseOperation op);
+
+// Suite of operations typically used for implementing Deep/Convolutional Neural
+// Nets.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class DnnSupport {
  public:
   DnnSupport() {}
@@ -995,6 +1274,7 @@ class DnnSupport {
 
   virtual port::Status Init() = 0;
 
+<<<<<<< HEAD
   // Gets the version of the backing library, as a VersionInfo object.
   virtual port::StatusOr<VersionInfo> GetVersion() {
     return port::UnimplementedError(
@@ -1282,6 +1562,8 @@ class DnnSupport {
         scratch_allocator, algorithm_desc, scratch_memory);
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Enqueues a single-precision convolution operation onto the stream.
   //
   // Arguments (all borrowed):
@@ -1291,16 +1573,24 @@ class DnnSupport {
   //  input_data: un-owned device memory region which contains the
   //    convolution input.
   //  filter_descriptor: dimensions of the convolution filter.
+<<<<<<< HEAD
+=======
+  //  weights: coefficients for the convolution filter, these are multiplied
+  //    against values in the input that the filter convolves over.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //  convolution_descriptor: stride of the convolution filter.
   //  output_descriptor: dimensions of the output layer.
   //  output_data: un-owned device memory region in which to place the
   //    convolution result.
+<<<<<<< HEAD
   //  algorithm_desc: specifies which algorithm should be used for the
   //    operation.
   //  scratch: un-owned device memory for scratch space in order to speed up
   //    the convolution operation.
   //  output_profile_result: the output profile result for this call. The
   //    profiling is only enabled when this is not nullptr.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //
   // input_descriptor, filter_descriptor, convolution_descriptor and
   // output_descriptor together specify exactly how the convolution is aligned
@@ -1315,6 +1605,7 @@ class DnnSupport {
   //   corresponds to dist_belief padding = FULL, i.e. the output is sized so
   //   that if the inverse of the filter is applied to the output in VALID mode
   //   the result is the same size as the input - this requires even more
+<<<<<<< HEAD
   //   padding of the input.
   virtual port::Status DoConvolve(
       ConvolutionKind kind, DataType element_type, DataType output_type,
@@ -1366,10 +1657,20 @@ class DnnSupport {
       const dnn::FilterDescriptor& filter_descriptor,
       const DeviceMemory<int8>& filter_coefficients,
       const DeviceMemory<float>& coefficient_scales,
+=======
+  //   padding
+  //   of the input.
+  virtual bool DoConvolve(
+      Stream* stream, const dnn::BatchDescriptor& input_descriptor,
+      const DeviceMemory<float>& input_data,
+      const dnn::FilterDescriptor& filter_descriptor,
+      const DeviceMemory<float>& filter_data,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       const dnn::ConvolutionDescriptor& convolution_descriptor,
       const dnn::BatchDescriptor& output_descriptor,
       DeviceMemory<float>* output_data) = 0;
 
+<<<<<<< HEAD
   // Same as DoConvolveQuantized above, but int8 filter coefficients.
   virtual bool DoConvolveQuantized(
       Stream* stream, const dnn::BatchDescriptor& input_descriptor,
@@ -1380,6 +1681,18 @@ class DnnSupport {
       const dnn::ConvolutionDescriptor& convolution_descriptor,
       const dnn::BatchDescriptor& output_descriptor,
       DeviceMemory<float>* output_data) = 0;
+=======
+  // Enqueues a double-precision convolution operation onto the stream.
+  // See DoConvolve above for argument details.
+  virtual bool DoConvolve(
+      Stream* stream, const dnn::BatchDescriptor& batch_descriptor,
+      const DeviceMemory<double>& input_data,
+      const dnn::FilterDescriptor& filter_descriptor,
+      const DeviceMemory<double>& filter_data,
+      const dnn::ConvolutionDescriptor& convolution_descriptor,
+      const dnn::BatchDescriptor& output_descriptor,
+      DeviceMemory<double>* output_data) = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Variation of the above with the weight matrix split into two matrices.
   // first_weights: Coefficients of the first matrix.
@@ -1408,13 +1721,19 @@ class DnnSupport {
   //  filter_descriptor: dimensions of the convolution filter.
   //  filter_data: coefficients for the convolution filter.
   //  output_descriptor: dimensions of the output gradients, which is the same
+<<<<<<< HEAD
   //    as the dimensions of the output.
+=======
+  //  as
+  //  the dimensions of the ouput.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //  backward_output_data: un-owned device memory region which contains the
   //    backprop of the output.
   //  convolution_descriptor: stride of the convolution filter.
   //  input_descriptor: dimensions of the input layer.
   //  backward_input_data: un-owned device memory region in which to place the
   //    backprop of the input.
+<<<<<<< HEAD
   //  scratch_allocator: un-owned, may-be-null object that may allocate scratch
   //    space in order to speed up the convolution operation.
   template <typename ElementType>
@@ -1447,6 +1766,20 @@ class DnnSupport {
 
   // Enqueues a single-precision backward convolution (for filter) operation
   // onto the stream.
+=======
+  virtual bool DoConvolveBackwardData(
+      Stream* stream, const FilterDescriptor& filter_descriptor,
+      const DeviceMemory<float>& filter_data,
+      const BatchDescriptor& output_descriptor,
+      DeviceMemory<float> backward_output_data,
+      const ConvolutionDescriptor& convolution_descriptor,
+      const BatchDescriptor& input_descriptor,
+      DeviceMemory<float>* backward_input_data) = 0;
+
+  // Enqueues a single-precision backward convolution (for filter) operation
+  // onto
+  // the stream.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //
   // Arguments:
   //  stream: borrowed pointer to the stream that the 'convolve' operation
@@ -1455,13 +1788,19 @@ class DnnSupport {
   //  input_data: un-owned device memory region which contains the
   //    convolution input.
   //  output_descriptor: dimensions of the output gradients, which is the same
+<<<<<<< HEAD
   //    as the dimensions of the output.
+=======
+  //  as
+  //  the dimensions of the ouput.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //  backward_output_data: un-owned device memory region which contains the
   //    backprop of the output.
   //  convolution_descriptor: stride of the convolution filter.
   //  filter_descriptor: dimensions of the convolution filter.
   //  backward_filter_data: un-owned device memory region in which to place the
   //    backprop of the filter.
+<<<<<<< HEAD
   //  scratch_allocator: un-owned, may-be-null object that may allocate scratch
   //    space in order to speed up the convolution operation.
   template <typename ElementType>
@@ -1528,6 +1867,16 @@ class DnnSupport {
       DeviceMemory<Eigen::half>* backward_bias_data) {
     return false;
   }
+=======
+  virtual bool DoConvolveBackwardFilter(
+      Stream* stream, const BatchDescriptor& input_descriptor,
+      const DeviceMemory<float>& input_data,
+      const BatchDescriptor& output_descriptor,
+      DeviceMemory<float> backward_output_data,
+      const ConvolutionDescriptor& convolution_descriptor,
+      const FilterDescriptor& filter_descriptor,
+      DeviceMemory<float>* backward_filter_data) = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Fully connects the "nodes" (float values) in input_data with
   // shape input_dimensions to output_data with output_dimensions
@@ -1652,6 +2001,7 @@ class DnnSupport {
                              const dnn::BatchDescriptor& input_dimensions,
                              const DeviceMemory<float>& input_data,
                              const dnn::BatchDescriptor& output_dimensions,
+<<<<<<< HEAD
                              DeviceMemory<float>* output_data,
                              ScratchAllocator* workspace_allocator) = 0;
 
@@ -1687,11 +2037,15 @@ class DnnSupport {
     LOG(FATAL) << "DoPoolForward not implemented for int8.";
     return false;
   }
+=======
+                             DeviceMemory<float>* output_data) = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Performs differentiation of the pooling operation.
   virtual bool DoPoolBackward(Stream* stream,
                               const dnn::PoolingDescriptor& pooling_dimensions,
                               const dnn::BatchDescriptor& input_dimensions,
+<<<<<<< HEAD
                               const DeviceMemory<double>& input_data,
                               const dnn::BatchDescriptor& output_dimensions,
                               const DeviceMemory<double>& output_data,
@@ -1705,10 +2059,13 @@ class DnnSupport {
   virtual bool DoPoolBackward(Stream* stream,
                               const dnn::PoolingDescriptor& pooling_dimensions,
                               const dnn::BatchDescriptor& input_dimensions,
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                               const DeviceMemory<float>& input_data,
                               const dnn::BatchDescriptor& output_dimensions,
                               const DeviceMemory<float>& output_data,
                               const DeviceMemory<float>& input_diff_data,
+<<<<<<< HEAD
                               DeviceMemory<float>* output_diff_data,
                               ScratchAllocator* workspace_allocator) {
     LOG(FATAL) << "DoPoolBackward not implemented.";
@@ -1762,6 +2119,16 @@ class DnnSupport {
       ScratchAllocator* workspace_allocator) {
     return false;
   }
+=======
+                              DeviceMemory<float>* output_diff_data) = 0;
+
+  // Applies local response normalization to all of the values
+  // held on the device in 'input_data'.
+  virtual bool DoNormalize(Stream* stream,
+                           const dnn::NormalizeDescriptor& normalize_descriptor,
+                           const DeviceMemory<float>& input_data,
+                           DeviceMemory<float>* output_data) = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Applies an activation function (see ActivationMode) to all of the values
   // held on the device in 'input_data', whose dimensions are described by
@@ -1778,9 +2145,13 @@ class DnnSupport {
   virtual bool DoActivate(Stream* stream, ActivationMode activation_mode,
                           const BatchDescriptor& dimensions,
                           const DeviceMemory<float>& input_data,
+<<<<<<< HEAD
                           DeviceMemory<float>* output_data, uint64 options) {
     return false;
   }
+=======
+                          DeviceMemory<float>* output_data) = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Concatenates several layers into one, by concatenating the depth of each
   // layer at matching x and y coordinates.
@@ -1801,6 +2172,7 @@ class DnnSupport {
       port::ArraySlice<const DeviceMemory<float>*> input_data,
       DeviceMemory<float>* output_data) = 0;
 
+<<<<<<< HEAD
   // Concatenates several layers into one, by concatenating each in the
   // x-dimension or y-dimension, based on a user-specified flag.
   // For x-concatenation, layers are aligned at matching y and depth
@@ -1924,6 +2296,8 @@ class DnnSupport {
     return false;
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Computes the specified operation (e.g. addition or multiplication)
   // between corresponding elements in the inputs and stores the result in the
   // output element.
@@ -1947,6 +2321,7 @@ class DnnSupport {
       const dnn::BatchDescriptor& output_dimensions,
       DeviceMemory<float>* output_data) = 0;
 
+<<<<<<< HEAD
   // Computes the specified operation (e.g. addition or multiplication)
   // between corresponding elements in the inputs and stores the result in the
   // output element. Each input is multiplied by a scalar constant and the
@@ -2055,6 +2430,8 @@ class DnnSupport {
     return false;
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Enqueues an asynchronous memcpy of the *quantized* output of a layer (that
   // is, bytes instead of scaled floats) into 'host_dst' if they are available
   // for the underlying DNN implementation. If this quantized output is not
@@ -2067,6 +2444,7 @@ class DnnSupport {
   //  gpu_unquantized_src: the device memory that contains the unquantized data
   //    -- this data should also have a corresponding quantized representation
   //    on the device for this operation to succeed.
+<<<<<<< HEAD
   //  mode: Type of quantization of the data to write into host_dst.
   //  host_dst: un-owned host memory region that is mutated in place,
   //    it is clobbered by the values in 'gpu_unquantized_src' when the enqueued
@@ -2075,6 +2453,25 @@ class DnnSupport {
   virtual bool DoMemcpyD2HQuantized(
       Stream* stream, const DeviceMemory<float>& gpu_unquantized_src,
       QuantizedActivationMode mode, void* host_dst, int64 size) = 0;
+=======
+  //  host_dst: un-owned host memory region that is mutated in place,
+  //    it is clobbered by the values in 'gpu_unquantized_src' when the enqueued
+  //    (asynchronous) memcpy operation is performed.
+  // TODO(wgulland) Merge all these versions of DoMemcpyD2HQuantized.
+  virtual bool DoMemcpyD2HQuantized(
+      Stream* stream, const DeviceMemory<float>& gpu_unquantized_src,
+      port::MutableArraySlice<uint8> host_dst) = 0;
+
+  // As above, but for 16-bit values.
+  virtual bool DoMemcpyD2HQuantized(
+      Stream* stream, const DeviceMemory<float>& gpu_unquantized_src,
+      port::MutableArraySlice<uint16> host_dst) = 0;
+
+  // As above, but for signed 32-bit values.
+  virtual bool DoMemcpyD2HQuantized(
+      Stream* stream, const DeviceMemory<float>& gpu_unquantized_src,
+      port::MutableArraySlice<int32> host_dst) = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Enqueues an asynchronous memcpy of 'host_dst' into the *quantized* input
   // of a layer (that is, bytes instead of scaled floats) if they are supported
@@ -2086,14 +2483,18 @@ class DnnSupport {
   //  stream: borrowed pointer to the stream that the 'quantized memcpy'
   //    operation should be enqueued onto.
   //  host_src: un-owned host memory region that contains the quantized data.
+<<<<<<< HEAD
   //  size: size in bytes of the host_src host memory region.
   //  mode: Type of quantization of the data to read from host_src.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //  gpu_unquantized_dst: the device memory that is clobbered by the values in
   //    'host_src' when the enqueued (asynchronous) memcpy operation is
   //    performed. -- this data should also have a corresponding quantized
   //    representation on the device for this operation to
   //    succeed.
   virtual bool DoMemcpyH2DQuantized(
+<<<<<<< HEAD
       Stream* stream, const void* host_src, int64 size,
       QuantizedActivationMode mode,
       DeviceMemory<float>* gpu_unquantized_dst) = 0;
@@ -2638,10 +3039,21 @@ class DnnSupport {
     return port::Status::OK();
   }
 
+=======
+      Stream* stream, port::ArraySlice<uint8> host_src,
+      DeviceMemory<float>* gpu_unquantized_dst) = 0;
+
+ private:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   SE_DISALLOW_COPY_AND_ASSIGN(DnnSupport);
 };
 
 }  // namespace dnn
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_DNN_H_

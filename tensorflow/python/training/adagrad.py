@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +37,19 @@ class AdagradOptimizer(optimizer.Optimizer):
     Adaptive Subgradient Methods for Online Learning and Stochastic Optimization
       :[Duchi et al., 2011](http://jmlr.org/papers/v12/duchi11a.html)
       ([pdf](http://www.jmlr.org/papers/volume12/duchi11a/duchi11a.pdf))
+=======
+"""Adagrad for TensorFlow."""
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import constant_op
+from tensorflow.python.training import optimizer
+from tensorflow.python.training import training_ops
+
+
+class AdagradOptimizer(optimizer.Optimizer):
+  """Optimizer that implements the Adagrad algorithm.
+
+  @@__init__
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """
 
   def __init__(self, learning_rate, initial_accumulator_value=0.1,
@@ -51,6 +65,7 @@ class AdagradOptimizer(optimizer.Optimizer):
         gradients.  Defaults to "Adagrad".
 
     Raises:
+<<<<<<< HEAD
       ValueError: If the `initial_accumulator_value` is invalid.
 
     @compatibility(eager)
@@ -59,6 +74,9 @@ class AdagradOptimizer(optimizer.Optimizer):
     for changing these values across different invocations of optimizer
     functions.
     @end_compatibility
+=======
+      ValueError: If the initial_accumulator_value is invalid.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """
     if initial_accumulator_value <= 0.0:
       raise ValueError("initial_accumulator_value must be positive: %s" %
@@ -71,6 +89,7 @@ class AdagradOptimizer(optimizer.Optimizer):
 
   def _create_slots(self, var_list):
     for v in var_list:
+<<<<<<< HEAD
       dtype = v.dtype.base_dtype
       if v.get_shape().is_fully_defined():
         init = init_ops.constant_initializer(self._initial_accumulator_value,
@@ -93,10 +112,20 @@ class AdagradOptimizer(optimizer.Optimizer):
     learning_rate = self._call_if_callable(self._learning_rate)
     self._learning_rate_tensor = ops.convert_to_tensor(
         learning_rate, name="learning_rate")
+=======
+      val = constant_op.constant(self._initial_accumulator_value,
+                                 shape=v.get_shape())
+      self._get_or_make_slot(v, val, "accumulator", self._name)
+
+  def _prepare(self):
+    self._learning_rate_tensor = ops.convert_to_tensor(self._learning_rate,
+                                                       name="learning_rate")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _apply_dense(self, grad, var):
     acc = self.get_slot(var, "accumulator")
     return training_ops.apply_adagrad(
+<<<<<<< HEAD
         var,
         acc,
         math_ops.cast(self._learning_rate_tensor, var.dtype.base_dtype),
@@ -110,11 +139,15 @@ class AdagradOptimizer(optimizer.Optimizer):
         acc.handle,
         math_ops.cast(self._learning_rate_tensor, grad.dtype.base_dtype),
         grad,
+=======
+        var, acc, self._learning_rate_tensor, grad,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         use_locking=self._use_locking)
 
   def _apply_sparse(self, grad, var):
     acc = self.get_slot(var, "accumulator")
     return training_ops.sparse_apply_adagrad(
+<<<<<<< HEAD
         var,
         acc,
         math_ops.cast(self._learning_rate_tensor, var.dtype.base_dtype),
@@ -130,4 +163,7 @@ class AdagradOptimizer(optimizer.Optimizer):
         math_ops.cast(self._learning_rate_tensor, grad.dtype),
         grad,
         indices,
+=======
+        var, acc, self._learning_rate_tensor, grad.values, grad.indices,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         use_locking=self._use_locking)

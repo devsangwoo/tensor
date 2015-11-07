@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +28,18 @@ namespace tensorflow {
 
 struct SafeTensorId;
 
+=======
+#ifndef TENSORFLOW_GRAPH_TENSOR_ID_H_
+#define TENSORFLOW_GRAPH_TENSOR_ID_H_
+
+#include <string>
+
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Identifier for a tensor within a step.
 // first == operation_name, second == output_index
 // Note: does not own backing storage for name.
@@ -36,6 +49,7 @@ struct TensorId : public std::pair<StringPiece, int> {
   // Inherit the set of constructors.
   using Base::pair;
 
+<<<<<<< HEAD
   // NOTE(skyewm): this is required on some platforms. I'm not sure why the
   // using statement above isn't always sufficient.
   TensorId() : Base() {}
@@ -55,11 +69,15 @@ struct TensorId : public std::pair<StringPiece, int> {
       return Hash32(x.first.data(), x.first.size(), x.second);
     }
   };
+=======
+  string ToString() const { return strings::StrCat(first, ":", second); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 TensorId ParseTensorName(const string& name);
 TensorId ParseTensorName(StringPiece name);
 
+<<<<<<< HEAD
 bool IsTensorIdControl(const TensorId& tensor_id);
 
 // Same as TensorId, except owns the backing storage for the op name. This makes
@@ -92,3 +110,8 @@ struct SafeTensorId : public std::pair<string, int> {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_GRAPH_TENSOR_ID_H_
+=======
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_GRAPH_TENSOR_ID_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

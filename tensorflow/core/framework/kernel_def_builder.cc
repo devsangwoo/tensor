@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +17,9 @@ limitations under the License.
 #include "tensorflow/core/framework/kernel_def_builder.h"
 #include "tensorflow/core/framework/attr_value.pb.h"
 #include "tensorflow/core/framework/kernel_def.pb.h"
+=======
+#include "tensorflow/core/framework/kernel_def_builder.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -24,15 +28,19 @@ KernelDefBuilder::KernelDefBuilder(const char* op_name) {
   kernel_def_->set_op(op_name);
 }
 
+<<<<<<< HEAD
 KernelDefBuilder::~KernelDefBuilder() {
   DCHECK(kernel_def_ == nullptr) << "Did not call Build()";
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 KernelDefBuilder& KernelDefBuilder::Device(const char* device_type) {
   kernel_def_->set_device_type(device_type);
   return *this;
 }
 
+<<<<<<< HEAD
 template <>
 KernelDefBuilder& KernelDefBuilder::AttrConstraint<int64>(
     const char* attr_name, gtl::ArraySlice<int64> allowed) {
@@ -104,6 +112,8 @@ KernelDefBuilder& KernelDefBuilder::AttrConstraint<bool>(const char* attr_name,
   return *this;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 KernelDefBuilder& KernelDefBuilder::TypeConstraint(
     const char* attr_name, gtl::ArraySlice<DataType> allowed) {
   auto* constraint = kernel_def_->add_constraint();
@@ -131,11 +141,16 @@ KernelDefBuilder& KernelDefBuilder::HostMemory(const char* arg_name) {
 KernelDefBuilder& KernelDefBuilder::Label(const char* label) {
   CHECK_EQ(kernel_def_->label(), "")
       << "Trying to set a kernel's label a second time: '" << label
+<<<<<<< HEAD
       << "' in: " << kernel_def_->DebugString();
+=======
+      << "' in: " << kernel_def_->ShortDebugString();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   kernel_def_->set_label(label);
   return *this;
 }
 
+<<<<<<< HEAD
 KernelDefBuilder& KernelDefBuilder::Priority(int32 priority) {
   kernel_def_->set_priority(priority);
   return *this;
@@ -147,4 +162,6 @@ const KernelDef* KernelDefBuilder::Build() {
   return r;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

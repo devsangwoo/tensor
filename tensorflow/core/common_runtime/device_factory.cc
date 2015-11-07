@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/common_runtime/device_factory.h"
 
 #include <memory>
 #include <string>
 #include <unordered_map>
+<<<<<<< HEAD
 #include <vector>
 
 #include "tensorflow/core/common_runtime/device.h"
@@ -26,6 +30,12 @@ limitations under the License.
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/types.h"
+=======
+
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/public/session_options.h"
 
 namespace tensorflow {
@@ -33,7 +43,11 @@ namespace tensorflow {
 namespace {
 
 static mutex* get_device_factory_lock() {
+<<<<<<< HEAD
   static mutex device_factory_lock(LINKER_INITIALIZED);
+=======
+  static mutex device_factory_lock;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return &device_factory_lock;
 }
 
@@ -47,6 +61,7 @@ std::unordered_map<string, FactoryItem>& device_factories() {
       new std::unordered_map<string, FactoryItem>;
   return *factories;
 }
+<<<<<<< HEAD
 
 }  // namespace
 
@@ -63,6 +78,10 @@ int32 DeviceFactory::DevicePriority(const string& device_type) {
 }
 
 // static
+=======
+}  // namespace
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 void DeviceFactory::Register(const string& device_type, DeviceFactory* factory,
                              int priority) {
   mutex_lock l(*get_device_factory_lock());
@@ -90,6 +109,7 @@ DeviceFactory* DeviceFactory::GetFactory(const string& device_type) {
   return it->second.factory.get();
 }
 
+<<<<<<< HEAD
 Status DeviceFactory::ListAllPhysicalDevices(std::vector<string>* devices) {
   // CPU first. A CPU device is required.
   auto cpu_factory = GetFactory("CPU");
@@ -146,12 +166,49 @@ Status DeviceFactory::AddDevices(
 std::unique_ptr<Device> DeviceFactory::NewDevice(const string& type,
                                                  const SessionOptions& options,
                                                  const string& name_prefix) {
+=======
+void DeviceFactory::AddDevices(const SessionOptions& options,
+                               const string& name_prefix,
+                               std::vector<Device*>* devices) {
+  // CPU first.
+  auto cpu_factory = GetFactory("CPU");
+  if (!cpu_factory) {
+    LOG(FATAL)
+        << "CPU Factory not registered.  Did you link in threadpool_device?";
+  }
+  size_t init_size = devices->size();
+  cpu_factory->CreateDevices(options, name_prefix, devices);
+  if (devices->size() == init_size) {
+    LOG(FATAL) << "No CPU devices are available in this process";
+  }
+
+  // Then GPU.
+  auto gpu_factory = GetFactory("GPU");
+  if (gpu_factory) {
+    gpu_factory->CreateDevices(options, name_prefix, devices);
+  }
+
+  // Then the rest.
+  mutex_lock l(*get_device_factory_lock());
+  for (auto& p : device_factories()) {
+    auto factory = p.second.factory.get();
+    if (factory != cpu_factory && factory != gpu_factory) {
+      factory->CreateDevices(options, name_prefix, devices);
+    }
+  }
+}
+
+Device* DeviceFactory::NewDevice(const string& type,
+                                 const SessionOptions& options,
+                                 const string& name_prefix) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   auto device_factory = GetFactory(type);
   if (!device_factory) {
     return nullptr;
   }
   SessionOptions opt = options;
   (*opt.config.mutable_device_count())[type] = 1;
+<<<<<<< HEAD
   std::vector<std::unique_ptr<Device>> devices;
   TF_CHECK_OK(device_factory->CreateDevices(opt, name_prefix, &devices));
   int expected_num_devices = 1;
@@ -161,6 +218,12 @@ std::unique_ptr<Device> DeviceFactory::NewDevice(const string& type,
   }
   DCHECK_EQ(devices.size(), static_cast<size_t>(expected_num_devices));
   return std::move(devices[0]);
+=======
+  std::vector<Device*> devices;
+  device_factory->CreateDevices(opt, name_prefix, &devices);
+  CHECK_EQ(devices.size(), 1);
+  return devices[0];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,15 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifndef TENSORFLOW_STREAM_EXECUTOR_STREAM_EXECUTOR_PIMPL_H_
 #define TENSORFLOW_STREAM_EXECUTOR_STREAM_EXECUTOR_PIMPL_H_
 
 #include <atomic>
+<<<<<<< HEAD
 #include <memory>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <set>
 #include <tuple>
 #include <vector>
 
+<<<<<<< HEAD
 #include "absl/base/macros.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
@@ -31,6 +38,15 @@ limitations under the License.
 #include "tensorflow/stream_executor/lib/threadpool.h"
 #include "tensorflow/stream_executor/platform.h"
 #include "tensorflow/stream_executor/platform/logging.h"
+=======
+#include "tensorflow/stream_executor/lib/status.h"
+#include "tensorflow/stream_executor/lib/statusor.h"
+#include "tensorflow/stream_executor/lib/strcat.h"
+#include "tensorflow/stream_executor/lib/threadpool.h"
+#include "tensorflow/stream_executor/platform.h"
+#include "tensorflow/stream_executor/platform/logging.h"
+#include "tensorflow/stream_executor/platform/mutex.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/platform/port.h"
 #include "tensorflow/stream_executor/platform/thread_annotations.h"
 #include "tensorflow/stream_executor/rng.h"
@@ -39,7 +55,12 @@ limitations under the License.
 #include "tensorflow/stream_executor/stream_executor_internal.h"
 #include "tensorflow/stream_executor/trace_listener.h"
 
+<<<<<<< HEAD
 namespace stream_executor {
+=======
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Structure used for device memory leak checking.
 struct AllocRecord {
@@ -71,14 +92,24 @@ class ScopedTracer;
 // StreamExecutor interface should not be invoked from a signal handler.
 class StreamExecutor {
  public:
+<<<<<<< HEAD
   StreamExecutor(
       const Platform *platform,
       std::unique_ptr<internal::StreamExecutorInterface> implementation,
       int device_ordinal);
+=======
+  explicit StreamExecutor(PlatformKind kind,
+                          const PluginConfig &plugin_config = PluginConfig());
+
+  // Primarily used for testing.
+  StreamExecutor(PlatformKind kind,
+                 internal::StreamExecutorInterface *implementation);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ~StreamExecutor();
 
   port::Status Init();
+<<<<<<< HEAD
   port::Status Init(DeviceOptions device_options);
 
   // Returns the platform that this StreamExecutor is acting upon.
@@ -88,18 +119,30 @@ class StreamExecutor {
   // Returns a reference to the platform that created this executor.
   const Platform *platform() const { return platform_; }
 
+=======
+  port::Status Init(int device_ordinal, DeviceOptions device_options);
+
+  // Returns the platform that this StreamExecutor is acting upon.
+  PlatformKind platform_kind() const { return platform_kind_; }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Retrieves (loads) a kernel for the platform this StreamExecutor is acting
   // upon, if one exists.
   //
   // Parameters:
   //   spec: The MultiKernelLoaderSpec is usually generated as a compile-time
   //    constant into an appropriate namespace. For example, see
+<<<<<<< HEAD
   //    stream_executor::executor_sample::kKernelLoaderSpecs, from which a
+=======
+  //    perftools::gputools::executor_sample::kKernelLoaderSpecs, from which a
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //    MultiKernelLoaderSpec is selected.
   //   kernel: Outparam that the kernel is loaded into. A given Kernel
   //    instantiation should not be loaded into more than once.
   //
   // If an error occurs, or there is no kernel available for the StreamExecutor
+<<<<<<< HEAD
   // platform, error status is returned.
   port::Status GetKernel(const MultiKernelLoaderSpec &spec, KernelBase *kernel);
 
@@ -121,6 +164,15 @@ class StreamExecutor {
   // elements.
   template <typename T>
   DeviceMemory<T> AllocateArray(uint64 element_count, int64 memory_space = 0);
+=======
+  // platform, false is returned.
+  bool GetKernel(const MultiKernelLoaderSpec &spec, KernelBase *kernel);
+
+  // Synchronously allocates an array on the GPU device of type T with
+  // element_count elements.
+  template <typename T>
+  DeviceMemory<T> AllocateArray(uint64 element_count);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // As AllocateArray(), but returns a ScopedDeviceMemory<T>.
   template <typename T>
@@ -128,8 +180,13 @@ class StreamExecutor {
     return ScopedDeviceMemory<T>(this, AllocateArray<T>(element_count));
   }
 
+<<<<<<< HEAD
   // Convenience wrapper that allocates space for a single element of type T in
   // device memory.
+=======
+  // Convenience wrapper that allocates space for a single element of type T
+  // in GPU memory.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   template <typename T>
   DeviceMemory<T> AllocateScalar() {
     return AllocateArray<T>(1);
@@ -141,8 +198,13 @@ class StreamExecutor {
     return AllocateOwnedArray<T>(1);
   }
 
+<<<<<<< HEAD
   // Synchronously allocates a scalar of type T on the device that is (POD)
   // zero-byte initialized.
+=======
+  // Synchronously allocates a scalar of type T on the GPU device that is
+  // (POD) zero-byte initialized.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   template <typename T>
   DeviceMemory<T> AllocateZeroed();
 
@@ -161,8 +223,23 @@ class StreamExecutor {
   //    sub-buffer after parent deallocation is expected to be safe. This will
   //    render your code non-platform-portable, however.
   template <typename T>
+<<<<<<< HEAD
   DeviceMemory<T> GetSubBuffer(DeviceMemory<T> *parent, uint64 element_offset,
                                uint64 element_count);
+=======
+  DeviceMemory<T> AllocateSubBuffer(DeviceMemory<T> *parent,
+                                    uint64 element_offset,
+                                    uint64 element_count);
+
+  // As AllocateSubBuffer(), but returns a ScopedDeviceMemory<T>.
+  template <typename T>
+  ScopedDeviceMemory<T> AllocateOwnedSubBuffer(DeviceMemory<T> *parent,
+                                               uint64 element_offset,
+                                               uint64 element_count) {
+    return ScopedDeviceMemory<T>(
+        this, AllocateSubBuffer<T>(parent, element_offset, element_count));
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Finds a symbol and returns device memory allocated to the symbol. The
   // symbol is searched in any kernels that were previously loaded through
@@ -170,6 +247,7 @@ class StreamExecutor {
   // type of symbol and T match.
   // - Note: symbol_name should include its namespace as well. For example,
   //         pass "nms0::symbol" if referring to nms0::symbol.
+<<<<<<< HEAD
   //
   // If `module_handle` is set then searches only within the module
   // corresponding to `module_handle`.
@@ -180,6 +258,10 @@ class StreamExecutor {
   // An untyped version of GetSymbol.
   port::StatusOr<DeviceMemoryBase> GetUntypedSymbol(
       const string &symbol_name, ModuleHandle module_handle = {});
+=======
+  template <typename T>
+  port::StatusOr<DeviceMemory<T>> GetSymbol(const string &symbol_name);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Deallocate the DeviceMemory previously allocated via this interface.
   // Deallocation of a nullptr-representative value is permitted.
@@ -188,6 +270,7 @@ class StreamExecutor {
   // null-out effect should not be relied upon in client code.
   void Deallocate(DeviceMemoryBase *mem);
 
+<<<<<<< HEAD
   // Retrieves a mapping of active opaque device memory pointer to a string
   // representation of the [allocating thread's] stack at the time the pointer
   // was allocated. Useful for tracking device memory leaks.
@@ -206,11 +289,24 @@ class StreamExecutor {
   // UnifiedMemoryAllocate.
   void UnifiedMemoryDeallocate(void *location);
 
+=======
+  // Retrieves a mapping of active opaque GPU memory pointer to a string
+  // representation of the [allocating thread's] stack at the time the pointer
+  // was allocated. Useful for tracking GPU memory leaks.
+  //
+  // Note: this will only be populated if --check_gpu_leaks flag is activated.
+  void GetMemAllocs(std::map<void *, AllocRecord> *records_out);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Allocates a region of host memory and registers it with the platform API.
   // Memory allocated in this manner (or allocated and registered with
   // HostMemoryRegister() is required for use in asynchronous memcpy operations,
   // such as Stream::ThenMemcpy.
+<<<<<<< HEAD
   void *HostMemoryAllocate(uint64 size);
+=======
+  void *HostMemoryAllocate(uint64 bytes);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Deallocates a region of host memory allocated by HostMemoryAllocate().
   void HostMemoryDeallocate(void *location);
@@ -227,11 +323,16 @@ class StreamExecutor {
   // This should be done before deallocating the region with delete[]/free/etc.
   bool HostMemoryUnregister(void *location) SE_MUST_USE_RESULT;
 
+<<<<<<< HEAD
   // Synchronizes all activity occurring in the StreamExecutor's context (most
+=======
+  // Synchronizes all activity occuring in the StreamExecutor's context (most
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // likely a whole device).
   bool SynchronizeAllActivity() SE_MUST_USE_RESULT;
 
   // Blocks the caller while "size" bytes are zeroed out (in POD fashion) at the
+<<<<<<< HEAD
   // given location in device memory.
   port::Status SynchronousMemZero(DeviceMemoryBase *location,
                                   uint64 size) SE_MUST_USE_RESULT;
@@ -253,10 +354,34 @@ class StreamExecutor {
   ABSL_DEPRECATED(
       "Prefer SynchronousMemcpyD2H, to avoid error-prone API usage.")
   bool SynchronousMemcpy(void *host_dst, const DeviceMemoryBase &device_src,
+=======
+  // given location in GPU memory.
+  bool SynchronousMemZero(DeviceMemoryBase *location,
+                          uint64 size) SE_MUST_USE_RESULT;
+
+  // Blocks the caller while "size" bytes are initialized to "value" (in POD
+  // fashion) at the given location in GPU memory.
+  bool SynchronousMemSet(DeviceMemoryBase *location, int value,
+                         uint64 size) SE_MUST_USE_RESULT;
+
+  // [deprecated] Blocks the caller while a data segment of the given size is
+  // copied from the host source to the GPU destination.
+  //
+  // Deprecation: prefer explicit H2D below, to avoid error-prone API usage.
+  bool SynchronousMemcpy(DeviceMemoryBase *gpu_dst, const void *host_src,
+                         uint64 size) SE_MUST_USE_RESULT;
+
+  // [deprecated] Blocks the caller while a data segment of the given size is
+  // copied from the GPU source to the host destination.
+  //
+  // Deprecation: prefer explicit D2H below, to avoid error-prone API usage.
+  bool SynchronousMemcpy(void *host_dst, const DeviceMemoryBase &gpu_src,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                          uint64 size) SE_MUST_USE_RESULT;
 
   // Same as SynchronousMemcpy(DeviceMemoryBase*, ...) above.
   port::Status SynchronousMemcpyH2D(const void *host_src, int64 size,
+<<<<<<< HEAD
                                     DeviceMemoryBase *device_dst);
 
   // Alternative interface for memcpying from host to device that takes an
@@ -296,13 +421,59 @@ class StreamExecutor {
   // whether the operation was successfully enqueued onto the stream.
   port::Status MemZero(Stream *stream, DeviceMemoryBase *location,
                        uint64 size) SE_MUST_USE_RESULT;
+=======
+                                    DeviceMemoryBase *gpu_dst);
+
+  // Alternative interface for memcpying from host to device that takes an
+  // array slice. Checks that the destination size can accomodate the host
+  // slice size.
+  template <class T>
+  port::Status SynchronousMemcpyH2D(port::ArraySlice<T> host_src,
+                                    DeviceMemoryBase *gpu_dst) {
+    auto host_size = host_src.size() * sizeof(T);
+    CHECK(gpu_dst->size() == 0 || gpu_dst->size() >= host_size);
+    return SynchronousMemcpyH2D(host_src.begin(), host_size, gpu_dst);
+  }
+
+  // Same as SynchronousMemcpy(void*, ...) above.
+  port::Status SynchronousMemcpyD2H(const DeviceMemoryBase &gpu_src, int64 size,
+                                    void *host_dst);
+
+  // Alternative interface for memcpying from device to host that takes an
+  // array slice. Checks that the destination size can accomodate the host
+  // slice size.
+  template <typename T>
+  port::Status SynchronousMemcpyD2H(const DeviceMemory<T> &gpu_src,
+                                    port::MutableArraySlice<T> host_dst) {
+    auto host_size = host_dst.size() * sizeof(T);
+    CHECK(gpu_src.size() == 0 || host_size >= gpu_src.size());
+    return SynchronousMemcpyD2H(gpu_src, host_size, host_dst.begin());
+  }
+
+  // Blocks the caller while a data segment of the given size is copied from the
+  // GPU source to the GPU destination.
+  bool SynchronousMemcpy(DeviceMemoryBase *gpu_dst,
+                         const DeviceMemoryBase &gpu_src,
+                         uint64 size) SE_MUST_USE_RESULT;
+
+  // Enqueues an operation onto stream to zero out size bytes at the given GPU
+  // memory location. Neither stream nor location may be null. Returns whether
+  // the operation was successfully enqueued onto the stream.
+  bool MemZero(Stream *stream, DeviceMemoryBase *location,
+               uint64 size) SE_MUST_USE_RESULT;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Enqueues an operation onto stream to set 32-bit patterns starting at
   // location, for byte count given by size. size must be 32-bit quantified
   // (i.e. evently divisible by 4). Returns whether the operation was
   // successfully enqueued onto the stream.
+<<<<<<< HEAD
   port::Status Memset32(Stream *stream, DeviceMemoryBase *location,
                         uint32 pattern, uint64 size);
+=======
+  bool Memset32(Stream *stream, DeviceMemoryBase *location, uint32 pattern,
+                uint64 size) SE_MUST_USE_RESULT;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Enables peer access from this StreamExecutor to memory
   // allocated by other, such that launched device code, memcpies, etc may
@@ -333,10 +504,13 @@ class StreamExecutor {
   // The value is cached on first use.
   const DeviceDescription &GetDeviceDescription() const;
 
+<<<<<<< HEAD
   // If implemented, returns device specific measurement of load
   // (e.g. pending requests).
   int64 GetDeviceLoad() const;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Returns the underlying device memory usage information, if it is available.
   // If it is not available (false is returned), free/total may not be
   // initialized.
@@ -367,6 +541,7 @@ class StreamExecutor {
   // platform that underlies this interface.
   bool SupportsDnn() const;
 
+<<<<<<< HEAD
   // Returns the list of supported algorithms for the forward convolution
   // operation.
   bool GetConvolveAlgorithms(bool with_winograd_nonfused,
@@ -417,6 +592,8 @@ class StreamExecutor {
   createRnnStateTensorDescriptor(int num_layer, int batch_size, int data_size,
                                  dnn::DataType data_type);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Returns the device ordinal that this StreamExecutor was initialized with.
   // Meaningless before initialization.
   int device_ordinal() const { return device_ordinal_; }
@@ -424,6 +601,7 @@ class StreamExecutor {
   // Returns a borrowed pointer to the underlying StreamExecutor implementation.
   internal::StreamExecutorInterface *implementation();
 
+<<<<<<< HEAD
   // Creates a kernel which can be launched with stream.ThenLaunch, such that
   // the types of the arguments provided for launch would have to match
   // types of the arguments provided at creation time.
@@ -437,6 +615,8 @@ class StreamExecutor {
       absl::string_view kernel_name, absl::string_view ptx,
       absl::Span<const uint8> cubin_data);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Warning: use Stream::ThenLaunch instead, this method is not for general
   // consumption. However, this is the only way to launch a kernel for which
   // the type signature is only known at runtime; say, if an application
@@ -450,9 +630,15 @@ class StreamExecutor {
   //
   // This is called by Stream::Launch() to delegate to the platform's launch
   // implementation in StreamExecutorInterface::Launch().
+<<<<<<< HEAD
   port::Status Launch(Stream *stream, const ThreadDim &thread_dims,
                       const BlockDim &block_dims, const KernelBase &kernel,
                       const KernelArgsArrayBase &args);
+=======
+  bool Launch(Stream *stream, const ThreadDim &thread_dims,
+              const BlockDim &block_dims, const KernelBase &kernel,
+              const std::vector<KernelArg> &args);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Gets-or-creates (creates with memoization) a FftSupport datatype that can
   // be used to execute FFT routines on the current platform.
@@ -472,6 +658,7 @@ class StreamExecutor {
   // underlying platform.
   dnn::DnnSupport *AsDnn();
 
+<<<<<<< HEAD
   // Gets-or-creates (creates with memoization) a BlasSupport datatype that can
   // be used to execute BLAS routines on the current platform. This is typically
   // not user-facing, as users will use the Stream::ThenBlas* family of routines
@@ -485,6 +672,8 @@ class StreamExecutor {
   // underlying platform.
   blas::BlasSupport *AsBlas();
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Turns StreamExecutor operation tracing on or off.
   void EnableTracing(bool enable);
 
@@ -500,12 +689,18 @@ class StreamExecutor {
   // previously registered.
   bool UnregisterTraceListener(TraceListener* listener);
 
+<<<<<<< HEAD
   // Return allocator statistics.
   absl::optional<AllocatorStats> GetAllocatorStats();
 
   // Return an allocator which delegates to this stream executor for memory
   // allocation.
   StreamExecutorMemoryAllocator *GetAllocator() { return &allocator_; }
+=======
+  // Converts a DeviceMemory object into a KernelArg object for passing to the
+  // device driver for kernel launch.
+  KernelArg DeviceMemoryToKernelArg(const DeviceMemoryBase &gpu_mem) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   template <typename BeginCallT, typename CompleteCallT,
@@ -519,10 +714,25 @@ class StreamExecutor {
   template <typename... Args>
   friend struct ThenBlasImpl;
 
+<<<<<<< HEAD
   // Synchronously allocates size bytes on the underlying platform and returns
   // a DeviceMemoryBase representing that allocation. In the case of failure,
   // nullptr is returned.
   DeviceMemoryBase Allocate(uint64 size, int64 memory_space);
+=======
+  // Gets-or-creates (creates with memoization) a BlasSupport datatype that can
+  // be used to execute BLAS routines on the current platform. This is typically
+  // not user-facing, as users will use the Stream::ThenBlas* family of routines
+  // to entrain BLAS operations. See blas.h for additional details.
+  //
+  // Ownership is not transferred to the caller -- ownership is retained by this
+  // object for memoization. This BLAS interface is also only expected to be
+  // used by a Stream for entraining calls to BLAS functionality.
+  //
+  // Returns null if there was an error initializing the BLAS support for the
+  // underlying platform.
+  blas::BlasSupport *AsBlas();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Gets-or-creates (creates with memoization) an RngSupport datatype that can
   // be used for random-number-generation routines on the current platform.
@@ -534,6 +744,7 @@ class StreamExecutor {
   rng::RngSupport *AsRng();
 
   // Causes the host code to synchronously wait for operations entrained onto
+<<<<<<< HEAD
   // stream to complete. Effectively a join on the asynchronous device
   // operations enqueued on the stream before this program point.
   port::Status BlockHostUntilDone(Stream *stream);
@@ -562,16 +773,49 @@ class StreamExecutor {
   // regions.
   bool MemcpyDeviceToDevice(Stream *stream, DeviceMemoryBase *device_dst,
                             const DeviceMemoryBase &device_src, uint64 size);
+=======
+  // stream to complete. Effectively a join on the asynchronous GPU operations
+  // enqueued on the stream before this program point.
+  bool BlockHostUntilDone(Stream *stream);
+
+  // Synchronously allocates size bytes on the underlying platform and returns
+  // an opaque void* representing that allocation. In the case of failure,
+  // nullptr is returned.
+  void *Allocate(uint64 size);
+
+  // Finds and retrieves device memory for the symbol on the underlying
+  // platform.
+  bool GetSymbol(const string& symbol_name, void **mem, size_t *bytes);
+
+  // Entrains a memcpy operation onto stream, with a host destination location
+  // host_dst and a GPU memory source, with target size size.
+  bool Memcpy(Stream *stream, void *host_dst, const DeviceMemoryBase &gpu_src,
+              uint64 size);
+
+  // Entrains a memcpy operation onto stream, with a GPU destination location
+  // and a host memory source, with target size size.
+  bool Memcpy(Stream *stream, DeviceMemoryBase *gpu_dst, const void *host_src,
+              uint64 size);
+
+  // Entrains a memcpy operation onto stream, with a GPU destination location
+  // and a GPU source location, with target size size. Peer access should have
+  // been enabled between the StreamExecutors owning the GPU memory regions.
+  bool MemcpyDeviceToDevice(Stream *stream, DeviceMemoryBase *gpu_dst,
+                            const DeviceMemoryBase &gpu_src, uint64 size);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Entrains on a stream a user-specified function to be run on the host.
   // See Stream::ThenDoHostCallback for full details.
   bool HostCallback(Stream *stream, std::function<void()> callback);
 
+<<<<<<< HEAD
   // Entrains on a stream a user-specified function to be run on the host.
   // See Stream::ThenDoHostCallback for full details.
   // This is the preferred form for a callback that may return an error.
   bool HostCallback(Stream *stream, std::function<port::Status()> callback);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Performs platform-specific allocation and initialization of an event.
   port::Status AllocateEvent(Event *event);
 
@@ -587,23 +831,41 @@ class StreamExecutor {
   // Requests the current status of the event from the underlying platform.
   Event::Status PollForEventStatus(Event *event);
 
+<<<<<<< HEAD
   // Allocates stream resources on the underlying platform and initializes its
   // internals.
   bool AllocateStream(Stream *stream);
 
   // Deallocates stream resources on the underlying platform.
   void DeallocateStream(Stream *stream);
+=======
+  // Allocates stream resources on the underlying platform for subject and
+  // initializes its internals.
+  bool AllocateStream(Stream *subject);
+
+  // Deallocates stream resources on the underlying platform.
+  void DeallocateStream(Stream *subject);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Causes dependent to not begin execution until other has finished its
   // last-enqueued work.
   bool CreateStreamDependency(Stream *dependent, Stream *other);
 
+<<<<<<< HEAD
   // Allocates timer resources on the underlying platform and initializes its
   // internals.
   bool AllocateTimer(Timer *timer);
 
   // Deallocates timer resources on the underlying platform.
   void DeallocateTimer(Timer *timer);
+=======
+  // Allocates timer resources on the underlying platform for subject and
+  // initializes its internals.
+  bool AllocateTimer(Timer *subject);
+
+  // Deallocates timer resources on the underlying platform.
+  void DeallocateTimer(Timer *subject);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Records a start event for an interval timer.
   bool StartTimer(Stream *stream, Timer *timer);
@@ -613,7 +875,11 @@ class StreamExecutor {
 
   // Allocates a new metadata object, appropriately populated, on the heap, with
   // ownership transfer to caller.
+<<<<<<< HEAD
   std::unique_ptr<DeviceDescription> CreateDeviceDescription() const;
+=======
+  DeviceDescription *PopulateDeviceDescription() const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Adds a task to the port::ThreadPool work queue. These tasks must be
   // fire-and-forget and have no external data or timing dependencies; their
@@ -625,7 +891,11 @@ class StreamExecutor {
   // Adds an AllocRecord for 'opaque' of size 'bytes' to the record map, for
   // leak checking. NULL buffer pointers and buffer sizes of 0 will not be
   // tracked.
+<<<<<<< HEAD
   void CreateAllocRecord(void *opaque, uint64 bytes);
+=======
+  void CreateAllocRecord(void *opaque, uint64 size);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Removes the AllocRecord keyed by 'opaque' from the record map. NULL
   // pointers will not be erased (as they're not tracked, per above).
@@ -637,27 +907,42 @@ class StreamExecutor {
   void SubmitTrace(TraceCallT trace_call, ArgsT&&... args);
 
   // Reader/writer lock for class-static StreamExecutor members.
+<<<<<<< HEAD
   static absl::Mutex static_mu_;
+=======
+  static mutex static_mu_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Reader/writer lock for mutable data structures on this StreamExecutor.
   //
   // Mutable so that caching functions (like DeviceDescription, AsBlas, etc.)
   // can acquire the lock on their first (mutating) call as well.
+<<<<<<< HEAD
   mutable absl::Mutex mu_;
 
   // Reference to the platform that created this executor.
   const Platform *platform_;
+=======
+  mutable mutex mu_;
+
+  // A mapping of pointer (to GPU memory) to string representation of the stack
+  // (of the allocating thread) at the time at which the pointer was allocated.
+  std::map<void *, AllocRecord> mem_allocs_ GUARDED_BY(mu_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Pointer to the platform-specific-interface implementation. This is
   // delegated to by the interface routines in pointer-to-implementation
   // fashion.
   std::unique_ptr<internal::StreamExecutorInterface> implementation_;
 
+<<<<<<< HEAD
   // A mapping of pointer (to device memory) to string representation of the
   // stack (of the allocating thread) at the time at which the pointer was
   // allocated.
   std::map<void *, AllocRecord> mem_allocs_ GUARDED_BY(mu_);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Memoized BLAS support object -- we only want to create this once when asked
   // for a BLAS interface.
   std::unique_ptr<blas::BlasSupport> blas_ GUARDED_BY(mu_);
@@ -717,6 +1002,7 @@ class StreamExecutor {
   // The set of TraceListeners registered for this StreamExecutor.
   std::set<TraceListener*> listeners_ GUARDED_BY(mu_);
 
+<<<<<<< HEAD
   // Allocated memory in bytes.
   int64 mem_alloc_bytes_;
 
@@ -790,10 +1076,24 @@ inline DeviceMemory<T> StreamExecutor::AllocateArray(uint64 element_count,
                                                      int64 memory_space) {
   uint64 bytes = sizeof(T) * element_count;
   return DeviceMemory<T>(Allocate(bytes, memory_space));
+=======
+  SE_DISALLOW_COPY_AND_ASSIGN(StreamExecutor);
+};
+
+////////////
+// Inlines
+
+template <typename T>
+inline DeviceMemory<T> StreamExecutor::AllocateArray(uint64 element_count) {
+  uint64 bytes = sizeof(T) * element_count;
+  void *opaque = Allocate(bytes);
+  return DeviceMemory<T>::MakeFromByteSize(opaque, bytes);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 template <typename T>
 inline port::StatusOr<DeviceMemory<T>> StreamExecutor::GetSymbol(
+<<<<<<< HEAD
     const string &symbol_name, ModuleHandle module_handle) {
   port::StatusOr<DeviceMemoryBase> untyped_symbol =
       GetUntypedSymbol(symbol_name, module_handle);
@@ -801,14 +1101,33 @@ inline port::StatusOr<DeviceMemory<T>> StreamExecutor::GetSymbol(
     return untyped_symbol.status();
   }
   return DeviceMemory<T>(untyped_symbol.ValueOrDie());
+=======
+    const string &symbol_name) {
+  // If failed to get the symbol, opaque/bytes are unchanged. Initialize them to
+  // be nullptr/0 for consistency with DeviceMemory semantics.
+  void *opaque = nullptr;
+  size_t bytes = 0;
+  if (GetSymbol(symbol_name, &opaque, &bytes)) {
+    CHECK_EQ(bytes % sizeof(T), 0);
+    return DeviceMemory<T>::MakeFromByteSize(opaque, bytes);
+  }
+  return port::Status(
+      port::error::NOT_FOUND,
+      port::StrCat("Check if kernel using the symbol is loaded: ",
+                   symbol_name));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 template <typename ElemT>
 ScopedDeviceMemory<ElemT>::ScopedDeviceMemory(StreamExecutor *parent,
                                               DeviceMemoryBase value)
+<<<<<<< HEAD
     : wrapped_(value),
       device_ordinal_(parent->device_ordinal()),
       allocator_(parent->GetAllocator()) {}
+=======
+    : wrapped_(value), parent_(parent) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename ElemT>
 ScopedDeviceMemory<ElemT>::ScopedDeviceMemory(
@@ -818,11 +1137,16 @@ ScopedDeviceMemory<ElemT>::ScopedDeviceMemory(
     std::vector<ElemT> local(values);
     if (!parent->SynchronousMemcpy(ptr(), const_cast<const ElemT *>(&local[0]),
                                    ptr()->size())) {
+<<<<<<< HEAD
       TF_CHECK_OK(Free());
+=======
+      Reset(nullptr);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 }
 
+<<<<<<< HEAD
 template <typename T>
 DeviceMemory<T> StreamExecutor::AllocateZeroed() {
   DeviceMemoryBase buf = Allocate(sizeof(T), /*memory_space=*/0);
@@ -832,6 +1156,34 @@ DeviceMemory<T> StreamExecutor::AllocateZeroed() {
 
   DeviceMemory<T> result(buf);
   bool ok = SynchronousMemZero(&result, sizeof(T)).ok();
+=======
+template <typename ElemT>
+ScopedDeviceMemory<ElemT>::~ScopedDeviceMemory() {
+  parent_->Deallocate(&wrapped_);
+}
+
+template <typename ElemT>
+void ScopedDeviceMemory<ElemT>::Reset(DeviceMemory<ElemT> updated) {
+  parent_->Deallocate(&wrapped_);
+  wrapped_ = updated;
+}
+
+template <typename ElemT>
+void ScopedDeviceMemory<ElemT>::Reset(std::nullptr_t) {
+  parent_->Deallocate(&wrapped_);
+  wrapped_ = DeviceMemory<ElemT>{};
+}
+
+template <typename T>
+DeviceMemory<T> StreamExecutor::AllocateZeroed() {
+  void *opaque = Allocate(sizeof(T));
+  if (opaque == nullptr) {
+    return DeviceMemory<T>{};
+  }
+
+  DeviceMemory<T> result = DeviceMemory<T>::MakeFromByteSize(opaque, sizeof(T));
+  bool ok = SynchronousMemZero(&result, sizeof(T));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!ok) {
     Deallocate(&result);
     return DeviceMemory<T>{};
@@ -841,9 +1193,15 @@ DeviceMemory<T> StreamExecutor::AllocateZeroed() {
 }
 
 template <typename T>
+<<<<<<< HEAD
 DeviceMemory<T> StreamExecutor::GetSubBuffer(DeviceMemory<T> *parent,
                                              uint64 element_offset,
                                              uint64 element_count) {
+=======
+DeviceMemory<T> StreamExecutor::AllocateSubBuffer(DeviceMemory<T> *parent,
+                                                  uint64 element_offset,
+                                                  uint64 element_count) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (element_offset + element_count > parent->ElementCount()) {
     LOG(ERROR) << "requested sub-buffer allocation (offset + size) is greater "
                << "than parent allocation size: (" << element_offset << " + "
@@ -851,12 +1209,22 @@ DeviceMemory<T> StreamExecutor::GetSubBuffer(DeviceMemory<T> *parent,
     return DeviceMemory<T>{};
   }
 
+<<<<<<< HEAD
   void *opaque = implementation_->GetSubBuffer(
+=======
+  void *opaque = implementation_->AllocateSubBuffer(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       parent, sizeof(T) * element_offset, sizeof(T) * element_count);
   if (opaque == nullptr) {
     return DeviceMemory<T>{};
   }
+<<<<<<< HEAD
   return DeviceMemory<T>(DeviceMemoryBase(opaque, sizeof(T) * element_count));
+=======
+  CreateAllocRecord(opaque, sizeof(T) * element_count);
+  return DeviceMemory<T>(DeviceMemoryBase(opaque, sizeof(T) * element_count,
+                                    true /* = is_sub_buffer */));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 template <typename... Params, typename... Args>
@@ -871,12 +1239,20 @@ inline Stream &Stream::ThenLaunch(ThreadDim thread_dims, BlockDim block_dims,
     // we pack the variadic parameters passed as ...args into the desired
     // tuple form and pass that packed form to the StreamExecutor::Launch()
     // implementation.
+<<<<<<< HEAD
     KernelArgsArray<sizeof...(args)> kernel_args;
     kernel.PackParams(&kernel_args, args...);
     DCHECK(parent_ != nullptr);
     bool ok =
         parent_->Launch(this, thread_dims, block_dims, kernel, kernel_args)
             .ok();
+=======
+    std::vector<KernelArg> kernel_args;
+    kernel_args.reserve(kernel.Arity());
+    kernel.PackParams(&kernel_args, args...);
+    bool ok =
+        parent_->Launch(this, thread_dims, block_dims, kernel, kernel_args);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!ok) {
       SetError();
       LOG(WARNING) << "parent failed to launch kernel: " << &kernel;
@@ -885,6 +1261,11 @@ inline Stream &Stream::ThenLaunch(ThreadDim thread_dims, BlockDim block_dims,
   return *this;
 }
 
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_STREAM_EXECUTOR_PIMPL_H_

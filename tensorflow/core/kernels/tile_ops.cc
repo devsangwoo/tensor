@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/array_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 #define EIGEN_USE_GPU
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
@@ -36,11 +40,25 @@ limitations under the License.
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifdef GOOGLE_CUDA
+#define EIGEN_USE_GPU
+#endif  // GOOGLE_CUDA
+
+#include "tensorflow/core/kernels/tile_ops.h"
+
+#include "tensorflow/core/framework/numeric_op.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/lib/core/errors.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 typedef Eigen::SyclDevice SYCLDevice;
 #endif  // TENSORFLOW_USE_SYCL
@@ -178,6 +196,11 @@ TF_CALL_complex128(DECLARE_TYPE);
 
 // --------------------------------------------------------------------------
 template <typename Device, typename Tmultiples>
+=======
+
+// --------------------------------------------------------------------------
+template <typename Device>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class TileOp : public OpKernel {
  public:
   explicit TileOp(OpKernelConstruction* context) : OpKernel(context) {}
@@ -187,13 +210,20 @@ class TileOp : public OpKernel {
     const Tensor& multiples = context->input(1);
 
     OP_REQUIRES(
+<<<<<<< HEAD
         context, IsLegacyVector(multiples.shape()),
         errors::InvalidArgument("Expected multiples to be 1-D, but got shape ",
                                 multiples.shape().DebugString()));
+=======
+        context, TensorShapeUtils::IsLegacyVector(multiples.shape()),
+        errors::InvalidArgument("Expected multiples to be 1-D, but got shape ",
+                                multiples.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(context, input.dims() == multiples.NumElements(),
                 errors::InvalidArgument(
                     "Expected multiples argument to be a vector of length ",
                     input.dims(), " but got length ", multiples.dim_size(0)));
+<<<<<<< HEAD
     const int input_dims = input.dims();
 
     // Eigen doesn't support scalars on the GPU, so handle 0-D specially
@@ -270,11 +300,80 @@ class TileOp : public OpKernel {
   template <DataType DT>
   void HandleCase(OpKernelContext* context,
                   const gtl::ArraySlice<Tmultiples>& multiples_array,
+=======
+
+    const int input_dims = input.dims();
+    const gtl::ArraySlice<int32> multiples_array(multiples.flat<int32>().data(),
+                                                 input_dims);
+
+    TensorShape output_shape;
+    for (int i = 0; i < input_dims; ++i) {
+      OP_REQUIRES(
+          context, multiples_array[i] > 0,
+          errors::InvalidArgument("Expected multiples[", i, "] > 0, but got ",
+                                  multiples_array[i]));
+      output_shape.AddDim(input.dim_size(i) * multiples_array[i]);
+    }
+    Tensor* result = nullptr;
+    OP_REQUIRES_OK(context, context->allocate_output(0, output_shape, &result));
+
+#define HANDLE_DIM(DT, NDIM)                                   \
+  if (context->input(0).dtype() == DT && input_dims == NDIM) { \
+    HandleCase<DT, NDIM>(context, multiples_array, result);    \
+    return;                                                    \
+  }
+
+#define HANDLE_TYPE(T) \
+  HANDLE_DIM(T, 0)     \
+  HANDLE_DIM(T, 1)     \
+  HANDLE_DIM(T, 2)     \
+  HANDLE_DIM(T, 3)     \
+  HANDLE_DIM(T, 4)     \
+  HANDLE_DIM(T, 5)
+
+    HANDLE_TYPE(DT_BOOL);
+    HANDLE_TYPE(DT_FLOAT);
+    HANDLE_TYPE(DT_DOUBLE);
+    HANDLE_TYPE(DT_UINT8);
+    HANDLE_TYPE(DT_INT32);
+    HANDLE_TYPE(DT_INT16);
+    HANDLE_TYPE(DT_INT64);
+    HANDLE_TYPE(DT_STRING);  // when DEVICE=CPUDevice.
+
+#undef HANDLE_TYPE
+#undef HANDLE_DIM
+
+    OP_REQUIRES(context, false,
+                errors::Unimplemented(
+                    "TileOp : Unhandled input dimensions, DT : ",
+                    context->input(0).dtype(), ", dims : ", input_dims));
+  }
+
+ private:
+  template <DataType DT, int NDIM>
+  void HandleCaseImpl(OpKernelContext* context,
+                      const gtl::ArraySlice<int32>& multiples_array,
+                      Tensor* result) {
+    typedef typename EnumToDataType<DT>::Type T;
+    Eigen::array<int32, NDIM> broadcast_array;
+    for (int i = 0; i < NDIM; ++i) {
+      broadcast_array[i] = multiples_array[i];
+    }
+    functor::Tile<Device, T, NDIM>()(
+        context->eigen_device<Device>(), result->tensor<T, NDIM>(),
+        context->input(0).tensor<T, NDIM>(), broadcast_array);
+  }
+
+  template <DataType DT, int NDIM>
+  void HandleCase(OpKernelContext* context,
+                  const gtl::ArraySlice<int32>& multiples_array,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   Tensor* result);
 
   TF_DISALLOW_COPY_AND_ASSIGN(TileOp);
 };
 
+<<<<<<< HEAD
 template <typename Device, typename Tmultiples>
 template <DataType DT>
 inline void TileOp<Device, Tmultiples>::HandleCase(
@@ -353,6 +452,62 @@ TF_CALL_int64(HANDLE_TYPE_NAME_SYCL);
 
 // --------------------------------------------------------------------------
 template <typename Device, typename Tmultiples>
+=======
+template <typename Device>
+template <DataType DT, int NDIM>
+inline void TileOp<Device>::HandleCase(
+    OpKernelContext* context, const gtl::ArraySlice<int32>& multiples_array,
+    Tensor* result) {
+  LOG(FATAL) << "TileOp: Invalid combination of Device, DT and NDIM: "
+             << typeid(Device).name() << ", " << DataTypeString(DT) << ", "
+             << NDIM;
+}
+
+#define HANDLE_CASE(device, dtype, ndim)                               \
+  template <>                                                          \
+  template <>                                                          \
+  void TileOp<device>::HandleCase<dtype, ndim>(                        \
+      OpKernelContext * context,                                       \
+      const gtl::ArraySlice<int32>& multiples_array, Tensor* result) { \
+    HandleCaseImpl<dtype, ndim>(context, multiples_array, result);     \
+  }
+
+#define HANDLE_CASE_DIM_POSITIVE(device, dtype) \
+  HANDLE_CASE(device, dtype, 1);                \
+  HANDLE_CASE(device, dtype, 2);                \
+  HANDLE_CASE(device, dtype, 3);                \
+  HANDLE_CASE(device, dtype, 4);                \
+  HANDLE_CASE(device, dtype, 5);
+
+#define HANDLE_CASE_DIM(device, dtype) \
+  HANDLE_CASE(device, dtype, 0);       \
+  HANDLE_CASE_DIM_POSITIVE(device, dtype);
+
+HANDLE_CASE_DIM(CPUDevice, DT_BOOL);
+HANDLE_CASE_DIM(CPUDevice, DT_FLOAT);
+HANDLE_CASE_DIM(CPUDevice, DT_DOUBLE);
+HANDLE_CASE_DIM(CPUDevice, DT_UINT8);
+HANDLE_CASE_DIM(CPUDevice, DT_INT32);
+HANDLE_CASE_DIM(CPUDevice, DT_INT16);
+HANDLE_CASE_DIM(CPUDevice, DT_INT64);
+HANDLE_CASE_DIM(CPUDevice, DT_STRING);
+
+#if GOOGLE_CUDA
+// Eigen on GPU does not handle 0-dimension data types yet.
+HANDLE_CASE_DIM_POSITIVE(GPUDevice, DT_FLOAT);
+HANDLE_CASE_DIM_POSITIVE(GPUDevice, DT_DOUBLE);
+HANDLE_CASE_DIM_POSITIVE(GPUDevice, DT_INT16);
+HANDLE_CASE_DIM_POSITIVE(GPUDevice, DT_INT32);
+HANDLE_CASE_DIM_POSITIVE(GPUDevice, DT_INT64);
+#endif  // GOOGLE_CUDA
+
+#undef HANDLE_CASE_DIM_POSITIVE
+#undef HANDLE_CASE_DIM
+#undef HANDLE_CASE
+
+// --------------------------------------------------------------------------
+template <typename Device>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class TileGradientOp : public OpKernel {
  public:
   explicit TileGradientOp(OpKernelConstruction* context) : OpKernel(context) {}
@@ -361,15 +516,22 @@ class TileGradientOp : public OpKernel {
     const Tensor& input = context->input(0);
     const Tensor& multiples = context->input(1);
     OP_REQUIRES(
+<<<<<<< HEAD
         context, IsLegacyVector(multiples.shape()),
         errors::InvalidArgument("Expected multiples to be 1-D, but got shape ",
                                 multiples.shape().DebugString()));
+=======
+        context, TensorShapeUtils::IsLegacyVector(multiples.shape()),
+        errors::InvalidArgument("Expected multiples to be 1-D, but got shape ",
+                                multiples.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(context, input.dims() == multiples.NumElements(),
                 errors::InvalidArgument(
                     "Expected multiples argument to be a vector of length ",
                     input.dims(), " but got length ", multiples.dim_size(0)));
 
     const int input_dims = input.dims();
+<<<<<<< HEAD
 
     // Eigen doesn't support scalars on the GPU, so handle 0-D specially
     if (input_dims == 0) {
@@ -381,6 +543,13 @@ class TileGradientOp : public OpKernel {
         multiples.flat<Tmultiples>().data(), input_dims);
     TensorShape output_shape;
     std::vector<Tmultiples> input_dim_size_vec;
+=======
+    const gtl::ArraySlice<int32> multiples_array(multiples.flat<int32>().data(),
+                                                 input_dims);
+
+    TensorShape output_shape;
+    std::vector<int32> input_dim_size_vec;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (int i = 0; i < input_dims; ++i) {
       OP_REQUIRES(
           context, multiples_array[i] > 0,
@@ -394,10 +563,13 @@ class TileGradientOp : public OpKernel {
       output_shape.AddDim(input.dim_size(i) / multiples_array[i]);
       input_dim_size_vec.push_back(input.dim_size(i));
     }
+<<<<<<< HEAD
     if (output_shape == input.shape()) {
       context->set_output(0, input);
       return;
     }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Tensor* result = nullptr;
     OP_REQUIRES_OK(context, context->allocate_output(0, output_shape, &result));
 
@@ -409,10 +581,15 @@ class TileGradientOp : public OpKernel {
   }
 
 #define HANDLE_TYPE(T) \
+<<<<<<< HEAD
+=======
+  HANDLE_DIM(T, 0)     \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   HANDLE_DIM(T, 1)     \
   HANDLE_DIM(T, 2)     \
   HANDLE_DIM(T, 3)     \
   HANDLE_DIM(T, 4)     \
+<<<<<<< HEAD
   HANDLE_DIM(T, 5)     \
   HANDLE_DIM(T, 6)     \
   HANDLE_DIM(T, 7)
@@ -430,32 +607,62 @@ class TileGradientOp : public OpKernel {
     TF_CALL_complex128(HANDLE_TYPE_NAME);
 
 #undef HANDLE_TYPE_NAME
+=======
+  HANDLE_DIM(T, 5)
+
+    HANDLE_TYPE(DT_FLOAT);
+    HANDLE_TYPE(DT_DOUBLE);
+    HANDLE_TYPE(DT_INT32);
+    HANDLE_TYPE(DT_INT16);
+    HANDLE_TYPE(DT_INT64);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef HANDLE_TYPE
 #undef HANDLE_DIM
 
     OP_REQUIRES(context, false,
+<<<<<<< HEAD
                 errors::Unimplemented("TileGradientOp : The input data type or "
                                       "dimension is not supported, DataType : ",
                                       DataTypeString(context->input(0).dtype()),
                                       ", Dimension : ", input_dims));
+=======
+                errors::Unimplemented(
+                    "TileGradientOp : Unhandled input dimensions, DT : ",
+                    context->input(0).dtype(), ", dims : ", input_dims));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
   template <DataType DT, int NDIM>
   void HandleCase(OpKernelContext* context,
+<<<<<<< HEAD
                   const std::vector<Tmultiples>& input_dims,
                   const gtl::ArraySlice<Tmultiples>& multiples_array,
+=======
+                  const std::vector<int32>& input_dims,
+                  const gtl::ArraySlice<int32>& multiples_array,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   Tensor* result);
 
   template <DataType DT, int NDIM>
   void HandleCaseImpl(OpKernelContext* context,
+<<<<<<< HEAD
                       const std::vector<Tmultiples>& input_dims,
                       const gtl::ArraySlice<Tmultiples>& multiples_array,
+=======
+                      const std::vector<int32>& input_dims,
+                      const gtl::ArraySlice<int32>& multiples_array,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                       Tensor* result) {
     typedef typename EnumToDataType<DT>::Type T;
 
     bool reduction_only = true;
+<<<<<<< HEAD
     std::vector<Tmultiples> reduction_dims;
+=======
+    std::vector<int> reduction_dims;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     for (int i = 0; i < NDIM; ++i) {
       if (input_dims[i] > multiples_array[i] && multiples_array[i] > 1) {
@@ -477,14 +684,23 @@ class TileGradientOp : public OpKernel {
       // NOTE(keveman): Handling the most common case here.
       // Adding more cases here would require more templating and code
       // explosion. For instance, HANDLE_DIM(2) wouldn't make sense for NDIM=1.
+<<<<<<< HEAD
       HANDLE_DIM(1);
+=======
+      HANDLE_DIM(NDIM > 0 ? 1 : 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Fall through to the unoptimized version.
 #undef HANDLE_DIM
     }
 
+<<<<<<< HEAD
     Eigen::DSizes<Eigen::DenseIndex, NDIM> indices;
     Eigen::DSizes<Eigen::DenseIndex, NDIM> sizes;
+=======
+    Eigen::DSizes<ptrdiff_t, NDIM> indices;
+    Eigen::DSizes<ptrdiff_t, NDIM> sizes;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Accumulate slices along the dimensions into the output. The number of
     // slices along dimension 'i' is simply the multiple along dimension 'i'
@@ -517,11 +733,18 @@ class TileGradientOp : public OpKernel {
 
   template <typename T, int NDIM, int REDUCENDIM>
   void HandleReduce(OpKernelContext* context,
+<<<<<<< HEAD
                     const std::vector<Tmultiples>& reduce_dim_in,
                     Tensor* result) {
     static_assert(NDIM >= REDUCENDIM, "Too many reduced dimensions");
     Eigen::DSizes<Eigen::DenseIndex, REDUCENDIM> reduce_dim;
     Eigen::DSizes<Eigen::DenseIndex, NDIM> reshape_dim;
+=======
+                    const std::vector<int32>& reduce_dim_in, Tensor* result) {
+    static_assert(NDIM >= REDUCENDIM, "Too many reduced dimensions");
+    Eigen::DSizes<ptrdiff_t, REDUCENDIM> reduce_dim;
+    Eigen::DSizes<ptrdiff_t, NDIM> reshape_dim;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     for (int i = 0; i < REDUCENDIM; ++i) {
       reduce_dim[i] = reduce_dim_in[i];
@@ -539,6 +762,7 @@ class TileGradientOp : public OpKernel {
   TF_DISALLOW_COPY_AND_ASSIGN(TileGradientOp);
 };
 
+<<<<<<< HEAD
 template <typename Device, typename Tmultiples>
 template <DataType DT, int NDIM>
 inline void TileGradientOp<Device, Tmultiples>::HandleCase(
@@ -720,4 +944,135 @@ TF_CALL_double(REGISTER_SYCL);
 #undef REGISTER_SYCL
 #endif  // TENSORFLOW_USE_SYCL
 
+=======
+template <typename Device>
+template <DataType DT, int NDIM>
+inline void TileGradientOp<Device>::HandleCase(
+    OpKernelContext* context, const std::vector<int32>& input_dims,
+    const gtl::ArraySlice<int32>& multiples_array, Tensor* result) {
+  LOG(FATAL) << "TileGradientOp: Invalid combination of Device, DT and NDIM: "
+             << typeid(Device).name() << ", " << DataTypeString(DT) << ", "
+             << NDIM;
+}
+
+#define HANDLE_CASE(device, dtype, ndim)                                       \
+  template <>                                                                  \
+  template <>                                                                  \
+  void TileGradientOp<device>::HandleCase<dtype, ndim>(                        \
+      OpKernelContext * context, const std::vector<int32>& input_dims,         \
+      const gtl::ArraySlice<int32>& multiples_array, Tensor* result) {         \
+    HandleCaseImpl<dtype, ndim>(context, input_dims, multiples_array, result); \
+  }
+
+#define HANDLE_CASE_DIM_POSITIVE(device, dtype) \
+  HANDLE_CASE(device, dtype, 1);                \
+  HANDLE_CASE(device, dtype, 2);                \
+  HANDLE_CASE(device, dtype, 3);                \
+  HANDLE_CASE(device, dtype, 4);                \
+  HANDLE_CASE(device, dtype, 5);
+
+#define HANDLE_CASE_DIM(device, dtype) \
+  HANDLE_CASE(device, dtype, 0);       \
+  HANDLE_CASE_DIM_POSITIVE(device, dtype);
+
+HANDLE_CASE_DIM(CPUDevice, DT_FLOAT);
+HANDLE_CASE_DIM(CPUDevice, DT_DOUBLE);
+HANDLE_CASE_DIM(CPUDevice, DT_INT16);
+HANDLE_CASE_DIM(CPUDevice, DT_INT32);
+HANDLE_CASE_DIM(CPUDevice, DT_INT64);
+
+#if GOOGLE_CUDA
+// Eigen on GPU does not handle 0-dimension data types yet.
+HANDLE_CASE_DIM_POSITIVE(GPUDevice, DT_FLOAT);
+HANDLE_CASE_DIM_POSITIVE(GPUDevice, DT_DOUBLE);
+HANDLE_CASE_DIM_POSITIVE(GPUDevice, DT_INT16);
+HANDLE_CASE_DIM_POSITIVE(GPUDevice, DT_INT32);
+HANDLE_CASE_DIM_POSITIVE(GPUDevice, DT_INT64);
+#endif  // GOOGLE_CUDA
+
+#undef HANDLE_CASE_DIM_POSITIVE
+#undef HANDLE_CASE_DIM
+#undef HANDLE_CASE
+
+REGISTER_KERNEL_BUILDER(Name("Tile").Device(DEVICE_CPU).HostMemory("multiples"),
+                        TileOp<CPUDevice>);
+REGISTER_KERNEL_BUILDER(Name("TileGrad")
+                            .Device(DEVICE_CPU)
+                            .HostMemory("multiples"),
+                        TileGradientOp<CPUDevice>);
+
+#if GOOGLE_CUDA
+#define DEFINE_GPU_TYPE(T) \
+  DEFINE_GPU_DIM(T, 1)     \
+  DEFINE_GPU_DIM(T, 2)     \
+  DEFINE_GPU_DIM(T, 3)     \
+  DEFINE_GPU_DIM(T, 4)     \
+  DEFINE_GPU_DIM(T, 5)
+
+#define DEFINE_GPU_DIM(T, NDIM)                                       \
+  template <>                                                         \
+  void Tile<GPUDevice, T, NDIM>::operator()(                          \
+      const GPUDevice& d, typename TTypes<T, NDIM>::Tensor out,       \
+      typename TTypes<T, NDIM>::ConstTensor in,                       \
+      const Eigen::array<int32, NDIM>& broadcast_array) const;        \
+  extern template struct Tile<GPUDevice, T, NDIM>;                    \
+  template <>                                                         \
+  void TileGrad<GPUDevice, T, NDIM>::operator()(                      \
+      const GPUDevice& d, typename TTypes<T, NDIM>::Tensor out,       \
+      typename TTypes<T, NDIM>::ConstTensor in,                       \
+      const Eigen::DSizes<ptrdiff_t, NDIM>& indices,                  \
+      const Eigen::DSizes<ptrdiff_t, NDIM>& sizes, bool first) const; \
+  extern template struct TileGrad<GPUDevice, T, NDIM>;                \
+  template <>                                                         \
+  void ReduceAndReshape<GPUDevice, T, NDIM, 1>::operator()(           \
+      const GPUDevice& d, typename TTypes<T, NDIM>::Tensor out,       \
+      typename TTypes<T, NDIM>::ConstTensor in,                       \
+      const Eigen::DSizes<ptrdiff_t, 1>& reduce_dim,                  \
+      const Eigen::DSizes<ptrdiff_t, NDIM>& reshape_dim) const;       \
+  extern template struct ReduceAndReshape<GPUDevice, T, NDIM, 1>;
+
+namespace functor {
+DEFINE_GPU_TYPE(float);
+DEFINE_GPU_TYPE(double);
+DEFINE_GPU_TYPE(int64);
+DEFINE_GPU_TYPE(int32);
+DEFINE_GPU_TYPE(int16);
+}  // end namespace functor
+
+#undef DEFINE_GPU_DIM
+#undef DEFINE_GPU_TYPE
+
+REGISTER_KERNEL_BUILDER(Name("Tile")
+                            .Device(DEVICE_GPU)
+                            .TypeConstraint<float>("T")
+                            .HostMemory("multiples"),
+                        TileOp<GPUDevice>);
+REGISTER_KERNEL_BUILDER(Name("Tile")
+                            .Device(DEVICE_GPU)
+                            .TypeConstraint<double>("T")
+                            .HostMemory("multiples"),
+                        TileOp<GPUDevice>);
+REGISTER_KERNEL_BUILDER(Name("Tile")
+                            .Device(DEVICE_GPU)
+                            .TypeConstraint<int16>("T")
+                            .HostMemory("multiples"),
+                        TileOp<GPUDevice>);
+
+REGISTER_KERNEL_BUILDER(Name("TileGrad")
+                            .Device(DEVICE_GPU)
+                            .TypeConstraint<float>("T")
+                            .HostMemory("multiples"),
+                        TileGradientOp<GPUDevice>);
+REGISTER_KERNEL_BUILDER(Name("TileGrad")
+                            .Device(DEVICE_GPU)
+                            .TypeConstraint<double>("T")
+                            .HostMemory("multiples"),
+                        TileGradientOp<GPUDevice>);
+REGISTER_KERNEL_BUILDER(Name("TileGrad")
+                            .Device(DEVICE_GPU)
+                            .TypeConstraint<int16>("T")
+                            .HostMemory("multiples"),
+                        TileGradientOp<GPUDevice>);
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

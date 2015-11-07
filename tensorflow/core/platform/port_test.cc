@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +22,19 @@ limitations under the License.
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/threadpool.h"
+=======
+#include "tensorflow/core/platform/port.h"
+#include <condition_variable>
+#include "tensorflow/core/lib/core/threadpool.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace port {
 
 TEST(Port, AlignedMalloc) {
   for (size_t alignment = 1; alignment <= 1 << 20; alignment <<= 1) {
+<<<<<<< HEAD
     void* p = AlignedMalloc(1, alignment);
     ASSERT_TRUE(p != nullptr) << "AlignedMalloc(1, " << alignment << ")";
     uintptr_t pval = reinterpret_cast<uintptr_t>(p);
@@ -44,10 +52,21 @@ TEST(Port, GetCurrentCPU) {
 #endif
 }
 
+=======
+    void* p = aligned_malloc(1, alignment);
+    ASSERT_TRUE(p != NULL) << "aligned_malloc(1, " << alignment << ")";
+    uintptr_t pval = reinterpret_cast<uintptr_t>(p);
+    EXPECT_EQ(pval % alignment, 0);
+    aligned_free(p);
+  }
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(ConditionVariable, WaitForMilliseconds_Timeout) {
   mutex m;
   mutex_lock l(m);
   condition_variable cv;
+<<<<<<< HEAD
   ConditionResult result = kCond_MaybeNotified;
   time_t start = time(nullptr);
   // Condition variables are subject to spurious wakeups on some platforms,
@@ -57,6 +76,11 @@ TEST(ConditionVariable, WaitForMilliseconds_Timeout) {
   }
   EXPECT_EQ(result, kCond_Timeout);
   time_t finish = time(nullptr);
+=======
+  time_t start = time(NULL);
+  EXPECT_EQ(WaitForMilliseconds(&l, &cv, 3000), kCond_Timeout);
+  time_t finish = time(NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_GE(finish - start, 3);
 }
 
@@ -65,15 +89,24 @@ TEST(ConditionVariable, WaitForMilliseconds_Signalled) {
   mutex m;
   mutex_lock l(m);
   condition_variable cv;
+<<<<<<< HEAD
   time_t start = time(nullptr);
   // Sleep for just 1 second then notify.  We have a timeout of 3 secs,
   // so the condition variable will notice the cv signal before the timeout.
   pool.Schedule([&m, &cv]() {
     Env::Default()->SleepForMicroseconds(1 * 1000 * 1000);
+=======
+  time_t start = time(NULL);
+  // Sleep for just 1 second then notify.  We have a timeout of 3 secs,
+  // so the condition variable will notice the cv signal before the timeout.
+  pool.Schedule([&m, &cv]() {
+    sleep(1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     mutex_lock l(m);
     cv.notify_all();
   });
   EXPECT_EQ(WaitForMilliseconds(&l, &cv, 3000), kCond_MaybeNotified);
+<<<<<<< HEAD
   time_t finish = time(nullptr);
   EXPECT_LT(finish - start, 3);
 }
@@ -187,5 +220,11 @@ TEST(TestCPUFeature, TestFeature) {
   LOG(INFO) << "has_avx2 = " << has_avx2;
 }
 
+=======
+  time_t finish = time(NULL);
+  EXPECT_LT(finish - start, 3);
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace port
 }  // namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,10 +23,29 @@ limitations under the License.
 
 namespace tensorflow {
 
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
+#ifndef TENSORFLOW_LIB_IO_TABLE_H_
+#define TENSORFLOW_LIB_IO_TABLE_H_
+
+#include <stdint.h>
+#include "tensorflow/core/lib/io/iterator.h"
+
+namespace tensorflow {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class RandomAccessFile;
 
 namespace table {
 
+<<<<<<< HEAD
+=======
+class Block;
+class BlockHandle;
+class Footer;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 struct Options;
 
 // A Table is a sorted map from strings to strings.  Tables are
@@ -44,7 +64,11 @@ class Table {
   // "*file", but the client must ensure that "file" remains live
   // for the duration of the returned table's lifetime.
   static Status Open(const Options& options, RandomAccessFile* file,
+<<<<<<< HEAD
                      uint64 file_size, Table** table);
+=======
+                          uint64 file_size, Table** table);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ~Table();
 
@@ -72,8 +96,13 @@ class Table {
   // to Seek(key).  May not make such a call if filter policy says
   // that key is not present.
   Status InternalGet(const StringPiece& key, void* arg,
+<<<<<<< HEAD
                      void (*handle_result)(void* arg, const StringPiece& k,
                                            const StringPiece& v));
+=======
+                          void (*handle_result)(void* arg, const StringPiece& k,
+                                                const StringPiece& v));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // No copying allowed
   Table(const Table&);
@@ -83,4 +112,8 @@ class Table {
 }  // namespace table
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_LIB_IO_TABLE_H_
+=======
+#endif  // TENSORFLOW_LIB_IO_TABLE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

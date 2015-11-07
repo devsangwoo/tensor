@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,11 @@ limitations under the License.
 #include "tensorflow/core/lib/core/refcount.h"
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -56,6 +62,7 @@ class CountUpToOp : public OpKernel {
   T limit_;
 };
 
+<<<<<<< HEAD
 template <class T>
 class ResourceCountUpToOp : public OpKernel {
  public:
@@ -104,6 +111,12 @@ class ResourceCountUpToOp : public OpKernel {
   REGISTER_KERNEL_BUILDER(                                                    \
       Name("ResourceCountUpTo").TypeConstraint<TYPE>("T").Device(DEVICE_CPU), \
       ResourceCountUpToOp<TYPE>)
+=======
+#define REGISTER(TYPE)                                                \
+  REGISTER_KERNEL_BUILDER(                                            \
+      Name("CountUpTo").TypeConstraint<TYPE>("T").Device(DEVICE_CPU), \
+      CountUpToOp<TYPE>)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 REGISTER(int32);
 REGISTER(int64);

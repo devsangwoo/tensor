@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +32,13 @@ limitations under the License.
 
 // TODO(mrry): Prevent this Windows.h #define from leaking out of our headers.
 #undef ERROR
+=======
+#ifndef TENSORFLOW_PLATFORM_DEFAULT_LOGGING_H_
+#define TENSORFLOW_PLATFORM_DEFAULT_LOGGING_H_
+
+#include <sstream>
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 const int INFO = 0;            // base_logging::INFO;
@@ -44,6 +52,7 @@ namespace internal {
 class LogMessage : public std::basic_ostringstream<char> {
  public:
   LogMessage(const char* fname, int line, int severity);
+<<<<<<< HEAD
   ~LogMessage() override;
 
   // Change the location of the log message.
@@ -64,6 +73,9 @@ class LogMessage : public std::basic_ostringstream<char> {
   // call site to avoid repeated lookups. This routine performs a hash-map
   // access against the VLOG-ing specification provided by the env var.
   static bool VmoduleActivated(const char* fname, int level);
+=======
+  ~LogMessage();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  protected:
   void GenerateLogMessage();
@@ -74,6 +86,7 @@ class LogMessage : public std::basic_ostringstream<char> {
   int severity_;
 };
 
+<<<<<<< HEAD
 // Uses the lower operator & precedence to voidify a LogMessage reference, so
 // that the ternary VLOG() implementation is balanced, type wise.
 struct Voidifier {
@@ -81,11 +94,14 @@ struct Voidifier {
   void operator&(const T&)const {}
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // LogMessageFatal ensures the process will exit in failure after
 // logging this message.
 class LogMessageFatal : public LogMessage {
  public:
   LogMessageFatal(const char* file, int line) TF_ATTRIBUTE_COLD;
+<<<<<<< HEAD
   TF_ATTRIBUTE_NORETURN ~LogMessageFatal() override;
 };
 
@@ -246,6 +262,28 @@ class LogEveryNSecState {
 #define LOG_EVERY_N_SEC(severity, n_seconds)                      \
   LOGGING_INTERNAL_STATEFUL_CONDITION(EveryNSec, true, n_seconds) \
   LOG(severity)
+=======
+  ~LogMessageFatal() TF_ATTRIBUTE_NORETURN;
+};
+
+#define _TF_LOG_INFO \
+  ::tensorflow::internal::LogMessage(__FILE__, __LINE__, tensorflow::INFO)
+#define _TF_LOG_WARNING \
+  ::tensorflow::internal::LogMessage(__FILE__, __LINE__, tensorflow::WARNING)
+#define _TF_LOG_ERROR \
+  ::tensorflow::internal::LogMessage(__FILE__, __LINE__, tensorflow::ERROR)
+#define _TF_LOG_FATAL \
+  ::tensorflow::internal::LogMessageFatal(__FILE__, __LINE__)
+
+#define LOG(severity) _TF_LOG_##severity
+
+// TODO(jeff): Define a proper implementation of VLOG_IS_ON
+#define VLOG_IS_ON(lvl) ((lvl) <= 0)
+
+#define VLOG(lvl)      \
+  if (VLOG_IS_ON(lvl)) \
+  ::tensorflow::internal::LogMessage(__FILE__, __LINE__, tensorflow::INFO)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // CHECK dies with a fatal error if condition is not true.  It is *not*
 // controlled by NDEBUG, so the check will be executed regardless of
@@ -348,8 +386,11 @@ string* MakeCheckOpString(const T1& v1, const T2& v2, const char* exprtext) {
 // The (int, int) specialization works around the issue that the compiler
 // will not instantiate the template version of the function on values of
 // unnamed enum type - see comment below.
+<<<<<<< HEAD
 // The (size_t, int) and (int, size_t) specialization are to handle unsigned
 // comparison errors while still being thorough with the comparison.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #define TF_DEFINE_CHECK_OP_IMPL(name, op)                                 \
   template <typename T1, typename T2>                                     \
   inline string* name##Impl(const T1& v1, const T2& v2,                   \
@@ -361,6 +402,7 @@ string* MakeCheckOpString(const T1& v1, const T2& v2, const char* exprtext) {
   }                                                                       \
   inline string* name##Impl(int v1, int v2, const char* exprtext) {       \
     return name##Impl<int, int>(v1, v2, exprtext);                        \
+<<<<<<< HEAD
   }                                                                       \
   inline string* name##Impl(const size_t v1, const int v2,                \
                             const char* exprtext) {                       \
@@ -376,6 +418,8 @@ string* MakeCheckOpString(const T1& v1, const T2& v2, const char* exprtext) {
     }                                                                     \
     const size_t uval = (size_t)((unsigned)v2);                           \
     return name##Impl<size_t, size_t>(v1, uval, exprtext);                \
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
 // We use the full name Check_EQ, Check_NE, etc. in case the file including
@@ -383,12 +427,21 @@ string* MakeCheckOpString(const T1& v1, const T2& v2, const char* exprtext) {
 // This happens if, for example, those are used as token names in a
 // yacc grammar.
 TF_DEFINE_CHECK_OP_IMPL(Check_EQ,
+<<<<<<< HEAD
                         ==)  // Compilation error with CHECK_EQ(NULL, x)?
 TF_DEFINE_CHECK_OP_IMPL(Check_NE, !=)  // Use CHECK(x == NULL) instead.
 TF_DEFINE_CHECK_OP_IMPL(Check_LE, <=)
 TF_DEFINE_CHECK_OP_IMPL(Check_LT, <)
 TF_DEFINE_CHECK_OP_IMPL(Check_GE, >=)
 TF_DEFINE_CHECK_OP_IMPL(Check_GT, >)
+=======
+                        == )  // Compilation error with CHECK_EQ(NULL, x)?
+TF_DEFINE_CHECK_OP_IMPL(Check_NE, != )  // Use CHECK(x == NULL) instead.
+TF_DEFINE_CHECK_OP_IMPL(Check_LE, <= )
+TF_DEFINE_CHECK_OP_IMPL(Check_LT, < )
+TF_DEFINE_CHECK_OP_IMPL(Check_GE, >= )
+TF_DEFINE_CHECK_OP_IMPL(Check_GT, > )
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef TF_DEFINE_CHECK_OP_IMPL
 
 // In optimized mode, use CheckOpString to hint to compiler that
@@ -463,6 +516,7 @@ T&& CheckNotNull(const char* file, int line, const char* exprtext, T&& t) {
   return std::forward<T>(t);
 }
 
+<<<<<<< HEAD
 int64 MinLogLevelFromEnv();
 
 int64 MinVLogLevelFromEnv();
@@ -524,3 +578,9 @@ void TFRemoveLogSink(TFLogSink* sink);
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_PLATFORM_DEFAULT_LOGGING_H_
+=======
+}  // namespace internal
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_PLATFORM_DEFAULT_LOGGING_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

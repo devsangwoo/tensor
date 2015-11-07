@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,16 @@ REGISTER9(BinaryOp, CPU, "Greater", functor::greater, float, Eigen::half,
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 REGISTER7(BinaryOp, GPU, "Greater", functor::greater, float, Eigen::half,
           double, int64, uint8, int8, int16);
+=======
+#include "tensorflow/core/kernels/cwise_ops_common.h"
+
+namespace tensorflow {
+REGISTER4(BinaryOp, CPU, "Greater", functor::greater, float, double, int32,
+          int64);
+#if GOOGLE_CUDA
+REGISTER3(BinaryOp, GPU, "Greater", functor::greater, float, double, int64);
+#endif
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // A special GPU kernel for int32.
 // TODO(b/25387198): Also enable int32 in device memory. This kernel
@@ -32,6 +43,7 @@ REGISTER_KERNEL_BUILDER(Name("Greater")
                             .HostMemory("z")
                             .TypeConstraint<int32>("T"),
                         BinaryOp<CPUDevice, functor::greater<int32>>);
+<<<<<<< HEAD
 #endif
 #ifdef TENSORFLOW_USE_SYCL
 REGISTER2(BinaryOp, SYCL, "Greater", functor::greater, float, double);
@@ -44,4 +56,7 @@ REGISTER_KERNEL_BUILDER(Name("Greater")
                             .TypeConstraint<int32>("T"),
                         BinaryOp<CPUDevice, functor::greater<int32>>);
 #endif  // TENSORFLOW_USE_SYCL
+=======
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

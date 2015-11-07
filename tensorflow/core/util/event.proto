@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package tensorflow;
+<<<<<<< HEAD
 
 import "tensorflow/core/framework/summary.proto";
 
@@ -9,18 +10,30 @@ option java_outer_classname = "EventProtos";
 option java_multiple_files = true;
 option java_package = "org.tensorflow.util";
 
+=======
+// option cc_enable_arenas = true;
+
+import "tensorflow/core/framework/graph.proto";
+import "tensorflow/core/framework/summary.proto";
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Protocol buffer representing an event that happened during
 // the execution of a Brain model.
 message Event {
   // Timestamp of the event.
   double wall_time = 1;
 
+<<<<<<< HEAD
   // Global step of the event.
+=======
+  // Globale step of the event.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int64 step = 2;
 
   oneof what {
     // An event file was started, with the specified version.
     // This is use to identify the contents of the record IO files
+<<<<<<< HEAD
     // easily.  Current version is "brain.Event:2".  All versions
     // start with "brain.Event:".
     string file_version = 3;
@@ -120,4 +133,14 @@ message WorkerHeartbeatResponse {
   WorkerHealth health_status = 1;
   repeated Event worker_log = 2;
   string hostname = 3;
+=======
+    // easily.  Current version is "tensorflow.Event:1".  All versions
+    // start with "tensorflow.Event:".
+    string file_version = 3;
+    // A model was constructed.
+    GraphDef graph_def = 4;
+    // A summary was generated.
+    Summary summary = 5;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }

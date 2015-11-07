@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,11 +30,22 @@ from tensorflow.python.platform import test
 
 
 class AssignOpTest(test.TestCase):
+=======
+"""Tests for state updating ops that may have benign race conditions."""
+import tensorflow.python.platform
+
+import numpy as np
+import tensorflow as tf
+
+
+class AssignOpTest(tf.test.TestCase):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   # NOTE(mrry): We exclude thess tests from the TSAN TAP target, because they
   #   contain benign and deliberate data races when multiple threads update
   #   the same parameters without a lock.
   def testParallelUpdateWithoutLocking(self):
+<<<<<<< HEAD
     # We need each thread to keep its own device stack or the device scopes
     # won't be properly nested.
     ops.get_default_graph().switch_to_thread_local()
@@ -53,17 +65,35 @@ class AssignOpTest(test.TestCase):
           self.checkedThread(
               target=run_add, args=(add_op,)) for add_op in adds
       ]
+=======
+    with self.test_session() as sess:
+      ones_t = tf.fill([1024, 1024], 1.0)
+      p = tf.Variable(tf.zeros([1024, 1024]))
+      adds = [tf.assign_add(p, ones_t, use_locking=False)
+              for _ in range(20)]
+      tf.initialize_all_variables().run()
+
+      def run_add(add_op):
+        sess.run(add_op)
+      threads = [self.checkedThread(target=run_add, args=(add_op,))
+                 for add_op in adds]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       for t in threads:
         t.start()
       for t in threads:
         t.join()
 
+<<<<<<< HEAD
       vals = self.evaluate(p)
+=======
+      vals = p.eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       ones = np.ones((1024, 1024)).astype(np.float32)
       self.assertTrue((vals >= ones).all())
       self.assertTrue((vals <= ones * 20).all())
 
   def testParallelAssignWithoutLocking(self):
+<<<<<<< HEAD
     # We need each thread to keep its own device stack or the device scopes
     # won't be properly nested.
     ops.get_default_graph().switch_to_thread_local()
@@ -83,17 +113,35 @@ class AssignOpTest(test.TestCase):
           self.checkedThread(
               target=run_assign, args=(assign_op,)) for assign_op in assigns
       ]
+=======
+    with self.test_session() as sess:
+      ones_t = tf.fill([1024, 1024], float(1))
+      p = tf.Variable(tf.zeros([1024, 1024]))
+      assigns = [tf.assign(p, tf.mul(ones_t, float(i)), False)
+                 for i in range(1, 21)]
+      tf.initialize_all_variables().run()
+
+      def run_assign(assign_op):
+        sess.run(assign_op)
+      threads = [self.checkedThread(target=run_assign, args=(assign_op,))
+                 for assign_op in assigns]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       for t in threads:
         t.start()
       for t in threads:
         t.join()
 
+<<<<<<< HEAD
       vals = self.evaluate(p)
+=======
+      vals = p.eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       # Assert every element is taken from one of the assignments.
       self.assertTrue((vals > 0).all())
       self.assertTrue((vals <= 20).all())
 
+<<<<<<< HEAD
   # NOTE(skyewm): We exclude these tests from the TSAN TAP target, because they
   # contain non-benign but known data races between the variable assignment and
   # returning the output tensors. This issue will be resolved with the new
@@ -165,3 +213,8 @@ class AssignOpTest(test.TestCase):
 
 if __name__ == "__main__":
   test.main()
+=======
+
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

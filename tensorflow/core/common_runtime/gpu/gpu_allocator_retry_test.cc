@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,16 @@ limitations under the License.
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/thread_annotations.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/common_runtime/gpu/gpu_allocator_retry.h"
+
+#include "tensorflow/core/lib/core/notification.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/thread_annotations.h"
+#include "tensorflow/core/public/env.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -49,6 +60,7 @@ class FakeAllocator {
   }
 
   void DeallocateRaw(void* ptr) {
+<<<<<<< HEAD
     mutex_lock l(mu_);
     ++memory_capacity_;
     retry_.NotifyDealloc();
@@ -56,12 +68,25 @@ class FakeAllocator {
 
  private:
   AllocatorRetry retry_;
+=======
+    retry_.DeallocateRaw(
+        [this](void* p) {
+          mutex_lock l(mu_);
+          ++memory_capacity_;
+        },
+        ptr);
+  }
+
+ private:
+  GPUAllocatorRetry retry_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   void* good_ptr_ = reinterpret_cast<void*>(0xdeadbeef);
   mutex mu_;
   size_t memory_capacity_ GUARDED_BY(mu_);
   int millis_to_wait_;
 };
 
+<<<<<<< HEAD
 // GPUAllocatorRetry is a mechanism to deal with race conditions which
 // are inevitable in the TensorFlow runtime where parallel Nodes can
 // execute in any order.  Properly testing this feature would use real
@@ -116,12 +141,17 @@ class AlternatingBarrier {
   std::vector<bool> done_ GUARDED_BY(mu_);
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class GPUAllocatorRetryTest : public ::testing::Test {
  protected:
   GPUAllocatorRetryTest() {}
 
   void LaunchConsumerThreads(int num_consumers, int cap_needed) {
+<<<<<<< HEAD
     barrier_.reset(new AlternatingBarrier(num_consumers));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     consumer_count_.resize(num_consumers, 0);
     for (int i = 0; i < num_consumers; ++i) {
       consumers_.push_back(Env::Default()->StartThread(
@@ -129,22 +159,34 @@ class GPUAllocatorRetryTest : public ::testing::Test {
             do {
               void* ptr = nullptr;
               for (int j = 0; j < cap_needed; ++j) {
+<<<<<<< HEAD
                 barrier_->WaitTurn(i);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                 ptr = alloc_->AllocateRaw(16, 1);
                 if (ptr == nullptr) {
                   mutex_lock l(mu_);
                   has_failed_ = true;
+<<<<<<< HEAD
                   barrier_->Done(i);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   return;
                 }
               }
               ++consumer_count_[i];
               for (int j = 0; j < cap_needed; ++j) {
+<<<<<<< HEAD
                 barrier_->WaitTurn(i);
                 alloc_->DeallocateRaw(ptr);
               }
             } while (!notifier_.HasBeenNotified());
             barrier_->Done(i);
+=======
+                alloc_->DeallocateRaw(ptr);
+              }
+            } while (!notifier_.HasBeenNotified());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           }));
     }
   }
@@ -169,7 +211,10 @@ class GPUAllocatorRetryTest : public ::testing::Test {
   }
 
   std::unique_ptr<FakeAllocator> alloc_;
+<<<<<<< HEAD
   std::unique_ptr<AlternatingBarrier> barrier_;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   std::vector<Thread*> consumers_;
   std::vector<int> consumer_count_;
   Notification notifier_;
@@ -181,9 +226,15 @@ class GPUAllocatorRetryTest : public ::testing::Test {
 // Verifies correct retrying when memory is slightly overcommitted but
 // we allow retry.
 TEST_F(GPUAllocatorRetryTest, RetrySuccess) {
+<<<<<<< HEAD
   // Support up to 2 allocations simultaneously, waits up to 1000 msec for
   // a chance to alloc.
   alloc_.reset(new FakeAllocator(2, 1000));
+=======
+  // Support up to 2 allocations simultaneously, waits up to 10 msec for
+  // a chance to alloc.
+  alloc_.reset(new FakeAllocator(2, 10000));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Launch 3 consumers, each of whom needs 1 unit at a time.
   LaunchConsumerThreads(3, 1);
   // This should be enough time for each consumer to be satisfied many times.
@@ -202,9 +253,13 @@ TEST_F(GPUAllocatorRetryTest, RetrySuccess) {
 }
 
 // Verifies OutOfMemory failure when memory is slightly overcommitted
+<<<<<<< HEAD
 // and retry is not allowed.  Note that this test will fail, i.e. no
 // memory alloc failure will be detected, if it is run in a context that
 // does not permit real multi-threaded execution.
+=======
+// and retry is not allowed.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST_F(GPUAllocatorRetryTest, NoRetryFail) {
   // Support up to 2 allocations simultaneously, waits up to 0 msec for
   // a chance to alloc.
@@ -227,16 +282,27 @@ TEST_F(GPUAllocatorRetryTest, NoRetryFail) {
 // Verifies OutOfMemory failure when retry is allowed but memory capacity
 // is too low even for retry.
 TEST_F(GPUAllocatorRetryTest, RetryInsufficientFail) {
+<<<<<<< HEAD
   // Support up to 2 allocations simultaneously, waits up to 1000 msec for
   // a chance to alloc.
   alloc_.reset(new FakeAllocator(2, 1000));
+=======
+  // Support up to 2 allocations simultaneously, waits up to 10 msec for
+  // a chance to alloc.
+  alloc_.reset(new FakeAllocator(2, 10000));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Launch 3 consumers, each of whom needs 2 units at a time.  We expect
   // deadlock where 2 consumers each hold 1 unit, and timeout trying to
   // get the second.
   LaunchConsumerThreads(3, 2);
   Env::Default()->SleepForMicroseconds(50000);
+<<<<<<< HEAD
   // We're forcing a race condition, so this will fail quickly, but
   // give it 10 seconds anyway.
+=======
+  // Will wait up to 10 seconds for proper race condition to occur, resulting
+  // in failure.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   JoinConsumerThreads(true, 10000000);
   for (int i = 0; i < 3; ++i) {
     LOG(INFO) << "Consumer " << i << " is " << consumer_count_[i];

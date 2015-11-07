@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Contains device-level options that can be specified at a platform level.
 // Example usage:
 //    auto device_options = DeviceOptions::Default();
@@ -20,12 +23,21 @@ limitations under the License.
 #ifndef TENSORFLOW_STREAM_EXECUTOR_DEVICE_OPTIONS_H_
 #define TENSORFLOW_STREAM_EXECUTOR_DEVICE_OPTIONS_H_
 
+<<<<<<< HEAD
 #include <map>
 
 #include "tensorflow/stream_executor/platform/port.h"
 #include "tensorflow/stream_executor/platform/logging.h"
 
 namespace stream_executor {
+=======
+#include "tensorflow/stream_executor/platform/port.h"
+
+#include "tensorflow/stream_executor/platform/logging.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Indicates a set of options for a device's usage, which generally must be
 // provided at StreamExecutor device-initialization time.
@@ -75,14 +87,22 @@ struct DeviceOptions {
     return flags_ == 0 ? "none" : "kDoNotReclaimStackAllocation";
   }
 
+<<<<<<< HEAD
   // Platform-specific device options. Expressed as key-value pairs to avoid
   // DeviceOptions subclass proliferation.
   std::map<string, string> non_portable_tags;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  private:
   unsigned flags_;
 };
 
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_DEVICE_OPTIONS_H_

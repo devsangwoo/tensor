@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +26,16 @@ limitations under the License.
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/public/version.h"
+=======
+#include "tensorflow/core/util/tensor_slice_writer.h"
+
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/lib/io/table_builder.h"
+#include "tensorflow/core/lib/random/random.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/public/env.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/saved_tensor_slice_util.h"
 
 namespace tensorflow {
@@ -35,11 +46,18 @@ namespace {
 
 class TableBuilder : public TensorSliceWriter::Builder {
  public:
+<<<<<<< HEAD
   TableBuilder(const string& name, WritableFile* f) : name_(name), file_(f) {
     table::Options option;
     option.compression = table::kNoCompression;
     builder_.reset(new table::TableBuilder(option, f));
   }
+=======
+  TableBuilder(const string& name, WritableFile* f)
+      : name_(name),
+        file_(f),
+        builder_(new table::TableBuilder(table::Options(), f)) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   void Add(StringPiece key, StringPiece val) override {
     builder_->Add(key, val);
   }
@@ -68,6 +86,7 @@ class TableBuilder : public TensorSliceWriter::Builder {
 };
 }  // anonymous namespace
 
+<<<<<<< HEAD
 Status CreateTableTensorSliceBuilder(const string& name,
                                      TensorSliceWriter::Builder** builder) {
   *builder = nullptr;
@@ -75,6 +94,15 @@ Status CreateTableTensorSliceBuilder(const string& name,
   Status s = Env::Default()->NewWritableFile(name, &f);
   if (s.ok()) {
     *builder = new TableBuilder(name, f.release());
+=======
+Status CreateTableTensorSliceBuilder(
+    const string& name, TensorSliceWriter::Builder** builder) {
+  *builder = nullptr;
+  WritableFile* f;
+  Status s = Env::Default()->NewWritableFile(name, &f);
+  if (s.ok()) {
+    *builder = new TableBuilder(name, f);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return Status::OK();
   } else {
     return s;
@@ -84,6 +112,7 @@ Status CreateTableTensorSliceBuilder(const string& name,
 TensorSliceWriter::TensorSliceWriter(const string& filename,
                                      CreateBuilderFunction create_builder)
     : filename_(filename),
+<<<<<<< HEAD
       create_builder_(std::move(create_builder)),
       tmpname_(strings::StrCat(filename, ".tempstate", random::New64())),
       slices_(0) {
@@ -91,6 +120,11 @@ TensorSliceWriter::TensorSliceWriter(const string& filename,
   versions->set_producer(TF_CHECKPOINT_VERSION);
   versions->set_min_consumer(TF_CHECKPOINT_VERSION_MIN_CONSUMER);
 }
+=======
+      create_builder_(create_builder),
+      tmpname_(strings::StrCat(filename, ".tempstate", random::New64())),
+      slices_(0) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 Status TensorSliceWriter::Finish() {
   Builder* b;
@@ -124,11 +158,16 @@ Status TensorSliceWriter::Finish() {
       LOG(ERROR) << "Failed to rename file " << tmpname_ << " to " << filename_;
     }
   } else {
+<<<<<<< HEAD
     Env::Default()->DeleteFile(tmpname_).IgnoreError();
+=======
+    Env::Default()->DeleteFile(tmpname_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return s;
 }
 
+<<<<<<< HEAD
 /* static */
 size_t TensorSliceWriter::MaxBytesPerElement(DataType dt) {
   switch (dt) {
@@ -194,6 +233,8 @@ Status TensorSliceWriter::SaveData(const tstring* data, int64 num_elements,
   return Status::OK();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace checkpoint
 
 }  // namespace tensorflow

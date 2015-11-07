@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,13 +22,25 @@ limitations under the License.
 
 #include "tensorflow/core/framework/attr_value_util.h"
 #include "tensorflow/core/framework/node_def.pb.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_NODE_DEF_BUILDER_H_
+#define TENSORFLOW_FRAMEWORK_NODE_DEF_BUILDER_H_
+
+#include <functional>
+#include "tensorflow/core/framework/attr_value_util.h"
+#include "tensorflow/core/framework/graph.pb.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/node_def_util.h"
 #include "tensorflow/core/framework/op.h"
 #include "tensorflow/core/framework/op_def.pb.h"
 #include "tensorflow/core/framework/types.h"
+<<<<<<< HEAD
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/graph/graph_node_util.h"
 #include "tensorflow/core/lib/core/status.h"
+=======
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/lib/strings/strcat.h"
 
@@ -35,8 +48,12 @@ namespace tensorflow {
 
 class NodeDefBuilder;
 typedef std::function<Status(const OpDef&, int, const NodeDef&,
+<<<<<<< HEAD
                              NodeDefBuilder*)>
     FakeInputFunctor;
+=======
+                                  NodeDefBuilder*)> FakeInputFunctor;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // This is a helper for creating a NodeDef.  Automatically sets attrs
 // that can be inferred from the inputs, and uses default values
@@ -53,9 +70,20 @@ class NodeDefBuilder {
  public:
   // To specify an output to be consumed by one of the Input() methods below.
   struct NodeOut {
+<<<<<<< HEAD
     NodeOut(StringPiece n, int i, DataType dt);
     NodeOut();  // uninitialized, call Reset() before use.
     void Reset(StringPiece n, int i, DataType dt);
+=======
+    NodeOut(const string& n, int i, DataType dt)
+        : node(n), index(i), data_type(dt) {}
+    NodeOut() {}  // uninitialized, call Reset() before use.
+    void Reset(const string& n, int i, DataType dt) {
+      node = n;
+      index = i;
+      data_type = dt;
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     string node;
     int index;
     DataType data_type;
@@ -65,6 +93,7 @@ class NodeDefBuilder {
   // the Op plus a registry) for the NodeDef.  Other fields are
   // specified by calling the methods below.
   // REQUIRES: The OpDef must satisfy ValidateOpDef().
+<<<<<<< HEAD
   NodeDefBuilder(StringPiece name, StringPiece op_name,
                  const OpRegistryInterface* op_registry = OpRegistry::Global(),
                  const NodeDebugInfo* debug = nullptr);
@@ -72,21 +101,47 @@ class NodeDefBuilder {
                  const NodeDebugInfo& debug);
   // REQUIRES: in addition, *op_def must outlive *this.
   NodeDefBuilder(StringPiece name, const OpDef* op_def);
+=======
+  NodeDefBuilder(const string& name, const string& op_name,
+                 const OpRegistryInterface* op_registry = OpRegistry::Global());
+  // REQUIRES: in addition, *op_def must outlive *this.
+  NodeDefBuilder(const string& name, const OpDef* op_def);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // You must call one Input() function per input_arg in the Op,
   // *and in the same order as the input_args appear in the OpDef.*
 
   // For inputs that take a single tensor.
+<<<<<<< HEAD
   NodeDefBuilder& Input(StringPiece src_node, int src_index, DataType dt);
   NodeDefBuilder& Input(const NodeOut& src);
 
   // For inputs that take a list of tensors.
   NodeDefBuilder& Input(gtl::ArraySlice<NodeOut> src_list);
+=======
+  NodeDefBuilder& Input(const string& src_node, int src_index, DataType dt) {
+    const OpDef::ArgDef* arg = NextArgDef();
+    if (arg != nullptr) SingleInput(arg, src_node, src_index, dt);
+    return *this;
+  }
+  NodeDefBuilder& Input(const NodeOut& src) {
+    Input(src.node, src.index, src.data_type);
+    return *this;
+  }
+
+  // For inputs that take a list of tensors.
+  NodeDefBuilder& Input(gtl::ArraySlice<NodeOut> src_list) {
+    const OpDef::ArgDef* arg = NextArgDef();
+    if (arg != nullptr) ListInput(arg, src_list);
+    return *this;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // To create inputs in tests, see fake_input.h.
   NodeDefBuilder& Input(FakeInputFunctor fake_input);
 
   // Specify that this node must only run after src_node.
+<<<<<<< HEAD
   NodeDefBuilder& ControlInput(StringPiece src_node);
 
   // Constrains what devices this node may be scheduled on.
@@ -131,10 +186,34 @@ class NodeDefBuilder {
   template <class T>
   NodeDefBuilder& Attr(StringPiece name, std::initializer_list<T> value) {
     return Attr(name, gtl::ArraySlice<T>(value));
+=======
+  NodeDefBuilder& ControlInput(const string& src_node) {
+    control_inputs_.push_back(src_node);
+    return *this;
+  }
+
+  // Constrains what devices this node may be scheduled on.
+  NodeDefBuilder& Device(const string& device_spec) {
+    node_def_.set_device(device_spec);
+    return *this;
+  }
+
+  // Sets the attr, if not already set.  If already set with a different
+  // value, an error will be returned from Finalize().
+  template <class T>
+  NodeDefBuilder& Attr(const string& attr_name, T&& value);
+  // Note: overload needed to allow {...} expressions for value.
+  template <class T>
+  NodeDefBuilder& Attr(const string& attr_name,
+                       std::initializer_list<T> value) {
+    Attr<std::initializer_list<T>>(attr_name, std::move(value));
+    return *this;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Finish building the NodeDef, returning any errors or setting
   // *node_def if none.
+<<<<<<< HEAD
   // If `consume` is true, the builder state will be moved into `node_def`,
   // and the builder will be left in an undefined state.
   // WARNING: Not all problems are detected!  The resulting NodeDef may
@@ -143,6 +222,13 @@ class NodeDefBuilder {
 
   // Accessors for the values set in the constructor.
   const string& node_name() const { return node_def_.name(); }
+=======
+  // WARNING: Not all problems are detected!  The resulting NodeDef may
+  // not be valid!  Call ValidateNodeDef() from node_def_utils to be sure.
+  Status Finalize(NodeDef* node_def) const;
+
+  // Accessor for the OpDef set in the constructor.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const OpDef& op_def() const { return *op_def_; }
 
  private:
@@ -158,13 +244,21 @@ class NodeDefBuilder {
   bool NextArgAvailable();
 
   // These do the main work of the Input() methods.
+<<<<<<< HEAD
   void SingleInput(const OpDef::ArgDef* input_arg, StringPiece src_node,
+=======
+  void SingleInput(const OpDef::ArgDef* input_arg, const string& src_node,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                    int src_index, DataType dt);
   void ListInput(const OpDef::ArgDef* input_arg,
                  gtl::ArraySlice<NodeOut> src_list);
 
   // Add "src_node:src_index" to the list of inputs in the node_def_.
+<<<<<<< HEAD
   void AddInput(StringPiece src_node, int src_index);
+=======
+  void AddInput(const string& src_node, int src_index);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Generate an error if you can't pass dt when expected is expected.
   void VerifyInputType(const OpDef::ArgDef* input_arg, DataType expected,
@@ -178,11 +272,14 @@ class NodeDefBuilder {
     return input_arg->is_ref() ? MakeRefType(dt) : dt;
   }
 
+<<<<<<< HEAD
   // Returns true if an attr named `name` is already present in the node_def_.
   // If such an attr is already present and `value` is not equal to the present
   // value, an error is generated.
   bool AttrValueAlreadyPresent(StringPiece name, const AttrValue& value);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const OpDef* op_def_;
   NodeDef node_def_;
   int inputs_specified_;
@@ -190,6 +287,31 @@ class NodeDefBuilder {
   std::vector<string> errors_;
 };
 
+<<<<<<< HEAD
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_NODE_DEF_BUILDER_H_
+=======
+// IMPLEMENTATION -------------------------------------------------------------
+
+template <class T>
+NodeDefBuilder& NodeDefBuilder::Attr(const string& attr_name, T&& value) {
+  const AttrValue* found = AttrSlice(node_def_).Find(attr_name);
+  if (found == nullptr) {
+    AddNodeAttr(attr_name, std::forward<T>(value), &node_def_);
+  } else {
+    AttrValue attr_value;
+    SetAttrValue(std::forward<T>(value), &attr_value);
+    if (!AreAttrValuesEqual(*found, attr_value)) {
+      errors_.push_back(strings::StrCat(
+          "Inconsistent values for attr '", attr_name, "' ",
+          SummarizeAttrValue(*found), " vs. ", SummarizeAttrValue(attr_value)));
+    }
+  }
+  return *this;
+}
+
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_NODE_DEF_BUILDER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

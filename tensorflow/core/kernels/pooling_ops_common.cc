@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,6 +77,43 @@ PoolParameters::PoolParameters(OpKernelContext* context,
   row_stride = GetTensorDim(stride, data_format, 'H');
   col_stride = GetTensorDim(stride, data_format, 'W');
   depth_stride = GetTensorDim(stride, data_format, 'C');
+=======
+#include "tensorflow/core/kernels/pooling_ops_common.h"
+
+#include "tensorflow/core/common_runtime/device.h"
+#include "tensorflow/core/public/tensor.h"
+
+#if GOOGLE_CUDA
+#include "tensorflow/core/common_runtime/gpu_device_context.h"
+#include "tensorflow/core/kernels/conv_2d.h"
+#include "tensorflow/core/kernels/maxpooling_op_gpu.h"
+#include "tensorflow/core/kernels/pooling_ops_common_gpu.h"
+#include "tensorflow/stream_executor/dnn.h"
+#include "tensorflow/stream_executor/stream.h"
+#endif  // GOOGLE_CUDA
+
+namespace tensorflow {
+
+PoolParameters::PoolParameters(OpKernelContext* context,
+                               const std::vector<int32>& ksize,
+                               const std::vector<int32>& stride,
+                               Padding padding,
+                               const TensorShape& tensor_in_shape) {
+  // For maxpooling, tensor_in should have 4 dimensions.
+  OP_REQUIRES(context, tensor_in_shape.dims() == 4,
+              errors::InvalidArgument("tensor_in must be 4-dimensional"));
+
+  depth = tensor_in_shape.dim_size(3);
+  tensor_in_cols = tensor_in_shape.dim_size(2);
+  tensor_in_rows = tensor_in_shape.dim_size(1);
+  tensor_in_batch = tensor_in_shape.dim_size(0);
+  window_rows = ksize[1];
+  window_cols = ksize[2];
+  depth_window = ksize[3];
+  row_stride = stride[1];
+  col_stride = stride[2];
+  depth_stride = stride[3];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // We only support 2D pooling across width/height and depthwise
   // pooling, not a combination.
@@ -86,6 +124,7 @@ PoolParameters::PoolParameters(OpKernelContext* context,
                   "or pooling across width/height."));
 
   if (depth_window == 1) {
+<<<<<<< HEAD
     OP_REQUIRES_OK(
         context, GetWindowedOutputSize(tensor_in_rows, window_rows, row_stride,
                                        padding, &out_height, &pad_rows));
@@ -94,6 +133,12 @@ PoolParameters::PoolParameters(OpKernelContext* context,
                                        padding, &out_width, &pad_cols));
     pad_depth = 0;
     out_depth = depth;
+=======
+    OP_REQUIRES_OK(context, Get2dOutputSize(
+                                tensor_in_rows, tensor_in_cols, window_rows,
+                                window_cols, row_stride, col_stride, padding,
+                                &out_height, &out_width, &pad_rows, &pad_cols));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   } else {
     // Our current version of depthwise max pooling does not support
     // any padding, and expects the depth_window to equal the
@@ -123,8 +168,12 @@ PoolParameters::PoolParameters(OpKernelContext* context,
 TensorShape PoolParameters::forward_output_shape() {
   if (depth_window == 1) {
     // Spatial pooling
+<<<<<<< HEAD
     return ShapeFromFormat(data_format, tensor_in_batch, out_height, out_width,
                            depth);
+=======
+    return TensorShape({tensor_in_batch, out_height, out_width, depth});
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   } else {
     // Depthwise pooling
     return TensorShape(
@@ -132,6 +181,7 @@ TensorShape PoolParameters::forward_output_shape() {
   }
 }
 
+<<<<<<< HEAD
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 
 template <typename T>
@@ -287,10 +337,48 @@ void DnnPoolingGradOp<T>::Compute(
     const Tensor* tensor_out, const Tensor& out_backprop,
     const TensorShape& tensor_in_shape, bool propagate_nans) {
   CHECK((pooling_mode != se::dnn::PoolingMode::kMaximum) ||
+=======
+#ifdef GOOGLE_CUDA
+
+namespace {
+template <typename T>
+perftools::gputools::DeviceMemory<T> AsDeviceMemory(const T* cuda_memory,
+                                                    uint64 size) {
+  perftools::gputools::DeviceMemoryBase wrapped(const_cast<T*>(cuda_memory),
+                                                size * sizeof(T));
+  perftools::gputools::DeviceMemory<T> typed(wrapped);
+  return typed;
+}
+}  // namespace
+
+// Forward declarations of the functor specializations for GPU.
+namespace functor {
+#define DECLARE_GPU_SPEC(T)                                      \
+  template <>                                                    \
+  void TransformDepth<GPUDevice, T>::operator()(                 \
+      const GPUDevice& d, typename TTypes<T, 4>::ConstTensor in, \
+      const Eigen::DSizes<Eigen::DenseIndex, 4>& shuffle,        \
+      typename TTypes<T, 4>::Tensor out);                        \
+  extern template struct TransformDepth<GPUDevice, T>;
+
+DECLARE_GPU_SPEC(float);
+#undef DECLARE_GPU_SPEC
+}  // namespace functor
+
+template <typename T>
+void DnnPoolingGradOp<T>::Compute(
+    OpKernelContext* context,
+    perftools::gputools::dnn::PoolingMode pooling_mode,
+    const std::vector<int32>& size, const std::vector<int32>& stride,
+    Padding padding, const Tensor* tensor_in, const Tensor* tensor_out,
+    const Tensor& out_backprop, const TensorShape& tensor_in_shape) {
+  CHECK((pooling_mode == perftools::gputools::dnn::PoolingMode::kMaximum) ||
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         (tensor_in && tensor_out))
       << "For MaxPoolGrad, both tensor_in and tensor_out needs to be "
          "specified";
 
+<<<<<<< HEAD
   Tensor* input_backprop = nullptr;
   OP_REQUIRES_OK(context,
                  context->allocate_output(0, tensor_in_shape, &input_backprop));
@@ -300,10 +388,18 @@ void DnnPoolingGradOp<T>::Compute(
 
   PoolParameters params{context, size,        stride,
                         padding, data_format, tensor_in_shape};
+=======
+  Tensor* output = nullptr;
+  OP_REQUIRES_OK(context,
+                 context->allocate_output(0, tensor_in_shape, &output));
+
+  PoolParameters params{context, size, stride, padding, tensor_in_shape};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!context->status().ok()) {
     return;
   }
 
+<<<<<<< HEAD
 #if CUDNN_VERSION < 7300
   /// For now, cudnn does not support NHWC format, so we need to convert it
   /// to NCHW before calling cudnn. We need to get rid of this once it is done
@@ -407,28 +503,104 @@ void DnnPoolingGradOp<T>::Compute(
 
   /// Get ready to call cudnn
   se::dnn::PoolingDescriptor pooling_desc;
+=======
+  /// For now, cudnn does not support NHWC format, so we need to convert it
+  /// to NCHW before calling cudnn. We need to get rid of this once it is done
+  Tensor transformed_input;
+  OP_REQUIRES_OK(context, context->allocate_temp(
+                              DataTypeToEnum<T>::value,
+                              TensorShape({tensor_in_shape.dim_size(0),
+                                           tensor_in_shape.dim_size(3),
+                                           tensor_in_shape.dim_size(1),
+                                           tensor_in_shape.dim_size(2)}),
+                              &transformed_input));
+  Tensor transformed_input_backprop;
+  OP_REQUIRES_OK(context, context->allocate_temp(
+                              DataTypeToEnum<T>::value,
+                              TensorShape({tensor_in_shape.dim_size(0),
+                                           tensor_in_shape.dim_size(3),
+                                           tensor_in_shape.dim_size(1),
+                                           tensor_in_shape.dim_size(2)}),
+                              &transformed_input_backprop));
+  Tensor transformed_output;
+  OP_REQUIRES_OK(
+      context,
+      context->allocate_temp(
+          DataTypeToEnum<T>::value,
+          TensorShape({out_backprop.dim_size(0), out_backprop.dim_size(3),
+                       out_backprop.dim_size(1), out_backprop.dim_size(2)}),
+          &transformed_output));
+  Tensor transformed_output_backprop;
+  OP_REQUIRES_OK(
+      context,
+      context->allocate_temp(
+          DataTypeToEnum<T>::value,
+          TensorShape({out_backprop.dim_size(0), out_backprop.dim_size(3),
+                       out_backprop.dim_size(1), out_backprop.dim_size(2)}),
+          &transformed_output_backprop));
+
+  auto nhwc_to_nchw = Eigen::DSizes<Eigen::DenseIndex, 4>(0, 3, 1, 2);
+  if (tensor_in) {
+    // For AvgPoolGrad, the original input tensor is not necessary. However,
+    // cudnn still requires them to run, although they do not affect the
+    // results.
+    functor::TransformDepth<GPUDevice, T>()(
+        context->eigen_device<Device>(), tensor_in->tensor<T, 4>(),
+        nhwc_to_nchw, transformed_input.tensor<T, 4>());
+  }
+  if (tensor_out) {
+    // For AvgPoolGrad, the original output tensor is not necessary. However,
+    // cudnn still requires them to run, although they do not affect the
+    // results.
+    functor::TransformDepth<GPUDevice, T>()(
+        context->eigen_device<Device>(), tensor_out->tensor<T, 4>(),
+        nhwc_to_nchw, transformed_output.tensor<T, 4>());
+  }
+  functor::TransformDepth<GPUDevice, T>()(
+      context->eigen_device<Device>(), out_backprop.tensor<T, 4>(),
+      nhwc_to_nchw, transformed_output_backprop.tensor<T, 4>());
+
+  /// Get ready to call cudnn
+  perftools::gputools::dnn::PoolingDescriptor pooling_desc;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   pooling_desc.set_pooling_mode(pooling_mode)
       .set_window_height(params.window_rows)
       .set_window_width(params.window_cols)
       .set_vertical_stride(params.row_stride)
       .set_horizontal_stride(params.col_stride)
       .set_vertical_padding(params.pad_rows)
+<<<<<<< HEAD
       .set_horizontal_padding(params.pad_cols)
       .set_propagate_nans(propagate_nans);
 
   se::dnn::BatchDescriptor orig_output_desc;
+=======
+      .set_horizontal_padding(params.pad_cols);
+
+  perftools::gputools::dnn::BatchDescriptor orig_output_desc;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   orig_output_desc.set_count(params.tensor_in_batch)
       .set_height(params.out_height)
       .set_width(params.out_width)
       .set_feature_map_count(params.depth)
+<<<<<<< HEAD
       .set_layout(data_layout);
 
   se::dnn::BatchDescriptor orig_input_desc;
+=======
+      .set_layout(perftools::gputools::dnn::DataLayout::kBatchDepthYX);
+
+  perftools::gputools::dnn::BatchDescriptor orig_input_desc;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   orig_input_desc.set_count(params.tensor_in_batch)
       .set_height(params.tensor_in_rows)
       .set_width(params.tensor_in_cols)
       .set_feature_map_count(params.depth)
+<<<<<<< HEAD
       .set_layout(data_layout);
+=======
+      .set_layout(perftools::gputools::dnn::DataLayout::kBatchDepthYX);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   auto orig_output_data =
       AsDeviceMemory(transformed_output.template flat<T>().data(),
@@ -436,6 +608,7 @@ void DnnPoolingGradOp<T>::Compute(
   auto orig_input_data =
       AsDeviceMemory(transformed_input.template flat<T>().data(),
                      transformed_input.template flat<T>().size());
+<<<<<<< HEAD
   auto output_backprop_data =
       AsDeviceMemory(transformed_output_backprop.template flat<T>().data(),
                      transformed_output_backprop.template flat<T>().size());
@@ -495,5 +668,37 @@ template class DnnPoolingOp<qint8>;
 #undef DEFINE_DNN_OPS
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+  auto output_backprop =
+      AsDeviceMemory(transformed_output_backprop.template flat<T>().data(),
+                     transformed_output_backprop.template flat<T>().size());
+  auto input_backprop =
+      AsDeviceMemory(transformed_input_backprop.template flat<T>().data(),
+                     transformed_input_backprop.template flat<T>().size());
+
+  auto* stream = context->op_device_context<GPUDeviceContext>()->stream();
+  OP_REQUIRES(context, stream, errors::Internal("No GPU stream available."));
+
+  bool status =
+      stream->ThenPoolBackward(pooling_desc, orig_input_desc, orig_input_data,
+                               orig_output_desc, orig_output_data,
+                               output_backprop, &input_backprop)
+          .ok();
+  OP_REQUIRES(context, status,
+              errors::Internal("cudnn PoolBackward launch failed"));
+
+  /// Transform the output data from NCHW back to NHWC
+  auto toConstTensor = [](const Tensor& x) -> const Tensor { return x; };
+  auto nchw_to_nhwc = Eigen::DSizes<Eigen::DenseIndex, 4>(0, 2, 3, 1);
+  functor::TransformDepth<GPUDevice, T>()(
+      context->eigen_device<Device>(),
+      toConstTensor(transformed_input_backprop).template tensor<T, 4>(),
+      nchw_to_nhwc, output->tensor<T, 4>());
+}
+
+template class DnnPoolingGradOp<float>;
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

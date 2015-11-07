@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,10 +29,27 @@ static SessionOptions* InitMultiThreadingOptions(int num_threads) {
   SessionOptions* opts = new SessionOptions();
   opts->config.set_intra_op_parallelism_threads(num_threads);
   opts->config.set_inter_op_parallelism_threads(1);
+=======
+#include <gtest/gtest.h>
+#include "tensorflow/core/common_runtime/kernel_benchmark_testlib.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/session_options.h"
+#include "tensorflow/core/public/tensor.h"
+
+namespace tensorflow {
+
+// We focus on the single thread performance of training ops.
+static SessionOptions InitSingleThreadedOptions() {
+  SessionOptions opts;
+  opts.config.set_intra_op_parallelism_threads(1);
+  opts.config.set_inter_op_parallelism_threads(1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return opts;
 }
 
 static SessionOptions* GetOptions() {
+<<<<<<< HEAD
   static SessionOptions* opts = InitMultiThreadingOptions(1);
   return opts;
 }
@@ -39,34 +57,45 @@ static SessionOptions* GetOptions() {
 static SessionOptions* GetMultiThreadedOptions() {
   static SessionOptions* opts = InitMultiThreadingOptions(32);
   return opts;
+=======
+  static SessionOptions opts = InitSingleThreadedOptions();
+  return &opts;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 static Node* Var(Graph* g, int n) {
   return test::graph::Var(g, DT_FLOAT, TensorShape({n}));
 }
 
+<<<<<<< HEAD
 static Node* Var(Graph* g, int m, int n) {
   return test::graph::Var(g, DT_FLOAT, TensorShape({m, n}));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static Node* Zeros(Graph* g, int n) {
   Tensor data(DT_FLOAT, TensorShape({n}));
   data.flat<float>().setZero();
   return test::graph::Constant(g, data);
 }
 
+<<<<<<< HEAD
 static Node* Zeros(Graph* g, int m, int n) {
   Tensor data(DT_FLOAT, TensorShape({m, n}));
   data.flat<float>().setZero();
   return test::graph::Constant(g, data);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static Node* Random(Graph* g, int n) {
   Tensor data(DT_FLOAT, TensorShape({n}));
   data.flat<float>().setRandom();
   return test::graph::Constant(g, data);
 }
 
+<<<<<<< HEAD
 static Node* Random(Graph* g, int m, int n) {
   Tensor data(DT_FLOAT, TensorShape({m, n}));
   data.flat<float>().setRandom();
@@ -80,6 +109,8 @@ static Node* Iota(Graph* g, int n) {
   return test::graph::Constant(g, data);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static Node* Scalar(Graph* g, float val) {
   Tensor data(DT_FLOAT, TensorShape({}));
   data.flat<float>()(0) = val;
@@ -87,6 +118,10 @@ static Node* Scalar(Graph* g, float val) {
 }
 
 static void SGD(int32 n, Graph** init_g, Graph** train_g) {
+<<<<<<< HEAD
+=======
+  RequireDefaultOps();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   {
     Graph* g = new Graph(OpRegistry::Global());
     auto var = Var(g, n);
@@ -115,6 +150,10 @@ static void BM_SGD(int iters, int params) {
 BENCHMARK(BM_SGD)->Arg(128 << 10)->Arg(256 << 10);
 
 static void Adagrad(int32 n, Graph** init_g, Graph** train_g) {
+<<<<<<< HEAD
+=======
+  RequireDefaultOps();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   {
     Graph* g = new Graph(OpRegistry::Global());
     auto var = Var(g, n);
@@ -146,6 +185,7 @@ static void BM_Adagrad(int iters, int params) {
 }
 BENCHMARK(BM_Adagrad)->Arg(128 << 10)->Arg(256 << 10);
 
+<<<<<<< HEAD
 static void SparseAdagrad(int32 m, int32 n, Graph** init_g, Graph** train_g) {
   {
     Graph* g = new Graph(OpRegistry::Global());
@@ -186,6 +226,10 @@ BENCHMARK(BM_SparseAdagrad)
     ->ArgPair(128, 128 << 10);
 
 static void Momentum(int32 n, Graph** init_g, Graph** train_g) {
+=======
+static void Momentum(int32 n, Graph** init_g, Graph** train_g) {
+  RequireDefaultOps();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TensorShape shape({n});
   {
     Graph* g = new Graph(OpRegistry::Global());
@@ -220,6 +264,10 @@ static void BM_Momentum(int iters, int params) {
 BENCHMARK(BM_Momentum)->Arg(128 << 10)->Arg(256 << 10);
 
 static void Adam(int32 n, Graph** init_g, Graph** train_g) {
+<<<<<<< HEAD
+=======
+  RequireDefaultOps();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TensorShape shape({n});
   {
     Graph* g = new Graph(OpRegistry::Global());
@@ -244,20 +292,30 @@ static void Adam(int32 n, Graph** init_g, Graph** train_g) {
     auto beta2 = Scalar(g, 0.99);
     auto epsilon = Scalar(g, 1e-8);
     auto grad = Random(g, n);
+<<<<<<< HEAD
     test::graph::Multi(
         g, "ApplyAdam",
         {var, m, v, beta1_power, beta2_power, lr, beta1, beta2, epsilon, grad});
+=======
+    test::graph::Multi(g, "ApplyAdam", {var, m, v, beta1_power, beta2_power, lr,
+                                        beta1, beta2, epsilon, grad});
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     *train_g = g;
   }
 }
 
+<<<<<<< HEAD
 static void BM_Adam(int iters, int params, int is_multi_threaded) {
+=======
+static void BM_Adam(int iters, int params) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const int64 tot = static_cast<int64>(iters) * params;
   testing::ItemsProcessed(tot);
   testing::BytesProcessed(tot * sizeof(float));
   Graph* init;
   Graph* train;
   Adam(params, &init, &train);
+<<<<<<< HEAD
   if (is_multi_threaded) {
     // Use max thread number if test performance.
     test::Benchmark("cpu", train, nullptr, init).Run(iters);
@@ -269,6 +327,14 @@ BENCHMARK(BM_Adam)->ArgPair(128 << 10, 0)->ArgPair(256 << 10, 0);
 BENCHMARK(BM_Adam)->ArgPair(256 << 5, 1)->ArgPair(256 << 16, 1);
 
 static void RMSProp(int32 n, Graph** init_g, Graph** train_g) {
+=======
+  test::Benchmark("cpu", train, GetOptions(), init).Run(iters);
+}
+BENCHMARK(BM_Adam)->Arg(128 << 10)->Arg(256 << 10);
+
+static void RMSProp(int32 n, Graph** init_g, Graph** train_g) {
+  RequireDefaultOps();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TensorShape shape({n});
   {
     Graph* g = new Graph(OpRegistry::Global());
@@ -308,6 +374,7 @@ static void BM_RMSProp(int iters, int params) {
 }
 BENCHMARK(BM_RMSProp)->Arg(128 << 10)->Arg(256 << 10);
 
+<<<<<<< HEAD
 static void AddSign(int32 n, Graph** init_g, Graph** train_g) {
   TensorShape shape({n});
   {
@@ -382,4 +449,6 @@ static void BM_PowerSign(int iters, int params) {
 }
 BENCHMARK(BM_PowerSign)->Arg(128 << 10)->Arg(256 << 10);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace tensorflow

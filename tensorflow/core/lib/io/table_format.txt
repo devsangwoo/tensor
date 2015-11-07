@@ -1,8 +1,16 @@
 File format
 ===========
 
+<<<<<<< HEAD
 The table format is similar to the table format for the LevelDB
 open source key/value store, with the exception that our tables
 do not support "filter" meta blocks (Bloom Filters).  See:
 
 https://github.com/google/leveldb/blob/master/doc/table_format.md
+=======
+The table format is heavily based on the table format for the LevelDB
+open source key/value store, with the exception that our tables
+do not support "filter" meta blocks (Bloom Filters).  See:
+
+https://code.google.com/p/leveldb/source/browse/doc/table_format.txt
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

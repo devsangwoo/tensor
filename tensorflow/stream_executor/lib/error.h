@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +22,25 @@ limitations under the License.
 #include "tensorflow/core/protobuf/error_codes.pb.h"  // IWYU pragma: export
 
 namespace stream_executor {
+=======
+#ifndef TENSORFLOW_STREAM_EXECUTOR_LIB_ERROR_H_
+#define TENSORFLOW_STREAM_EXECUTOR_LIB_ERROR_H_
+
+#include "tensorflow/core/lib/core/error_codes.pb.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace port {
 
 namespace error = tensorflow::error;
 
 }  // namespace port
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_LIB_ERROR_H_

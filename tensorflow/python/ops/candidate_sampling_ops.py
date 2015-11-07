@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,19 +32,39 @@ from tensorflow.python.util.tf_export import tf_export
     'random.uniform_candidate_sampler',
     v1=['random.uniform_candidate_sampler', 'nn.uniform_candidate_sampler'])
 @deprecation.deprecated_endpoints('nn.uniform_candidate_sampler')
+=======
+"""Wrappers for primitive Neural Net (NN) Operations."""
+
+from tensorflow.python.framework import ops
+from tensorflow.python.framework import random_seed
+from tensorflow.python.framework import tensor_shape
+from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import gen_candidate_sampling_ops
+from tensorflow.python.ops import math_ops
+
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 def uniform_candidate_sampler(true_classes, num_true, num_sampled, unique,
                               range_max, seed=None, name=None):
   """Samples a set of classes using a uniform base distribution.
 
   This operation randomly samples a tensor of sampled classes
+<<<<<<< HEAD
   (`sampled_candidates`) from the range of integers `[0, range_max)`.
+=======
+  (`sampled_candidates`) from the range of integers `[0, range_max]`.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   The elements of `sampled_candidates` are drawn without replacement
   (if `unique=True`) or with replacement (if `unique=False`) from
   the base distribution.
 
   The base distribution for this operation is the uniform distribution
+<<<<<<< HEAD
   over the range of integers `[0, range_max)`.
+=======
+  over the range of integers `[0, range_max]`.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   In addition, this operation returns tensors `true_expected_count`
   and `sampled_expected_count` representing the number of times each
@@ -59,9 +80,13 @@ def uniform_candidate_sampler(true_classes, num_true, num_sampled, unique,
     true_classes: A `Tensor` of type `int64` and shape `[batch_size,
       num_true]`. The target classes.
     num_true: An `int`.  The number of target classes per training example.
+<<<<<<< HEAD
     num_sampled: An `int`.  The number of classes to randomly sample. The
       `sampled_candidates` return value will have shape `[num_sampled]`. If
       `unique=True`, `num_sampled` must be less than or equal to `range_max`.
+=======
+    num_sampled: An `int`.  The number of classes to randomly sample per batch.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     unique: A `bool`. Determines whether all sampled classes in a batch are
       unique.
     range_max: An `int`. The number of possible classes.
@@ -69,10 +94,15 @@ def uniform_candidate_sampler(true_classes, num_true, num_sampled, unique,
     name: A name for the operation (optional).
 
   Returns:
+<<<<<<< HEAD
     sampled_candidates: A tensor of type `int64` and shape `[num_sampled]`.  The
       sampled classes, either with possible duplicates (`unique=False`) or all
       unique (`unique=True`). In either case, `sampled_candidates` is
       independent of the true classes.
+=======
+    sampled_candidates: A tensor of type `int64` and shape `[num_sampled]`.
+      The sampled classes.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     true_expected_count: A tensor of type `float`.  Same shape as
       `true_classes`. The expected counts under the sampling distribution
       of each of `true_classes`.
@@ -81,11 +111,16 @@ def uniform_candidate_sampler(true_classes, num_true, num_sampled, unique,
       of each of `sampled_candidates`.
   """
   seed1, seed2 = random_seed.get_seed(seed)
+<<<<<<< HEAD
   return gen_candidate_sampling_ops.uniform_candidate_sampler(
+=======
+  return gen_candidate_sampling_ops._uniform_candidate_sampler(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       true_classes, num_true, num_sampled, unique, range_max, seed=seed1,
       seed2=seed2, name=name)
 
 
+<<<<<<< HEAD
 @tf_export(
     'random.log_uniform_candidate_sampler',
     v1=[
@@ -93,12 +128,18 @@ def uniform_candidate_sampler(true_classes, num_true, num_sampled, unique,
         'nn.log_uniform_candidate_sampler'
     ])
 @deprecation.deprecated_endpoints('nn.log_uniform_candidate_sampler')
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 def log_uniform_candidate_sampler(true_classes, num_true, num_sampled, unique,
                                   range_max, seed=None, name=None):
   """Samples a set of classes using a log-uniform (Zipfian) base distribution.
 
   This operation randomly samples a tensor of sampled classes
+<<<<<<< HEAD
   (`sampled_candidates`) from the range of integers `[0, range_max)`.
+=======
+  (`sampled_candidates`) from the range of integers `[0, range_max]`.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   The elements of `sampled_candidates` are drawn without replacement
   (if `unique=True`) or with replacement (if `unique=False`) from
@@ -128,7 +169,11 @@ def log_uniform_candidate_sampler(true_classes, num_true, num_sampled, unique,
     true_classes: A `Tensor` of type `int64` and shape `[batch_size,
       num_true]`. The target classes.
     num_true: An `int`.  The number of target classes per training example.
+<<<<<<< HEAD
     num_sampled: An `int`.  The number of classes to randomly sample.
+=======
+    num_sampled: An `int`.  The number of classes to randomly sample per batch.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     unique: A `bool`. Determines whether all sampled classes in a batch are
       unique.
     range_max: An `int`. The number of possible classes.
@@ -146,21 +191,32 @@ def log_uniform_candidate_sampler(true_classes, num_true, num_sampled, unique,
       of each of `sampled_candidates`.
   """
   seed1, seed2 = random_seed.get_seed(seed)
+<<<<<<< HEAD
   return gen_candidate_sampling_ops.log_uniform_candidate_sampler(
+=======
+  return gen_candidate_sampling_ops._log_uniform_candidate_sampler(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       true_classes, num_true, num_sampled, unique, range_max, seed=seed1,
       seed2=seed2, name=name)
 
 
+<<<<<<< HEAD
 @tf_export(
     'random.learned_unigram_candidate_sampler',
     'nn.learned_unigram_candidate_sampler')
 @deprecation.deprecated_endpoints(['nn.learned_unigram_candidate_sampler'])
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 def learned_unigram_candidate_sampler(true_classes, num_true, num_sampled,
                                       unique, range_max, seed=None, name=None):
   """Samples a set of classes from a distribution learned during training.
 
   This operation randomly samples a tensor of sampled classes
+<<<<<<< HEAD
   (`sampled_candidates`) from the range of integers `[0, range_max)`.
+=======
+  (`sampled_candidates`) from the range of integers `[0, range_max]`.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   The elements of `sampled_candidates` are drawn without replacement
   (if `unique=True`) or with replacement (if `unique=False`) from
@@ -168,7 +224,11 @@ def learned_unigram_candidate_sampler(true_classes, num_true, num_sampled,
 
   The base distribution for this operation is constructed on the fly
   during training.  It is a unigram distribution over the target
+<<<<<<< HEAD
   classes seen so far during training.  Every integer in `[0, range_max)`
+=======
+  classes seen so far during training.  Every integer in `[0, range_max]`
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   begins with a weight of 1, and is incremented by 1 each time it is
   seen as a target class.  The base distribution is not saved to checkpoints,
   so it is reset when the model is reloaded.
@@ -187,7 +247,11 @@ def learned_unigram_candidate_sampler(true_classes, num_true, num_sampled,
     true_classes: A `Tensor` of type `int64` and shape `[batch_size,
       num_true]`. The target classes.
     num_true: An `int`.  The number of target classes per training example.
+<<<<<<< HEAD
     num_sampled: An `int`.  The number of classes to randomly sample.
+=======
+    num_sampled: An `int`.  The number of classes to randomly sample per batch.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     unique: A `bool`. Determines whether all sampled classes in a batch are
       unique.
     range_max: An `int`. The number of possible classes.
@@ -206,11 +270,16 @@ def learned_unigram_candidate_sampler(true_classes, num_true, num_sampled,
 
   """
   seed1, seed2 = random_seed.get_seed(seed)
+<<<<<<< HEAD
   return gen_candidate_sampling_ops.learned_unigram_candidate_sampler(
+=======
+  return gen_candidate_sampling_ops._learned_unigram_candidate_sampler(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       true_classes, num_true, num_sampled, unique, range_max, seed=seed1,
       seed2=seed2, name=name)
 
 
+<<<<<<< HEAD
 @tf_export('random.fixed_unigram_candidate_sampler',
            'nn.fixed_unigram_candidate_sampler')
 def fixed_unigram_candidate_sampler(true_classes,
@@ -230,6 +299,16 @@ def fixed_unigram_candidate_sampler(true_classes,
 
   This operation randomly samples a tensor of sampled classes
   (`sampled_candidates`) from the range of integers `[0, range_max)`.
+=======
+def fixed_unigram_candidate_sampler(true_classes, num_true, num_sampled, unique,
+                                    range_max, vocab_file='', distortion=0.0,
+                                    num_reserved_ids=0, num_shards=1, shard=0,
+                                    unigrams=[], seed=None, name=None):
+  """Samples a set of classes using the provided (fixed) base distribution.
+
+  This operation randomly samples a tensor of sampled classes
+  (`sampled_candidates`) from the range of integers `[0, range_max]`.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   The elements of `sampled_candidates` are drawn without replacement
   (if `unique=True`) or with replacement (if `unique=False`) from
@@ -253,7 +332,11 @@ def fixed_unigram_candidate_sampler(true_classes,
     true_classes: A `Tensor` of type `int64` and shape `[batch_size,
       num_true]`. The target classes.
     num_true: An `int`.  The number of target classes per training example.
+<<<<<<< HEAD
     num_sampled: An `int`.  The number of classes to randomly sample.
+=======
+    num_sampled: An `int`.  The number of classes to randomly sample per batch.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     unique: A `bool`. Determines whether all sampled classes in a batch are
       unique.
     range_max: An `int`. The number of possible classes.
@@ -268,7 +351,11 @@ def fixed_unigram_candidate_sampler(true_classes,
       `distortion = 1.0` gives regular unigram sampling (as defined by the vocab
       file), and `distortion = 0.0` gives a uniform distribution.
     num_reserved_ids: Optionally some reserved IDs can be added in the range
+<<<<<<< HEAD
       `[0, num_reserved_ids)` by the users. One use case is that a special
+=======
+      `[0, num_reserved_ids]` by the users. One use case is that a special
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       unknown word token is used as ID 0. These IDs will have a sampling
       probability of 0.
     num_shards: A sampler can be used to sample from a subset of the original
@@ -297,14 +384,21 @@ def fixed_unigram_candidate_sampler(true_classes,
 
   """
   seed1, seed2 = random_seed.get_seed(seed)
+<<<<<<< HEAD
   return gen_candidate_sampling_ops.fixed_unigram_candidate_sampler(
+=======
+  return gen_candidate_sampling_ops._fixed_unigram_candidate_sampler(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       true_classes, num_true, num_sampled, unique, range_max,
       vocab_file=vocab_file, distortion=distortion,
       num_reserved_ids=num_reserved_ids, num_shards=num_shards, shard=shard,
       unigrams=unigrams, seed=seed1, seed2=seed2, name=name)
 
 
+<<<<<<< HEAD
 @tf_export('random.all_candidate_sampler', 'nn.all_candidate_sampler')
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 def all_candidate_sampler(true_classes, num_true, num_sampled, unique,
                           seed=None, name=None):
   """Generate the set of all classes.
@@ -335,15 +429,25 @@ def all_candidate_sampler(true_classes, num_true, num_sampled, unique,
       of each of `sampled_candidates`. All returned values are 1.0.
   """
   seed1, seed2 = random_seed.get_seed(seed)
+<<<<<<< HEAD
   return gen_candidate_sampling_ops.all_candidate_sampler(
+=======
+  return gen_candidate_sampling_ops._all_candidate_sampler(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       true_classes, num_true, num_sampled, unique, seed=seed1, seed2=seed2,
       name=name)
 
 
+<<<<<<< HEAD
 @tf_export('nn.compute_accidental_hits')
 def compute_accidental_hits(true_classes, sampled_candidates, num_true,
                             seed=None, name=None):
   """Compute the position ids in `sampled_candidates` matching `true_classes`.
+=======
+def compute_accidental_hits(true_classes, sampled_candidates, num_true,
+                            seed=None, name=None):
+  """Compute the ids of positions in sampled_candidates matching true_classes.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   In Candidate Sampling, this operation facilitates virtually removing
   sampled classes which happen to match target classes.  This is done
@@ -384,6 +488,39 @@ def compute_accidental_hits(true_classes, sampled_candidates, num_true,
 
   """
   seed1, seed2 = random_seed.get_seed(seed)
+<<<<<<< HEAD
   return gen_candidate_sampling_ops.compute_accidental_hits(
       true_classes, sampled_candidates, num_true, seed=seed1, seed2=seed2,
       name=name)
+=======
+  return gen_candidate_sampling_ops._compute_accidental_hits(
+      true_classes, sampled_candidates, num_true, seed=seed1, seed2=seed2,
+      name=name)
+
+
+@ops.RegisterShape("AllCandidateSampler")
+@ops.RegisterShape("FixedUnigramCandidateSampler")
+@ops.RegisterShape("LearnedUnigramCandidateSampler")
+@ops.RegisterShape("LogUniformCandidateSampler")
+@ops.RegisterShape("ThreadUnsafeUnigramCandidateSampler")
+@ops.RegisterShape("UniformCandidateSampler")
+def _CandidateSamplerShape(op):
+  true_classes_shape = op.inputs[0].get_shape().with_rank(2)
+  batch_size = true_classes_shape[0]
+  num_sampled = op.get_attr("num_sampled")
+  num_true = op.get_attr("num_true")
+  return [tensor_shape.vector(num_sampled),
+          tensor_shape.matrix(batch_size, num_true),
+          tensor_shape.vector(num_sampled)]
+
+
+@ops.RegisterShape("ComputeAccidentalHits")
+def _ComputeAccidentalHitsShape(op):
+  num_true = op.get_attr("num_true")
+  # Validate that the input shape matches the attrs, even though it
+  # does not influence the shape of the output.
+  true_candidates_shape = op.inputs[0].get_shape().merge_with(
+      tensor_shape.matrix(None, num_true))
+  output_shape = tensor_shape.vector(None)
+  return [output_shape] * 3
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

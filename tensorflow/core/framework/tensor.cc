@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Implementation notes:
 //
 // Tensor.cc uses a few templated classes and structs to facilitate
@@ -27,6 +30,7 @@ limitations under the License.
 //   includes running the constructor and destructor of T[], encoding
 //   an decoding T[] into/from a Cord, etc.
 
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor.h"
 
 #include "absl/strings/escaping.h"
@@ -133,6 +137,48 @@ class Buffer : public BufferBase {
   size_t size() const override { return sizeof(T) * elem_; }
 
  private:
+=======
+#include "tensorflow/core/public/tensor.h"
+
+#include "tensorflow/core/framework/tensor.pb.h"
+#include "tensorflow/core/framework/type_traits.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/core/coding.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/gtl/stl_util.h"
+#include "tensorflow/core/lib/strings/str_util.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/platform/tensor_coding.h"
+
+namespace tensorflow {
+namespace {
+
+// Typed ref-counted buffer: T[n].
+template <typename T>
+class Buffer : public TensorBuffer {
+ public:
+  Buffer(Allocator* a, int64 n);
+
+  void* data() const override { return data_; }
+  size_t size() const override { return sizeof(T) * elem_; }
+  TensorBuffer* root_buffer() override { return this; }
+  void FillAllocationDescription(AllocationDescription* proto) const override {
+    int64 rb = size();
+    proto->set_requested_bytes(rb);
+    proto->set_allocator_name(alloc_->Name());
+    if (alloc_->TracksAllocationSizes()) {
+      int64 ab = alloc_->AllocatedSize(data_);
+      proto->set_allocated_bytes(ab);
+    }
+  }
+
+ private:
+  Allocator* alloc_;
+  T* data_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int64 elem_;
 
   ~Buffer() override;
@@ -140,6 +186,7 @@ class Buffer : public BufferBase {
   TF_DISALLOW_COPY_AND_ASSIGN(Buffer);
 };
 
+<<<<<<< HEAD
 void LogUnexpectedSize(int64 actual, int64 expected) {
   LOG(ERROR) << "Input size was " << actual << " and expected " << expected;
 }
@@ -148,14 +195,44 @@ bool MemoryLoggingEnabled() {
   static bool memory_logging_enabled = LogMemory::IsEnabled();
   return memory_logging_enabled;
 }
+=======
+// is_simple<T>::value if T[] can be safely constructed and destructed
+// without running T() and ~T().  We do not use std::is_trivial<T>
+// directly because std::complex<float> is not trival but its array
+// can be constructed and destructed without running its default ctor
+// and dtor.
+template <typename T>
+struct is_simple {
+  static const bool value = std::is_trivial<T>::value ||
+                            std::is_same<T, complex64>::value ||
+                            is_quantized<T>::value;
+};
+
+template <>
+struct is_simple<bfloat16> {
+  static const bool value = true;
+};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // A set of helper functions depending on T.
 template <typename T>
 struct Helper {
   // By default, we assume T is a simple type (float, int32, etc.)
+<<<<<<< HEAD
   static_assert(is_simple_type<T>::value, "T is not a simple type.");
   typedef protobuf::RepeatedField<T> RepeatedFieldType;
 
+=======
+  static_assert(is_simple<T>::value, "T is not a simple type.");
+  typedef protobuf::RepeatedField<T> RepeatedFieldType;
+
+  // No constructor to run.
+  static void RunCtor(T* p, int n) {}
+
+  // No destructor to run.
+  static void RunDtor(T* p, int n) {}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Encoder of simple type T to a string.  We do a copy.
   template <typename Destination>
   static void Encode(TensorBuffer* in, int64 n, Destination* out) {
@@ -169,6 +246,7 @@ struct Helper {
   template <typename Source>
   static TensorBuffer* Decode(Allocator* a, const Source& in, int64 n) {
     if (in.size() != sizeof(T) * n) {
+<<<<<<< HEAD
       LogUnexpectedSize(in.size(), sizeof(T) * n);
       return nullptr;
     }
@@ -179,6 +257,14 @@ struct Helper {
       return nullptr;
     }
     port::CopyToArray(in, data);
+=======
+      LOG(ERROR) << "Input size was " << in.size() << " and expected "
+                 << sizeof(T) * n;
+      return nullptr;
+    }
+    Buffer<T>* buf = new Buffer<T>(a, n);
+    port::CopyToArray(in, buf->template base<char>());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return buf;
   }
 
@@ -192,6 +278,7 @@ struct Helper {
 // Helper specialization for string (the only non-simple type we
 // support).
 template <>
+<<<<<<< HEAD
 struct Helper<tstring> {
   // Proto message uses RepeatedFieldType to hold repeated T.
   typedef protobuf::RepeatedPtrField<string> RepeatedFieldType;
@@ -239,6 +326,27 @@ struct Helper<ResourceHandle> {
   static void Encode(TensorBuffer* in, int64 n, Destination* out) {
     EncodeResourceHandleList(in->base<const ResourceHandle>(), n,
                              port::NewStringListEncoder(out));
+=======
+struct Helper<string> {
+  // Proto message uses RepeatedFieldType to hold repeated T.
+  typedef protobuf::RepeatedPtrField<string> RepeatedFieldType;
+
+  // Runs string's default constructor for  p[0], p[1], ..., p[n-1].
+  static void RunCtor(string* p, int n) {
+    for (int i = 0; i < n; ++p, ++i) new (p) string();
+  }
+
+  // Runs T's default destructor for  p[0], p[1], ..., p[n-1].
+  static void RunDtor(string* p, int n) {
+    for (int i = 0; i < n; ++p, ++i) p->~string();
+  }
+
+  // Encodes "n" elements of type string stored in "in" into Cord
+  // "out", which is usually the TensorProto::tensor_content.
+  template <typename Destination>
+  static void Encode(TensorBuffer* in, int64 n, Destination* out) {
+    port::EncodeStringList(in->base<const string>(), n, out);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Decodes "n" elements of type string from "in" and constructs a
@@ -246,6 +354,7 @@ struct Helper<ResourceHandle> {
   // usually the TensorProto::tensor_content.
   template <typename Source>
   static TensorBuffer* Decode(Allocator* a, const Source& in, int64 n) {
+<<<<<<< HEAD
     auto* buf = new Buffer<ResourceHandle>(a, n);
     ResourceHandle* ps = buf->template base<ResourceHandle>();
     if (ps == nullptr ||
@@ -286,12 +395,30 @@ struct Helper<Variant> {
       return nullptr;
     }
     return buf;
+=======
+    Buffer<string>* buf = new Buffer<string>(a, n);
+    string* strings = buf->template base<string>();
+    if (port::DecodeStringList(in, strings, n)) {
+      return buf;
+    } else {
+      buf->Unref();
+      return nullptr;
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Returns the estimated memory usage of "n" elements of type T
   // stored in buffer "in".
   static int64 TotalBytes(TensorBuffer* in, int n) {
+<<<<<<< HEAD
     return n * sizeof(Variant);
+=======
+    int64 tot = in->size();
+    DCHECK_EQ(tot, sizeof(string) * n);
+    const string* p = in->base<const string>();
+    for (int i = 0; i < n; ++i, ++p) tot += p->size();
+    return tot;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -321,6 +448,7 @@ PROTO_TRAITS(float, float, float);
 PROTO_TRAITS(double, double, double);
 PROTO_TRAITS(int32, int32, int);
 PROTO_TRAITS(uint8, int32, int);
+<<<<<<< HEAD
 PROTO_TRAITS(uint16, int32, int);
 PROTO_TRAITS(uint32, uint32, uint32);
 PROTO_TRAITS(int16, int32, int);
@@ -400,6 +528,18 @@ struct ProtoHelper<Variant> {
 };
 
 template <>
+=======
+PROTO_TRAITS(int16, int32, int);
+PROTO_TRAITS(int8, int32, int);
+PROTO_TRAITS(int64, int64, int64);
+PROTO_TRAITS(bool, bool, bool);
+PROTO_TRAITS(string, string, string);
+PROTO_TRAITS(qint8, int32, int);
+PROTO_TRAITS(quint8, int32, int);
+#undef PROTO_TRAITS
+
+template <>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 struct ProtoHelper<complex64> {
   typedef Helper<float>::RepeatedFieldType FieldType;
   static const complex64* Begin(const TensorProto& proto) {
@@ -416,6 +556,7 @@ struct ProtoHelper<complex64> {
 };
 
 template <>
+<<<<<<< HEAD
 struct ProtoHelper<complex128> {
   typedef Helper<double>::RepeatedFieldType FieldType;
   static const complex128* Begin(const TensorProto& proto) {
@@ -432,6 +573,8 @@ struct ProtoHelper<complex128> {
 };
 
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 struct ProtoHelper<qint32> {
   typedef Helper<int32>::RepeatedFieldType FieldType;
   static const qint32* Begin(const TensorProto& proto) {
@@ -449,6 +592,7 @@ struct ProtoHelper<qint32> {
 
 template <>
 struct ProtoHelper<bfloat16> {
+<<<<<<< HEAD
   static void Fill(const bfloat16* data, size_t n, TensorProto* proto) {
     proto->mutable_half_val()->Reserve(n);
     for (size_t i = 0; i < n; ++i) {
@@ -463,12 +607,26 @@ struct ProtoHelper<Eigen::half> {
     proto->mutable_half_val()->Reserve(n);
     for (size_t i = 0; i < n; ++i) {
       proto->mutable_half_val()->AddAlreadyReserved(data[i].x);
+=======
+  typedef Helper<float>::RepeatedFieldType FieldType;
+  static const bfloat16* Begin(const TensorProto& proto) {
+    return reinterpret_cast<const bfloat16*>(proto.int_val().data());
+  }
+  static size_t NumElements(const TensorProto& proto) {
+    return proto.int_val().size();
+  }
+  static void Fill(const bfloat16* data, size_t n, TensorProto* proto) {
+    proto->mutable_int_val()->Reserve(n);
+    for (size_t i = 0; i < n; ++i) {
+      proto->mutable_int_val()->AddAlreadyReserved(data[i].value);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 };
 
 template <typename T>
 Buffer<T>::Buffer(Allocator* a, int64 n)
+<<<<<<< HEAD
     : BufferBase(a, TypedAllocator::Allocate<T>(a, n, AllocationAttributes())),
       elem_(n) {}
 
@@ -485,6 +643,17 @@ Buffer<T>::~Buffer() {
       RecordDeallocation();
     }
     TypedAllocator::Deallocate<T>(alloc_, static_cast<T*>(data()), elem_);
+=======
+    : alloc_(a), data_(a->Allocate<T>(n)), elem_(n) {
+  if (data_) Helper<T>::RunCtor(data_, elem_);
+}
+
+template <typename T>
+Buffer<T>::~Buffer() {
+  if (data_) {
+    Helper<T>::RunDtor(data_, elem_);
+    alloc_->Deallocate<T>(data_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
@@ -494,7 +663,11 @@ Buffer<T>::~Buffer() {
 // default value for T.
 //
 // This routine is using the typed fields (float_val, etc.) in the
+<<<<<<< HEAD
 // tensor proto as opposed to the untyped binary representation
+=======
+// tenor proto as opposed to the untyped binary representation
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // (tensor_content). This is used when we expect the TensorProto is
 // used by a client program which may not know how to encode a tensor
 // in the compact binary representation.
@@ -503,6 +676,7 @@ TensorBuffer* FromProtoField(Allocator* a, const TensorProto& in, int64 n) {
   CHECK_GT(n, 0);
   Buffer<T>* buf = new Buffer<T>(a, n);
   T* data = buf->template base<T>();
+<<<<<<< HEAD
   if (data == nullptr) {
     buf->Unref();
     return nullptr;
@@ -582,10 +756,15 @@ TensorBuffer* FromProtoField<Eigen::half>(Allocator* a, const TensorProto& in,
   }
   const int64 in_n = in.half_val().size();
   auto begin = in.half_val().begin();
+=======
+  const int64 in_n = ProtoHelper<T>::NumElements(in);
+  auto begin = ProtoHelper<T>::Begin(in);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (n <= in_n) {
     std::copy_n(begin, n, data);
   } else if (in_n > 0) {
     std::copy_n(begin, in_n, data);
+<<<<<<< HEAD
     const uint16 last = *(data + in_n - 1);
     std::fill_n(data + in_n, n - in_n, last);
   } else {
@@ -614,6 +793,12 @@ TensorBuffer* FromProtoField<bfloat16>(Allocator* a, const TensorProto& in,
     std::fill_n(data + in_n, n - in_n, last);
   } else {
     std::fill_n(data, n, 0);
+=======
+    const T& last = *(data + in_n - 1);
+    std::fill_n(data + in_n, n - in_n, last);
+  } else {
+    std::fill_n(data, n, T());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return buf;
 }
@@ -642,15 +827,28 @@ void UnrefIfNonNull(core::RefCounted* buf) {
 
 Tensor::Tensor() : Tensor(DT_FLOAT) {}
 
+<<<<<<< HEAD
 Tensor::Tensor(DataType type) : shape_(type), buf_(nullptr) {}
 
 Tensor::Tensor(DataType type, const TensorShape& shape, TensorBuffer* buf)
     : shape_(shape), buf_(buf) {
   set_dtype(type);
+=======
+Tensor::Tensor(DataType type) : type_(type), shape_({0}), buf_(nullptr) {}
+
+Tensor::Tensor(const Tensor& other)
+    : type_(other.dtype()), shape_(other.shape()), buf_(other.buf_) {
+  RefIfNonNull(buf_);
+}
+
+Tensor::Tensor(DataType type, const TensorShape& shape, TensorBuffer* buf)
+    : type_(type), shape_(shape), buf_(buf) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   RefIfNonNull(buf);
 }
 
 bool Tensor::IsInitialized() const {
+<<<<<<< HEAD
   return (buf_ != nullptr && buf_->data() != nullptr) ||
          shape_.num_elements() == 0;
 }
@@ -671,17 +869,25 @@ void Tensor::CheckTypeAndIsAligned(DataType expected_dtype) const {
 void Tensor::CheckIsAlignedAndSingleElement() const {
   CHECK(IsAligned()) << "Aligned and single element";
   CHECK_EQ(1, NumElements()) << "Must have a one element tensor";
+=======
+  return buf_ != nullptr && buf_->data() != nullptr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Tensor::~Tensor() { UnrefIfNonNull(buf_); }
 
 void Tensor::CopyFromInternal(const Tensor& other, const TensorShape& shape) {
   CHECK_EQ(shape.num_elements(), other.NumElements());
+<<<<<<< HEAD
   // Data type will be overwritten if this == &other, since dtype is part of
   // shape.
   DataType other_dtype = other.dtype();
   shape_ = shape;
   set_dtype(other_dtype);
+=======
+  type_ = other.dtype();
+  shape_ = shape;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (buf_ != other.buf_) {
     UnrefIfNonNull(buf_);
     buf_ = other.buf_;
@@ -689,6 +895,7 @@ void Tensor::CopyFromInternal(const Tensor& other, const TensorShape& shape) {
   }
 }
 
+<<<<<<< HEAD
 Status Tensor::BitcastFrom(const Tensor& other, DataType dtype,
                            const TensorShape& shape) {
   int in_size = DataTypeSize(other.dtype());
@@ -722,6 +929,8 @@ bool Tensor::RefCountIsOne() const {
          buf_->root_buffer()->RefCountIsOne() && buf_->OwnsMemory();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // The macro CASES() expands to a switch statement conditioned on
 // TYPE_ENUM. Each case expands the STMTS after a typedef for T.
 #define SINGLE_ARG(...) __VA_ARGS__
@@ -731,6 +940,7 @@ bool Tensor::RefCountIsOne() const {
     STMTS;                            \
     break;                            \
   }
+<<<<<<< HEAD
 #define CASES_WITH_DEFAULT(TYPE_ENUM, STMTS, INVALID, DEFAULT) \
   switch (TYPE_ENUM) {                                         \
     CASE(float, SINGLE_ARG(STMTS))                             \
@@ -826,15 +1036,55 @@ void Tensor::HostScalarTensorBufferBase::FillAllocationDescription(
   proto->set_allocator_name("HostScalarTensorBuffer");
   proto->set_ptr(reinterpret_cast<uintptr_t>(data()));
 }
+=======
+#define CASES(TYPE_ENUM, STMTS)                       \
+  switch (TYPE_ENUM) {                                \
+    CASE(float, SINGLE_ARG(STMTS))                    \
+    CASE(double, SINGLE_ARG(STMTS))                   \
+    CASE(int32, SINGLE_ARG(STMTS))                    \
+    CASE(uint8, SINGLE_ARG(STMTS))                    \
+    CASE(int16, SINGLE_ARG(STMTS))                    \
+    CASE(int8, SINGLE_ARG(STMTS))                     \
+    CASE(string, SINGLE_ARG(STMTS))                   \
+    CASE(complex64, SINGLE_ARG(STMTS))                \
+    CASE(int64, SINGLE_ARG(STMTS))                    \
+    CASE(bool, SINGLE_ARG(STMTS))                     \
+    CASE(qint32, SINGLE_ARG(STMTS))                   \
+    CASE(quint8, SINGLE_ARG(STMTS))                   \
+    CASE(qint8, SINGLE_ARG(STMTS))                    \
+    CASE(bfloat16, SINGLE_ARG(STMTS))                 \
+    case DT_INVALID:                                  \
+      LOG(FATAL) << "Type not set";                   \
+      break;                                          \
+    default:                                          \
+      LOG(FATAL) << "Unexpected type: " << TYPE_ENUM; \
+      break;                                          \
+  }
+
+Tensor::Tensor(Allocator* a, DataType type, const TensorShape& shape)
+    : type_(type), shape_(shape), buf_(nullptr) {
+  CHECK_NOTNULL(a);
+  if (shape_.num_elements() > 0) {
+    CASES(type, buf_ = new Buffer<T>(a, shape.num_elements()));
+  }
+}
+
+Tensor::Tensor(DataType type, const TensorShape& shape)
+    : Tensor(cpu_allocator(), type, shape) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename T>
 class SubBuffer : public TensorBuffer {
  public:
   // This buffer is an alias to buf[delta, delta + n).
   SubBuffer(TensorBuffer* buf, int64 delta, int64 n)
+<<<<<<< HEAD
       : TensorBuffer(buf->base<T>() + delta),
         root_(buf->root_buffer()),
         elem_(n) {
+=======
+      : root_(buf->root_buffer()), data_(buf->base<T>() + delta), elem_(n) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Sanity check. The caller should ensure the sub buffer is valid.
     CHECK_LE(root_->base<T>(), this->base<T>());
     T* root_limit = root_->base<T>() + root_->size() / sizeof(T);
@@ -845,17 +1095,27 @@ class SubBuffer : public TensorBuffer {
     root_->Ref();
   }
 
+<<<<<<< HEAD
   size_t size() const override { return sizeof(T) * elem_; }
   TensorBuffer* root_buffer() override { return root_; }
   bool GetAllocatedBytes(size_t* out_bytes) const override {
     return root_->GetAllocatedBytes(out_bytes);
   }
+=======
+  void* data() const override { return data_; }
+  size_t size() const override { return sizeof(T) * elem_; }
+  TensorBuffer* root_buffer() override { return root_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   void FillAllocationDescription(AllocationDescription* proto) const override {
     root_->FillAllocationDescription(proto);
   }
 
  private:
   TensorBuffer* root_;
+<<<<<<< HEAD
+=======
+  T* data_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int64 elem_;
 
   ~SubBuffer() override { root_->Unref(); }
@@ -873,8 +1133,13 @@ Tensor Tensor::Slice(int64 start, int64 limit) const {
     return *this;
   }
   Tensor ret;
+<<<<<<< HEAD
   ret.shape_ = shape_;
   ret.set_dtype(dtype());
+=======
+  ret.type_ = type_;
+  ret.shape_ = shape_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ret.buf_ = nullptr;
   if (dim0_size > 0) {
     const int64 elems_per_dim0 = NumElements() / dim0_size;
@@ -883,6 +1148,7 @@ Tensor Tensor::Slice(int64 start, int64 limit) const {
     ret.shape_.set_dim(0, dim0_size);
     const int64 num_elems = dim0_size * elems_per_dim0;
     if (buf_) {
+<<<<<<< HEAD
       DataType dt = dtype();
       CASES(dt, ret.buf_ = new SubBuffer<T>(buf_, delta, num_elems));
     }
@@ -907,13 +1173,20 @@ Tensor Tensor::SubSlice(int64 index) const {
     if (buf_) {
       DataType dt = dtype();
       CASES(dt, ret.buf_ = new SubBuffer<T>(buf_, delta, num_elems));
+=======
+      CASES(type_, ret.buf_ = new SubBuffer<T>(buf_, delta, num_elems));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return ret;
 }
 
 bool Tensor::FromProto(const TensorProto& proto) {
+<<<<<<< HEAD
   return FromProto(get_default_cpu_allocator(), proto);
+=======
+  return FromProto(cpu_allocator(), proto);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 bool Tensor::FromProto(Allocator* a, const TensorProto& proto) {
@@ -924,6 +1197,7 @@ bool Tensor::FromProto(Allocator* a, const TensorProto& proto) {
   TensorShape shape(proto.tensor_shape());
   const int64 N = shape.num_elements();
   if (N > 0 && proto.dtype()) {
+<<<<<<< HEAD
     bool dtype_error = false;
     if (!proto.tensor_content().empty()) {
       const auto& content = proto.tensor_content();
@@ -945,13 +1219,32 @@ bool Tensor::FromProto(Allocator* a, const TensorProto& proto) {
     LogMemory::RecordTensorAllocation("Unknown (from Proto)",
                                       LogMemory::UNKNOWN_STEP_ID, *this);
   }
+=======
+    if (!proto.tensor_content().empty()) {
+      const auto& content = proto.tensor_content();
+      CASES(proto.dtype(), p = Helper<T>::Decode(a, content, N));
+    } else {
+      CASES(proto.dtype(), p = FromProtoField<T>(a, proto, N));
+    }
+    if (p == nullptr) return false;
+  }
+  type_ = proto.dtype();
+  shape_ = shape;
+  UnrefIfNonNull(buf_);
+  buf_ = p;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return true;
 }
 
 void Tensor::AsProtoField(TensorProto* proto) const {
   proto->Clear();
+<<<<<<< HEAD
   shape_.AsProto(proto->mutable_tensor_shape());
   proto->set_dtype(dtype());
+=======
+  proto->set_dtype(dtype());
+  shape_.AsProto(proto->mutable_tensor_shape());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (buf_) {
     CASES(dtype(), ToProtoField<T>(*buf_, shape_.num_elements(), proto));
   }
@@ -959,7 +1252,11 @@ void Tensor::AsProtoField(TensorProto* proto) const {
 
 void Tensor::AsProtoTensorContent(TensorProto* proto) const {
   proto->Clear();
+<<<<<<< HEAD
   proto->set_dtype(dtype());
+=======
+  proto->set_dtype(type_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   shape_.AsProto(proto->mutable_tensor_shape());
   if (buf_) {
     CASES(dtype(), Helper<T>::Encode(buf_, shape_.num_elements(),
@@ -974,6 +1271,7 @@ size_t Tensor::TotalBytes() const {
   return 0;  // Makes compiler happy.
 }
 
+<<<<<<< HEAD
 size_t Tensor::AllocatedBytes() const {
   if (buf_) {
     size_t ret;
@@ -986,12 +1284,17 @@ size_t Tensor::AllocatedBytes() const {
 
 bool Tensor::CanUseDMA() const {
   CASES(dtype(), return is_simple_type<T>::value);
+=======
+bool Tensor::CanUseDMA() const {
+  CASES(dtype(), return is_simple<T>::value);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return false;  // Makes compiler happy.
 }
 
 #undef CASES
 #undef CASE
 
+<<<<<<< HEAD
 namespace {
 
 // StrCat and StrAppend don't support Eigen::half directly at the moment, and
@@ -1231,12 +1534,51 @@ string Tensor::SummarizeValue(int64 max_entries, bool print_v2) const {
     }
   }
 }
+=======
+string Tensor::SummarizeValue(int64 max_entries) const {
+  string ret;
+  for (int64 i = 0; i < std::min(max_entries, NumElements()); ++i) {
+    if (i > 0) strings::StrAppend(&ret, " ");
+    switch (dtype()) {
+      case DT_STRING:
+        strings::StrAppend(&ret, str_util::CEscape(flat<string>()(i)));
+        break;
+      case DT_BOOL:
+        strings::StrAppend(&ret, flat<bool>()(i) ? "True" : "False");
+        break;
+
+#define CASE(DT_ENUM)                                                   \
+  case DT_ENUM:                                                         \
+    strings::StrAppend(&ret, flat<EnumToDataType<DT_ENUM>::Type>()(i)); \
+    break
+
+        CASE(DT_FLOAT);
+        CASE(DT_DOUBLE);
+        CASE(DT_INT32);
+        CASE(DT_UINT8);
+        CASE(DT_INT16);
+        CASE(DT_INT8);
+        CASE(DT_INT64);
+
+#undef CASE
+      default:
+        // TODO(zhifengc, josh11b): Pretty-print other types (bool,
+        // complex64, quantized, bfloat16).
+        strings::StrAppend(&ret, " ?");
+    }
+  }
+  if (max_entries < NumElements()) strings::StrAppend(&ret, "...");
+
+  return ret;
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 StringPiece Tensor::tensor_data() const {
   if (buf_ == nullptr) return StringPiece();  // Don't die for empty tensors
   return StringPiece(static_cast<char*>(buf_->data()), TotalBytes());
 }
 
+<<<<<<< HEAD
 bool Tensor::SharesBufferWith(const Tensor& b) const {
   return buf_ != nullptr && b.buf_ != nullptr &&
          buf_->root_buffer() == b.buf_->root_buffer();
@@ -1251,11 +1593,18 @@ string Tensor::DebugString(int num_values) const {
 string Tensor::DeviceSafeDebugString() const {
   return strings::StrCat("Tensor<type: ", DataTypeString(dtype()),
                          " shape: ", shape().DebugString(), ">");
+=======
+string Tensor::DebugString() const {
+  return strings::StrCat("Tensor<type: ", DataTypeString(dtype()), " shape: ",
+                         shape().ShortDebugString(), " values: ",
+                         SummarizeValue(3), ">");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void Tensor::FillDescription(TensorDescription* description) const {
   description->set_dtype(dtype());
   shape().AsProto(description->mutable_shape());
+<<<<<<< HEAD
   if (buf_ != nullptr && buf_->data() != nullptr) {
     buf_->FillAllocationDescription(
         description->mutable_allocation_description());
@@ -1286,6 +1635,10 @@ gtl::InlinedVector<int64, 4> Tensor::ComputeFlatOuterDims(
     out_dims[num_out_dims - 1] *= orig[in_dim];
   }
   return out_dims;
+=======
+  buf_->FillAllocationDescription(
+      description->mutable_allocation_description());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

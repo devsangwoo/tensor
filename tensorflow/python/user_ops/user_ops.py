@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,3 +31,15 @@ from tensorflow.python.util.tf_export import tf_export
 def my_fact():
   """Example of overriding the generated code for an Op."""
   return _gen_user_ops.fact()
+=======
+"""All user ops."""
+
+import tensorflow.python.platform
+from tensorflow.python.ops import gen_user_ops
+from tensorflow.python.ops.gen_user_ops import *
+
+
+def my_fact():
+  """Example of overriding the generated code for an Op."""
+  return gen_user_ops._fact()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

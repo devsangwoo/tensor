@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Implements the StreamExecutor interface by passing through to its
 // implementation_ value (in pointer-to-implementation style), which
 // implements StreamExecutorInterface.
@@ -20,6 +23,7 @@ limitations under the License.
 #include "tensorflow/stream_executor/stream_executor_pimpl.h"
 
 #include <atomic>
+<<<<<<< HEAD
 #include <memory>
 #include <utility>
 
@@ -29,18 +33,27 @@ limitations under the License.
 #include "absl/strings/str_format.h"
 #include "absl/synchronization/notification.h"
 #include "tensorflow/core/util/env_var.h"
+=======
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/blas.h"
 #include "tensorflow/stream_executor/fft.h"
 #include "tensorflow/stream_executor/lib/env.h"
 #include "tensorflow/stream_executor/lib/error.h"
+<<<<<<< HEAD
 #include "tensorflow/stream_executor/lib/stacktrace.h"
 #include "tensorflow/stream_executor/lib/statusor.h"
+=======
+#include "tensorflow/stream_executor/lib/notification.h"
+#include "tensorflow/stream_executor/lib/stringprintf.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/lib/threadpool.h"
 #include "tensorflow/stream_executor/platform/port.h"
 #include "tensorflow/stream_executor/rng.h"
 #include "tensorflow/stream_executor/stream_executor_internal.h"
 
 namespace {
+<<<<<<< HEAD
 bool FLAGS_check_device_leaks = false;
 }  // namespace
 
@@ -54,21 +67,76 @@ string StackTraceIfVLOG10() {
     return "";
   }
 }
+=======
+bool FLAGS_check_gpu_leaks = false;
+}  // namespace
+
+namespace perftools {
+namespace gputools {
+namespace {
+
+// Maximum stack depth to report when generating backtrace on mem allocation
+// (for GPU memory leak checker)
+static const int kMaxStackDepth = 256;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Make sure the executor is done with its work; we know (because this isn't
 // publicly visible) that all enqueued work is quick.
 void BlockOnThreadExecutor(port::ThreadPool *executor) {
+<<<<<<< HEAD
   absl::Notification n;
+=======
+  port::Notification n;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   executor->Schedule([&n]() { n.Notify(); });
   n.WaitForNotification();
 }
 
+<<<<<<< HEAD
+=======
+internal::StreamExecutorInterface *StreamExecutorImplementationFromPlatformKind(
+    PlatformKind platform_kind, const PluginConfig &plugin_config) {
+  // Note: we use this factory-assignment-in-switch pattern instead of just
+  // invoking the callable in case linkage is messed up -- instead of invoking a
+  // nullptr std::function (due to failed registration) we give a nice
+  // LOG(FATAL) message.
+  internal::StreamExecutorFactory factory;
+  switch (platform_kind) {
+    case PlatformKind::kCuda:
+      factory = *internal::MakeCUDAExecutorImplementation();
+      break;
+    case PlatformKind::kOpenCL:
+      factory = *internal::MakeOpenCLExecutorImplementation();
+      break;
+    case PlatformKind::kOpenCLAltera:
+      factory = *internal::MakeOpenCLAlteraExecutorImplementation();
+      break;
+    case PlatformKind::kHost:
+      factory = internal::MakeHostExecutorImplementation;
+      break;
+    default:
+      factory = nullptr;
+  }
+  if (factory == nullptr) {
+    LOG(FATAL)
+        << "cannot create GPU executor implementation for platform kind: "
+        << PlatformKindString(platform_kind);
+  }
+  return factory(plugin_config);
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 std::atomic_int_fast64_t correlation_id_generator(0);
 
 }  // namespace
 
+<<<<<<< HEAD
 template <typename BeginCallT, typename CompleteCallT, typename ReturnT,
           typename... BeginArgsT>
+=======
+template <typename BeginCallT, typename CompleteCallT,
+          typename ReturnT, typename... BeginArgsT>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class ScopedTracer {
  public:
   ScopedTracer(StreamExecutor *stream_exec, BeginCallT begin_call,
@@ -95,7 +163,11 @@ class ScopedTracer {
   void Trace(CallbackT callback, TraceArgsT... args) {
     {
       // Instance tracers held in a block to limit the lock lifetime.
+<<<<<<< HEAD
       absl::ReaderMutexLock lock{&stream_exec_->mu_};
+=======
+      shared_lock lock{stream_exec_->mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       for (TraceListener *listener : stream_exec_->listeners_) {
         (listener->*callback)(correlation_id_,
                               std::forward<TraceArgsT>(args)...);
@@ -105,7 +177,11 @@ class ScopedTracer {
 
   StreamExecutor *stream_exec_;
   CompleteCallT complete_call_;
+<<<<<<< HEAD
   const ReturnT *result_;
+=======
+  const ReturnT* result_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int64 correlation_id_;
 };
 
@@ -120,6 +196,7 @@ MakeScopedTracer(StreamExecutor *stream_exec, BeginCallT begin_call,
       std::forward<BeginArgsT>(begin_args)...);
 }
 
+<<<<<<< HEAD
 #define SCOPED_TRACE(LOC, ...) \
   auto tracer =                \
       MakeScopedTracer(this, &LOC##Begin, &LOC##Complete, ##__VA_ARGS__);
@@ -161,6 +238,38 @@ StreamExecutor::StreamExecutor(
   } else {
     platform_kind_ = PlatformKind::kInvalid;
   }
+=======
+#define SCOPED_TRACE(LOC, ...)                                      \
+  auto tracer = MakeScopedTracer(this, &LOC ## Begin,               \
+                                 &LOC ## Complete, ## __VA_ARGS__);
+
+/* static */ mutex StreamExecutor::static_mu_{LINKER_INITIALIZED};
+
+StreamExecutor::StreamExecutor(PlatformKind platform_kind,
+                               const PluginConfig &plugin_config)
+    : implementation_(StreamExecutorImplementationFromPlatformKind(
+          platform_kind, plugin_config)),
+      platform_kind_(platform_kind),
+      device_ordinal_(-1),
+      background_threads_(new port::ThreadPool(
+          port::Env::Default(), "stream_executor", kNumBackgroundThreads)),
+      live_stream_count_(0),
+      tracing_enabled_(false) {
+  CheckPlatformKindIsValid(platform_kind);
+}
+
+StreamExecutor::StreamExecutor(
+    PlatformKind platform_kind,
+    internal::StreamExecutorInterface *implementation)
+    : implementation_(implementation),
+      platform_kind_(platform_kind),
+      device_ordinal_(-1),
+      background_threads_(new port::ThreadPool(
+          port::Env::Default(), "stream_executor", kNumBackgroundThreads)),
+      live_stream_count_(0),
+      tracing_enabled_(false) {
+  CheckPlatformKindIsValid(platform_kind);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 StreamExecutor::~StreamExecutor() {
@@ -172,16 +281,24 @@ StreamExecutor::~StreamExecutor() {
                  << "especially if any stream is still active!";
   }
 
+<<<<<<< HEAD
   if (FLAGS_check_device_leaks) {
     for (auto it : mem_allocs_) {
       LOG(INFO) << "Memory alloced at executor exit: addr: "
                 << absl::StrFormat("%p", it.first)
+=======
+  if (FLAGS_check_gpu_leaks) {
+    for (auto it : mem_allocs_) {
+      LOG(INFO) << "Memory alloced at executor exit: addr: "
+                << port::Printf("%p", it.first)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                 << ", bytes: " << it.second.bytes << ", trace: \n"
                 << it.second.stack_trace;
     }
   }
 }
 
+<<<<<<< HEAD
 port::Status StreamExecutor::Init(DeviceOptions device_options) {
   return implementation_->Init(device_ordinal_, std::move(device_options));
 }
@@ -204,11 +321,30 @@ port::Status StreamExecutor::LoadModule(const MultiModuleLoaderSpec &spec,
 
 bool StreamExecutor::UnloadModule(ModuleHandle module_handle) {
   return implementation_->UnloadModule(module_handle);
+=======
+port::Status StreamExecutor::Init(int device_ordinal,
+                                  DeviceOptions device_options) {
+  device_ordinal_ = device_ordinal;
+  return implementation_->Init(device_ordinal, device_options);
+}
+
+port::Status StreamExecutor::Init() {
+  return Init(0, DeviceOptions::Default());
+}
+
+bool StreamExecutor::GetKernel(const MultiKernelLoaderSpec &spec,
+                               KernelBase *kernel) {
+  return implementation_->GetKernel(spec, kernel);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void StreamExecutor::Deallocate(DeviceMemoryBase *mem) {
   VLOG(1) << "Called StreamExecutor::Deallocate(mem=" << mem->opaque()
+<<<<<<< HEAD
           << ") mem->size()=" << mem->size() << StackTraceIfVLOG10();
+=======
+          << ") mem->size()=" << mem->size();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   if (mem->opaque() != nullptr) {
     EraseAllocRecord(mem->opaque());
@@ -218,7 +354,11 @@ void StreamExecutor::Deallocate(DeviceMemoryBase *mem) {
 }
 
 void StreamExecutor::GetMemAllocs(std::map<void *, AllocRecord> *records_out) {
+<<<<<<< HEAD
   absl::ReaderMutexLock lock(&mu_);
+=======
+  shared_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   *records_out = mem_allocs_;
 }
 
@@ -239,20 +379,32 @@ port::Status StreamExecutor::SetDeviceSharedMemoryConfig(
   if (config != SharedMemoryConfig::kDefault &&
       config != SharedMemoryConfig::kFourByte &&
       config != SharedMemoryConfig::kEightByte) {
+<<<<<<< HEAD
     string error_msg = absl::StrFormat(
         "Invalid shared memory config specified: %d", static_cast<int>(config));
     LOG(ERROR) << error_msg;
     return port::Status(port::error::INVALID_ARGUMENT, error_msg);
+=======
+    string error_msg = port::Printf(
+        "Invalid shared memory config specified: %d", static_cast<int>(config));
+    LOG(ERROR) << error_msg;
+    return port::Status{port::error::INVALID_ARGUMENT, error_msg};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return implementation_->SetDeviceSharedMemoryConfig(config);
 }
 
 const DeviceDescription &StreamExecutor::GetDeviceDescription() const {
+<<<<<<< HEAD
   absl::MutexLock lock(&mu_);
+=======
+  mutex_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (device_description_ != nullptr) {
     return *device_description_;
   }
 
+<<<<<<< HEAD
   device_description_ = CreateDeviceDescription();
   return *device_description_;
 }
@@ -261,6 +413,12 @@ int64 StreamExecutor::GetDeviceLoad() const {
   return implementation_->GetDeviceLoad();
 }
 
+=======
+  device_description_.reset(PopulateDeviceDescription());
+  return *device_description_;
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 int StreamExecutor::PlatformDeviceCount() const {
   return implementation_->PlatformDeviceCount();
 }
@@ -277,6 +435,7 @@ bool StreamExecutor::SupportsDnn() const {
   return implementation_->SupportsDnn();
 }
 
+<<<<<<< HEAD
 bool StreamExecutor::GetConvolveAlgorithms(
     bool with_winograd_nonfused,
     std::vector<dnn::AlgorithmDesc> *out_algorithms) {
@@ -396,6 +555,10 @@ StreamExecutor::createRnnStateTensorDescriptor(int num_layer, int batch_size,
 
 dnn::DnnSupport *StreamExecutor::AsDnn() {
   absl::MutexLock lock(&mu_);
+=======
+dnn::DnnSupport *StreamExecutor::AsDnn() {
+  mutex_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (dnn_ != nullptr) {
     return dnn_.get();
   }
@@ -405,7 +568,11 @@ dnn::DnnSupport *StreamExecutor::AsDnn() {
 }
 
 blas::BlasSupport *StreamExecutor::AsBlas() {
+<<<<<<< HEAD
   absl::MutexLock lock(&mu_);
+=======
+  mutex_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (blas_ != nullptr) {
     return blas_.get();
   }
@@ -415,7 +582,11 @@ blas::BlasSupport *StreamExecutor::AsBlas() {
 }
 
 fft::FftSupport *StreamExecutor::AsFft() {
+<<<<<<< HEAD
   absl::MutexLock lock(&mu_);
+=======
+  mutex_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (fft_ != nullptr) {
     return fft_.get();
   }
@@ -425,7 +596,11 @@ fft::FftSupport *StreamExecutor::AsFft() {
 }
 
 rng::RngSupport *StreamExecutor::AsRng() {
+<<<<<<< HEAD
   absl::MutexLock lock(&mu_);
+=======
+  mutex_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (rng_ != nullptr) {
     return rng_.get();
   }
@@ -434,25 +609,38 @@ rng::RngSupport *StreamExecutor::AsRng() {
   return rng_.get();
 }
 
+<<<<<<< HEAD
 port::Status StreamExecutor::Launch(Stream *stream,
                                     const ThreadDim &thread_dims,
                                     const BlockDim &block_dims,
                                     const KernelBase &kernel,
                                     const KernelArgsArrayBase &args) {
+=======
+bool StreamExecutor::Launch(Stream *stream, const ThreadDim &thread_dims,
+                            const BlockDim &block_dims,
+                            const KernelBase &kernel,
+                            const std::vector<KernelArg> &args) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   SubmitTrace(&TraceListener::LaunchSubmit, stream, thread_dims, block_dims,
               kernel, args);
 
   return implementation_->Launch(stream, thread_dims, block_dims, kernel, args);
 }
 
+<<<<<<< HEAD
 port::Status StreamExecutor::BlockHostUntilDone(Stream *stream) {
   port::Status result;
+=======
+bool StreamExecutor::BlockHostUntilDone(Stream *stream) {
+  bool result;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   SCOPED_TRACE(TraceListener::BlockHostUntilDone, &result, stream);
 
   result = implementation_->BlockHostUntilDone(stream);
   return result;
 }
 
+<<<<<<< HEAD
 port::Status StreamExecutor::GetStatus(Stream *stream) {
   return implementation_->GetStatus(stream);
 }
@@ -471,10 +659,18 @@ DeviceMemoryBase StreamExecutor::Allocate(uint64 size, int64 memory_space) {
           << ", memory_space=" << memory_space << ") returns " << buf.opaque()
           << StackTraceIfVLOG10();
   CreateAllocRecord(buf.opaque(), size);
+=======
+void *StreamExecutor::Allocate(uint64 size) {
+  void *buf = implementation_->Allocate(size);
+  VLOG(1) << "Called StreamExecutor::Allocate(size=" << size
+          << ") returns " << buf;
+  CreateAllocRecord(buf, size);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   return buf;
 }
 
+<<<<<<< HEAD
 port::StatusOr<DeviceMemoryBase> StreamExecutor::GetUntypedSymbol(
     const string &symbol_name, ModuleHandle module_handle) {
   // If failed to get the symbol, opaque/bytes are unchanged. Initialize them to
@@ -517,25 +713,43 @@ void StreamExecutor::UnifiedMemoryDeallocate(void *location) {
           << location << ")" << StackTraceIfVLOG10();
 
   return implementation_->UnifiedMemoryDeallocate(location);
+=======
+bool StreamExecutor::GetSymbol(const string &symbol_name, void **mem,
+                               size_t *bytes) {
+  return implementation_->GetSymbol(symbol_name, mem, bytes);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void *StreamExecutor::HostMemoryAllocate(uint64 size) {
   void *buffer = implementation_->HostMemoryAllocate(size);
   VLOG(1) << "Called StreamExecutor::HostMemoryAllocate(size=" << size
+<<<<<<< HEAD
           << ") returns " << buffer << StackTraceIfVLOG10();
+=======
+          << ") returns " << buffer;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return buffer;
 }
 
 void StreamExecutor::HostMemoryDeallocate(void *location) {
+<<<<<<< HEAD
   VLOG(1) << "Called StreamExecutor::HostMemoryDeallocate(location=" << location
           << ")" << StackTraceIfVLOG10();
+=======
+  VLOG(1) << "Called StreamExecutor::HostMemoryDeallocate(location="
+          << location << ")";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   return implementation_->HostMemoryDeallocate(location);
 }
 
 bool StreamExecutor::HostMemoryRegister(void *location, uint64 size) {
   VLOG(1) << "Called StreamExecutor::HostMemoryRegister(location=" << location
+<<<<<<< HEAD
           << ", size=" << size << ")" << StackTraceIfVLOG10();
+=======
+          << ", size=" << size << ")";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (location == nullptr || size == 0) {
     LOG(WARNING) << "attempting to register null or zero-sized memory: "
                  << location << "; size " << size;
@@ -545,13 +759,21 @@ bool StreamExecutor::HostMemoryRegister(void *location, uint64 size) {
 
 bool StreamExecutor::HostMemoryUnregister(void *location) {
   VLOG(1) << "Called StreamExecutor::HostMemoryUnregister(location=" << location
+<<<<<<< HEAD
           << ")" << StackTraceIfVLOG10();
+=======
+          << ")";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return implementation_->HostMemoryUnregister(location);
 }
 
 bool StreamExecutor::SynchronizeAllActivity() {
+<<<<<<< HEAD
   VLOG(1) << "Called StreamExecutor::SynchronizeAllActivity()"
           << StackTraceIfVLOG10();
+=======
+  VLOG(1) << "Called StreamExecutor::SynchronizeAllActivity()";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool ok = implementation_->SynchronizeAllActivity();
 
   // This should all be quick and infallible work, so we can perform the
@@ -561,32 +783,55 @@ bool StreamExecutor::SynchronizeAllActivity() {
   return ok;
 }
 
+<<<<<<< HEAD
 port::Status StreamExecutor::SynchronousMemZero(DeviceMemoryBase *location,
                                                 uint64 size) {
   VLOG(1) << "Called StreamExecutor::SynchronousMemZero(location=" << location
           << ", size=" << size << ")" << StackTraceIfVLOG10();
+=======
+bool StreamExecutor::SynchronousMemZero(DeviceMemoryBase *location,
+                                        uint64 size) {
+  VLOG(1) << "Called StreamExecutor::SynchronousMemZero(location="
+          << location << ", size=" << size << ")";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   return implementation_->SynchronousMemZero(location, size);
 }
 
+<<<<<<< HEAD
 port::Status StreamExecutor::SynchronousMemSet(DeviceMemoryBase *location,
                                                int value, uint64 size) {
   VLOG(1) << "Called StreamExecutor::SynchronousMemSet(location=" << location
           << ", value=" << value << ", size=" << size << ")"
           << StackTraceIfVLOG10();
+=======
+bool StreamExecutor::SynchronousMemSet(DeviceMemoryBase *location, int value,
+                                       uint64 size) {
+  VLOG(1) << "Called StreamExecutor::SynchronousMemSet(location="
+          << location << ", value=" << value << ", size=" << size << ")";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   return implementation_->SynchronousMemSet(location, value, size);
 }
 
+<<<<<<< HEAD
 bool StreamExecutor::SynchronousMemcpy(DeviceMemoryBase *device_dst,
                                        const void *host_src, uint64 size) {
   VLOG(1) << "Called StreamExecutor::SynchronousMemcpy(device_dst="
           << device_dst->opaque() << ", host_src=" << host_src
           << ", size=" << size << ") H2D" << StackTraceIfVLOG10();
+=======
+bool StreamExecutor::SynchronousMemcpy(DeviceMemoryBase *gpu_dst,
+                                       const void *host_src, uint64 size) {
+  VLOG(1) << "Called StreamExecutor::SynchronousMemcpy(gpu_dst="
+          << gpu_dst->opaque() << ", host_src=" << host_src << ", size=" << size
+          << ") H2D";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Tracing overloaded methods is very difficult due to issues with type
   // inference on template args. Since use of these overloaded methods is
   // discouraged anyway, this isn't a huge deal.
+<<<<<<< HEAD
   port::Status status =
       implementation_->SynchronousMemcpy(device_dst, host_src, size);
   if (!status.ok()) {
@@ -643,11 +888,54 @@ port::Status StreamExecutor::SynchronousMemcpyD2H(
                         "%p to host %p size %d: %s",
                         device_src.opaque(), host_dst, size,
                         result.ToString()));
+=======
+  return implementation_->SynchronousMemcpy(gpu_dst, host_src, size);
+}
+
+bool StreamExecutor::SynchronousMemcpy(void *host_dst,
+                                       const DeviceMemoryBase &gpu_src,
+                                       uint64 size) {
+  VLOG(1) << "Called StreamExecutor::SynchronousMemcpy(host_dst="
+          << host_dst << ", gpu_src=" << gpu_src.opaque() << ", size=" << size
+          << ") D2H";
+
+  return implementation_->SynchronousMemcpy(host_dst, gpu_src, size);
+}
+
+bool StreamExecutor::SynchronousMemcpy(DeviceMemoryBase *gpu_dst,
+                                       const DeviceMemoryBase &gpu_src,
+                                       uint64 size) {
+  VLOG(1) << "Called StreamExecutor::SynchronousMemcpy(gpu_dst="
+          << gpu_dst->opaque() << ", gpu_src=" << gpu_src.opaque() << ", size=" << size
+          << ") D2D";
+
+  return implementation_->SynchronousMemcpyDeviceToDevice(gpu_dst, gpu_src,
+                                                          size);
+}
+
+port::Status StreamExecutor::SynchronousMemcpyD2H(
+    const DeviceMemoryBase &gpu_src, int64 size, void *host_dst) {
+  VLOG(1) << "Called StreamExecutor::SynchronousMemcpyD2H(gpu_src="
+          << gpu_src.opaque() << ", size=" << size << ", host_dst=" << host_dst << ")";
+
+  port::Status result{port::Status::OK()};
+  SCOPED_TRACE(TraceListener::SynchronousMemcpyD2H,
+               &result, gpu_src, size, host_dst);
+
+  if (!implementation_->SynchronousMemcpy(host_dst, gpu_src, size)) {
+    return port::Status{
+        port::error::INTERNAL,
+        port::Printf(
+            "failed to synchronously memcpy device-to-host: GPU %p to host %p "
+            "size %lld",
+            gpu_src.opaque(), host_dst, size)};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   return result;
 }
 
+<<<<<<< HEAD
 port::Status StreamExecutor::SynchronousMemcpyH2D(
     const void *host_src, int64 size, DeviceMemoryBase *device_dst) {
   VLOG(1) << "Called StreamExecutor::SynchronousMemcpyH2D(host_src=" << host_src
@@ -666,12 +954,31 @@ port::Status StreamExecutor::SynchronousMemcpyH2D(
                         "%p to device %p size %d: %s",
                         host_src, device_dst->opaque(), size,
                         result.ToString()));
+=======
+port::Status StreamExecutor::SynchronousMemcpyH2D(const void *host_src,
+                                                  int64 size,
+                                                  DeviceMemoryBase *gpu_dst) {
+  VLOG(1) << "Called StreamExecutor::SynchronousMemcpyH2D(host_src="
+          << host_src << ", size=" << size << ", gpu_dst" << gpu_dst->opaque() << ")";
+
+  port::Status result{port::Status::OK()};
+  SCOPED_TRACE(TraceListener::SynchronousMemcpyH2D,
+               &result, host_src, size, gpu_dst);
+
+  if (!implementation_->SynchronousMemcpy(gpu_dst, host_src, size)) {
+    result = port::Status{
+        port::error::INTERNAL,
+        port::Printf("failed to synchronously memcpy host-to-device: host "
+                     "%p to GPU %p size %lld",
+                     host_src, gpu_dst->opaque(), size)};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   return result;
 }
 
 bool StreamExecutor::Memcpy(Stream *stream, void *host_dst,
+<<<<<<< HEAD
                             const DeviceMemoryBase &device_src, uint64 size) {
   return implementation_->Memcpy(stream, host_dst, device_src, size);
 }
@@ -697,6 +1004,31 @@ port::Status StreamExecutor::MemZero(Stream *stream, DeviceMemoryBase *location,
 port::Status StreamExecutor::Memset32(Stream *stream,
                                       DeviceMemoryBase *location,
                                       uint32 pattern, uint64 size) {
+=======
+                            const DeviceMemoryBase &gpu_src, uint64 size) {
+  return implementation_->Memcpy(stream, host_dst, gpu_src, size);
+}
+
+bool StreamExecutor::Memcpy(Stream *stream, DeviceMemoryBase *gpu_dst,
+                            const void *host_src, uint64 size) {
+  return implementation_->Memcpy(stream, gpu_dst, host_src, size);
+}
+
+bool StreamExecutor::MemcpyDeviceToDevice(Stream *stream,
+                                          DeviceMemoryBase *gpu_dst,
+                                          const DeviceMemoryBase &gpu_src,
+                                          uint64 size) {
+  return implementation_->MemcpyDeviceToDevice(stream, gpu_dst, gpu_src, size);
+}
+
+bool StreamExecutor::MemZero(Stream *stream, DeviceMemoryBase *location,
+                             uint64 size) {
+  return implementation_->MemZero(stream, location, size);
+}
+
+bool StreamExecutor::Memset32(Stream *stream, DeviceMemoryBase *location,
+                              uint32 pattern, uint64 size) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   CHECK_EQ(0, size % 4)
       << "need 32-bit multiple size to fill with 32-bit pattern";
   return implementation_->Memset32(stream, location, pattern, size);
@@ -704,12 +1036,16 @@ port::Status StreamExecutor::Memset32(Stream *stream,
 
 bool StreamExecutor::HostCallback(Stream *stream,
                                   std::function<void()> callback) {
+<<<<<<< HEAD
   return implementation_->HostCallback(stream, std::move(callback));
 }
 
 bool StreamExecutor::HostCallback(Stream *stream,
                                   std::function<port::Status()> callback) {
   return implementation_->HostCallback(stream, std::move(callback));
+=======
+  return implementation_->HostCallback(stream, callback);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 port::Status StreamExecutor::AllocateEvent(Event *event) {
@@ -770,16 +1106,22 @@ bool StreamExecutor::StopTimer(Stream *stream, Timer *timer) {
   return implementation_->StopTimer(stream, timer);
 }
 
+<<<<<<< HEAD
 std::unique_ptr<DeviceDescription> StreamExecutor::CreateDeviceDescription()
     const {
   auto desc_status = implementation_->CreateDeviceDescription();
   return desc_status.ConsumeValueOrDie();
+=======
+DeviceDescription *StreamExecutor::PopulateDeviceDescription() const {
+  return implementation_->PopulateDeviceDescription();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 bool StreamExecutor::DeviceMemoryUsage(int64 *free, int64 *total) const {
   return implementation_->DeviceMemoryUsage(free, total);
 }
 
+<<<<<<< HEAD
 void StreamExecutor::EnqueueOnBackgroundThread(std::function<void()> task) {
   background_threads_->Schedule(std::move(task));
 }
@@ -789,16 +1131,41 @@ void StreamExecutor::CreateAllocRecord(void *opaque, uint64 bytes) {
     absl::MutexLock lock(&mu_);
     mem_allocs_[opaque] = AllocRecord{bytes, ""};
     mem_alloc_bytes_ += bytes;
+=======
+KernelArg StreamExecutor::DeviceMemoryToKernelArg(
+    const DeviceMemoryBase &gpu_mem) const {
+  return implementation_->DeviceMemoryToKernelArg(gpu_mem);
+}
+
+void StreamExecutor::EnqueueOnBackgroundThread(std::function<void()> task) {
+  background_threads_->Schedule(task);
+}
+
+void StreamExecutor::CreateAllocRecord(void *opaque, uint64 bytes) {
+  if (FLAGS_check_gpu_leaks && opaque != nullptr && bytes != 0) {
+    mutex_lock lock{mu_};
+    mem_allocs_[opaque] = AllocRecord{
+        bytes, ""};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
 void StreamExecutor::EraseAllocRecord(void *opaque) {
+<<<<<<< HEAD
   if (FLAGS_check_device_leaks && opaque != nullptr) {
     absl::MutexLock lock(&mu_);
     if (mem_allocs_.find(opaque) == mem_allocs_.end()) {
       LOG(ERROR) << "Deallocating unknown pointer: " << opaque;
     } else {
       mem_alloc_bytes_ -= mem_allocs_[opaque].bytes;
+=======
+  if (FLAGS_check_gpu_leaks && opaque != nullptr) {
+    mutex_lock lock{mu_};
+    if (mem_allocs_.find(opaque) == mem_allocs_.end()) {
+      LOG(ERROR) << "Deallocating unknown pointer: "
+                 << port::Printf("0x%p", opaque);
+    } else {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       mem_allocs_.erase(opaque);
     }
   }
@@ -808,7 +1175,11 @@ void StreamExecutor::EnableTracing(bool enabled) { tracing_enabled_ = enabled; }
 
 void StreamExecutor::RegisterTraceListener(TraceListener *listener) {
   {
+<<<<<<< HEAD
     absl::MutexLock lock(&mu_);
+=======
+    mutex_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (listeners_.find(listener) != listeners_.end()) {
       LOG(INFO) << "Attempt to register already-registered listener, "
                 << listener;
@@ -822,7 +1193,11 @@ void StreamExecutor::RegisterTraceListener(TraceListener *listener) {
 
 bool StreamExecutor::UnregisterTraceListener(TraceListener *listener) {
   {
+<<<<<<< HEAD
     absl::MutexLock lock(&mu_);
+=======
+    mutex_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (listeners_.find(listener) == listeners_.end()) {
       LOG(INFO) << "Attempt to unregister unknown listener, " << listener;
       return false;
@@ -834,16 +1209,23 @@ bool StreamExecutor::UnregisterTraceListener(TraceListener *listener) {
   return true;
 }
 
+<<<<<<< HEAD
 absl::optional<AllocatorStats> StreamExecutor::GetAllocatorStats() {
   return implementation_->GetAllocatorStats();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <typename TraceCallT, typename... ArgsT>
 void StreamExecutor::SubmitTrace(TraceCallT trace_call, ArgsT &&... args) {
   if (tracing_enabled_) {
     {
       // instance tracers held in a block to limit the lock lifetime.
+<<<<<<< HEAD
       absl::ReaderMutexLock lock(&mu_);
+=======
+      shared_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       for (TraceListener *listener : listeners_) {
         (listener->*trace_call)(std::forward<ArgsT>(args)...);
       }
@@ -855,6 +1237,7 @@ internal::StreamExecutorInterface *StreamExecutor::implementation() {
   return implementation_->GetUnderlyingExecutor();
 }
 
+<<<<<<< HEAD
 StreamExecutorMemoryAllocator::StreamExecutorMemoryAllocator(
     StreamExecutor *executor)
     : DeviceMemoryAllocator(executor->platform()) {
@@ -939,3 +1322,7 @@ port::StatusOr<Stream *> StreamExecutorMemoryAllocator::GetStream(
 }
 
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

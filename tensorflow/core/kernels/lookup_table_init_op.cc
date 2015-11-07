@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,6 +36,76 @@ limitations under the License.
 #include "tensorflow/core/platform/macros.h"
 
 namespace tensorflow {
+=======
+#define EIGEN_USE_THREADS
+
+#include <string>
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/kernels/initializable_lookup_table.h"
+#include "tensorflow/core/kernels/lookup_util.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+
+namespace tensorflow {
+namespace lookup {
+
+// Iterator to initialize tables given 'keys' and 'values' tensors.
+//
+// The two tensors are returned in the first iteration. It doesn't loop
+// over each element of the tensor since insertions in the lookup table can
+// process batches.
+class KeyValueTensorIterator
+    : public InitializableLookupTable::InitTableIterator {
+ public:
+  // keys and values are not owned by the iterator.
+  explicit KeyValueTensorIterator(const Tensor* keys, const Tensor* values)
+      : keys_(keys), values_(values), valid_(true), status_(Status::OK()) {
+    TensorShape key_shape = keys_->shape();
+    if (!key_shape.IsSameSize(values_->shape())) {
+      valid_ = false;
+      status_ = errors::InvalidArgument(
+          "keys and values should have the same dimension.",
+          key_shape.DebugString(), " vs ", values_->shape().DebugString());
+    }
+    if (key_shape.num_elements() == 0) {
+      valid_ = false;
+      status_ =
+          errors::InvalidArgument("keys and values cannot be empty tensors.");
+    }
+  }
+
+  bool Valid() const override { return valid_; }
+
+  void Next() override {
+    valid_ = false;
+    status_ = errors::OutOfRange("No more data.");
+  }
+
+  const Tensor& keys() const override { return *keys_; }
+
+  const Tensor& values() const override { return *values_; }
+
+  Status status() const override { return status_; }
+
+  int64 total_size() const {
+    return keys_ == nullptr ? -1 : keys_->NumElements();
+  }
+
+ private:
+  TF_DISALLOW_COPY_AND_ASSIGN(KeyValueTensorIterator);
+
+  const Tensor* keys_;    // Doesn't own it.
+  const Tensor* values_;  // Doesn't own it.
+  bool valid_;            // true if the iterator points to an existing range.
+  Status status_;
+};
+
+}  // namespace lookup
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Kernel to initialize a look table given a key and value tensors.
 // After this operation, the table becomes read-only.
@@ -50,23 +121,37 @@ class InitializeTableOp : public OpKernel {
                    GetInitializableLookupTable("table_handle", ctx, &table));
     core::ScopedUnref unref_me(table);
 
+<<<<<<< HEAD
     DataType expected_input_0 =
         (ctx->input_dtype(0) == DT_RESOURCE) ? DT_RESOURCE : DT_STRING_REF;
     DataTypeVector expected_inputs = {expected_input_0, table->key_dtype(),
+=======
+    DataTypeVector expected_inputs = {DT_STRING_REF, table->key_dtype(),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                       table->value_dtype()};
     DataTypeVector expected_outputs = {};
     OP_REQUIRES_OK(ctx, ctx->MatchSignature(expected_inputs, expected_outputs));
 
     const Tensor& keys = ctx->input(1);
+<<<<<<< HEAD
     OP_REQUIRES(
         ctx, TensorShapeUtils::IsVector(keys.shape()),
         errors::InvalidArgument("Keys must be a vector, but received shape",
                                 keys.shape().DebugString()));
+=======
+    OP_REQUIRES(ctx, TensorShapeUtils::IsVector(keys.shape()),
+                errors::InvalidArgument("Keys must be a vector, but received ",
+                                        keys.shape().DebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     const Tensor& values = ctx->input(2);
     OP_REQUIRES(
         ctx, TensorShapeUtils::IsVector(values.shape()),
+<<<<<<< HEAD
         errors::InvalidArgument("Values must be a vector, but received shape",
+=======
+        errors::InvalidArgument("Values must be a vector, but received ",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                 values.shape().DebugString()));
 
     OP_REQUIRES(ctx, keys.NumElements() == values.NumElements(),
@@ -74,6 +159,7 @@ class InitializeTableOp : public OpKernel {
                     "Keys and values must have the same size ",
                     keys.NumElements(), " vs ", values.NumElements()));
 
+<<<<<<< HEAD
     int memory_used_before = 0;
     if (ctx->track_allocations()) {
       memory_used_before = table->MemoryUsed();
@@ -83,6 +169,10 @@ class InitializeTableOp : public OpKernel {
       ctx->record_persistent_memory_allocation(table->MemoryUsed() -
                                                memory_used_before);
     }
+=======
+    lookup::KeyValueTensorIterator iter(&keys, &values);
+    OP_REQUIRES_OK(ctx, table->Initialize(iter));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
@@ -91,6 +181,7 @@ class InitializeTableOp : public OpKernel {
 
 REGISTER_KERNEL_BUILDER(Name("InitializeTable").Device(DEVICE_CPU),
                         InitializeTableOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("InitializeTableV2").Device(DEVICE_CPU),
                         InitializeTableOp);
 
@@ -162,5 +253,7 @@ REGISTER_KERNEL_BUILDER(Name("InitializeTableFromTextFile").Device(DEVICE_CPU),
 REGISTER_KERNEL_BUILDER(
     Name("InitializeTableFromTextFileV2").Device(DEVICE_CPU),
     InitializeTableFromTextFileOp);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

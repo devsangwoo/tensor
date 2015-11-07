@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -409,12 +410,26 @@ bool Env::CreateUniqueFileName(string* prefix, const string& suffix) {
     return true;
   }
 }
+=======
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/platform/protobuf.h"
+
+namespace tensorflow {
+
+Env::~Env() {}
+
+RandomAccessFile::~RandomAccessFile() {}
+
+WritableFile::~WritableFile() {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 Thread::~Thread() {}
 
 EnvWrapper::~EnvWrapper() {}
 
 Status ReadFileToString(Env* env, const string& fname, string* data) {
+<<<<<<< HEAD
   uint64 file_size;
   Status s = env->GetFileSize(fname, &file_size);
   if (!s.ok()) {
@@ -440,12 +455,45 @@ Status ReadFileToString(Env* env, const string& fname, string* data) {
   } else {
     memmove(p, result.data(), result.size());
   }
+=======
+  data->clear();
+  RandomAccessFile* file;
+  Status s = env->NewRandomAccessFile(fname, &file);
+  if (!s.ok()) {
+    return s;
+  }
+  int64 offset = 0;
+  static const int kBufferSize = 8192;
+  char* space = new char[kBufferSize];
+  while (true) {
+    StringPiece fragment;
+    s = file->Read(offset, kBufferSize, &fragment, space);
+    if (!s.ok()) {
+      if (errors::IsOutOfRange(s)) {  // No more bytes, but not an error
+        s = Status::OK();
+        data->append(fragment.data(), fragment.size());
+      }
+      break;
+    }
+    offset += fragment.size();
+    data->append(fragment.data(), fragment.size());
+    if (fragment.empty()) {
+      break;
+    }
+  }
+  delete[] space;
+  delete file;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return s;
 }
 
 Status WriteStringToFile(Env* env, const string& fname,
                          const StringPiece& data) {
+<<<<<<< HEAD
   std::unique_ptr<WritableFile> file;
+=======
+  WritableFile* file;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Status s = env->NewWritableFile(fname, &file);
   if (!s.ok()) {
     return s;
@@ -454,6 +502,7 @@ Status WriteStringToFile(Env* env, const string& fname,
   if (s.ok()) {
     s = file->Close();
   }
+<<<<<<< HEAD
   return s;
 }
 
@@ -488,6 +537,12 @@ Status FileSystemCopyFile(FileSystem* src_fs, const string& src,
   return target_file->Close();
 }
 
+=======
+  delete file;
+  return s;
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // A ZeroCopyInputStream on a RandomAccessFile.
 namespace {
 class FileStream : public ::tensorflow::protobuf::io::ZeroCopyInputStream {
@@ -499,7 +554,11 @@ class FileStream : public ::tensorflow::protobuf::io::ZeroCopyInputStream {
     pos_ += count;
     return true;
   }
+<<<<<<< HEAD
   int64_t ByteCount() const override { return pos_; }
+=======
+  int64 ByteCount() const override { return pos_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Status status() const { return status_; }
 
   bool Next(const void** data, int* size) override {
@@ -526,6 +585,7 @@ class FileStream : public ::tensorflow::protobuf::io::ZeroCopyInputStream {
 
 }  // namespace
 
+<<<<<<< HEAD
 Status WriteBinaryProto(Env* env, const string& fname,
                         const ::tensorflow::protobuf::MessageLite& proto) {
   string serialized;
@@ -538,6 +598,17 @@ Status ReadBinaryProto(Env* env, const string& fname,
   std::unique_ptr<RandomAccessFile> file;
   TF_RETURN_IF_ERROR(env->NewRandomAccessFile(fname, &file));
   std::unique_ptr<FileStream> stream(new FileStream(file.get()));
+=======
+Status ReadBinaryProto(Env* env, const string& fname,
+                       ::tensorflow::protobuf::MessageLite* proto) {
+  RandomAccessFile* file;
+  auto s = env->NewRandomAccessFile(fname, &file);
+  if (!s.ok()) {
+    return s;
+  }
+  std::unique_ptr<RandomAccessFile> file_holder(file);
+  std::unique_ptr<FileStream> stream(new FileStream(file));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // TODO(jiayq): the following coded stream is for debugging purposes to allow
   // one to parse arbitrarily large messages for MessageLite. One most likely
@@ -548,6 +619,7 @@ Status ReadBinaryProto(Env* env, const string& fname,
   // respectively.
   coded_stream.SetTotalBytesLimit(1024LL << 20, 512LL << 20);
 
+<<<<<<< HEAD
   if (!proto->ParseFromCodedStream(&coded_stream) ||
       !coded_stream.ConsumedEntireMessage()) {
     TF_RETURN_IF_ERROR(stream->status());
@@ -599,6 +671,15 @@ Status ReadTextOrBinaryProto(Env* env, const string& fname,
   }
 #endif
   return ReadBinaryProto(env, fname, proto);
+=======
+  if (!proto->ParseFromCodedStream(&coded_stream)) {
+    s = stream->status();
+    if (s.ok()) {
+      s = Status(error::DATA_LOSS, "Parse error");
+    }
+  }
+  return s;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

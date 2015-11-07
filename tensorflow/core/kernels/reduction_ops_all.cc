@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/kernels/reduction_ops_common.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(
     Name("All")
         .TypeConstraint<int32>("Tidx")
@@ -43,6 +47,18 @@ REGISTER_KERNEL_BUILDER(
         .Device(DEVICE_GPU)
         .HostMemory("reduction_indices"),
     ReductionOp<GPUDevice, bool, int64, Eigen::internal::AndReducer>);
+=======
+REGISTER_KERNEL_BUILDER(Name("All")
+                            .Device(DEVICE_CPU)
+                            .HostMemory("reduction_indices"),
+                        ReductionOp<CPUDevice, bool, functor::AllReducer>);
+
+#if GOOGLE_CUDA
+REGISTER_KERNEL_BUILDER(Name("All")
+                            .Device(DEVICE_GPU)
+                            .HostMemory("reduction_indices"),
+                        ReductionOp<GPUDevice, bool, functor::AllReducer>);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #endif
 
 }  // namespace tensorflow

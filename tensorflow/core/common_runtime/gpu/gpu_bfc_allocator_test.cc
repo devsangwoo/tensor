@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +16,16 @@ limitations under the License.
 
 #if (defined(GOOGLE_CUDA) && GOOGLE_CUDA) || \
     (defined(TENSORFLOW_USE_ROCM) && TENSORFLOW_USE_ROCM)
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/common_runtime/gpu/gpu_bfc_allocator.h"
 
 #include <algorithm>
 #include <vector>
 
+<<<<<<< HEAD
 #include "tensorflow/core/common_runtime/gpu/gpu_id.h"
 #include "tensorflow/core/common_runtime/gpu/gpu_id_utils.h"
 #include "tensorflow/core/common_runtime/gpu/gpu_init.h"
@@ -34,10 +39,22 @@ limitations under the License.
 #include "tensorflow/core/platform/test_benchmark.h"
 #include "tensorflow/core/platform/types.h"
 #include "tensorflow/core/protobuf/bfc_memory_map.pb.h"
+=======
+#include "tensorflow/stream_executor/stream_executor.h"
+#include <gtest/gtest.h>
+#include "tensorflow/core/common_runtime/gpu/gpu_init.h"
+#include "tensorflow/core/lib/gtl/inlined_vector.h"
+#include "tensorflow/core/lib/random/simple_philox.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+
+namespace gpu = ::perftools::gputools;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
 
+<<<<<<< HEAD
 static void CheckStats(Allocator* a, int64 num_allocs, int64 bytes_in_use,
                        int64 peak_bytes_in_use, int64 largest_alloc_size) {
   absl::optional<AllocatorStats> stats = a->GetStats();
@@ -60,17 +77,25 @@ TEST(GPUBFCAllocatorTest, NoDups) {
   GPUBFCAllocator a(sub_allocator, 1 << 30, "GPU_0_bfc");
   CheckStats(&a, 0, 0, 0, 0);
 
+=======
+TEST(GPUBFCAllocatorTest, NoDups) {
+  GPUBFCAllocator a(0, 1 << 30);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Allocate a lot of raw pointers
   std::vector<void*> ptrs;
   for (int s = 1; s < 1024; s++) {
     void* raw = a.AllocateRaw(1, s);
     ptrs.push_back(raw);
   }
+<<<<<<< HEAD
   CheckStats(&a, 1023, 654336, 654336, 1024);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   std::sort(ptrs.begin(), ptrs.end());
 
   // Make sure none of them are equal, and that none of them overlap.
+<<<<<<< HEAD
   for (size_t i = 1; i < ptrs.size(); i++) {
     ASSERT_NE(ptrs[i], ptrs[i - 1]);  // No dups
     size_t req_size = a.RequestedSize(ptrs[i - 1]);
@@ -91,6 +116,25 @@ TEST(GPUBFCAllocatorTest, AllocationsAndDeallocations) {
       GpuIdUtil::ExecutorForPlatformGpuId(platform_gpu_id).ValueOrDie(),
       platform_gpu_id, false /*use_unified_memory*/, {}, {});
   GPUBFCAllocator a(sub_allocator, 1 << 30, "GPU_0_bfc");
+=======
+  for (int i = 0; i < ptrs.size(); i++) {
+    if (i > 0) {
+      ASSERT_NE(ptrs[i], ptrs[i - 1]);  // No dups
+      size_t req_size = a.RequestedSize(ptrs[i - 1]);
+      ASSERT_GT(req_size, 0);
+      ASSERT_GE(static_cast<char*>(ptrs[i]) - static_cast<char*>(ptrs[i - 1]),
+                req_size);
+    }
+  }
+
+  for (int i = 0; i < ptrs.size(); i++) {
+    a.DeallocateRaw(ptrs[i]);
+  }
+}
+
+TEST(GPUBFCAllocatorTest, AllocationsAndDeallocations) {
+  GPUBFCAllocator a(0, 1 << 30);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Allocate 256 raw pointers of sizes between 100 bytes and about
   // a meg
   random::PhiloxRandom philox(123, 17);
@@ -107,7 +151,11 @@ TEST(GPUBFCAllocatorTest, AllocationsAndDeallocations) {
 
   // Deallocate half of the memory, and keep track of the others.
   std::vector<void*> existing_ptrs;
+<<<<<<< HEAD
   for (size_t i = 0; i < initial_ptrs.size(); i++) {
+=======
+  for (int i = 0; i < initial_ptrs.size(); i++) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (i % 2 == 1) {
       a.DeallocateRaw(initial_ptrs[i]);
     } else {
@@ -115,11 +163,14 @@ TEST(GPUBFCAllocatorTest, AllocationsAndDeallocations) {
     }
   }
 
+<<<<<<< HEAD
   // Ensure out of memory errors work and do not prevent future allocations from
   // working.
   void* out_of_memory_ptr = a.AllocateRaw(1, (1 << 30) + 1);
   CHECK_EQ(out_of_memory_ptr, nullptr);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Allocate a lot of raw pointers
   for (int s = 1; s < 256; s++) {
     size_t size = std::min<size_t>(
@@ -130,6 +181,7 @@ TEST(GPUBFCAllocatorTest, AllocationsAndDeallocations) {
 
   std::sort(existing_ptrs.begin(), existing_ptrs.end());
   // Make sure none of them are equal
+<<<<<<< HEAD
   for (size_t i = 1; i < existing_ptrs.size(); i++) {
     CHECK_NE(existing_ptrs[i], existing_ptrs[i - 1]);  // No dups
 
@@ -143,11 +195,29 @@ TEST(GPUBFCAllocatorTest, AllocationsAndDeallocations) {
   }
 
   for (size_t i = 0; i < existing_ptrs.size(); i++) {
+=======
+  for (int i = 0; i < existing_ptrs.size(); i++) {
+    if (i > 0) {
+      CHECK_NE(existing_ptrs[i], existing_ptrs[i - 1]);  // No dups
+
+      size_t req_size = a.RequestedSize(existing_ptrs[i - 1]);
+      ASSERT_GT(req_size, 0);
+
+      // Check that they don't overlap.
+      ASSERT_GE(static_cast<char*>(existing_ptrs[i]) -
+                    static_cast<char*>(existing_ptrs[i - 1]),
+                req_size);
+    }
+  }
+
+  for (int i = 0; i < existing_ptrs.size(); i++) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     a.DeallocateRaw(existing_ptrs[i]);
   }
 }
 
 TEST(GPUBFCAllocatorTest, ExerciseCoalescing) {
+<<<<<<< HEAD
   PlatformGpuId platform_gpu_id(0);
   GPUMemAllocator* sub_allocator = new GPUMemAllocator(
       GpuIdUtil::ExecutorForPlatformGpuId(platform_gpu_id).ValueOrDie(),
@@ -158,10 +228,17 @@ TEST(GPUBFCAllocatorTest, ExerciseCoalescing) {
   float* first_ptr = TypedAllocator::Allocate<float>(&a, 1024, {});
   a.DeallocateRaw(first_ptr);
   CheckStats(&a, 1, 0, 4096, 4096);
+=======
+  GPUBFCAllocator a(0, 1 << 30);
+
+  float* first_ptr = a.Allocate<float>(1024);
+  a.Deallocate(first_ptr);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (int i = 0; i < 1024; ++i) {
     // Allocate several buffers of different sizes, and then clean them
     // all up.  We should be able to repeat this endlessly without
     // causing fragmentation and growth.
+<<<<<<< HEAD
     float* t1 = TypedAllocator::Allocate<float>(&a, 1024, {});
 
     int64* t2 = TypedAllocator::Allocate<int64>(&a, 1048576, {});
@@ -177,10 +254,24 @@ TEST(GPUBFCAllocatorTest, ExerciseCoalescing) {
              1024 * sizeof(float) + 1048576 * sizeof(int64) +
                  2048 * sizeof(double) + 10485760 * sizeof(float),
              10485760 * sizeof(float));
+=======
+    float* t1 = a.Allocate<float>(1024);
+
+    int64* t2 = a.Allocate<int64>(1048576);
+    double* t3 = a.Allocate<double>(2048);
+    float* t4 = a.Allocate<float>(10485760);
+
+    a.Deallocate(t1);
+    a.Deallocate(t2);
+    a.Deallocate(t3);
+    a.Deallocate(t4);
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // At the end, we should have coalesced all memory into one region
   // starting at the beginning, so validate that allocating a pointer
   // starts from this region.
+<<<<<<< HEAD
   float* first_ptr_after = TypedAllocator::Allocate<float>(&a, 1024, {});
   EXPECT_EQ(first_ptr, first_ptr_after);
   a.DeallocateRaw(first_ptr_after);
@@ -193,19 +284,34 @@ TEST(GPUBFCAllocatorTest, AllocateZeroBufSize) {
       platform_gpu_id, false /*use_unified_memory*/, {}, {});
   GPUBFCAllocator a(sub_allocator, 1 << 30, "GPU_0_bfc");
   float* ptr = TypedAllocator::Allocate<float>(&a, 0, {});
+=======
+  float* first_ptr_after = a.Allocate<float>(1024);
+  EXPECT_EQ(first_ptr, first_ptr_after);
+  a.Deallocate(first_ptr_after);
+}
+
+TEST(GPUBFCAllocatorTest, AllocateZeroBufSize) {
+  GPUBFCAllocator a(0, 1 << 30);
+  float* ptr = a.Allocate<float>(0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(nullptr, ptr);
 }
 
 TEST(GPUBFCAllocatorTest, TracksSizes) {
+<<<<<<< HEAD
   PlatformGpuId platform_gpu_id(0);
   GPUMemAllocator* sub_allocator = new GPUMemAllocator(
       GpuIdUtil::ExecutorForPlatformGpuId(platform_gpu_id).ValueOrDie(),
       platform_gpu_id, false /*use_unified_memory*/, {}, {});
   GPUBFCAllocator a(sub_allocator, 1 << 30, "GPU_0_bfc");
+=======
+  GPUBFCAllocator a(0, 1 << 30);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(true, a.TracksAllocationSizes());
 }
 
 TEST(GPUBFCAllocatorTest, AllocatedVsRequested) {
+<<<<<<< HEAD
   PlatformGpuId platform_gpu_id(0);
   GPUMemAllocator* sub_allocator = new GPUMemAllocator(
       GpuIdUtil::ExecutorForPlatformGpuId(platform_gpu_id).ValueOrDie(),
@@ -652,3 +758,28 @@ TEST_F(GPUBFCAllocatorPrivateMethodsTest, TestRegionDeallocation) {
 }  // namespace tensorflow
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+  GPUBFCAllocator a(0, 1 << 30);
+  float* t1 = a.Allocate<float>(1);
+  EXPECT_EQ(4, a.RequestedSize(t1));
+  EXPECT_EQ(256, a.AllocatedSize(t1));
+  a.Deallocate(t1);
+}
+
+TEST(GPUBFCAllocatorTest, TestCustomMemoryLimit) {
+  // Configure a 1MiB byte limit
+  GPUBFCAllocator a(0, 1 << 20);
+
+  float* first_ptr = a.Allocate<float>(1 << 6);
+  float* second_ptr = a.Allocate<float>(1 << 20);
+
+  EXPECT_NE(nullptr, first_ptr);
+  EXPECT_EQ(nullptr, second_ptr);
+  a.Deallocate(first_ptr);
+}
+
+}  // namespace
+}  // namespace tensorflow
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

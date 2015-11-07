@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // These utility functions allow for the conversion of RGB data to YUV data.
 
 #include "tensorflow/examples/android/jni/rgb2yuv.h"
 
+<<<<<<< HEAD
 static inline void WriteYUV(const int x, const int y, const int width,
                             const int r8, const int g8, const int b8,
                             uint8_t* const pY, uint8_t* const pUV) {
+=======
+#include "tensorflow/core/platform/port.h"
+
+using namespace tensorflow;
+
+static inline void WriteYUV(const int x, const int y, const int width,
+                            const int r8, const int g8, const int b8,
+                            uint8* const pY,
+                            uint8* const pUV) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Using formulas from http://msdn.microsoft.com/en-us/library/ms893078
   *pY = ((66 * r8 + 129 * g8 + 25 * b8 + 128) >> 8) + 16;
 
@@ -50,6 +64,7 @@ static inline void WriteYUV(const int x, const int y, const int width,
   pUV[offset + u_offset] += ((-38 * r8 - 74 * g8 + 112 * b8 + 128) >> 10) + 32;
 }
 
+<<<<<<< HEAD
 void ConvertARGB8888ToYUV420SP(const uint32_t* const input,
                                uint8_t* const output, int width, int height) {
   uint8_t* pY = output;
@@ -59,6 +74,17 @@ void ConvertARGB8888ToYUV420SP(const uint32_t* const input,
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       const uint32_t rgb = *in++;
+=======
+void ConvertARGB8888ToYUV420SP(const uint32* const input, uint8* const output,
+                               int width, int height) {
+  uint8* pY = output;
+  uint8* pUV = output + (width * height);
+  const uint32* in = input;
+
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      const uint32 rgb = *in++;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifdef __APPLE__
       const int nB = (rgb >> 8) & 0xFF;
       const int nG = (rgb >> 16) & 0xFF;
@@ -73,6 +99,7 @@ void ConvertARGB8888ToYUV420SP(const uint32_t* const input,
   }
 }
 
+<<<<<<< HEAD
 void ConvertRGB565ToYUV420SP(const uint16_t* const input, uint8_t* const output,
                              const int width, const int height) {
   uint8_t* pY = output;
@@ -82,6 +109,17 @@ void ConvertRGB565ToYUV420SP(const uint16_t* const input, uint8_t* const output,
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       const uint32_t rgb = *in++;
+=======
+void ConvertRGB565ToYUV420SP(const uint16* const input, uint8* const output,
+                             const int width, const int height) {
+  uint8* pY = output;
+  uint8* pUV = output + (width * height);
+  const uint16* in = input;
+
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      const uint32 rgb = *in++;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       const int r5 = ((rgb >> 11) & 0x1F);
       const int g6 = ((rgb >> 5) & 0x3F);

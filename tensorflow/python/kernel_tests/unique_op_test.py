@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,12 +43,29 @@ class UniqueTest(test.TestCase):
     x = np.random.randint(2, high=10, size=7000)
     y, idx = array_ops.unique(x, out_idx=dtypes.int64)
     tf_y, tf_idx = self.evaluate([y, idx])
+=======
+"""Tests for tensorflow.kernels.unique_op."""
+import tensorflow.python.platform
+
+import numpy as np
+import tensorflow as tf
+
+
+class UniqueTest(tf.test.TestCase):
+
+  def testInt32(self):
+    x = list(np.random.randint(2, high=10, size=7000))
+    with self.test_session() as sess:
+      y, idx = tf.unique(x)
+      tf_y, tf_idx = sess.run([y, idx])
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     self.assertEqual(len(x), len(tf_idx))
     self.assertEqual(len(tf_y), len(np.unique(x)))
     for i in range(len(x)):
       self.assertEqual(x[i], tf_y[tf_idx[i]])
 
+<<<<<<< HEAD
   def testString(self):
     indx = np.random.randint(65, high=122, size=7000)
     x = [chr(i) for i in indx]
@@ -208,3 +226,7 @@ class UniqueWithCountsTest(test.TestCase):
 
 if __name__ == '__main__':
   test.main()
+=======
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

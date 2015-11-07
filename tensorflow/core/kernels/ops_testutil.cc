@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,4 +72,23 @@ Tensor* OpsTestBase::GetOutput(int output_index) {
   return output;
 }
 
+=======
+#include "tensorflow/core/kernels/ops_testutil.h"
+
+namespace tensorflow {
+namespace test {
+
+NodeDef Node(const string& name, const string& op,
+             const std::vector<string>& inputs) {
+  NodeDef def;
+  def.set_name(name);
+  def.set_op(op);
+  for (const string& s : inputs) {
+    def.add_input(s);
+  }
+  return def;
+}
+
+}  // namespace test
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

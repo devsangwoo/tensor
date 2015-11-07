@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/op_def_util.h"
 
 #include "tensorflow/core/framework/op_def.pb.h"
 #include "tensorflow/core/framework/op_def_builder.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/lib/strings/strcat.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/lib/core/status_test_util.h"
+#include "tensorflow/core/lib/strings/str_util.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -33,6 +44,7 @@ OpDef FromText(const string& text) {
   return op_def;
 }
 
+<<<<<<< HEAD
 OpDef::AttrDef ADef(const string& text) {
   OpDef::AttrDef attr_def;
   EXPECT_TRUE(protobuf::TextFormat::MergeFromString(text, &attr_def));
@@ -80,12 +92,53 @@ TEST_F(ValidateOpDefTest, OpDefValid) {
 
   TF_EXPECT_OK(TestBuilder(OpDefBuilder("Namespace>X").Attr("a: int")));
   TF_EXPECT_OK(TestBuilder(OpDefBuilder("Namespace>X>Y").Attr("a: int")));
+=======
+class ValidateOpDefTest : public ::testing::Test {
+ protected:
+  Status TestProto(const string& text) {
+    return ValidateOpDef(FromText(text));
+  }
+
+  Status TestBuilder(const OpDefBuilder& builder) {
+    OpDef op_def;
+    Status status = builder.Finalize(&op_def);
+    EXPECT_OK(status);
+    if (!status.ok()) {
+      return status;
+    } else {
+      return ValidateOpDef(op_def);
+    }
+  }
+
+  void ExpectFailure(const Status& status, const string& message) {
+    EXPECT_FALSE(status.ok()) << "Did not see error with: " << message;
+    if (!status.ok()) {
+      LOG(INFO) << "message: " << status;
+      EXPECT_TRUE(StringPiece(status.ToString()).contains(message))
+          << "Actual: " << status << "\nExpected to contain: " << message;
+    }
+  }
+};
+
+TEST_F(ValidateOpDefTest, OpDefValid) {
+  EXPECT_OK(TestBuilder(OpDefBuilder("X").Attr("a: int")));
+  EXPECT_OK(TestBuilder(OpDefBuilder("X").Input("a: int32")));
+  EXPECT_OK(TestBuilder(OpDefBuilder("X").Output("a: bool")));
+  EXPECT_OK(TestBuilder(OpDefBuilder("X").Attr("t: type").Input("a: t")));
+  EXPECT_OK(TestBuilder(OpDefBuilder("X").Attr("a: int = 3")));
+  EXPECT_OK(TestBuilder(OpDefBuilder("X").Attr("a: int >= -5")));
+  EXPECT_OK(TestBuilder(OpDefBuilder("X").Attr("a: int >= -5")));
+  EXPECT_OK(TestBuilder(OpDefBuilder("X").Attr("a: int >= -5 = 3")));
+  EXPECT_OK(TestBuilder(OpDefBuilder("X").Attr("a: numbertype")));
+  EXPECT_OK(TestBuilder(OpDefBuilder("Uppercase")));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(ValidateOpDefTest, InvalidName) {
   ExpectFailure(TestBuilder(OpDefBuilder("lower").Attr("a: int")),
                 "Invalid name");
   ExpectFailure(TestBuilder(OpDefBuilder("BadSuffix 7%")), "Invalid name");
+<<<<<<< HEAD
   ExpectFailure(TestBuilder(OpDefBuilder(">OpName").Attr("a: int")),
                 "Invalid name");
   // Can't have a dangling empty namespace
@@ -97,6 +150,8 @@ TEST_F(ValidateOpDefTest, InvalidName) {
   // Can't have empty namespaces
   ExpectFailure(TestBuilder(OpDefBuilder("OpName>A>>B").Attr("a: int")),
                 "Invalid name");
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(ValidateOpDefTest, DuplicateName) {
@@ -153,6 +208,7 @@ TEST_F(ValidateOpDefTest, BadAttrDefault) {
   ExpectFailure(
       TestProto("name: 'BadAttrDef' attr { name: 'a' "
                 "type: 'int' default_value { s: 'x' } }"),
+<<<<<<< HEAD
       "AttrValue had value with type 'string' when 'int' expected\n\t for "
       "attr 'a'\n\t in Op 'BadAttrDef'");
   ExpectFailure(TestProto("name: 'BadAttrDef' attr { name: 'a' "
@@ -163,20 +219,41 @@ TEST_F(ValidateOpDefTest, BadAttrDefault) {
       TestProto("name: 'BadAttrDef' attr { name: 'a' type: 'int' "
                 "default_value { i: 5 list { i: [2] } } }"),
       "AttrValue had value with type 'list(int)' when 'int' expected\n\t for "
+=======
+      "AttrValue had value with type string when int expected\n\t for "
+      "attr 'a'\n\t in Op 'BadAttrDef'");
+  ExpectFailure(TestProto("name: 'BadAttrDef' attr { name: 'a' "
+                          "type: 'int' default_value { f: 0.5 } }"),
+                "AttrValue had value with type float when int expected\n\t for "
+                "attr 'a'\n\t in Op 'BadAttrDef'");
+  ExpectFailure(
+      TestProto("name: 'BadAttrDef' attr { name: 'a' type: 'int' "
+                "default_value { i: 5 list { i: [2] } } }"),
+      "AttrValue had value with type list(int) when int expected\n\t for "
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       "attr 'a'\n\t in Op 'BadAttrDef'");
   ExpectFailure(
       TestProto("name: 'BadAttrDef' attr { name: 'a' "
                 "type: 'list(int)' default_value { f: 0.5 } }"),
+<<<<<<< HEAD
       "AttrValue had value with type 'float' when 'list(int)' expected\n\t "
+=======
+      "AttrValue had value with type float when list(int) expected\n\t "
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       "for attr 'a'\n\t in Op 'BadAttrDef'");
   ExpectFailure(
       TestProto("name: 'BadAttrDef' attr { name: 'a' type: 'list(int)' "
                 "default_value { list { i: [5] f: [0.5] } } }"),
+<<<<<<< HEAD
       "AttrValue had value with type 'list(float)' when 'list(int)' "
+=======
+      "AttrValue had value with type list(float) when list(int) "
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       "expected\n\t for attr 'a'\n\t in Op 'BadAttrDef'");
 
   ExpectFailure(TestProto("name: 'BadAttrDef' attr { name: 'a' "
                           "type: 'type' default_value { } }"),
+<<<<<<< HEAD
                 "AttrValue missing value with expected type 'type'\n\t for "
                 "attr 'a'\n\t in Op 'BadAttrDef'");
   ExpectFailure(TestProto("name: 'BadAttrDef' attr { name: 'a' "
@@ -186,21 +263,44 @@ TEST_F(ValidateOpDefTest, BadAttrDefault) {
   ExpectFailure(TestProto("name: 'BadAttrDef' attr { name: 'a' "
                           "type: 'tensor' default_value { } }"),
                 "AttrValue missing value with expected type 'tensor'\n\t for "
+=======
+                "AttrValue missing value with expected type type\n\t for "
+                "attr 'a'\n\t in Op 'BadAttrDef'");
+  ExpectFailure(TestProto("name: 'BadAttrDef' attr { name: 'a' "
+                          "type: 'shape' default_value { } }"),
+                "AttrValue missing value with expected type shape\n\t for "
+                "attr 'a'\n\t in Op 'BadAttrDef'");
+  ExpectFailure(TestProto("name: 'BadAttrDef' attr { name: 'a' "
+                          "type: 'tensor' default_value { } }"),
+                "AttrValue missing value with expected type tensor\n\t for "
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                 "attr 'a'\n\t in Op 'BadAttrDef'");
 
   // default_value {} is indistinguishable from default_value{ list{} } (one
   // with an empty list) in proto3 semantics.
+<<<<<<< HEAD
   TF_EXPECT_OK(
+=======
+  EXPECT_OK(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       TestProto("name: 'GoodAttrDef' attr { name: 'a' "
                 "type: 'list(int)' default_value { } }"));
 
   // Empty lists are allowed:
+<<<<<<< HEAD
   TF_EXPECT_OK(
       TestProto("name: 'GoodAttrDef' attr { name: 'a' "
                 "type: 'list(int)' default_value { list { } } }"));
   // Builder should make the same proto:
   TF_EXPECT_OK(
       TestBuilder(OpDefBuilder("GoodAttrDef").Attr("a: list(int) = []")));
+=======
+  EXPECT_OK(
+      TestProto("name: 'GoodAttrDef' attr { name: 'a' "
+                "type: 'list(int)' default_value { list { } } }"));
+  // Builder should make the same proto:
+  EXPECT_OK(TestBuilder(OpDefBuilder("GoodAttrDef").Attr("a: list(int) = []")));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Unless there is a minimum length specified:
   ExpectFailure(TestProto("name: 'BadAttrDef' attr { name: 'a' "
@@ -217,11 +317,18 @@ TEST_F(ValidateOpDefTest, BadAttrDefault) {
                           "default_value { list { s: ['foo'] } } }"),
                 "Length for attr 'a' of 1 must be at least minimum 2\n\t in Op "
                 "'BadAttrDef'");
+<<<<<<< HEAD
   ExpectFailure(
       TestBuilder(
           OpDefBuilder("GoodAttrDef").Attr("a: list(type) >=2 = [DT_STRING]")),
       "Length for attr 'a' of 1 must be at least minimum 2\n\t in Op "
       "'GoodAttrDef'");
+=======
+  ExpectFailure(TestBuilder(OpDefBuilder("GoodAttrDef")
+                                .Attr("a: list(type) >=2 = [DT_STRING]")),
+                "Length for attr 'a' of 1 must be at least minimum 2\n\t in Op "
+                "'GoodAttrDef'");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(ValidateOpDefTest, NoRefTypes) {
@@ -231,10 +338,16 @@ TEST_F(ValidateOpDefTest, NoRefTypes) {
   ExpectFailure(
       TestBuilder(OpDefBuilder("BadAttrDef").Attr("T: type = DT_INT32_REF")),
       "AttrValue must not have reference type value of int32_ref");
+<<<<<<< HEAD
   ExpectFailure(
       TestBuilder(
           OpDefBuilder("BadAttrDef").Attr("T: list(type) = [DT_STRING_REF]")),
       "AttrValue must not have reference type value of string_ref");
+=======
+  ExpectFailure(TestBuilder(OpDefBuilder("BadAttrDef")
+                                .Attr("T: list(type) = [DT_STRING_REF]")),
+                "AttrValue must not have reference type value of string_ref");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(ValidateOpDefTest, BadAttrMin) {
@@ -250,7 +363,11 @@ TEST_F(ValidateOpDefTest, BadAttrMin) {
       TestProto("name: 'BadAttrMin' attr { name: 'a' "
                 "type: 'list(string)' has_minimum: true minimum: -5 }"),
       "list type must have a non-negative minimum, not -5");
+<<<<<<< HEAD
   TF_EXPECT_OK(
+=======
+  EXPECT_OK(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       TestProto("name: 'GoodAttrMin' attr { name: 'a' type: 'list(string)' "
                 "has_minimum: true minimum: 1 }"));
   ExpectFailure(TestProto("name: 'NoHasMin' attr { name: 'a' "
@@ -261,6 +378,7 @@ TEST_F(ValidateOpDefTest, BadAttrMin) {
 
 TEST_F(ValidateOpDefTest, BadAttrAllowed) {
   // Is in list of allowed types.
+<<<<<<< HEAD
   TF_EXPECT_OK(TestBuilder(
       OpDefBuilder("GoodAttrtude").Attr("x: numbertype = DT_INT32")));
   // Not in list of allowed types.
@@ -268,10 +386,19 @@ TEST_F(ValidateOpDefTest, BadAttrAllowed) {
       TestBuilder(
           OpDefBuilder("BadAttrtude").Attr("x: numbertype = DT_STRING")),
       "attr 'x' of string is not in the list of allowed values");
+=======
+  EXPECT_OK(TestBuilder(
+      OpDefBuilder("GoodAttrtude").Attr("x: numbertype = DT_INT32")));
+  // Not in list of allowed types.
+  ExpectFailure(TestBuilder(OpDefBuilder("BadAttrtude")
+                                .Attr("x: numbertype = DT_STRING")),
+                "attr 'x' of string is not in the list of allowed values");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ExpectFailure(
       TestBuilder(OpDefBuilder("BadAttrtude")
                       .Attr("x: list(realnumbertype) = [DT_COMPLEX64]")),
       "attr 'x' of complex64 is not in the list of allowed values");
+<<<<<<< HEAD
   ExpectFailure(
       TestBuilder(OpDefBuilder("BadAttrtude")
                       .Attr("x: list(realnumbertype) = [DT_COMPLEX128]")),
@@ -294,6 +421,26 @@ TEST_F(ValidateOpDefTest, BadAttrAllowed) {
       TestProto("name: 'BadAttrtude' attr { name: 'a' "
                 "type: 'string' allowed_values { list { i: [6] } } }"),
       "with type 'list(int)' when 'list(string)' expected");
+=======
+  // Is in list of allowed strings.
+  EXPECT_OK(TestBuilder(
+      OpDefBuilder("GoodAttrtude").Attr("x: {'foo', 'bar'} = 'bar'")));
+  // Not in list of allowed strings.
+  ExpectFailure(TestBuilder(OpDefBuilder("BadAttrtude")
+                                .Attr("x: {'foo', 'bar'} = 'baz'")),
+                "attr 'x' of \"baz\" is not in the list of allowed values");
+  ExpectFailure(TestBuilder(OpDefBuilder("BadAttrtude")
+                                .Attr("x: list({'foo', 'bar'}) = ['baz']")),
+                "attr 'x' of \"baz\" is not in the list of allowed values");
+  ExpectFailure(TestProto(
+                    "name: 'BadAttrtude' attr { name: 'a' "
+                    "type: 'string' allowed_values { s: 'not list' } }"),
+                "with type string when list(string) expected");
+  ExpectFailure(
+      TestProto("name: 'BadAttrtude' attr { name: 'a' "
+                "type: 'string' allowed_values { list { i: [6] } } }"),
+      "with type list(int) when list(string) expected");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(ValidateOpDefTest, BadArgType) {
@@ -332,13 +479,21 @@ TEST_F(ValidateOpDefTest, BadArgType) {
                 "attr { name: 'n' type: 'int' has_minimum: true minimum: 1 }"),
       "Attr 'x' used as type_attr for input 'a' has type list(type)");
   // But list(type) is fine as the type of an arg without a number_attr:
+<<<<<<< HEAD
   TF_EXPECT_OK(TestProto(
+=======
+  EXPECT_OK(TestProto(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       "name: 'Arg' input_arg { name: 'a' type_list_attr: 'x' } "
       "attr { name: 'x' type: 'list(type)' } attr { name: 'n' type: 'int' "
       "has_minimum: true minimum: 1 }"));
 
   // number_attr
+<<<<<<< HEAD
   TF_EXPECT_OK(TestProto(
+=======
+  EXPECT_OK(TestProto(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       "name: 'Arg' input_arg { name: 'a' type: DT_INT32 number_attr: 'n' } "
       "attr { name: 'n' type: 'int' has_minimum: true minimum: 0 }"));
 
@@ -370,6 +525,7 @@ TEST_F(ValidateOpDefTest, BadArgType) {
                 "Can't have both number_attr and type_list_attr for input 'a'");
 }
 
+<<<<<<< HEAD
 void ExpectDifferent(const OpDef::AttrDef& a1, const OpDef::AttrDef& a2) {
   EXPECT_FALSE(AttrDefEqual(a1, a2));
   EXPECT_FALSE(AttrDefEqual(a2, a1));
@@ -550,5 +706,7 @@ TEST(OpDefAttrDefaultsUnchangedTest, Foo) {
                 "Attr 'n' has removed it's default; from \"x\" to no default");
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

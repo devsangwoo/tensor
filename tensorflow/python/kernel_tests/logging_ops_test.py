@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,10 +57,34 @@ class LoggingOpsTest(test.TestCase):
       ]):
         out = math_ops.div(z, y)
       self.assertAllEqual(2.0, self.evaluate(out))
+=======
+"""Tests for tensorflow.kernels.logging_ops."""
+
+import tensorflow.python.platform
+
+import tensorflow as tf
+
+
+class LoggingOpsTest(tf.test.TestCase):
+
+  def testAssertDivideByZero(self):
+    with self.test_session() as sess:
+      epsilon = tf.convert_to_tensor(1e-20)
+      x = tf.convert_to_tensor(0.0)
+      y = tf.convert_to_tensor(1.0)
+      z = tf.convert_to_tensor(2.0)
+      # assert(epsilon < y)
+      # z / y
+      with sess.graph.control_dependencies(
+          [tf.Assert(tf.less(epsilon, y), ["Divide-by-zero"])]):
+        out = tf.div(z, y)
+      self.assertAllEqual(2.0, out.eval())
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       # assert(epsilon < x)
       # z / x
       #
       # This tests printing out multiple tensors
+<<<<<<< HEAD
       with sess.graph.control_dependencies([
           control_flow_ops.Assert(
               math_ops.less(epsilon, x), ["Divide-by-zero", "less than x"])
@@ -426,8 +451,34 @@ class PrintGradientTest(test.TestCase):
       wx_print_grad = gradients_impl.gradients(wx_print, w)[0]
       wxg = self.evaluate(wx_grad)
       wxpg = self.evaluate(wx_print_grad)
+=======
+      with sess.graph.control_dependencies(
+          [tf.Assert(tf.less(epsilon, x),
+                     ["Divide-by-zero", "less than x"])]):
+        out = tf.div(z, x)
+      with self.assertRaisesOpError("less than x"):
+        out.eval()
+
+
+class PrintGradientTest(tf.test.TestCase):
+
+  def testPrintGradient(self):
+    with self.test_session():
+      inp = tf.constant(2.0, shape=[100, 32], name="in")
+      w = tf.constant(4.0, shape=[10, 100], name="w")
+      wx = tf.matmul(w, inp, name="wx")
+      wx_print = tf.Print(wx, [w, w, w])
+      wx_grad = tf.gradients(wx, w)[0]
+      wx_print_grad = tf.gradients(wx_print, w)[0]
+      wxg = wx_grad.eval()
+      wxpg = wx_print_grad.eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     self.assertAllEqual(wxg, wxpg)
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
   test.main()
+=======
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,10 +19,18 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_FRAMEWORK_OP_DEF_BUILDER_H_
 #define TENSORFLOW_CORE_FRAMEWORK_OP_DEF_BUILDER_H_
+=======
+// Class and associated machinery for specifying an Op's OpDef for Op
+// registration.
+
+#ifndef TENSORFLOW_FRAMEWORK_OP_DEF_BUILDER_H_
+#define TENSORFLOW_FRAMEWORK_OP_DEF_BUILDER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <string>
 #include <vector>
 #include "tensorflow/core/framework/op_def.pb.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/core/stringpiece.h"
 #include "tensorflow/core/platform/macros.h"
@@ -49,11 +58,22 @@ struct OpRegistrationData {
   bool is_function_op = false;
 };
 
+=======
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/public/status.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Builder class passed to the REGISTER_OP() macro.
 class OpDefBuilder {
  public:
   // Constructs an OpDef with just the name field set.
+<<<<<<< HEAD
   explicit OpDefBuilder(string op_name);
+=======
+  explicit OpDefBuilder(StringPiece op_name);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Adds an attr to this OpDefBuilder (and returns *this). The spec has
   // format "<name>:<type>" or "<name>:<type>=<default>"
@@ -61,10 +81,15 @@ class OpDefBuilder {
   // (by convention only using capital letters for attrs that can be inferred)
   // <type> can be:
   //   "string", "int", "float", "bool", "type", "shape", or "tensor"
+<<<<<<< HEAD
   //   "numbertype", "realnumbertype", "quantizedtype"
   //       (meaning "type" with a restriction on valid values)
   //   "{int32,int64}" or {realnumbertype,quantizedtype,string}"
   //       (meaning "type" with a restriction containing unions of value types)
+=======
+  //   "numbertype", "realnumbertype", "quantizedtype", "{int32,int64}"
+  //       (meaning "type" with a restriction on valid values)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //   "{\"foo\", \"bar\n baz\"}", or "{'foo', 'bar\n baz'}"
   //       (meaning "string" with a restriction on valid values)
   //   "list(string)", ..., "list(tensor)", "list(numbertype)", ...
@@ -86,9 +111,15 @@ class OpDefBuilder {
   // * Ability to restrict the type of the tensor like the existing
   //   restrictions for type attrs.
   // Perhaps by linking the type of the tensor to a type attr?
+<<<<<<< HEAD
   OpDefBuilder& Attr(string spec);
 
   // Adds an input or output to this OpDefBuilder (and returns *this).
+=======
+  OpDefBuilder& Attr(StringPiece spec);
+
+  // Adds an input or ouput to this OpDefBuilder (and returns *this).
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // The spec has form "<name>:<type-expr>" or "<name>:Ref(<type-expr>)"
   // where <name> matches regexp [a-z][a-z0-9_]* and <type-expr> can be:
   // * For a single tensor: <type>
@@ -103,8 +134,13 @@ class OpDefBuilder {
   // in the spec?
   // TODO(josh11b): SparseInput() and SparseOutput() matching the Python
   // handling?
+<<<<<<< HEAD
   OpDefBuilder& Input(string spec);
   OpDefBuilder& Output(string spec);
+=======
+  OpDefBuilder& Input(StringPiece spec);
+  OpDefBuilder& Output(StringPiece spec);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Turns on the indicated boolean flag in this OpDefBuilder (and
   // returns *this).
@@ -113,9 +149,12 @@ class OpDefBuilder {
   OpDefBuilder& SetIsStateful();
   OpDefBuilder& SetAllowsUninitializedInput();
 
+<<<<<<< HEAD
   // Deprecate the op at a certain GraphDef version.
   OpDefBuilder& Deprecated(int version, string explanation);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Adds docs to this OpDefBuilder (and returns *this).
   // Docs have the format:
   //   <1-line summary>
@@ -129,6 +168,7 @@ class OpDefBuilder {
   // may start the description with an "=" (like name:= <description>)
   // to suppress the automatically-generated type documentation in
   // generated output.
+<<<<<<< HEAD
 #ifndef TF_LEAN_BINARY
   OpDefBuilder& Doc(string text);
 #else
@@ -166,10 +206,29 @@ class OpDefBuilder {
   std::vector<string> inputs_;
   std::vector<string> outputs_;
   std::vector<string> control_outputs_;
+=======
+  OpDefBuilder& Doc(StringPiece text);
+
+  // Sets *op_def to the requested OpDef, or returns an error.
+  // Must be called after all of the above methods.
+  // Note that OpDefBuilder only reports parsing errors.  You should also
+  // call ValidateOpDef() to detect other problems.
+  Status Finalize(OpDef* op_def) const;
+
+ private:
+  OpDef op_def_;
+  std::vector<string> attrs_;
+  std::vector<string> inputs_;
+  std::vector<string> outputs_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string doc_;
   std::vector<string> errors_;
 };
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_OP_DEF_BUILDER_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_OP_DEF_BUILDER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

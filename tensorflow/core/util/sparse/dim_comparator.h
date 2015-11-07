@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,14 @@ limitations under the License.
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_UTIL_SPARSE_DIM_COMPARATOR_H_
+#define TENSORFLOW_UTIL_SPARSE_DIM_COMPARATOR_H_
+
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/logging.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace sparse {
@@ -46,6 +55,7 @@ class DimComparator {
  public:
   typedef typename gtl::ArraySlice<int64> VarDimArray;
 
+<<<<<<< HEAD
   DimComparator(const TTypes<int64>::Matrix& ix, const VarDimArray& order,
                 const VarDimArray& shape)
       : ix_(ix), order_(order), dims_(shape.size()) {
@@ -54,6 +64,16 @@ class DimComparator {
     for (size_t d = 0; d < order.size(); ++d) {
       DCHECK_GE(order[d], 0);
       DCHECK_LT(order[d], shape.size());
+=======
+  inline DimComparator(const TTypes<int64>::Matrix& ix,
+                       const VarDimArray& order, int dims)
+      : ix_(ix), order_(order), dims_(dims) {
+    CHECK_GT(order.size(), 0) << "Must order using at least one index";
+    CHECK_LE(order.size(), dims_) << "Can only sort up to dims";
+    for (size_t d = 0; d < order.size(); ++d) {
+      CHECK_GE(order[d], 0);
+      CHECK_LT(order[d], dims);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
@@ -66,6 +86,7 @@ class DimComparator {
     return false;
   }
 
+<<<<<<< HEAD
   // Compares two indices taken from corresponding index matrices, using the
   // standard, row-major (or lexicographic) order.  Useful for cases that need
   // to distinguish between all three orderings (<, ==, >).
@@ -111,9 +132,18 @@ class FixedDimComparator : DimComparator {
     }
     return value;
   }
+=======
+  const TTypes<int64>::Matrix ix_;
+  const VarDimArray order_;
+  const int dims_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace sparse
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_UTIL_SPARSE_DIM_COMPARATOR_H_
+=======
+#endif  // TENSORFLOW_UTIL_SPARSE_DIM_COMPARATOR_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

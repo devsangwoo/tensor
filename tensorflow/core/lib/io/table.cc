@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/lib/io/table.h"
 
@@ -21,7 +27,11 @@ limitations under the License.
 #include "tensorflow/core/lib/io/format.h"
 #include "tensorflow/core/lib/io/table_options.h"
 #include "tensorflow/core/lib/io/two_level_iterator.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/env.h"
+=======
+#include "tensorflow/core/public/env.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace table {
@@ -38,17 +48,29 @@ struct Table::Rep {
   Block* index_block;
 };
 
+<<<<<<< HEAD
 Status Table::Open(const Options& options, RandomAccessFile* file, uint64 size,
                    Table** table) {
   *table = nullptr;
+=======
+Status Table::Open(const Options& options, RandomAccessFile* file,
+                        uint64 size, Table** table) {
+  *table = NULL;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (size < Footer::kEncodedLength) {
     return errors::DataLoss("file is too short to be an sstable");
   }
 
   char footer_space[Footer::kEncodedLength];
   StringPiece footer_input;
+<<<<<<< HEAD
   Status s = file->Read(size - Footer::kEncodedLength, Footer::kEncodedLength,
                         &footer_input, footer_space);
+=======
+  Status s =
+      file->Read(size - Footer::kEncodedLength, Footer::kEncodedLength,
+                 &footer_input, footer_space);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!s.ok()) return s;
 
   Footer footer;
@@ -57,7 +79,11 @@ Status Table::Open(const Options& options, RandomAccessFile* file, uint64 size,
 
   // Read the index block
   BlockContents contents;
+<<<<<<< HEAD
   Block* index_block = nullptr;
+=======
+  Block* index_block = NULL;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (s.ok()) {
     s = ReadBlock(file, footer.index_handle(), &contents);
     if (s.ok()) {
@@ -94,7 +120,11 @@ static void DeleteBlock(void* arg, void* ignored) {
 Iterator* Table::BlockReader(void* arg, const StringPiece& index_value) {
   Table* table = reinterpret_cast<Table*>(arg);
   //  Cache* block_cache = table->rep_->options.block_cache;
+<<<<<<< HEAD
   Block* block = nullptr;
+=======
+  Block* block = NULL;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //  Cache::Handle* cache_handle = NULL;
 
   BlockHandle handle;
@@ -112,9 +142,15 @@ Iterator* Table::BlockReader(void* arg, const StringPiece& index_value) {
   }
 
   Iterator* iter;
+<<<<<<< HEAD
   if (block != nullptr) {
     iter = block->NewIterator();
     iter->RegisterCleanup(&DeleteBlock, block, nullptr);
+=======
+  if (block != NULL) {
+    iter = block->NewIterator();
+    iter->RegisterCleanup(&DeleteBlock, block, NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   } else {
     iter = NewErrorIterator(s);
   }
@@ -127,12 +163,21 @@ Iterator* Table::NewIterator() const {
 }
 
 Status Table::InternalGet(const StringPiece& k, void* arg,
+<<<<<<< HEAD
                           void (*saver)(void*, const StringPiece&,
                                         const StringPiece&)) {
+=======
+                               void (*saver)(void*, const StringPiece&,
+                                             const StringPiece&)) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Status s;
   Iterator* iiter = rep_->index_block->NewIterator();
   iiter->Seek(k);
   if (iiter->Valid()) {
+<<<<<<< HEAD
+=======
+    BlockHandle handle;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Iterator* block_iter = BlockReader(this, iiter->value());
     block_iter->Seek(k);
     if (block_iter->Valid()) {

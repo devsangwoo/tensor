@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +27,19 @@ limitations under the License.
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/thread_annotations.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_CANCELLATION_H_
+#define TENSORFLOW_FRAMEWORK_CANCELLATION_H_
+
+#include <atomic>
+#include <functional>
+#include <unordered_map>
+
+#include "tensorflow/core/lib/core/notification.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/thread_annotations.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -36,21 +50,29 @@ namespace tensorflow {
 // CancellationManager::get_cancellation_token.
 typedef int64 CancellationToken;
 
+<<<<<<< HEAD
 // A callback that is invoked when a step is canceled.
+=======
+// A callback that is invoked when a step is cancelled.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 // NOTE(mrry): See caveats about CancelCallback implementations in the
 // comment for CancellationManager::RegisterCallback.
 typedef std::function<void()> CancelCallback;
 
+<<<<<<< HEAD
 // This class should never simultaneously be used as the cancellation manager
 // for two separate sets of executions (i.e two separate steps, or two separate
 // function executions).
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class CancellationManager {
  public:
   // A value that won't be returned by get_cancellation_token().
   static const CancellationToken kInvalidToken;
 
   CancellationManager();
+<<<<<<< HEAD
 
   // Constructs a new CancellationManager that is a "child" of `*parent`.
   //
@@ -58,6 +80,8 @@ class CancellationManager {
   // outlive the created CancellationManager.
   explicit CancellationManager(CancellationManager* parent);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ~CancellationManager();
 
   // Run all callbacks associated with this manager.
@@ -68,9 +92,13 @@ class CancellationManager {
 
   // Returns a token that must be used in calls to RegisterCallback
   // and DeregisterCallback.
+<<<<<<< HEAD
   CancellationToken get_cancellation_token() {
     return next_cancellation_token_.fetch_add(1);
   }
+=======
+  CancellationToken get_cancellation_token();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Attempts to register the given callback to be invoked when this
   // manager is cancelled. Returns true if the callback was
@@ -91,7 +119,11 @@ class CancellationManager {
   //     CancellationToken token = cm->get_cancellation_token();
   //     {
   //       mutex_lock(mu_);
+<<<<<<< HEAD
   //       already_cancelled = !cm->RegisterCallback(
+=======
+  //       already_cancelled = cm->RegisterCallback(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //           [this, token]() { Cancel(token); });
   //       if (!already_cancelled) {
   //         // Issue asynchronous operation. Associate the pending operation
@@ -134,6 +166,7 @@ class CancellationManager {
   // cancellation manager.
   bool DeregisterCallback(CancellationToken token);
 
+<<<<<<< HEAD
   // Deregister the callback that, when registered, was associated
   // with the given cancellation token. Returns true iff the callback
   // was deregistered and will not be invoked; otherwise returns false
@@ -180,8 +213,23 @@ class CancellationManager {
 
   mutex mu_;
   std::unique_ptr<State> state_ GUARDED_BY(mu_);
+=======
+ private:
+  bool is_cancelling_;
+  std::atomic_bool is_cancelled_;
+
+  mutex mu_;
+  Notification cancelled_notification_;
+  CancellationToken next_cancellation_token_ GUARDED_BY(mu_);
+  std::unordered_map<CancellationToken, CancelCallback> callbacks_
+      GUARDED_BY(mu_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_CANCELLATION_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_CANCELLATION_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

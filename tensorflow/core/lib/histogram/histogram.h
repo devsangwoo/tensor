@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,15 @@ limitations under the License.
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/thread_annotations.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_LIB_HISTOGRAM_HISTOGRAM_H_
+#define TENSORFLOW_LIB_HISTOGRAM_HISTOGRAM_H_
+
+#include <string>
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/thread_annotations.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -95,8 +105,11 @@ class Histogram {
   gtl::ArraySlice<double> bucket_limits_;
   std::vector<double> buckets_;
 
+<<<<<<< HEAD
   double Remap(double x, double x0, double x1, double y0, double y1) const;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TF_DISALLOW_COPY_AND_ASSIGN(Histogram);
 };
 
@@ -117,7 +130,11 @@ class ThreadSafeHistogram {
 
   void Clear();
 
+<<<<<<< HEAD
   // TODO(touts): It might be a good idea to provide a AddN(<many values>)
+=======
+  // TODO(mdevin): It might be a good idea to provide a AddN(<many values>)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // method to avoid grabbing/releasing the lock when adding many values.
   void Add(double value);
 
@@ -136,4 +153,8 @@ class ThreadSafeHistogram {
 }  // namespace histogram
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_LIB_HISTOGRAM_HISTOGRAM_H_
+=======
+#endif  // TENSORFLOW_LIB_HISTOGRAM_HISTOGRAM_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

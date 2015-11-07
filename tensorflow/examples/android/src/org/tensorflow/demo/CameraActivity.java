@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
  * Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+=======
+ * Copyright 2014 The Android Open Source Project
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +20,7 @@
 
 package org.tensorflow.demo;
 
+<<<<<<< HEAD
 import android.Manifest;
 import android.app.Activity;
 import android.app.Fragment;
@@ -454,4 +459,21 @@ public abstract class CameraActivity extends Activity
   protected abstract void onPreviewSizeChosen(final Size size, final int rotation);
   protected abstract int getLayoutId();
   protected abstract Size getDesiredPreviewFrameSize();
+=======
+import android.app.Activity;
+import android.os.Bundle;
+
+public class CameraActivity extends Activity {
+  @Override
+  protected void onCreate(final Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_camera);
+    if (null == savedInstanceState) {
+      getFragmentManager()
+          .beginTransaction()
+          .replace(R.id.container, CameraConnectionFragment.newInstance())
+          .commit();
+    }
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }

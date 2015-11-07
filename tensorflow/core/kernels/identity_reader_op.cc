@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,14 @@ limitations under the License.
 #include "tensorflow/core/framework/reader_op_kernel.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/strings/str_util.h"
+=======
+// See docs in ../ops/io_ops.cc.
+
+#include <memory>
+#include "tensorflow/core/framework/reader_op_kernel.h"
+#include "tensorflow/core/kernels/reader_base.h"
+#include "tensorflow/core/lib/core/errors.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/strings/strcat.h"
 #include "tensorflow/core/platform/protobuf.h"
 
@@ -33,7 +42,11 @@ class IdentityReader : public ReaderBase {
   explicit IdentityReader(const string& node_name)
       : ReaderBase(strings::StrCat("IdentityReader '", node_name, "'")) {}
 
+<<<<<<< HEAD
   Status ReadLocked(tstring* key, tstring* value, bool* produced,
+=======
+  Status ReadLocked(string* key, string* value, bool* produced,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                     bool* at_end) override {
     *key = current_work();
     *value = current_work();
@@ -44,6 +57,7 @@ class IdentityReader : public ReaderBase {
 
   // Stores state in a ReaderBaseState proto, since IdentityReader has
   // no additional state beyond ReaderBase.
+<<<<<<< HEAD
   Status SerializeStateLocked(tstring* state) override {
     ReaderBaseState base_state;
     SaveBaseState(&base_state);
@@ -56,6 +70,20 @@ class IdentityReader : public ReaderBase {
     if (!ParseProtoUnlimited(&base_state, state)) {
       return errors::InvalidArgument("Could not parse state for ", name(), ": ",
                                      absl::CEscape(state));
+=======
+  Status SerializeStateLocked(string* state) override {
+    ReaderBaseState base_state;
+    SaveBaseState(&base_state);
+    base_state.SerializeToString(state);
+    return Status::OK();
+  }
+
+  Status RestoreStateLocked(const string& state) override {
+    ReaderBaseState base_state;
+    if (!ParseProtoUnlimited(&base_state, state)) {
+      return errors::InvalidArgument("Could not parse state for ", name(), ": ",
+                                     str_util::CEscape(state));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     TF_RETURN_IF_ERROR(RestoreBaseState(base_state));
     return Status::OK();
@@ -72,7 +100,10 @@ class IdentityReaderOp : public ReaderOpKernel {
 
 REGISTER_KERNEL_BUILDER(Name("IdentityReader").Device(DEVICE_CPU),
                         IdentityReaderOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("IdentityReaderV2").Device(DEVICE_CPU),
                         IdentityReaderOp);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,17 @@ limitations under the License.
 #include <vector>
 
 #include "absl/strings/escaping.h"
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
+#include "tensorflow/core/lib/io/table.h"
+
+#include <map>
+#include <string>
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/io/block.h"
 #include "tensorflow/core/lib/io/block_builder.h"
@@ -28,17 +40,26 @@ limitations under the License.
 #include "tensorflow/core/lib/io/iterator.h"
 #include "tensorflow/core/lib/io/table_builder.h"
 #include "tensorflow/core/lib/random/simple_philox.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/platform/snappy.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/lib/strings/str_util.h"
+#include "tensorflow/core/platform/test.h"
+#include "tensorflow/core/public/env.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace table {
 
+<<<<<<< HEAD
 namespace {
 typedef std::pair<StringPiece, StringPiece> StringPiecePair;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace test {
 static StringPiece RandomString(random::SimplePhilox* rnd, int len,
                                 string* dst) {
@@ -75,7 +96,11 @@ static StringPiece CompressibleString(random::SimplePhilox* rnd,
   dst->resize(len);
   return StringPiece(*dst);
 }
+<<<<<<< HEAD
 }  // namespace test
+=======
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 static void Increment(string* key) { key->push_back('\0'); }
 
@@ -91,6 +116,7 @@ struct STLLessThan {
 
 class StringSink : public WritableFile {
  public:
+<<<<<<< HEAD
   ~StringSink() override {}
 
   const string& contents() const { return contents_; }
@@ -107,6 +133,17 @@ class StringSink : public WritableFile {
   }
 
   Status Append(StringPiece data) override {
+=======
+  ~StringSink() {}
+
+  const string& contents() const { return contents_; }
+
+  virtual Status Close() { return Status::OK(); }
+  virtual Status Flush() { return Status::OK(); }
+  virtual Status Sync() { return Status::OK(); }
+
+  virtual Status Append(const StringPiece& data) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     contents_.append(data.data(), data.size());
     return Status::OK();
   }
@@ -117,6 +154,7 @@ class StringSink : public WritableFile {
 
 class StringSource : public RandomAccessFile {
  public:
+<<<<<<< HEAD
   explicit StringSource(const StringPiece& contents)
       : contents_(contents.data(), contents.size()), bytes_read_(0) {}
 
@@ -130,6 +168,17 @@ class StringSource : public RandomAccessFile {
 
   Status Read(uint64 offset, size_t n, StringPiece* result,
               char* scratch) const override {
+=======
+  StringSource(const StringPiece& contents)
+      : contents_(contents.data(), contents.size()), bytes_read_(0) {}
+
+  virtual ~StringSource() {}
+
+  uint64 Size() const { return contents_.size(); }
+
+  virtual Status Read(uint64 offset, size_t n, StringPiece* result,
+                           char* scratch) const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (offset > contents_.size()) {
       return errors::InvalidArgument("invalid Read offset");
     }
@@ -159,7 +208,11 @@ class Constructor {
   virtual ~Constructor() {}
 
   void Add(const string& key, const StringPiece& value) {
+<<<<<<< HEAD
     data_[key] = string(value);
+=======
+    data_[key] = value.ToString();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Finish constructing the data structure with all the keys that have
@@ -189,18 +242,30 @@ class Constructor {
 
 class BlockConstructor : public Constructor {
  public:
+<<<<<<< HEAD
   BlockConstructor() : block_(nullptr) {}
   ~BlockConstructor() override { delete block_; }
   Status FinishImpl(const Options& options, const KVMap& data) override {
     delete block_;
     block_ = nullptr;
+=======
+  BlockConstructor() : block_(NULL) {}
+  ~BlockConstructor() { delete block_; }
+  virtual Status FinishImpl(const Options& options, const KVMap& data) {
+    delete block_;
+    block_ = NULL;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     BlockBuilder builder(&options);
 
     for (KVMap::const_iterator it = data.begin(); it != data.end(); ++it) {
       builder.Add(it->first, it->second);
     }
     // Open the block
+<<<<<<< HEAD
     data_ = string(builder.Finish());
+=======
+    data_ = builder.Finish().ToString();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     BlockContents contents;
     contents.data = data_;
     contents.cachable = false;
@@ -208,7 +273,11 @@ class BlockConstructor : public Constructor {
     block_ = new Block(contents);
     return Status::OK();
   }
+<<<<<<< HEAD
   Iterator* NewIterator() const override { return block_->NewIterator(); }
+=======
+  virtual Iterator* NewIterator() const { return block_->NewIterator(); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   string data_;
@@ -217,9 +286,15 @@ class BlockConstructor : public Constructor {
 
 class TableConstructor : public Constructor {
  public:
+<<<<<<< HEAD
   TableConstructor() : source_(nullptr), table_(nullptr) {}
   ~TableConstructor() override { Reset(); }
   Status FinishImpl(const Options& options, const KVMap& data) override {
+=======
+  TableConstructor() : source_(NULL), table_(NULL) {}
+  ~TableConstructor() { Reset(); }
+  virtual Status FinishImpl(const Options& options, const KVMap& data) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Reset();
     StringSink sink;
     TableBuilder builder(options, &sink);
@@ -239,7 +314,11 @@ class TableConstructor : public Constructor {
     return Table::Open(table_options, source_, sink.contents().size(), &table_);
   }
 
+<<<<<<< HEAD
   Iterator* NewIterator() const override { return table_->NewIterator(); }
+=======
+  virtual Iterator* NewIterator() const { return table_->NewIterator(); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   uint64 ApproximateOffsetOf(const StringPiece& key) const {
     return table_->ApproximateOffsetOf(key);
@@ -251,8 +330,13 @@ class TableConstructor : public Constructor {
   void Reset() {
     delete table_;
     delete source_;
+<<<<<<< HEAD
     table_ = nullptr;
     source_ = nullptr;
+=======
+    table_ = NULL;
+    source_ = NULL;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   StringSource* source_;
@@ -274,11 +358,19 @@ static const int kNumTestArgs = sizeof(kTestArgList) / sizeof(kTestArgList[0]);
 
 class Harness : public ::testing::Test {
  public:
+<<<<<<< HEAD
   Harness() : constructor_(nullptr) {}
 
   void Init(const TestArgs& args) {
     delete constructor_;
     constructor_ = nullptr;
+=======
+  Harness() : constructor_(NULL) {}
+
+  void Init(const TestArgs& args) {
+    delete constructor_;
+    constructor_ = NULL;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     options_ = Options();
 
     options_.block_restart_interval = args.restart_interval;
@@ -295,19 +387,31 @@ class Harness : public ::testing::Test {
     }
   }
 
+<<<<<<< HEAD
   ~Harness() override { delete constructor_; }
+=======
+  ~Harness() { delete constructor_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void Add(const string& key, const string& value) {
     constructor_->Add(key, value);
   }
 
+<<<<<<< HEAD
   void Test(random::SimplePhilox* rnd, int num_random_access_iters = 200) {
+=======
+  void Test(random::SimplePhilox* rnd) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     std::vector<string> keys;
     KVMap data;
     constructor_->Finish(options_, &keys, &data);
 
     TestForwardScan(keys, data);
+<<<<<<< HEAD
     TestRandomAccess(rnd, keys, data, num_random_access_iters);
+=======
+    TestRandomAccess(rnd, keys, data);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void TestForwardScan(const std::vector<string>& keys, const KVMap& data) {
@@ -316,7 +420,11 @@ class Harness : public ::testing::Test {
     iter->SeekToFirst();
     for (KVMap::const_iterator model_iter = data.begin();
          model_iter != data.end(); ++model_iter) {
+<<<<<<< HEAD
       ASSERT_EQ(ToStringPiecePair(data, model_iter), ToStringPiecePair(iter));
+=======
+      ASSERT_EQ(ToString(data, model_iter), ToString(iter));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       iter->Next();
     }
     ASSERT_TRUE(!iter->Valid());
@@ -324,14 +432,22 @@ class Harness : public ::testing::Test {
   }
 
   void TestRandomAccess(random::SimplePhilox* rnd,
+<<<<<<< HEAD
                         const std::vector<string>& keys, const KVMap& data,
                         int num_random_access_iters) {
+=======
+                        const std::vector<string>& keys, const KVMap& data) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     static const bool kVerbose = false;
     Iterator* iter = constructor_->NewIterator();
     ASSERT_TRUE(!iter->Valid());
     KVMap::const_iterator model_iter = data.begin();
     if (kVerbose) fprintf(stderr, "---\n");
+<<<<<<< HEAD
     for (int i = 0; i < num_random_access_iters; i++) {
+=======
+    for (int i = 0; i < 200; i++) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       const int toss = rnd->Uniform(3);
       switch (toss) {
         case 0: {
@@ -339,8 +455,12 @@ class Harness : public ::testing::Test {
             if (kVerbose) fprintf(stderr, "Next\n");
             iter->Next();
             ++model_iter;
+<<<<<<< HEAD
             ASSERT_EQ(ToStringPiecePair(data, model_iter),
                       ToStringPiecePair(iter));
+=======
+            ASSERT_EQ(ToString(data, model_iter), ToString(iter));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           }
           break;
         }
@@ -349,8 +469,12 @@ class Harness : public ::testing::Test {
           if (kVerbose) fprintf(stderr, "SeekToFirst\n");
           iter->SeekToFirst();
           model_iter = data.begin();
+<<<<<<< HEAD
           ASSERT_EQ(ToStringPiecePair(data, model_iter),
                     ToStringPiecePair(iter));
+=======
+          ASSERT_EQ(ToString(data, model_iter), ToString(iter));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           break;
         }
 
@@ -358,10 +482,16 @@ class Harness : public ::testing::Test {
           string key = PickRandomKey(rnd, keys);
           model_iter = data.lower_bound(key);
           if (kVerbose)
+<<<<<<< HEAD
             fprintf(stderr, "Seek '%s'\n", absl::CEscape(key).c_str());
           iter->Seek(StringPiece(key));
           ASSERT_EQ(ToStringPiecePair(data, model_iter),
                     ToStringPiecePair(iter));
+=======
+            fprintf(stderr, "Seek '%s'\n", str_util::CEscape(key).c_str());
+          iter->Seek(StringPiece(key));
+          ASSERT_EQ(ToString(data, model_iter), ToString(iter));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           break;
         }
       }
@@ -369,6 +499,7 @@ class Harness : public ::testing::Test {
     delete iter;
   }
 
+<<<<<<< HEAD
   StringPiecePair ToStringPiecePair(const KVMap& data,
                                     const KVMap::const_iterator& it) {
     if (it == data.end()) {
@@ -392,6 +523,29 @@ class Harness : public ::testing::Test {
       return StringPiecePair("END", "");
     } else {
       return StringPiecePair(it->key(), it->value());
+=======
+  string ToString(const KVMap& data, const KVMap::const_iterator& it) {
+    if (it == data.end()) {
+      return "END";
+    } else {
+      return "'" + it->first + "->" + it->second + "'";
+    }
+  }
+
+  string ToString(const KVMap& data, const KVMap::const_reverse_iterator& it) {
+    if (it == data.rend()) {
+      return "END";
+    } else {
+      return "'" + it->first + "->" + it->second + "'";
+    }
+  }
+
+  string ToString(const Iterator* it) {
+    if (!it->Valid()) {
+      return "END";
+    } else {
+      return "'" + it->key().ToString() + "->" + it->value().ToString() + "'";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
@@ -408,7 +562,11 @@ class Harness : public ::testing::Test {
           break;
         case 1: {
           // Attempt to return something smaller than an existing key
+<<<<<<< HEAD
           if (!result.empty() && result[result.size() - 1] > '\0') {
+=======
+          if (result.size() > 0 && result[result.size() - 1] > '\0') {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             result[result.size() - 1]--;
           }
           break;
@@ -499,7 +657,11 @@ TEST_F(Harness, SimpleMultiBigValues) {
     Add("anext", string(10000000, 'a'));
     Add("anext2", string(10000000, 'b'));
     Add("azz", "tiny");
+<<<<<<< HEAD
     Test(&rnd, 100 /* num_random_access_iters */);
+=======
+    Test(&rnd);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
@@ -527,7 +689,11 @@ TEST_F(Harness, Randomized) {
       for (int e = 0; e < num_entries; e++) {
         string v;
         Add(test::RandomKey(&rnd, rnd.Skewed(4)),
+<<<<<<< HEAD
             string(test::RandomString(&rnd, rnd.Skewed(5), &v)));
+=======
+            test::RandomString(&rnd, rnd.Skewed(5), &v).ToString());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
       Test(&rnd);
     }
@@ -538,9 +704,14 @@ static bool Between(uint64 val, uint64 low, uint64 high) {
   bool result = (val >= low) && (val <= high);
   if (!result) {
     fprintf(stderr, "Value %llu is not in range [%llu, %llu]\n",
+<<<<<<< HEAD
             static_cast<unsigned long long>(val),
             static_cast<unsigned long long>(low),
             static_cast<unsigned long long>(high));
+=======
+            (unsigned long long)(val), (unsigned long long)(low),
+            (unsigned long long)(high));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return result;
 }
@@ -605,9 +776,15 @@ TEST(TableTest, ApproximateOffsetOfCompressed) {
   ASSERT_TRUE(Between(c.ApproximateOffsetOf("abc"), 0, 0));
   ASSERT_TRUE(Between(c.ApproximateOffsetOf("k01"), 0, 0));
   ASSERT_TRUE(Between(c.ApproximateOffsetOf("k02"), 10, 100));
+<<<<<<< HEAD
   ASSERT_TRUE(Between(c.ApproximateOffsetOf("k03"), 2000, 4000));
   ASSERT_TRUE(Between(c.ApproximateOffsetOf("k04"), 2000, 4000));
   ASSERT_TRUE(Between(c.ApproximateOffsetOf("xyz"), 4000, 7000));
+=======
+  ASSERT_TRUE(Between(c.ApproximateOffsetOf("k03"), 2000, 3000));
+  ASSERT_TRUE(Between(c.ApproximateOffsetOf("k04"), 2000, 3000));
+  ASSERT_TRUE(Between(c.ApproximateOffsetOf("xyz"), 4000, 6000));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(TableTest, SeekToFirstKeyDoesNotReadTooMuch) {

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -121,3 +122,15 @@ def get_path_to_datafile(path):
 def readahead_file_path(path, readahead='128M'):  # pylint: disable=unused-argument
   """Readahead files not implemented; simply returns given path."""
   return path
+=======
+"""Load a file resource and return the contents."""
+# pylint: disable=unused-import
+# pylint: disable=g-import-not-at-top
+# pylint: disable=wildcard-import
+import control_imports
+import tensorflow.python.platform
+if control_imports.USE_OSS:
+  from tensorflow.python.platform.default._resource_loader import *
+else:
+  from tensorflow.python.platform.google._resource_loader import *
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

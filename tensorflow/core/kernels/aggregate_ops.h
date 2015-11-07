@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,15 @@ limitations under the License.
 
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor_types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_AGGREGATE_OPS_H_
+#define TENSORFLOW_KERNELS_AGGREGATE_OPS_H_
+
+// Functor definitions for Aggregate ops, must be compilable by nvcc.
+
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -223,4 +233,8 @@ struct Add9EigenImpl {
 }  // namespace functor
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_AGGREGATE_OPS_H_
+=======
+#endif  // TENSORFLOW_KERNELS_AGGREGATE_OPS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

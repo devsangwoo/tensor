@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,6 +57,24 @@ float_feature = lambda v: feature(float_list=feature_pb2.FloatList(value=v))
 feature_list = lambda l: feature_pb2.FeatureList(feature=l)
 feature_lists = lambda d: feature_pb2.FeatureLists(feature_list=d)
 sequence_example = example_pb2.SequenceExample
+=======
+"""Tests for tensorflow.ops.parsing_ops."""
+
+import itertools
+
+import tensorflow.python.platform
+
+import numpy as np
+import tensorflow as tf
+
+# Helpers for creating Example objects
+example = tf.train.Example
+feature = tf.train.Feature
+features = lambda d: tf.train.Features(feature=d)
+bytes_feature = lambda v: feature(bytes_list=tf.train.BytesList(value=v))
+int64_feature = lambda v: feature(int64_list=tf.train.Int64List(value=v))
+float_feature = lambda v: feature(float_list=tf.train.FloatList(value=v))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 def flatten(list_of_lists):
@@ -63,6 +82,7 @@ def flatten(list_of_lists):
   return itertools.chain.from_iterable(list_of_lists)
 
 
+<<<<<<< HEAD
 def _compare_output_to_expected(tester, actual, expected):
   tester.assertEqual(set(actual.keys()), set(expected.keys()))
   for k, v in actual.items():
@@ -122,6 +142,80 @@ class ParseExampleTest(test.TestCase):
     a_default = [0, 42, 0]
     b_default = np.random.rand(3, 3).astype(bytes)
     c_default = np.random.rand(2).astype(np.float32)
+=======
+def flatten_values_tensors_or_sparse(tensors_list):
+  """Flatten each SparseTensor object into 3 Tensors for session.run()."""
+  return list(flatten([[v.indices, v.values, v.shape]
+                       if isinstance(v, tf.SparseTensor) else [v]
+                       for v in tensors_list]))
+
+
+def _compare_output_to_expected(
+    tester, dict_tensors, expected_tensors, flat_output):
+  tester.assertEqual(set(dict_tensors.keys()), set(expected_tensors.keys()))
+
+  i = 0  # Index into the flattened output of session.run()
+  for k, v in dict_tensors.iteritems():
+    expected_v = expected_tensors[k]
+    tf.logging.info("Comparing key: %s", k)
+    if isinstance(v, tf.SparseTensor):
+      # Three outputs for SparseTensor : indices, values, shape.
+      tester.assertEqual([k, 3], [k, len(expected_v)])
+      tester.assertAllEqual(flat_output[i], expected_v[0])
+      tester.assertAllEqual(flat_output[i + 1], expected_v[1])
+      tester.assertAllEqual(flat_output[i + 2], expected_v[2])
+      i += 3
+    else:
+      # One output for standard Tensor.
+      tester.assertAllEqual(flat_output[i], expected_v)
+      i += 1
+
+
+class ParseExampleTest(tf.test.TestCase):
+
+  def _test(self, kwargs, expected_values=None, expected_err_re=None):
+    with self.test_session() as sess:
+      # Pull out some keys to check shape inference
+      serialized = kwargs["serialized"]
+      dense_keys = kwargs["dense_keys"] if "dense_keys" in kwargs else []
+      sparse_keys = kwargs["sparse_keys"] if "sparse_keys" in kwargs else []
+      dense_shapes = kwargs["dense_shapes"] if "dense_shapes" in kwargs else []
+
+      # Returns dict w/ Tensors and SparseTensors
+      out = tf.parse_example(**kwargs)
+
+      # Check shapes; if serialized is a Tensor we need its size to
+      # properly check.
+      batch_size = (
+          serialized.eval().size if isinstance(serialized, tf.Tensor)
+          else np.asarray(serialized).size)
+      self.assertEqual(len(dense_keys), len(dense_shapes))
+      for (k, s) in zip(dense_keys, dense_shapes):
+        self.assertEqual(tuple(out[k].get_shape().as_list()), (batch_size,) + s)
+      for k in sparse_keys:
+        self.assertEqual(tuple(out[k].indices.get_shape().as_list()), (None, 2))
+        self.assertEqual(tuple(out[k].values.get_shape().as_list()), (None,))
+        self.assertEqual(tuple(out[k].shape.get_shape().as_list()), (2,))
+
+      # Check values
+      result = flatten_values_tensors_or_sparse(out.values())  # flatten values
+      if expected_err_re is None:
+        tf_result = sess.run(result)
+        _compare_output_to_expected(self, out, expected_values, tf_result)
+      else:
+        with self.assertRaisesOpError(expected_err_re):
+          sess.run(result)
+
+  def testEmptySerializedWithAllDefaults(self):
+    dense_keys = ["a", "b", "c"]
+    dense_shapes = [(1, 3), (3, 3), (2,)]
+    dense_types = [tf.int64, tf.string, tf.float32]
+    dense_defaults = {
+        "a": [0, 42, 0],
+        "b": np.random.rand(3, 3).astype(np.str),
+        "c": np.random.rand(2).astype(np.float32),
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     expected_st_a = (  # indices, values, shape
         np.empty((0, 2), dtype=np.int64),  # indices
@@ -129,14 +223,22 @@ class ParseExampleTest(test.TestCase):
         np.array([2, 0], dtype=np.int64))  # batch == 2, max_elems = 0
 
     expected_output = {
+<<<<<<< HEAD
         sparse_name: expected_st_a,
         a_name: np.array(2 * [[a_default]]),
         b_name: np.array(2 * [b_default]),
         c_name: np.array(2 * [c_default]),
+=======
+        "st_a": expected_st_a,
+        "a": np.array(2 * [[dense_defaults["a"]]]),
+        "b": np.array(2 * [dense_defaults["b"]]),
+        "c": np.array(2 * [dense_defaults["c"]]),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
 
     self._test(
         {
+<<<<<<< HEAD
             "example_names": np.empty((0,), dtype=bytes),
             "serialized": ops.convert_to_tensor(["", ""]),
             "features": {
@@ -196,6 +298,45 @@ class ParseExampleTest(test.TestCase):
             "Name: in1, Feature: c \\(data type: float\\) is required"))
 
   def testDenseNotMatchingShapeShouldFail(self):
+=======
+            "names": np.empty((0,), dtype=np.str),
+            # empty serialized input Examples
+            "serialized": tf.convert_to_tensor(["", ""]),
+            "dense_defaults": dense_defaults,
+            "sparse_keys": ["st_a"],
+            "sparse_types": [tf.int64],
+            "dense_keys": dense_keys,
+            "dense_types": dense_types,
+            "dense_shapes": dense_shapes
+        }, expected_output)
+
+  def testEmptySerializedWithoutDefaultsShouldFail(self):
+    dense_shapes = [(1, 3), (3, 3), (2,)]
+    dense_defaults = {
+        "a": [0, 42, 0],
+        "b": np.random.rand(3, 3).astype(np.str),
+        # Feature "c" is missing, since there's gaps it will cause failure.
+    }
+    self._test(
+        {
+            "serialized": ["", ""],  # empty serialized input Examples
+            "names": ["in1", "in2"],
+            "dense_defaults": dense_defaults,
+            "sparse_keys": ["st_a"],
+            "sparse_types": [tf.int64],
+            "dense_keys": ["a", "b", "c"],
+            "dense_types": [tf.int64, tf.string, tf.float32],
+            "dense_shapes": dense_shapes
+        },
+        expected_err_re="Name: in1, Feature: c is required")
+
+  def testDenseNotMatchingShapeShouldFail(self):
+    dense_shapes = [(1, 3)]
+    dense_defaults = {
+        # no default!
+    }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     original = [
         example(features=features({
             "a": float_feature([1, 1, 3]),
@@ -210,6 +351,7 @@ class ParseExampleTest(test.TestCase):
 
     self._test(
         {
+<<<<<<< HEAD
             "example_names": names,
             "serialized": ops.convert_to_tensor(serialized),
             "features": {
@@ -254,6 +396,32 @@ class ParseExampleTest(test.TestCase):
                 "st_c": float_feature([1, 2, -1]),
                 "st_d": bytes_feature([b"hi"])
             }))
+=======
+            "serialized": tf.convert_to_tensor(serialized),
+            "names": names,
+            "dense_defaults": dense_defaults,
+            "dense_keys": ["a"],
+            "dense_types": [tf.float32],
+            "dense_shapes": dense_shapes,
+        },
+        expected_err_re="Name: failing, Key: a.  Number of float values")
+
+  def testSerializedContainingSparse(self):
+    original = [
+        example(features=features({
+            "st_c": float_feature([3, 4])
+        })),
+        example(features=features({
+            "st_c": float_feature([]),  # empty float list
+        })),
+        example(features=features({
+            "st_d": feature(),  # feature with nothing in it
+        })),
+        example(features=features({
+            "st_c": float_feature([1, 2, -1]),
+            "st_d": bytes_feature(["hi"])
+        }))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ]
 
     serialized = [m.SerializeToString() for m in original]
@@ -264,7 +432,12 @@ class ParseExampleTest(test.TestCase):
         np.array([4, 3], dtype=np.int64))  # batch == 2, max_elems = 3
 
     expected_st_d = (  # indices, values, shape
+<<<<<<< HEAD
         np.array([[3, 0]], dtype=np.int64), np.array(["hi"], dtype=bytes),
+=======
+        np.array([[3, 0]], dtype=np.int64),
+        np.array(["hi"], dtype=np.str),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         np.array([4, 1], dtype=np.int64))  # batch == 2, max_elems = 1
 
     expected_output = {
@@ -274,6 +447,7 @@ class ParseExampleTest(test.TestCase):
 
     self._test(
         {
+<<<<<<< HEAD
             "serialized": ops.convert_to_tensor(serialized),
             "features": {
                 "st_c": parsing_ops.VarLenFeature(dtypes.float32),
@@ -442,10 +616,28 @@ class ParseExampleTest(test.TestCase):
                 aname: float_feature([-1, -1]),
                 bname: bytes_feature([b""]),
             }))
+=======
+            "serialized": tf.convert_to_tensor(serialized),
+            "sparse_keys": ["st_c", "st_d"],
+            "sparse_types": [tf.float32, tf.string],
+        }, expected_output)
+
+  def testSerializedContainingDense(self):
+    original = [
+        example(features=features({
+            "a": float_feature([1, 1]),
+            "b": bytes_feature(["b0_str"]),
+        })),
+        example(features=features({
+            "a": float_feature([-1, -1]),
+            "b": bytes_feature(["b1"]),
+        }))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ]
 
     serialized = [m.SerializeToString() for m in original]
 
+<<<<<<< HEAD
     expected_output = {
         aname:
             np.array([[1, 1], [-1, -1]], dtype=np.float32).reshape(2, 1, 2, 1),
@@ -503,11 +695,19 @@ class ParseExampleTest(test.TestCase):
             np.array([[1, 1], [-1, -1]], dtype=np.float32).reshape(2, 1, 2, 1),
         bname:
             np.array(["b0_str", "b1"], dtype=bytes).reshape(2, 1, 1, 1, 1),
+=======
+    dense_shapes = [(1, 2, 1), (1, 1, 1, 1)]
+
+    expected_output = {
+        "a": np.array([[1, 1], [-1, -1]], dtype=np.float32).reshape(2, 1, 2, 1),
+        "b": np.array(["b0_str", "b1"], dtype=np.str).reshape(2, 1, 1, 1, 1),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
 
     # No defaults, values required
     self._test(
         {
+<<<<<<< HEAD
             "serialized": ops.convert_to_tensor(serialized),
             "features": {
                 aname:
@@ -517,6 +717,12 @@ class ParseExampleTest(test.TestCase):
                     parsing_ops.FixedLenFeature(
                         (1, 1, 1, 1), dtype=dtypes.string),
             }
+=======
+            "serialized": tf.convert_to_tensor(serialized),
+            "dense_keys": ["a", "b"],
+            "dense_types": [tf.float32, tf.string],
+            "dense_shapes": dense_shapes,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         }, expected_output)
 
   def testSerializedContainingDenseScalar(self):
@@ -530,18 +736,30 @@ class ParseExampleTest(test.TestCase):
     serialized = [m.SerializeToString() for m in original]
 
     expected_output = {
+<<<<<<< HEAD
         "a":
             np.array([[1], [-1]], dtype=np.float32)  # 2x1 (column vector)
+=======
+        "a": np.array([[1], [-1]], dtype=np.float32)  # 2x1 (column vector)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
 
     self._test(
         {
+<<<<<<< HEAD
             "serialized": ops.convert_to_tensor(serialized),
             "features": {
                 "a":
                     parsing_ops.FixedLenFeature(
                         (1,), dtype=dtypes.float32, default_value=-1),
             }
+=======
+            "serialized": tf.convert_to_tensor(serialized),
+            "dense_defaults": {"a": -1},
+            "dense_shapes": [(1,)],
+            "dense_keys": ["a"],
+            "dense_types": [tf.float32],
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         }, expected_output)
 
   def testSerializedContainingDenseWithDefaults(self):
@@ -550,13 +768,19 @@ class ParseExampleTest(test.TestCase):
             "a": float_feature([1, 1]),
         })),
         example(features=features({
+<<<<<<< HEAD
             "b": bytes_feature([b"b1"]),
         })),
         example(features=features({"b": feature()})),
+=======
+            "b": bytes_feature(["b1"]),
+        }))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ]
 
     serialized = [m.SerializeToString() for m in original]
 
+<<<<<<< HEAD
     expected_output = {
         "a":
             np.array([[1, 1], [3, -3], [3, -3]],
@@ -564,10 +788,23 @@ class ParseExampleTest(test.TestCase):
         "b":
             np.array(["tmp_str", "b1", "tmp_str"],
                      dtype=bytes).reshape(3, 1, 1, 1, 1),
+=======
+    dense_shapes = [(1, 2, 1), (1, 1, 1, 1)]
+    dense_types = [tf.float32, tf.string]
+    dense_defaults = {
+        "a": [3.0, -3.0],
+        "b": "tmp_str",
+    }
+
+    expected_output = {
+        "a": np.array([[1, 1], [3, -3]], dtype=np.float32).reshape(2, 1, 2, 1),
+        "b": np.array(["tmp_str", "b1"], dtype=np.str).reshape(2, 1, 1, 1, 1),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
 
     self._test(
         {
+<<<<<<< HEAD
             "serialized": ops.convert_to_tensor(serialized),
             "features": {
                 "a":
@@ -582,10 +819,28 @@ class ParseExampleTest(test.TestCase):
         }, expected_output)
 
   def testSerializedContainingSparseAndSparseFeatureAndDenseWithNoDefault(self):
+=======
+            "serialized": tf.convert_to_tensor(serialized),
+            "dense_defaults": dense_defaults,
+            "dense_keys": ["a", "b"],
+            "dense_types": dense_types,
+            "dense_shapes": dense_shapes,
+        }, expected_output)
+
+  def testSerializedContainingSparseAndDenseWithNoDefault(self):
+    dense_defaults = {
+        "a": [1, 2, 3],
+        "b": np.random.rand(3, 3).astype(np.str),
+        # Feature "c" must be provided
+    }
+    dense_shapes = [(1, 3), (3, 3), (2,)]
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     expected_st_a = (  # indices, values, shape
         np.empty((0, 2), dtype=np.int64),  # indices
         np.empty((0,), dtype=np.int64),  # sp_a is DT_INT64
         np.array([2, 0], dtype=np.int64))  # batch == 2, max_elems = 0
+<<<<<<< HEAD
     expected_sp = (  # indices, values, shape
         np.array([[0, 0], [0, 3], [1, 7]],
                  dtype=np.int64), np.array(["a", "b", "c"], dtype="|S"),
@@ -604,11 +859,22 @@ class ParseExampleTest(test.TestCase):
                 "val": bytes_feature([b"c"]),
                 "idx": int64_feature([7])
             }))
+=======
+
+    original = [
+        example(features=features({
+            "c": float_feature([3, 4])
+        })),
+        example(features=features({
+            "c": float_feature([1, 2])
+        }))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ]
 
     names = ["in1", "in2"]
     serialized = [m.SerializeToString() for m in original]
 
+<<<<<<< HEAD
     a_default = [1, 2, 3]
     b_default = np.random.rand(3, 3).astype(bytes)
     expected_output = {
@@ -616,11 +882,18 @@ class ParseExampleTest(test.TestCase):
         "sp": expected_sp,
         "a": np.array(2 * [[a_default]]),
         "b": np.array(2 * [b_default]),
+=======
+    expected_output = {
+        "st_a": expected_st_a,
+        "a": np.array(2 * [[dense_defaults["a"]]]),
+        "b": np.array(2 * [dense_defaults["b"]]),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         "c": np.array([[3, 4], [1, 2]], dtype=np.float32),
     }
 
     self._test(
         {
+<<<<<<< HEAD
             "example_names": names,
             "serialized": ops.convert_to_tensor(serialized),
             "features": {
@@ -1365,11 +1638,70 @@ class ParseSingleExampleTest(test.TestCase):
                 dtype=dtypes.float32),
     }
 
+=======
+            "names": names,
+            "serialized": tf.convert_to_tensor(serialized),
+            "dense_defaults": dense_defaults,
+            "sparse_keys": ["st_a"],
+            "sparse_types": [tf.int64],
+            "dense_keys": ["a", "b", "c"],
+            "dense_types": [tf.int64, tf.string, tf.float32],
+            "dense_shapes": dense_shapes
+        }, expected_output)
+
+
+class ParseSingleExampleTest(tf.test.TestCase):
+
+  def _test(self, kwargs, expected_values=None, expected_err_re=None):
+    with self.test_session() as sess:
+      # Pull out some keys to check shape inference
+      dense_keys = kwargs["dense_keys"] if "dense_keys" in kwargs else []
+      sparse_keys = kwargs["sparse_keys"] if "sparse_keys" in kwargs else []
+      dense_shapes = kwargs["dense_shapes"] if "dense_shapes" in kwargs else []
+
+      # Returns dict w/ Tensors and SparseTensors
+      out = tf.parse_single_example(**kwargs)
+
+      # Check shapes
+      self.assertEqual(len(dense_keys), len(dense_shapes))
+      for (k, s) in zip(dense_keys, dense_shapes):
+        self.assertEqual(tuple(out[k].get_shape()), s)
+      for k in sparse_keys:
+        self.assertEqual(tuple(out[k].indices.get_shape().as_list()), (None, 1))
+        self.assertEqual(tuple(out[k].values.get_shape().as_list()), (None,))
+        self.assertEqual(tuple(out[k].shape.get_shape().as_list()), (1,))
+
+      # Check values
+      result = flatten_values_tensors_or_sparse(out.values())  # flatten values
+      if expected_err_re is None:
+        tf_result = sess.run(result)
+        _compare_output_to_expected(self, out, expected_values, tf_result)
+      else:
+        with self.assertRaisesOpError(expected_err_re):
+          sess.run(result)
+
+  def testSingleExampleWithSparseAndDense(self):
+    dense_types = [tf.int64, tf.string, tf.float32]
+    dense_shapes = [(1, 3), (3, 3), (2,)]
+    dense_defaults = {
+        "a": [1, 2, 3],
+        "b": np.random.rand(3, 3).astype(np.str),
+        # Feature "c" must be provided
+    }
+
+    original = example(features=features(
+        {"c": float_feature([3, 4]),
+         "st_a": float_feature([3.0, 4.0])}))
+
+    serialized = original.SerializeToString()
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     expected_st_a = (
         np.array([[0], [1]], dtype=np.int64),  # indices
         np.array([3.0, 4.0], dtype=np.float32),  # values
         np.array([2], dtype=np.int64))  # shape: max_values = 2
 
+<<<<<<< HEAD
     expected_sp = (  # indices, values, shape
         np.array([[0], [3]], dtype=np.int64), np.array(["a", "b"], dtype="|S"),
         np.array([13], dtype=np.int64))  # max_values = 13
@@ -1405,10 +1737,18 @@ class ParseSingleExampleTest(test.TestCase):
         "rt_2d_with_uniform_row_length": expected_rt_2d_uniform,
         "rt_3d": expected_rt_3d,
         "rt_3d_with_uniform_row_length": expected_rt_3d_with_uniform,
+=======
+    expected_output = {
+        "st_a": expected_st_a,
+        "a": [dense_defaults["a"]],
+        "b": dense_defaults["b"],
+        "c": np.array([3, 4], dtype=np.float32),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
 
     self._test(
         {
+<<<<<<< HEAD
             "example_names": ops.convert_to_tensor("in1"),
             "serialized": ops.convert_to_tensor(serialized),
             "features": test_features,
@@ -2507,3 +2847,18 @@ class ParseTensorOpTest(test.TestCase):
 
 if __name__ == "__main__":
   test.main()
+=======
+            "names": "in1",
+            "serialized": tf.convert_to_tensor(serialized),
+            "dense_defaults": dense_defaults,
+            "dense_types": dense_types,
+            "sparse_keys": ["st_a"],
+            "sparse_types": [tf.float32],
+            "dense_keys": ["a", "b", "c"],
+            "dense_shapes": dense_shapes
+        }, expected_output)
+
+
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+<<<<<<< HEAD
  Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+=======
+ Copyright 2013 The Android Open Source Project
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,9 +20,13 @@
 -->
 
 <resources>
+<<<<<<< HEAD
     <string name="app_name">TensorFlow Demo</string>
     <string name="activity_name_classification">TF Classify</string>
     <string name="activity_name_detection">TF Detect</string>
     <string name="activity_name_stylize">TF Stylize</string>
     <string name="activity_name_speech">TF Speech</string>
+=======
+    <string name="app_name">Tensorflow Demo</string>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 </resources>

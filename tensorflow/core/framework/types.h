@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +16,16 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_FRAMEWORK_TYPES_H_
 #define TENSORFLOW_CORE_FRAMEWORK_TYPES_H_
+=======
+#ifndef TENSORFLOW_FRAMEWORK_TYPES_H_
+#define TENSORFLOW_FRAMEWORK_TYPES_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <map>
 #include <set>
 #include <string>
 
+<<<<<<< HEAD
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 // Disable clang-format to prevent 'FixedPoint' header from being included
 // before 'Tensor' header on which it depends.
@@ -29,17 +35,29 @@ limitations under the License.
 #include "tensorflow/core/framework/bfloat16.h"
 #include "tensorflow/core/framework/numeric_types.h"
 #include "tensorflow/core/framework/resource_handle.h"
+=======
+#include "tensorflow/core/framework/bfloat16.h"
+#include "tensorflow/core/framework/numeric_types.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/types.pb.h"
 #include "tensorflow/core/lib/core/stringpiece.h"
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/lib/gtl/inlined_vector.h"
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/types.h"
 
 namespace tensorflow {
 
 class Variant;
 
+=======
+#include "tensorflow/core/platform/port.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/FixedPoint"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // MemoryType is used to describe whether input or output Tensors of
 // an OpKernel should reside in "Host memory" (e.g., CPU memory) or
 // "Device" Memory (CPU memory for CPU devices, GPU memory for GPU
@@ -59,7 +77,10 @@ class DeviceType {
   explicit DeviceType(StringPiece type) : type_(type.data(), type.size()) {}
 
   const char* type() const { return type_.c_str(); }
+<<<<<<< HEAD
   const string& type_string() const { return type_; }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   bool operator<(const DeviceType& other) const;
   bool operator==(const DeviceType& other) const;
@@ -71,6 +92,7 @@ class DeviceType {
 std::ostream& operator<<(std::ostream& os, const DeviceType& d);
 
 // Convenient constants that can be passed to a DeviceType constructor
+<<<<<<< HEAD
 TF_EXPORT extern const char* const DEVICE_DEFAULT;  // "DEFAULT"
 TF_EXPORT extern const char* const DEVICE_CPU;      // "CPU"
 TF_EXPORT extern const char* const DEVICE_GPU;      // "GPU"
@@ -101,22 +123,36 @@ struct DeviceName<Eigen::SyclDevice> {
 
 typedef gtl::InlinedVector<MemoryType, 4> MemoryTypeVector;
 typedef gtl::ArraySlice<MemoryType> MemoryTypeSlice;
+=======
+extern const char* const DEVICE_CPU;  // "CPU"
+extern const char* const DEVICE_GPU;  // "GPU"
+
+typedef gtl::InlinedVector<MemoryType, 4> MemoryTypeVector;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 typedef gtl::InlinedVector<DataType, 4> DataTypeVector;
 typedef gtl::ArraySlice<DataType> DataTypeSlice;
 
 typedef gtl::InlinedVector<DeviceType, 4> DeviceTypeVector;
+<<<<<<< HEAD
 typedef gtl::InlinedVector<std::pair<DeviceType, int32>, 4>
     PrioritizedDeviceTypeVector;
 
 // Convert the enums to strings for errors:
 string DataTypeString(DataType dtype);
 string DeviceTypeString(const DeviceType& device_type);
+=======
+
+// Convert the enums to strings for errors:
+string DataTypeString(DataType dtype);
+string DeviceTypeString(DeviceType device_type);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 string DataTypeSliceString(const DataTypeSlice dtypes);
 inline string DataTypeVectorString(const DataTypeVector& dtypes) {
   return DataTypeSliceString(dtypes);
 }
 
+<<<<<<< HEAD
 // DataTypeSet represents a set of DataType values as a simple and efficient
 // bit mask.  Note that DataTypeSet cannot represent all DataType values; it
 // cannot represent any of the DT_*_REF values.
@@ -230,14 +266,19 @@ class DataTypeSet {
   }
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // If "sp" names a valid type, store it in "*dt" and return true.  Otherwise,
 // return false.
 bool DataTypeFromString(StringPiece sp, DataType* dt);
 
+<<<<<<< HEAD
 constexpr inline DataTypeSet ToSet(DataType dt) {
   return DataTypeSet(1u << static_cast<uint32>(dt));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // DT_FLOAT + kDataTypeRefOffset == DT_FLOAT_REF, etc.
 enum { kDataTypeRefOffset = 100 };
 inline bool IsRefType(DataType dtype) {
@@ -261,6 +302,7 @@ inline bool TypesCompatible(DataType expected, DataType actual) {
 }
 
 // Does not include _ref types.
+<<<<<<< HEAD
 constexpr DataTypeSet kAllTypes =
     ToSet(DT_FLOAT) | ToSet(DT_DOUBLE) | ToSet(DT_INT32) | ToSet(DT_UINT8) |
     ToSet(DT_INT16) | ToSet(DT_UINT16) | ToSet(DT_INT8) | ToSet(DT_STRING) |
@@ -349,6 +391,19 @@ constexpr DataTypeSet kRealAndQuantizedTypes =
 inline DataTypeSet RealAndQuantizedTypes() { return kRealAndQuantizedTypes; }
 
 #endif  // defined(IS_MOBILE_PLATFORM)
+=======
+DataTypeVector AllTypes();
+
+// Return the list of all numeric types.
+// NOTE: On Android, we only include the float and int32 types for now.
+DataTypeVector RealNumberTypes();  // Types that support '<' and '>'.
+DataTypeVector NumberTypes();      // Includes complex and quantized types.
+
+DataTypeVector QuantizedTypes();
+DataTypeVector RealAndQuantizedTypes();  // Types that support '<' and
+                                         // '>', including quantized
+                                         // types
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Validates type T for whether it is a supported DataType.
 template <class T>
@@ -383,6 +438,7 @@ struct EnumToDataType {};  // Specializations below
     typedef TYPE Type;                                  \
   }
 
+<<<<<<< HEAD
 MATCH_TYPE_AND_ENUM(float, DT_FLOAT);
 MATCH_TYPE_AND_ENUM(double, DT_DOUBLE);
 MATCH_TYPE_AND_ENUM(int32, DT_INT32);
@@ -493,3 +549,34 @@ bool DataTypeAlwaysOnHost(DataType dt);
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_TYPES_H_
+=======
+// We use Eigen's QInt implementations for our quantized int types.
+typedef Eigen::QInt8 qint8;
+typedef Eigen::QUInt8 quint8;
+typedef Eigen::QInt32 qint32;
+
+MATCH_TYPE_AND_ENUM(float, DT_FLOAT);
+MATCH_TYPE_AND_ENUM(double, DT_DOUBLE);
+MATCH_TYPE_AND_ENUM(int32, DT_INT32);
+MATCH_TYPE_AND_ENUM(uint8, DT_UINT8);
+MATCH_TYPE_AND_ENUM(int16, DT_INT16);
+MATCH_TYPE_AND_ENUM(int8, DT_INT8);
+MATCH_TYPE_AND_ENUM(string, DT_STRING);
+MATCH_TYPE_AND_ENUM(complex64, DT_COMPLEX64);
+MATCH_TYPE_AND_ENUM(int64, DT_INT64);
+MATCH_TYPE_AND_ENUM(bool, DT_BOOL);
+MATCH_TYPE_AND_ENUM(qint8, DT_QINT8);
+MATCH_TYPE_AND_ENUM(quint8, DT_QUINT8);
+MATCH_TYPE_AND_ENUM(qint32, DT_QINT32);
+MATCH_TYPE_AND_ENUM(bfloat16, DT_BFLOAT16);
+
+#undef MATCH_TYPE_AND_ENUM
+
+bool DataTypeCanUseMemcpy(DataType dt);
+
+bool DataTypeIsQuantized(DataType dt);
+
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_TYPES_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

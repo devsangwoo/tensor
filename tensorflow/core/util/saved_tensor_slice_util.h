@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,19 @@ limitations under the License.
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/lib/core/status.h"  // for Status
 #include "tensorflow/core/platform/protobuf.h"
+=======
+// Utilities for saving/restoring tensor slice checkpoints.
+
+#ifndef TENSORFLOW_UTIL_SAVED_TENSOR_SLICE_UTIL_H_
+#define TENSORFLOW_UTIL_SAVED_TENSOR_SLICE_UTIL_H_
+
+#include <string>  // for string
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/framework/tensor.pb.h"
+#include "tensorflow/core/framework/tensor_slice.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/public/status.h"  // for Status
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -50,12 +64,15 @@ string EncodeTensorNameSlice(const string& name,
 Status DecodeTensorNameSlice(const string& code, string* name,
                              tensorflow::TensorSlice* slice);
 
+<<<<<<< HEAD
 // Extracts the full shape, slice spec, and shape of the slice from
 // "shape_and_slice".  On non-OK return, caller must clear the out-arguments
 // before reusing.
 Status ParseShapeAndSlice(const string& shape_and_slice, TensorShape* shape,
                           TensorSlice* slice, TensorShape* shape_slice);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <typename T>
 struct SaveTypeTraits;
 
@@ -64,12 +81,18 @@ const typename SaveTypeTraits<T>::SavedType* TensorProtoData(
     const TensorProto& t);
 
 template <typename T>
+<<<<<<< HEAD
 typename SaveTypeTraits<T>::RepeatedField* MutableTensorProtoData(
     TensorProto* t);
+=======
+protobuf::RepeatedField<typename SaveTypeTraits<T>::SavedType>*
+MutableTensorProtoData(TensorProto* t);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename T>
 void Fill(T* data, size_t n, TensorProto* t);
 
+<<<<<<< HEAD
 #define TENSOR_PROTO_EXTRACT_TYPE_HELPER(TYPE, FIELD, FTYPE, STYPE)      \
   template <>                                                            \
   struct SaveTypeTraits<TYPE> {                                          \
@@ -82,6 +105,19 @@ void Fill(T* data, size_t n, TensorProto* t);
     static_assert(SaveTypeTraits<TYPE>::supported,                       \
                   "Specified type " #TYPE " not supported for Restore"); \
     return reinterpret_cast<const STYPE*>(t.FIELD##_val().data());       \
+=======
+#define TENSOR_PROTO_EXTRACT_TYPE(TYPE, FIELD, FTYPE)                    \
+  template <>                                                            \
+  struct SaveTypeTraits<TYPE> {                                          \
+    static constexpr bool supported = true;                              \
+    typedef FTYPE SavedType;                                             \
+  };                                                                     \
+  template <>                                                            \
+  inline const FTYPE* TensorProtoData<TYPE>(const TensorProto& t) {      \
+    static_assert(SaveTypeTraits<TYPE>::supported,                       \
+                  "Specified type " #TYPE " not supported for Restore"); \
+    return reinterpret_cast<const FTYPE*>(t.FIELD##_val().data());       \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }                                                                      \
   template <>                                                            \
   inline protobuf::RepeatedField<FTYPE>* MutableTensorProtoData<TYPE>(   \
@@ -90,6 +126,7 @@ void Fill(T* data, size_t n, TensorProto* t);
                   "Specified type " #TYPE " not supported for Save");    \
     return reinterpret_cast<protobuf::RepeatedField<FTYPE>*>(            \
         t->mutable_##FIELD##_val());                                     \
+<<<<<<< HEAD
   }
 
 #define TENSOR_PROTO_EXTRACT_TYPE(TYPE, FIELD, FTYPE)             \
@@ -118,11 +155,25 @@ TENSOR_PROTO_EXTRACT_TYPE_COMPLEX(complex128, dcomplex, double);
 TENSOR_PROTO_EXTRACT_TYPE(int32, int, int32);
 TENSOR_PROTO_EXTRACT_TYPE(int64, int64, protobuf_int64);
 TENSOR_PROTO_EXTRACT_TYPE(uint16, int, int32);
+=======
+  }                                                                      \
+  template <>                                                            \
+  inline void Fill(const TYPE* data, size_t n, TensorProto* t) {         \
+    typename protobuf::RepeatedField<FTYPE> copy(data, data + n);        \
+    t->mutable_##FIELD##_val()->Swap(&copy);                             \
+  }
+
+TENSOR_PROTO_EXTRACT_TYPE(float, float, float);
+TENSOR_PROTO_EXTRACT_TYPE(double, double, double);
+TENSOR_PROTO_EXTRACT_TYPE(int32, int, int32);
+TENSOR_PROTO_EXTRACT_TYPE(int64, int64, int64);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TENSOR_PROTO_EXTRACT_TYPE(uint8, int, int32);
 TENSOR_PROTO_EXTRACT_TYPE(int8, int, int32);
 TENSOR_PROTO_EXTRACT_TYPE(int16, int, int32);
 TENSOR_PROTO_EXTRACT_TYPE(qint8, int, int32);
 TENSOR_PROTO_EXTRACT_TYPE(quint8, int, int32);
+<<<<<<< HEAD
 TENSOR_PROTO_EXTRACT_TYPE(quint16, int, int32);
 
 #undef TENSOR_PROTO_EXTRACT_TYPE_COMPLEX
@@ -131,6 +182,11 @@ TENSOR_PROTO_EXTRACT_TYPE(quint16, int, int32);
 
 // Custom implementation for qint32, based on the one for int32.
 
+=======
+
+#undef TENSOR_PROTO_EXTRACT_TYPE
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <>
 struct SaveTypeTraits<qint32> : SaveTypeTraits<int32> {};
 
@@ -147,6 +203,7 @@ inline void Fill(const qint32* data, size_t n, TensorProto* t) {
   t->mutable_int_val()->Swap(&copy);
 }
 
+<<<<<<< HEAD
 // Custom implementation for Eigen::half.
 
 template <>
@@ -206,8 +263,14 @@ inline void Fill(const tstring* data, size_t n, TensorProto* t) {
   t->mutable_string_val()->Swap(&copy);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace checkpoint
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_UTIL_SAVED_TENSOR_SLICE_UTIL_H_
+=======
+#endif  // TENSORFLOW_UTIL_SAVED_TENSOR_SLICE_UTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Implement the Philox algorithm to generate random numbers in parallel.
 // Salmon et al. SC 2011. Parallel random numbers: as easy as 1, 2, 3.
 //   http://www.thesalmons.org/john/random123/papers/random123sc11.pdf
 
+<<<<<<< HEAD
 #ifndef TENSORFLOW_CORE_LIB_RANDOM_PHILOX_RANDOM_H_
 #define TENSORFLOW_CORE_LIB_RANDOM_PHILOX_RANDOM_H_
 
@@ -26,6 +30,17 @@ limitations under the License.
 
 // Function qualifiers that need to work on both CPU and GPU.
 #if defined(__CUDACC__) || defined(__HIPCC__)
+=======
+#ifndef TENSORFLOW_LIB_RANDOM_PHILOX_RANDOM_H_
+#define TENSORFLOW_LIB_RANDOM_PHILOX_RANDOM_H_
+
+#include <stdlib.h>
+
+#include "tensorflow/core/platform/port.h"
+
+// Function qualifiers that need to work on both CPU and GPU.
+#ifdef __CUDA_ARCH__
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // For nvcc.
 #define PHILOX_DEVICE_FUNC __host__ __device__
 #define PHILOX_INLINE __inline__
@@ -49,10 +64,16 @@ namespace random {
 template <typename T, int ElementCount>
 class Array {
  public:
+<<<<<<< HEAD
   static const int kElementCount = ElementCount;
   PHILOX_DEVICE_INLINE Array() {
     for (int i = 0; i < ElementCount; ++i) {
       data_[i] = T(0);
+=======
+  PHILOX_DEVICE_INLINE Array() {
+    for (int i = 0; i < ElementCount; ++i) {
+      data_[i] = T();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
@@ -102,6 +123,7 @@ class Array {
 // 2. PhiloxRandom is compilable by gcc and nvcc.
 class PhiloxRandom {
  public:
+<<<<<<< HEAD
   using ResultType = Array<uint32, 4>;
   using ResultElementType = uint32;
   // The number of elements that will be returned.
@@ -111,6 +133,12 @@ class PhiloxRandom {
   // The type for the 64-bit key stored in the form of two 32-bit uint
   // that are used in the diffusion process.
   using Key = Array<uint32, 2>;
+=======
+  typedef Array<uint32, 4> ResultType;
+  typedef uint32 ResultElementType;
+  // The number of elements that will be returned.
+  static const int kResultElementCount = 4;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   PHILOX_DEVICE_INLINE
   PhiloxRandom() {}
@@ -129,6 +157,7 @@ class PhiloxRandom {
     counter_[3] = static_cast<uint32>(seed_hi >> 32);
   }
 
+<<<<<<< HEAD
   PHILOX_DEVICE_INLINE
   PhiloxRandom(ResultType counter, Key key) : counter_(counter), key_(key) {}
 
@@ -138,6 +167,8 @@ class PhiloxRandom {
   PHILOX_DEVICE_INLINE
   Key const& key() const { return key_; }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Skip the specified number of samples of 128-bits in the current stream.
   PHILOX_DEVICE_INLINE
   void Skip(uint64 count) {
@@ -191,6 +222,13 @@ class PhiloxRandom {
   }
 
  private:
+<<<<<<< HEAD
+=======
+  // The type for the 64-bit key stored in the form of two 32-bit uint
+  // that are used in the diffusion process.
+  typedef Array<uint32, 2> Key;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // We use the same constants as recommended by the original paper.
   static const uint32 kPhiloxW32A = 0x9E3779B9;
   static const uint32 kPhiloxW32B = 0xBB67AE85;
@@ -213,7 +251,11 @@ class PhiloxRandom {
   PHILOX_DEVICE_INLINE
   static void MultiplyHighLow(uint32 a, uint32 b, uint32* result_low,
                               uint32* result_high) {
+<<<<<<< HEAD
 #ifndef __CUDA_ARCH__
+=======
+#ifndef __GCUDACC__
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     const uint64 product = static_cast<uint64>(a) * b;
     *result_low = static_cast<uint32>(product);
     *result_high = static_cast<uint32>(product >> 32);
@@ -255,4 +297,8 @@ class PhiloxRandom {
 }  // namespace random
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_LIB_RANDOM_PHILOX_RANDOM_H_
+=======
+#endif  // TENSORFLOW_LIB_RANDOM_PHILOX_RANDOM_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

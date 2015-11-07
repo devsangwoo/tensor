@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package tensorflow;
+<<<<<<< HEAD
 option cc_enable_arenas = true;
 option java_outer_classname = "DeviceAttributesProtos";
 option java_multiple_files = true;
@@ -31,6 +32,23 @@ message DeviceLocality {
 
 message DeviceAttributes {
   // Fully specified name of the device within a cluster.
+=======
+// option cc_enable_arenas = true;
+
+// BusAdjacency identifies the ability of a device to participate in
+// maximally efficient DMA operations within the local context of a
+// process.
+//
+// This is currently ignored.
+enum BusAdjacency {
+  BUS_0 = 0;
+  BUS_1 = 1;
+  BUS_ANY = 2;
+  BUS_NUM_ADJACENCIES = 3;
+};
+
+message DeviceAttributes {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string name = 1;
 
   // String representation of device_type.
@@ -39,9 +57,13 @@ message DeviceAttributes {
   // Memory capacity of device in bytes.
   int64 memory_limit = 4;
 
+<<<<<<< HEAD
   // Platform-specific data about device that may be useful
   // for supporting efficient data transfers.
   DeviceLocality locality = 5;
+=======
+  BusAdjacency bus_adjacency = 5;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // A device is assigned a global unique number each time it is
   // initialized. "incarnation" should never be 0.

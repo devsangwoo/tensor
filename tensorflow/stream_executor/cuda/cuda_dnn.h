@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // The CUDA-specific DNN library support, implementing the general DnnSupport
 // interface.
 
 #ifndef TENSORFLOW_STREAM_EXECUTOR_CUDA_CUDA_DNN_H_
 #define TENSORFLOW_STREAM_EXECUTOR_CUDA_CUDA_DNN_H_
 
+<<<<<<< HEAD
 #include "tensorflow/stream_executor/cuda/cuda_activation.h"
 #include "tensorflow/stream_executor/dnn.h"
 #include "tensorflow/stream_executor/lib/status.h"
+=======
+#include "tensorflow/stream_executor/dnn.h"
+#include "tensorflow/stream_executor/lib/status.h"
+#include "tensorflow/stream_executor/platform/mutex.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/platform/thread_annotations.h"
 #include "tensorflow/stream_executor/plugin_registry.h"
 #include "tensorflow/stream_executor/temporary_device_memory.h"
 
+<<<<<<< HEAD
 namespace stream_executor {
 namespace gpu {
 
@@ -35,12 +45,22 @@ class CudnnRnnSequenceTensorDescriptor;
 class CudnnRnnStateTensorDescriptor;
 
 // Opaque and unique identifier for the cuDNN plugin.
+=======
+namespace perftools {
+namespace gputools {
+namespace cuda {
+
+class CUDAExecutor;
+
+// Opaque and unique identifer for the cuDNN plugin.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 extern const PluginId kCuDnnPlugin;
 
 // cudnn-library based DNN support. For details on overridden interface
 // functions, see dnn.h.
 class CudnnSupport : public dnn::DnnSupport {
  public:
+<<<<<<< HEAD
   explicit CudnnSupport(GpuExecutor* parent);
 
   port::Status Init() override;
@@ -377,6 +397,28 @@ class CudnnSupport : public dnn::DnnSupport {
     LOG(ERROR) << "DoConvolveQuantized not supported by cuDNN";
     return false;
   }
+=======
+  explicit CudnnSupport(CUDAExecutor* parent);
+  ~CudnnSupport() override;
+
+  port::Status Init() override;
+
+  bool DoConvolve(Stream* stream, const dnn::BatchDescriptor& input_descriptor,
+                  const DeviceMemory<float>& input_data,
+                  const dnn::FilterDescriptor& filter_descriptor,
+                  const DeviceMemory<float>& filter_data,
+                  const dnn::ConvolutionDescriptor& convolution_descriptor,
+                  const dnn::BatchDescriptor& output_descriptor,
+                  DeviceMemory<float>* output_data) override;
+
+  bool DoConvolve(Stream* stream, const dnn::BatchDescriptor& batch_descriptor,
+                  const DeviceMemory<double>& input_data,
+                  const dnn::FilterDescriptor& filter_descriptor,
+                  const DeviceMemory<double>& filter_data,
+                  const dnn::ConvolutionDescriptor& convolution_descriptor,
+                  const dnn::BatchDescriptor& output_descriptor,
+                  DeviceMemory<double>* output_data) override;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   bool DoSeparableConvolve(
       Stream* stream, const dnn::BatchDescriptor& batch_descriptor,
@@ -391,6 +433,7 @@ class CudnnSupport : public dnn::DnnSupport {
     return false;
   }
 
+<<<<<<< HEAD
   bool DoConvolveBackwardBias(
       Stream* stream, const dnn::BatchDescriptor& input_descriptor,
       const DeviceMemory<double>& input_data,
@@ -408,6 +451,25 @@ class CudnnSupport : public dnn::DnnSupport {
       const DeviceMemory<Eigen::half>& input_data,
       const dnn::BatchDescriptor& bias_descriptor,
       DeviceMemory<Eigen::half>* backward_bias_data) override;
+=======
+  bool DoConvolveBackwardData(
+      Stream* stream, const dnn::FilterDescriptor& filter_descriptor,
+      const DeviceMemory<float>& filter_data,
+      const dnn::BatchDescriptor& output_descriptor,
+      DeviceMemory<float> backward_output_data,
+      const dnn::ConvolutionDescriptor& convolution_descriptor,
+      const dnn::BatchDescriptor& input_descriptor,
+      DeviceMemory<float>* backward_input_data) override;
+
+  bool DoConvolveBackwardFilter(
+      Stream* stream, const dnn::BatchDescriptor& input_descriptor,
+      const DeviceMemory<float>& input_data,
+      const dnn::BatchDescriptor& output_descriptor,
+      DeviceMemory<float> backward_output_data,
+      const dnn::ConvolutionDescriptor& convolution_descriptor,
+      const dnn::FilterDescriptor& filter_descriptor,
+      DeviceMemory<float>* backward_filter_data) override;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   bool DoMatMul(Stream* stream, const DeviceMemory<float>& input_data,
                 const DeviceMemory<float>& weights,
@@ -443,6 +505,7 @@ class CudnnSupport : public dnn::DnnSupport {
   bool DoActivate(Stream* stream, dnn::ActivationMode activation_mode,
                   const dnn::BatchDescriptor& dimensions,
                   const DeviceMemory<float>& input_data,
+<<<<<<< HEAD
                   DeviceMemory<float>* output_data, uint64 options) override;
 
   bool DoPoolForward(Stream* stream,
@@ -452,12 +515,16 @@ class CudnnSupport : public dnn::DnnSupport {
                      const dnn::BatchDescriptor& output_dimensions,
                      DeviceMemory<double>* output_data,
                      ScratchAllocator* workspace_allocator) override;
+=======
+                  DeviceMemory<float>* output_data) override;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   bool DoPoolForward(Stream* stream,
                      const dnn::PoolingDescriptor& pooling_dimensions,
                      const dnn::BatchDescriptor& input_dimensions,
                      const DeviceMemory<float>& input_data,
                      const dnn::BatchDescriptor& output_dimensions,
+<<<<<<< HEAD
                      DeviceMemory<float>* output_data,
                      ScratchAllocator* workspace_allocator) override;
 
@@ -486,6 +553,9 @@ class CudnnSupport : public dnn::DnnSupport {
                       const DeviceMemory<double>& input_diff_data,
                       DeviceMemory<double>* output_diff_data,
                       ScratchAllocator* workspace_allocator) override;
+=======
+                     DeviceMemory<float>* output_data) override;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   bool DoPoolBackward(Stream* stream,
                       const dnn::PoolingDescriptor& pooling_dimensions,
@@ -494,6 +564,7 @@ class CudnnSupport : public dnn::DnnSupport {
                       const dnn::BatchDescriptor& output_dimensions,
                       const DeviceMemory<float>& output_data,
                       const DeviceMemory<float>& input_diff_data,
+<<<<<<< HEAD
                       DeviceMemory<float>* output_diff_data,
                       ScratchAllocator* workspace_allocator) override;
 
@@ -521,6 +592,14 @@ class CudnnSupport : public dnn::DnnSupport {
       const DeviceMemory<float>& normalized_variable_gradient,
       DeviceMemory<float>* raw_variable_gradient,
       ScratchAllocator* workspace_allocator) override;
+=======
+                      DeviceMemory<float>* output_diff_data) override;
+
+  bool DoNormalize(Stream* stream,
+                   const dnn::NormalizeDescriptor& normalize_descriptor,
+                   const DeviceMemory<float>& input_data,
+                   DeviceMemory<float>* output_data) override;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   bool DoDepthConcatenate(
       Stream* stream, port::ArraySlice<dnn::BatchDescriptor> input_dimensions,
@@ -534,6 +613,7 @@ class CudnnSupport : public dnn::DnnSupport {
       const dnn::BatchDescriptor& output_dimensions,
       DeviceMemory<float>* output_data) override;
 
+<<<<<<< HEAD
   bool DoXYPad(Stream* stream, const dnn::BatchDescriptor &dimensions,
                const DeviceMemory<float> &input_data,
                int64 left_pad, int64 right_pad, int64 top_pad,
@@ -552,6 +632,22 @@ class CudnnSupport : public dnn::DnnSupport {
   bool DoMemcpyH2DQuantized(
       Stream* stream, const void* host_src, int64 size,
       dnn::QuantizedActivationMode mode,
+=======
+  bool DoMemcpyD2HQuantized(Stream* stream,
+                            const DeviceMemory<float>& device_unquantized_src,
+                            port::MutableArraySlice<uint8> host_dst) override;
+
+  bool DoMemcpyD2HQuantized(Stream* stream,
+                            const DeviceMemory<float>& device_unquantized_src,
+                            port::MutableArraySlice<uint16> host_dst) override;
+
+  bool DoMemcpyD2HQuantized(Stream* stream,
+                            const DeviceMemory<float>& device_unquantized_src,
+                            port::MutableArraySlice<int32> host_dst) override;
+
+  bool DoMemcpyH2DQuantized(
+      Stream* stream, port::ArraySlice<uint8> host_src,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       DeviceMemory<float>* device_unquantized_dst) override;
 
   // Derives an output batch descriptor from an input batch and convolution
@@ -562,6 +658,7 @@ class CudnnSupport : public dnn::DnnSupport {
       const dnn::ConvolutionDescriptor& convolution_descriptor,
       dnn::BatchDescriptor* output_batch_descriptor);
 
+<<<<<<< HEAD
   bool DoTransformTensor(Stream* stream, const dnn::BatchDescriptor& input_desc,
                          dnn::DataType input_type,
                          const DeviceMemoryBase& input_data,
@@ -685,11 +782,45 @@ class CudnnSupport : public dnn::DnnSupport {
       const dnn::AlgorithmConfig& algorithm_config,
       ScratchAllocator* scratch_allocator, dnn::AlgorithmDesc* algorithm_desc,
       DeviceMemory<uint8>* scratch_memory) override;
+=======
+ private:
+  // Guards the enqueueing of DNN operations via the dnn_handle_ below.
+  mutex dnn_handle_mutex_;
+
+  CUDAExecutor* parent_;  // Parent executor object. Not owned.
+
+  // cudnn library handle. cudnnHandle_t type is not present in this header to
+  // prevent third-party library header inclusions from leaking outside the
+  // single cuda_dnn translation unit.
+  void* dnn_handle_ GUARDED_BY(dnn_handle_mutex_);
+
+  // NOTE(keveman): Temporary data layout transformation until cuDNN supports
+  // kBatchYXDepth for backward pass. This function allocates temporary memory,
+  // lays out the source data into the temporary but in the kBatchDepthXY
+  // layout, and returns the temporary memory. The caller is responsible for
+  // deallocating the temporary. Since the allocation is done using Stream's
+  // AllocateTemporaryMemory, a later BlockHostUntilDone could be used for
+  // deallocation.
+  //
+  // transform_scratch is populated with a legitimate temporary allocation iff
+  // the original output data needs to be transformed.
+  DeviceMemory<float> MaybeTransformLayout(
+      Stream* stream, dnn::BatchDescriptor* output_descriptor,
+      DeviceMemory<float> backward_output_data,
+      std::unique_ptr<TemporaryDeviceMemory<float>>* transform_scratch)
+      EXCLUSIVE_LOCKS_REQUIRED(dnn_handle_mutex_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   SE_DISALLOW_COPY_AND_ASSIGN(CudnnSupport);
 };
 
+<<<<<<< HEAD
 }  // namespace gpu
 }  // namespace stream_executor
+=======
+}  // namespace cuda
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_CUDA_CUDA_DNN_H_

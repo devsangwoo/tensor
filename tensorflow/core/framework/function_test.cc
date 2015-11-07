@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +22,20 @@ limitations under the License.
 #include "tensorflow/core/framework/function_testlib.h"
 #include "tensorflow/core/framework/op.h"
 #include "tensorflow/core/framework/tensor_shape.pb.h"
+=======
+#include "tensorflow/core/framework/function.h"
+#include "tensorflow/core/framework/function.pb.h"
+#include "tensorflow/core/framework/function_testlib.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/op.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/tensor_testutil.h"
 #include "tensorflow/core/kernels/ops_util.h"
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/lib/strings/strcat.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/types.h"
 
@@ -49,11 +58,23 @@ class Attrs {
  private:
   AttrValueMap map_;
 };
+=======
+#include "tensorflow/core/platform/port.h"
+#include <gtest/gtest.h>
+
+namespace tensorflow {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 typedef FunctionDefHelper FDH;
 
 Status GetOpSig(const string& op, const OpDef** sig) {
+<<<<<<< HEAD
   return OpRegistry::Global()->LookUpOpDef(op, sig);
+=======
+  Status s;
+  *sig = OpRegistry::Global()->LookUp(op, &s);
+  return s;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 REGISTER_OP("One")
@@ -66,6 +87,7 @@ y: A scalar in type T.
 
 )doc");
 
+<<<<<<< HEAD
 TEST(TFunc, SquarePlusOne) {
   auto fdef = FDH::Create(
       // Name
@@ -73,6 +95,18 @@ TEST(TFunc, SquarePlusOne) {
       // Inputs
       {"x: T"},
       // Outputs
+=======
+static InstantiateAttrValueMap kNoAttrs;
+
+TEST(TFunc, SquarePlusOne) {
+  RequireDefaultOps();
+  auto fdef = FDH::Define(
+      // Name
+      "SquarePlusOne",
+      // Args
+      {"x: T"},
+      // Return values
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       {"y: T"},
       // Attrs
       {"T: {float, double, int32, int64}"},
@@ -83,22 +117,31 @@ TEST(TFunc, SquarePlusOne) {
        // NOTE: We can also have a Cast<Tin, Tout>(x) instead.
        {{"o"}, "One", {}, {{"T", "$T"}}},
        // y = Add<T>(a, o)
+<<<<<<< HEAD
        {{"y"}, "Add", {"a:y", "o:y"}, {{"T", "$T"}}}},
       // Returns
       {{"y", "y:z:0"}});
+=======
+       {{"y"}, "Add", {"a", "o"}, {{"T", "$T"}}}});
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   const char* e = R"P(
 SquarePlusOne[T:{float, double, int32, int64}](x:T) -> (y:T) {
   a = Square[T=$T](x)
   o = One[T=$T]()
+<<<<<<< HEAD
   y = Add[T=$T](a:y, o:y)
   return y = y:z:0
+=======
+  y = Add[T=$T](a, o)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(DebugString(fdef), e);
 
   // Instantiate one with T=float
   InstantiationResult result;
+<<<<<<< HEAD
   TF_ASSERT_OK(
       InstantiateFunction(fdef, Attrs({{"T", DT_FLOAT}}), GetOpSig, &result));
   const char* e2 = R"P(
@@ -106,10 +149,19 @@ SquarePlusOne[T:{float, double, int32, int64}](x:T) -> (y:T) {
   a = Square[T=float](x)
   o = One[T=float]()
   y = Add[T=float](a, o)
+=======
+  TF_CHECK_OK(InstantiateFunction(fdef, {{"T", DT_FLOAT}}, GetOpSig, &result));
+  const char* e2 = R"P(
+(n0:float) -> (n3:float) {
+  n1 = Square[T=float](n0)
+  n2 = One[T=float]()
+  n3 = Add[T=float](n1, n2)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(result.arg_types, DataTypeVector({DT_FLOAT}));
   EXPECT_EQ(result.ret_types, DataTypeVector({DT_FLOAT}));
+<<<<<<< HEAD
   EXPECT_EQ(DebugString(result.nodes), e2);
 }
 
@@ -279,6 +331,9 @@ NTimesT(x:float, y:float) -> (z:float) {
   EXPECT_EQ(result.arg_types, DataTypeVector({DT_FLOAT, DT_FLOAT}));
   EXPECT_EQ(result.ret_types, DataTypeVector({DT_FLOAT}));
   EXPECT_EQ(DebugString(result.nodes), e2);
+=======
+  EXPECT_EQ(DebugString(result.gdef), e2);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // NOTE: This is the simplest Map op. It takes a f:T->U.
@@ -300,7 +355,11 @@ y: N tensors, each of type U;
 )doc");
 
 TEST(TFunc, AddSquared) {
+<<<<<<< HEAD
   auto fdef = FDH::Create(
+=======
+  auto fdef = FDH::Define(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // Name
       "AddSquared",
       // Args
@@ -319,31 +378,52 @@ TEST(TFunc, AddSquared) {
          {"U", "$T"},
          {"N", "$N"}}},
        // y = AddN<N=$N,T=$T>(a)
+<<<<<<< HEAD
        {{"y"}, "AddN", {"a:y"}, {{"N", "$N"}, {"T", "$T"}}}},
       {{"y", "y:sum"}});
+=======
+       {{"y"}, "AddN", {"a"}, {{"N", "$N"}, {"T", "$T"}}}});
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   const char* e = R"P(
 AddSquared[N:int, T:{float, double, int32, int64}](x:N*T) -> (y:T) {
   a = Map[N=$N, T=$T, U=$T, func=Square[T=$T]](x)
+<<<<<<< HEAD
   y = AddN[N=$N, T=$T](a:y)
   return y = y:sum
+=======
+  y = AddN[N=$N, T=$T](a)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(DebugString(fdef), e);
 
   // Instantiate one with T=float
   InstantiationResult result;
+<<<<<<< HEAD
   TF_ASSERT_OK(InstantiateFunction(fdef, Attrs({{"N", 3}, {"T", DT_FLOAT}}),
                                    GetOpSig, &result));
   const char* e2 = R"P(
 (x_0:float, x_1:float, x_2:float) -> (y:float) {
   a = Map[N=3, T=float, U=float, func=Square[T=float]](x_0, x_1, x_2)
   y = AddN[N=3, T=float](a, a:1, a:2)
+=======
+  TF_CHECK_OK(InstantiateFunction(fdef, {{"N", 3}, {"T", DT_FLOAT}}, GetOpSig,
+                                  &result));
+  const char* e2 = R"P(
+(n0:float, n1:float, n2:float) -> (n4:float) {
+  n3 = Map[N=3, T=float, U=float, func=Square[T=float]](n0, n1, n2)
+  n4 = AddN[N=3, T=float](n3, n3:1, n3:2)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(result.arg_types, DataTypeVector({DT_FLOAT, DT_FLOAT, DT_FLOAT}));
   EXPECT_EQ(result.ret_types, DataTypeVector({DT_FLOAT}));
+<<<<<<< HEAD
   EXPECT_EQ(DebugString(result.nodes), e2);
+=======
+  EXPECT_EQ(DebugString(result.gdef), e2);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(TFunc, ControlDeps) {
@@ -376,6 +456,7 @@ ControlDeps(x:float) -> () {
   EXPECT_EQ(DebugString(fdef), e);
 
   InstantiationResult result;
+<<<<<<< HEAD
   TF_ASSERT_OK(InstantiateFunction(fdef, AttrSlice(), GetOpSig, &result));
   const char* e2 = R"P(
 (x:float) -> () {
@@ -384,20 +465,39 @@ ControlDeps(x:float) -> () {
   b = One[T=float]() @ u
   v = NoOp() @ b
   c = One[T=float]() @ a, v
+=======
+  TF_CHECK_OK(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result));
+  const char* e2 = R"P(
+(n0:float) -> () {
+  n1 = One[T=float]() @ n0
+  n2 = NoOp() @ n1
+  n3 = One[T=float]() @ n2
+  n4 = NoOp() @ n3
+  n5 = One[T=float]() @ n1, n4
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(result.arg_types, DataTypeVector({DT_FLOAT}));
   EXPECT_EQ(result.ret_types, DataTypeVector({}));
+<<<<<<< HEAD
   EXPECT_EQ(DebugString(result.nodes), e2);
+=======
+  EXPECT_EQ(DebugString(result.gdef), e2);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(TFunc, XTimesTwo) {
   auto expect = R"P(
 XTimesTwo[T:{float, double, int32, int64}](x:T) -> (y:T) {
   two = Const[dtype=int64, value=Tensor<type: int64 shape: [] values: 2>]()
+<<<<<<< HEAD
   scale = Cast[DstT=$T, SrcT=int64](two:output:0)
   y = Mul[T=$T](x, scale:y:0)
   return y = y:z:0
+=======
+  scale = Cast[DstT=$T, SrcT=int64](two)
+  y = Mul[T=$T](x, scale)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(expect, DebugString(test::function::XTimesTwo()));
@@ -407,8 +507,12 @@ TEST(TFunc, WXPlusB) {
   auto expect = R"P(
 WXPlusB[T:{float, double}](w:T, x:T, b:T) -> (y:T) {
   mm = MatMul[T=$T, _kernel="eigen", transpose_a=false, transpose_b=false](w, x)
+<<<<<<< HEAD
   y = Add[T=$T](mm:product:0, b)
   return y = y:z:0
+=======
+  y = Add[T=$T](mm, b)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(expect, DebugString(test::function::WXPlusB()));
@@ -416,7 +520,11 @@ WXPlusB[T:{float, double}](w:T, x:T, b:T) -> (y:T) {
 
 TEST(TFunc, Body_TypeList) {
   const Tensor kZero = test::AsScalar<int32>(0);
+<<<<<<< HEAD
   auto fdef = FDH::Create(
+=======
+  auto fdef = FDH::Define(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // Name
       "Test",
       // Args
@@ -427,6 +535,7 @@ TEST(TFunc, Body_TypeList) {
       {},
       // Nodes
       {{{"zero"}, "Const", {}, {{"value", kZero}, {"dtype", DT_INT32}}},
+<<<<<<< HEAD
        {{"s"},
         "Split",
         {"zero:output:0", "i"},
@@ -441,21 +550,44 @@ TEST(TFunc, Body_TypeList) {
          {"Tin", DataTypeSlice{DT_FLOAT, DT_FLOAT}}}},
        {{"o"}, "AddN", {"x:output"}, {{"N", 2}, {"T", DT_FLOAT}}}},
       {{"o", "o:sum:0"}});
+=======
+       {{"s"}, "Split", {"zero", "i"}, {{"num_split", 4}, {"T", DT_FLOAT}}},
+       {{"a", "b", "c", "d"},
+        "_ArrayToList",
+        {"s"},
+        {{"N", 4},
+         {"T", DT_FLOAT},
+         {"out_types", DataTypeSlice{DT_FLOAT, DT_FLOAT, DT_FLOAT, DT_FLOAT}}}},
+       {{"l"}, "Mul", {"a", "b"}, {{"T", DT_FLOAT}}},
+       {{"r"}, "Mul", {"c", "d"}, {{"T", DT_FLOAT}}},
+       {{"x"}, "_ListToArray", {"l", "r"}, {{"N", 2}, {"T", DT_FLOAT}}},
+       {{"o"}, "AddN", {"x"}, {{"N", 2}, {"T", DT_FLOAT}}}});
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   const char* e = R"P(
 Test(i:float) -> (o:float) {
   zero = Const[dtype=int32, value=Tensor<type: int32 shape: [] values: 0>]()
+<<<<<<< HEAD
   s = Split[T=float, num_split=4](zero:output:0, i)
   l = Mul[T=float](s:output:0, s:output:1)
   r = Mul[T=float](s:output:2, s:output:3)
   x = _ListToArray[N=2, T=float, Tin={float, float}](l:z, r:z)
   o = AddN[N=2, T=float](x:output)
   return o = o:sum:0
+=======
+  s = Split[T=float, num_split=4](zero, i)
+  a, b, c, d = _ArrayToList[N=4, T=float, out_types={float, float, float, float}](s)
+  l = Mul[T=float](a, b)
+  r = Mul[T=float](c, d)
+  x = _ListToArray[N=2, T=float](l, r)
+  o = AddN[N=2, T=float](x)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(DebugString(fdef), e);
 
   InstantiationResult result;
+<<<<<<< HEAD
   TF_ASSERT_OK(InstantiateFunction(fdef, AttrSlice(), GetOpSig, &result));
   const char* e2 = R"P(
 (i:float) -> (o:float) {
@@ -465,11 +597,27 @@ Test(i:float) -> (o:float) {
   r = Mul[T=float](s:2, s:3)
   x = _ListToArray[N=2, T=float, Tin={float, float}](l, r)
   o = AddN[N=2, T=float](x, x:1)
+=======
+  TF_CHECK_OK(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result));
+  const char* e2 = R"P(
+(n0:float) -> (n7:float) {
+  n1 = Const[dtype=int32, value=Tensor<type: int32 shape: [] values: 0>]()
+  n2 = Split[T=float, num_split=4](n1, n0)
+  n3 = _ArrayToList[N=4, T=float, out_types={float, float, float, float}](n2, n2:1, n2:2, n2:3)
+  n4 = Mul[T=float](n3, n3:1)
+  n5 = Mul[T=float](n3:2, n3:3)
+  n6 = _ListToArray[N=2, T=float, Tin={float, float}](n4, n5)
+  n7 = AddN[N=2, T=float](n6, n6:1)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(result.arg_types, DataTypeVector({DT_FLOAT}));
   EXPECT_EQ(result.ret_types, DataTypeVector({DT_FLOAT}));
+<<<<<<< HEAD
   EXPECT_EQ(DebugString(result.nodes), e2);
+=======
+  EXPECT_EQ(DebugString(result.gdef), e2);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 REGISTER_OP("Cond")
@@ -484,8 +632,13 @@ REGISTER_OP("Cond")
 output = Cond(input) ? then_branch(input) : else_branch(input)
 
 cond: A function takes 'input' and returns a scalar.
+<<<<<<< HEAD
 then_branch: A function takes 'input' and returns 'output'.
 else_branch: A function takes 'input' and returns 'output'.
+=======
+then_branch: A funcion takes 'input' and returns 'output'.
+else_branch: A funcion takes 'input' and returns 'output'.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 )doc");
 
 TEST(TFunc, Body_Array_List_Converter) {
@@ -521,22 +674,35 @@ TEST(TFunc, Body_Array_List_Converter) {
   const char* e = R"P(
 MySelect(x:float) -> (z:float) {
   y = Cond[Tin={float}, cond=MyCond, else_branch=MyElse, out_types={float}, then_branch=MyThen](x)
+<<<<<<< HEAD
   z = Cond[Tin={float, float}, cond=MyCond2, else_branch=MyElse2, out_types={float}, then_branch=MyThen2](y:output:0, y:output:0)
   return z = z:output:0
+=======
+  z = Cond[Tin={float, float}, cond=MyCond2, else_branch=MyElse2, out_types={float}, then_branch=MyThen2](y, y)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(DebugString(fdef), e);
 
   InstantiationResult result;
+<<<<<<< HEAD
   TF_ASSERT_OK(InstantiateFunction(fdef, AttrSlice(), GetOpSig, &result));
   const char* e2 = R"P(
 (x:float) -> (z:float) {
   y = Cond[Tin={float}, cond=MyCond, else_branch=MyElse, out_types={float}, then_branch=MyThen](x)
   z = Cond[Tin={float, float}, cond=MyCond2, else_branch=MyElse2, out_types={float}, then_branch=MyThen2](y, y)
+=======
+  TF_CHECK_OK(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result));
+  const char* e2 = R"P(
+(n0:float) -> (n2:float) {
+  n1 = Cond[Tin={float}, cond=MyCond, else_branch=MyElse, out_types={float}, then_branch=MyThen](n0)
+  n2 = Cond[Tin={float, float}, cond=MyCond2, else_branch=MyElse2, out_types={float}, then_branch=MyThen2](n1, n1)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 )P";
   EXPECT_EQ(result.arg_types, DataTypeVector({DT_FLOAT}));
   EXPECT_EQ(result.ret_types, DataTypeVector({DT_FLOAT}));
+<<<<<<< HEAD
   EXPECT_EQ(DebugString(result.nodes), e2);
 }
 
@@ -561,12 +727,21 @@ TEST(TFunc, IntsOnDeviceArgSet) {
 static void HasError(const Status& s, const string& substr) {
   EXPECT_TRUE(absl::StrContains(s.ToString(), substr))
       << ">>" << s << "<<, expected substring >>" << substr << "<<";
+=======
+  EXPECT_EQ(DebugString(result.gdef), e2);
+}
+
+static void HasError(const Status& s, const string& substr) {
+  EXPECT_TRUE(StringPiece(s.ToString()).contains(substr))
+      << s << ", expected substring " << substr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(InstantiateErrors, Not_Sufficient_Attrs) {
   auto fdef =
       FDH::Define("nop", {}, {}, {"T:{float, double, int32, int64}"}, {});
   InstantiationResult result;
+<<<<<<< HEAD
   HasError(
       InstantiateFunction(fdef, Attrs({{"U", DT_FLOAT}}), GetOpSig, &result),
       "Attr T is not found from ");
@@ -582,14 +757,24 @@ TEST(InstantiateErrors, Too_Many_Attrs) {
            "Attr U is not found in ");
 }
 #endif
+=======
+  HasError(InstantiateFunction(fdef, {{"U", DT_FLOAT}}, GetOpSig, &result),
+           "T is not found");
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TEST(InstantiateErrors, AttrValue_Value_Placeholder) {
   auto fdef =
       FDH::Define("nop", {}, {}, {"T:{float, double, int32, int64}"}, {});
   InstantiationResult result;
+<<<<<<< HEAD
   HasError(
       InstantiateFunction(fdef, Attrs({{"T", "$bad"}}), GetOpSig, &result),
       "AttrValue had value with unexpected type 'placeholder'\n\tfor attr 'T'");
+=======
+  HasError(InstantiateFunction(fdef, {{"T", "$bad"}}, GetOpSig, &result),
+           "T in attr_values is still a placeholder");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(InstantiateErrors, Unbounded_Attr) {
@@ -598,18 +783,40 @@ TEST(InstantiateErrors, Unbounded_Attr) {
                               {{"a"}, "One", {}, {{"T", "$unknown"}}, {"x"}},
                           });
   InstantiationResult result;
+<<<<<<< HEAD
   HasError(
       InstantiateFunction(fdef, Attrs({{"T", DT_FLOAT}}), GetOpSig, &result),
       "Failed to bind all placeholders");
+=======
+  HasError(InstantiateFunction(fdef, {{"T", DT_FLOAT}}, GetOpSig, &result),
+           "Failed to bind all placeholders");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(InstantiateErrors, DupArgs) {
   auto fdef = FDH::Define("test", {"x:float", "x:float"}, {}, {}, {});
   InstantiationResult result;
+<<<<<<< HEAD
   HasError(InstantiateFunction(fdef, AttrSlice(), GetOpSig, &result),
            "Duplicated arg name");
 }
 
+=======
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "Duplicated arg name");
+}
+
+TEST(InstantiateErrors, Dup_Arg_Node_Name) {
+  auto fdef = FDH::Define("test", {"x:float"}, {}, {},
+                          {
+                              {{"x"}, "One", {}, {{"T", DT_FLOAT}}},
+                          });
+  InstantiationResult result;
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "Duplicated ret name");
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(InstantiateErrors, Dup_Node_Names) {
   auto fdef = FDH::Define("test", {"x:float"}, {}, {},
                           {
@@ -617,6 +824,7 @@ TEST(InstantiateErrors, Dup_Node_Names) {
                               {{"y"}, "One", {}, {{"T", DT_FLOAT}}},
                           });
   InstantiationResult result;
+<<<<<<< HEAD
   HasError(InstantiateFunction(fdef, AttrSlice(), GetOpSig, &result),
            "Duplicated ret name");
 }
@@ -633,13 +841,55 @@ TEST(InstantiateErrors, Node_Arg_Notfound) {
 }
 
 TEST(InstantiateErrors, Node_Arg_TypeMismatch) {
+=======
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "Duplicated ret name");
+}
+
+TEST(InstantiateErrors, Node_Signature_Mismatch_NoOp) {
+  auto fdef = FDH::Define("test", {"x:float"}, {}, {},
+                          {
+                              {{"y", "z"}, "NoOp", {}, {{"T", DT_FLOAT}}},
+                          });
+  InstantiationResult result;
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "Expect one ret name");
+}
+
+TEST(InstantiateErrors, Node_Signature_Mismatch) {
+  auto fdef = FDH::Define("test", {"x:float"}, {}, {},
+                          {
+                              {{"y", "z"}, "One", {}, {{"T", DT_FLOAT}}},
+                          });
+  InstantiationResult result;
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "Malformed function node (#ret)");
+}
+
+TEST(InstantiateErrors, Node_Arg_Notfound) {
+  auto fdef = FDH::Define("test", {"x:float"}, {}, {},
+                          {
+                              {{"y"}, "Add", {"x", "z"}, {{"T", DT_FLOAT}}},
+                          });
+  InstantiationResult result;
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "arg[1] is not found");
+}
+
+TEST(InstantiateErrors, Node_Arg_Mismatch) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   auto fdef = FDH::Define("test", {"x:float"}, {}, {},
                           {
                               {{"y"}, "Add", {"x", "x"}, {{"T", DT_INT32}}},
                           });
   InstantiationResult result;
+<<<<<<< HEAD
   HasError(InstantiateFunction(fdef, AttrSlice(), GetOpSig, &result),
            "input x[0] expected type int32 != float, the type of x[0]");
+=======
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "Invalid arg(0) for function arg");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(InstantiateErrors, Node_Arg_ControlMissing) {
@@ -649,6 +899,7 @@ TEST(InstantiateErrors, Node_Arg_ControlMissing) {
                       {{"y"}, "Add", {"x", "x"}, {{"T", DT_FLOAT}}, {"z"}},
                   });
   InstantiationResult result;
+<<<<<<< HEAD
   HasError(InstantiateFunction(fdef, AttrSlice(), GetOpSig, &result),
            "input[2] == '^z', is not found.");
 }
@@ -699,17 +950,43 @@ TEST(InstantiateErrors, FuncRet_NameMismatch) {
 // }
 
 TEST(InstantiateErrors, FuncRet_TypeMismatch) {
+=======
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "dep[0] is not found");
+}
+
+TEST(InstantiateErrors, FuncRet_Missing) {
+  auto fdef = FDH::Define("test", {}, {"y: float"}, {},
+                          {
+                              {{"x"}, "One", {}, {{"T", DT_FLOAT}}},
+                          });
+  InstantiationResult result;
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "ret is not found");
+}
+
+TEST(InstantiateErrors, FuncRet_Mismatch) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   auto fdef = FDH::Define("test", {}, {"y: float"}, {},
                           {
                               {{"y"}, "One", {}, {{"T", DT_DOUBLE}}},
                           });
   InstantiationResult result;
+<<<<<<< HEAD
   HasError(InstantiateFunction(fdef, AttrSlice(), GetOpSig, &result),
            "Invalid ret types y : float vs. double\n\tIn function output y");
 }
 
 TEST(InstantiateErrors, TypeList_Missing_Retval_Attr) {
   auto fdef = FDH::Create(
+=======
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "Invalid ret name.\n\t In y");
+}
+
+TEST(InstantiateErrors, TypeList_Missing_Retval_Attr) {
+  auto fdef = FDH::Define(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // Name
       "MySelect",
       // Args
@@ -727,6 +1004,7 @@ TEST(InstantiateErrors, TypeList_Missing_Retval_Attr) {
             {"cond", FDH::FunctionRef("MyCond2")},
             {"then_branch", FDH::FunctionRef("MyThen2")},
             {"else_branch", FDH::FunctionRef("MyElse2")}}},
+<<<<<<< HEAD
       },
       {{"y", "y:output"}});
   InstantiationResult result;
@@ -736,6 +1014,16 @@ TEST(InstantiateErrors, TypeList_Missing_Retval_Attr) {
 
 TEST(InstantiateErrors, TypeList_Num_Retval_Mismatch) {
   auto fdef = FDH::Create(
+=======
+      });
+  InstantiationResult result;
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "Missing attr out_types");
+}
+
+TEST(InstantiateErrors, TypeList_Num_Retval_Mismatch) {
+  auto fdef = FDH::Define(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // Name
       "MySelect",
       // Args
@@ -754,6 +1042,7 @@ TEST(InstantiateErrors, TypeList_Num_Retval_Mismatch) {
             {"cond", FDH::FunctionRef("MyCond2")},
             {"then_branch", FDH::FunctionRef("MyThen2")},
             {"else_branch", FDH::FunctionRef("MyElse2")}}},
+<<<<<<< HEAD
       },
       {{"y", "y:output"}});
   InstantiationResult result;
@@ -763,6 +1052,16 @@ TEST(InstantiateErrors, TypeList_Num_Retval_Mismatch) {
 
 TEST(InstantiateErrors, TypeList_Missing_Arg) {
   auto fdef = FDH::Create(
+=======
+      });
+  InstantiationResult result;
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "Wrong #ret: 0 2 1");
+}
+
+TEST(InstantiateErrors, TypeList_Missing_Arg) {
+  auto fdef = FDH::Define(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // Name
       "MySelect",
       // Args
@@ -776,6 +1075,7 @@ TEST(InstantiateErrors, TypeList_Missing_Arg) {
           {{"y"},
            "Cond",
            {"x", "unknown"},
+<<<<<<< HEAD
            {{"Tin", DataTypeSlice{DT_FLOAT, DT_FLOAT}},
             {"out_types", DataTypeSlice{DT_FLOAT}},
             {"cond", FDH::FunctionRef("MyCond2")},
@@ -905,10 +1205,21 @@ TEST(InstantiateErrors, TypeMismatch) {
   InstantiationResult result;
   HasError(InstantiateFunction(fdef, AttrSlice(), GetOpSig, &result),
            "input inputs[1] expected type float != int32, the type of y[0]");
+=======
+           {{"out_types", DataTypeSlice{DT_FLOAT}},
+            {"cond", FDH::FunctionRef("MyCond2")},
+            {"then_branch", FDH::FunctionRef("MyThen2")},
+            {"else_branch", FDH::FunctionRef("MyElse2")}}},
+      });
+  InstantiationResult result;
+  HasError(InstantiateFunction(fdef, kNoAttrs, GetOpSig, &result),
+           "arg[1] is not found");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(FunctionCallFrame, Void_Void) {
   FunctionCallFrame frame({}, {});
+<<<<<<< HEAD
   TF_EXPECT_OK(frame.SetArgs({}));
   auto a = test::AsTensor<float>({100});
   HasError(frame.SetArgs({a}), "Invalid argument");
@@ -917,6 +1228,16 @@ TEST(FunctionCallFrame, Void_Void) {
   HasError(frame.SetRetval(0, v), "Invalid argument");
   std::vector<Tensor> rets;
   TF_EXPECT_OK(frame.GetRetvals(&rets));
+=======
+  EXPECT_OK(frame.SetArgs({}));
+  auto a = test::AsTensor<float>({100});
+  HasError(frame.SetArgs({a}), "Invalid argument");
+  Tensor v;
+  HasError(frame.GetArg(0, &v), "Out of range");
+  HasError(frame.SetRetval(0, v), "Out of range");
+  std::vector<Tensor> rets;
+  EXPECT_OK(frame.GetRetvals(&rets));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(rets.size(), 0);
 }
 
@@ -928,6 +1249,7 @@ TEST(FunctionCallFrame, Float_Float_Float) {
   auto c = test::AsTensor<int64>({300});
   HasError(frame.SetArgs({a, c}),
            "Invalid argument: Expects arg[1] to be float");
+<<<<<<< HEAD
   TF_EXPECT_OK(frame.SetArgs({a, b}));
 
   Tensor v;
@@ -941,20 +1263,43 @@ TEST(FunctionCallFrame, Float_Float_Float) {
   v = test::AsTensor<float>({-100});
   HasError(frame.SetRetval(-1, v), "Invalid argument");
   HasError(frame.SetRetval(1, v), "Invalid argument");
+=======
+  EXPECT_OK(frame.SetArgs({a, b}));
+
+  Tensor v;
+  HasError(frame.GetArg(-1, &v), "Out of range");
+  HasError(frame.GetArg(2, &v), "Out of range");
+  EXPECT_OK(frame.GetArg(0, &v));
+  test::ExpectTensorEqual<float>(a, v);
+  EXPECT_OK(frame.GetArg(1, &v));
+  test::ExpectTensorEqual<float>(b, v);
+
+  v = test::AsTensor<float>({-100});
+  HasError(frame.SetRetval(-1, v), "Out of range");
+  HasError(frame.SetRetval(1, v), "Out of range");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   HasError(frame.SetRetval(0, test::AsTensor<int64>({-100})),
            "Invalid argument: Expects ret[0] to be float");
 
   std::vector<Tensor> rets;
   HasError(frame.GetRetvals(&rets), "does not have value");
+<<<<<<< HEAD
   TF_EXPECT_OK(frame.SetRetval(0, v));
   HasError(frame.SetRetval(0, v), "has already been set");
 
   TF_EXPECT_OK(frame.GetRetvals(&rets));
+=======
+  EXPECT_OK(frame.SetRetval(0, v));
+  HasError(frame.SetRetval(0, v), "has already been set");
+
+  EXPECT_OK(frame.GetRetvals(&rets));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(rets.size(), 1);
   test::ExpectTensorEqual<float>(rets[0], v);
 }
 
 TEST(Canonicalize, Basic) {
+<<<<<<< HEAD
   EXPECT_EQ(Canonicalize("MatMul", Attrs({{"T", DT_FLOAT},
                                           {"transpose_a", false},
                                           {"transpose_b", false}})),
@@ -1530,4 +1875,53 @@ TEST(InstantiateFunctionTest, ArgAttrs) {
 }
 
 }  // end namespace
+=======
+  EXPECT_EQ(Canonicalize("MatMul", {{"T", DT_FLOAT},
+                                    {"transpose_a", false},
+                                    {"transpose_b", false}}),
+            "MatMul[T=float,transpose_a=false,transpose_b=false]");
+  EXPECT_EQ(Canonicalize("MatMul", {{"T", DT_FLOAT},
+                                    {"transpose_b", false},
+                                    {"transpose_a", false}}),
+            "MatMul[T=float,transpose_a=false,transpose_b=false]");
+  EXPECT_EQ(Canonicalize("MatMul", {{"T", DT_DOUBLE},
+                                    {"transpose_b", true},
+                                    {"transpose_a", false}}),
+            "MatMul[T=double,transpose_a=false,transpose_b=true]");
+}
+
+TEST(FunctionLibraryDefinitionTest, Find) {
+  FunctionDefLibrary proto;
+  *proto.add_function() = test::function::XTimesTwo();
+  FunctionLibraryDefinition lib_def(proto);
+
+  EXPECT_EQ(lib_def.Find("XTimes16"), nullptr);
+
+  auto expect = R"P(
+XTimesTwo[T:{float, double, int32, int64}](x:T) -> (y:T) {
+  two = Const[dtype=int64, value=Tensor<type: int64 shape: [] values: 2>]()
+  scale = Cast[DstT=$T, SrcT=int64](two)
+  y = Mul[T=$T](x, scale)
+}
+)P";
+  auto found = lib_def.Find("XTimesTwo");
+  ASSERT_NE(found, nullptr);
+  EXPECT_EQ(expect, DebugString(*found));
+}
+
+TEST(FunctionLibraryDefinitionTest, LookUp) {
+  FunctionDefLibrary proto;
+  *proto.add_function() = test::function::XTimesTwo();
+  FunctionLibraryDefinition lib_def(proto);
+
+  Status s;
+  EXPECT_EQ(lib_def.LookUp("XTimes16", &s), nullptr);
+
+  auto found = lib_def.LookUp("XTimesTwo", &s);
+  ASSERT_NE(found, nullptr);
+  EXPECT_EQ(found->DebugString(),
+            test::function::XTimesTwo().signature().DebugString());
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace tensorflow

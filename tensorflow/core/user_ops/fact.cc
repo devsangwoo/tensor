@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,9 +36,38 @@ class FactOp : public tensorflow::OpKernel {
                                 0, tensorflow::TensorShape(), &output_tensor));
     using tensorflow::string;
     auto output = output_tensor->template scalar<tensorflow::tstring>();
+=======
+// An example Op.
+
+#include "tensorflow/core/framework/op.h"
+#include "tensorflow/core/framework/op_kernel.h"
+
+using namespace tensorflow;
+
+REGISTER_OP("Fact")
+    .Output("fact: string")
+    .Doc(R"doc(
+Output a fact about factorials.
+)doc");
+
+class FactOp : public OpKernel {
+ public:
+  explicit FactOp(OpKernelConstruction* context) : OpKernel(context) {}
+
+  void Compute(OpKernelContext* context) override {
+    // Output a scalar string.
+    Tensor* output_tensor = NULL;
+    OP_REQUIRES_OK(context,
+                   context->allocate_output(0, TensorShape(), &output_tensor));
+    auto output = output_tensor->template scalar<string>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     output() = "0! == 1";
   }
 };
 
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("Fact").Device(tensorflow::DEVICE_CPU), FactOp);
+=======
+REGISTER_KERNEL_BUILDER(Name("Fact").Device(DEVICE_CPU), FactOp);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,14 @@ limitations under the License.
 #include "tensorflow/core/lib/hash/hash.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_CONTROL_FLOW_H_
+#define TENSORFLOW_FRAMEWORK_CONTROL_FLOW_H_
+
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/lib/hash/hash.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -55,4 +64,8 @@ struct FrameAndIterHash {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_CONTROL_FLOW_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_CONTROL_FLOW_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

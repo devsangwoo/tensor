@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +30,26 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status.h"       // for Status
 #include "tensorflow/core/lib/core/stringpiece.h"  // for StringPiece
 #include "tensorflow/core/platform/types.h"        // for int64
+=======
+// A class to manage slices of a tensor. You can "register" set of slices for a
+// tensor and then "query" if we have data for a given slice.
+
+// TODO(yangke): consider moving it to a more private place so that we don't
+// need to expose the API.
+
+#ifndef TENSORFLOW_UTIL_TENSOR_SLICE_SET_H_
+#define TENSORFLOW_UTIL_TENSOR_SLICE_SET_H_
+
+#include <string>                 // for string
+#include <unordered_map>
+
+#include "tensorflow/core/platform/port.h"  // for int64
+#include "tensorflow/core/framework/tensor_slice.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "tensorflow/core/lib/core/stringpiece.h"  // for StringPiece
+#include "tensorflow/core/public/status.h"         // for Status
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -46,7 +67,22 @@ class TensorSliceSet {
   // associated with the slice (in one application it denotes the name of the
   // file that contains the slice); the "data" points to the data of the tensor
   // slice (it can be a nullptr).
+<<<<<<< HEAD
   Status Register(const TensorSlice& slice, const string& tag);
+=======
+  // We don't take the ownership of "data" and the caller needs to make sure
+  // the data is always available during the life time of the tensor slice set
+  // if it is not nullptr.
+  Status Register(const TensorSlice& slice, const string& tag,
+                       const float* data);
+
+  // Query about a new slice: checks if we have data for "slice" and if we have
+  // the data and "data" is not nullptr, fill "data" with the slice data. The
+  // caller needs to make sure "data" point to a large eough buffer.
+  // TODO(yangke): avoid unnecessary copying by using a core::RefCounted
+  // pointer.
+  bool Query(const TensorSlice& slice, float* data) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Alternative way of querying about a new slice: instead of copying the
   // data, it returns a list of meta data about the stored slices that will
@@ -55,6 +91,7 @@ class TensorSliceSet {
       const TensorSlice& slice,
       std::vector<std::pair<tensorflow::TensorSlice, string>>* results) const;
 
+<<<<<<< HEAD
   struct SliceInfo {
     TensorSlice slice;
     const string tag;
@@ -86,8 +123,27 @@ Status RegisterTensorSlice(
     const string& tag, const TensorSlice& slice,
     std::unordered_map<string, TensorSliceSet*>* tensor_slices);
 
+=======
+ private:
+  const TensorShape shape_;
+  const DataType type_;
+  struct SliceInfo {
+    TensorSlice slice;
+    const string tag;
+    const float* data;
+    int64 num_floats;
+  };
+  // We maintain a mapping from the slice string to the slice information.
+  std::unordered_map<string, SliceInfo> slices_;
+};
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace checkpoint
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_UTIL_TENSOR_SLICE_SET_H_
+=======
+#endif  // TENSORFLOW_UTIL_TENSOR_SLICE_SET_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

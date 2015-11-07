@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,12 +86,48 @@ def Print(input_, data, message=None, first_n=None, summarize=None, name=None):
   the following:
 
   `from __future__ import print_function`
+=======
+"""Logging Operations."""
+
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import common_shapes
+from tensorflow.python.ops import gen_logging_ops
+# pylint: disable=wildcard-import
+from tensorflow.python.ops.gen_logging_ops import *
+# pylint: enable=wildcard-import
+
+
+# Assert and Print are special symbols in python, so we must
+# use an upper-case version of them.
+def Assert(condition, data, summarize=None, name=None):
+  """Asserts that the given condition is true.
+
+  If `condition` evaluates to false, print the list of tensors in `data`.
+  `summarize` determines how many entries of the tensors to print.
+
+  Args:
+    condition: The condition to evaluate.
+    data: The tensors to print out when condition is false.
+    summarize: Print this many entries of each tensor.
+    name: A name for this operation (optional).
+  """
+  return gen_logging_ops._assert(condition, data, summarize, name)
+
+
+def Print(input_, data, message=None, first_n=None, summarize=None,
+          name=None):
+  """Prints a list of tensors.
+
+  This is an identity op with the side effect of printing `data` when
+  evaluating.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Args:
     input_: A tensor passed through this op.
     data: A list of tensors to print out when op is evaluated.
     message: A string, prefix of the error message.
     first_n: Only log `first_n` number of times. Negative numbers log always;
+<<<<<<< HEAD
       this is the default.
     summarize: Only print this many entries of each tensor. If None, then a
       maximum of 3 elements are printed per input tensor.
@@ -108,10 +145,19 @@ def Print(input_, data, message=None, first_n=None, summarize=None, name=None):
           out = tf.add(tensor, tensor)
         sess.run(out)
     ```
+=======
+             this is the default.
+    summarize: Only print this many entries of each tensor.
+    name: A name for the operation (optional).
+
+  Returns:
+    Same tensor as `input_`.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """
   return gen_logging_ops._print(input_, data, message, first_n, summarize, name)
 
 
+<<<<<<< HEAD
 # pylint: enable=invalid-name
 
 
@@ -378,11 +424,14 @@ def print_v2(*inputs, **kwargs):
 # pylint: enable=g-doc-args
 
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 @ops.RegisterGradient("Print")
 def _PrintGrad(op, *grad):
   return list(grad) + [None] * (len(op.inputs) - 1)
 
 
+<<<<<<< HEAD
 def _Collect(val, collections, default_collections):
   if collections is None:
     collections = default_collections
@@ -679,3 +728,9 @@ ops.NotDifferentiable("ScalarSummary")
 ops.NotDifferentiable("TensorSummary")
 ops.NotDifferentiable("TensorSummaryV2")
 ops.NotDifferentiable("Timestamp")
+=======
+# NOTE(mrry): Assert and Print produce an empty output, which is
+# presumably never read.
+ops.RegisterShape("Assert")(common_shapes.unknown_shape)
+ops.RegisterShape("Print")(common_shapes.unknown_shape)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

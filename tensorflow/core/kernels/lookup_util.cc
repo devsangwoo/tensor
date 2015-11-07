@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +20,19 @@ limitations under the License.
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/io/inputbuffer.h"
+=======
+#include "tensorflow/core/kernels/lookup_util.h"
+
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace lookup {
 namespace {
 
+<<<<<<< HEAD
 static const int kInputBufferSize = 1 * 1024 * 1024; /* bytes */
 static const int kLineNumber = -1;
 static const int kWholeLine = -2;
@@ -252,6 +261,9 @@ class TextFileLineIterator
 };
 
 Status GetTableHandle(StringPiece input_name, OpKernelContext* ctx,
+=======
+Status GetTableHandle(const string& input_name, OpKernelContext* ctx,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                       string* container, string* table_handle) {
   {
     mutex* mu;
@@ -264,7 +276,11 @@ Status GetTableHandle(StringPiece input_name, OpKernelContext* ctx,
           "Lookup table handle must be scalar, but had shape: ",
           tensor.shape().DebugString());
     }
+<<<<<<< HEAD
     auto h = tensor.flat<tstring>();
+=======
+    auto h = tensor.flat<string>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     *container = h(0);
     *table_handle = h(1);
   }
@@ -273,6 +289,7 @@ Status GetTableHandle(StringPiece input_name, OpKernelContext* ctx,
 
 }  // namespace
 
+<<<<<<< HEAD
 Status GetResourceLookupTable(StringPiece input_name, OpKernelContext* ctx,
                               LookupInterface** table) {
   const Tensor* handle_tensor;
@@ -283,6 +300,10 @@ Status GetResourceLookupTable(StringPiece input_name, OpKernelContext* ctx,
 
 Status GetReferenceLookupTable(StringPiece input_name, OpKernelContext* ctx,
                                LookupInterface** table) {
+=======
+Status GetLookupTable(const string& input_name, OpKernelContext* ctx,
+                      LookupInterface** table) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string container;
   string table_handle;
   TF_RETURN_IF_ERROR(
@@ -290,6 +311,7 @@ Status GetReferenceLookupTable(StringPiece input_name, OpKernelContext* ctx,
   return ctx->resource_manager()->Lookup(container, table_handle, table);
 }
 
+<<<<<<< HEAD
 Status GetLookupTable(StringPiece input_name, OpKernelContext* ctx,
                       LookupInterface** table) {
   DataType handle_dtype;
@@ -329,6 +351,23 @@ Status GetInitializableLookupTable(StringPiece input_name, OpKernelContext* ctx,
       return errors::InvalidArgument("Table ", container, " ", table_handle,
                                      " is not initializable");
     }
+=======
+Status GetInitializableLookupTable(const string& input_name,
+                                   OpKernelContext* ctx,
+                                   InitializableLookupTable** table) {
+  string container;
+  string table_handle;
+  TF_RETURN_IF_ERROR(
+      GetTableHandle(input_name, ctx, &container, &table_handle));
+  LookupInterface* lookup_table;
+  TF_RETURN_IF_ERROR(
+      ctx->resource_manager()->Lookup(container, table_handle, &lookup_table));
+  *table = dynamic_cast<InitializableLookupTable*>(lookup_table);
+  if (*table == nullptr) {
+    lookup_table->Unref();
+    return errors::InvalidArgument("Table ", container, " ", table_handle,
+                                   " is not initializable");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return Status::OK();
 }
@@ -337,14 +376,20 @@ Status CheckTableDataTypes(const LookupInterface& table, DataType key_dtype,
                            DataType value_dtype, const string& table_name) {
   if (table.key_dtype() != key_dtype || table.value_dtype() != value_dtype) {
     return errors::InvalidArgument(
+<<<<<<< HEAD
         "Conflicting key/value dtypes ", DataTypeString(key_dtype), "->",
         DataTypeString(value_dtype), " with ",
         DataTypeString(table.key_dtype()), "-",
         DataTypeString(table.value_dtype()), " for table ", table_name);
+=======
+        "Conflicting key/value dtypes ", key_dtype, "->", value_dtype, " with ",
+        table.key_dtype(), "-", table.value_dtype(), " for table ", table_name);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return Status::OK();
 }
 
+<<<<<<< HEAD
 // Helper function to initialize an InitializableLookupTable from a text file.
 Status InitializeTableFromTextFile(const string& filename, int64 vocab_size,
                                    char delimiter, int32 key_index,
@@ -390,5 +435,7 @@ Status InitializeTableFromTextFile(const string& filename, int64 vocab_size,
   return s;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace lookup
 }  // namespace tensorflow

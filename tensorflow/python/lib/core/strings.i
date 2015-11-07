@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Wrapper functions to provide a scripting-language-friendly interface
 // to our string libraries.
 //
@@ -35,6 +38,7 @@ limitations under the License.
 
 %{
 #include "tensorflow/core/lib/core/stringpiece.h"
+<<<<<<< HEAD
 
 // Handles str in Python 2, bytes in Python 3.
 // Returns true on success, false on failure.
@@ -52,19 +56,52 @@ bool _BytesToStringPiece(PyObject* obj, tensorflow::StringPiece* result) {
   }
   return true;
 }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 %}
 
 %typemap(typecheck) tensorflow::StringPiece = char *;
 %typemap(typecheck) const tensorflow::StringPiece & = char *;
 
+<<<<<<< HEAD
 // "tensorflow::StringPiece" arguments must be specified as a 'str' or 'bytes' object.
 %typemap(in) tensorflow::StringPiece {
   if (!_BytesToStringPiece($input, &$1)) SWIG_fail;
+=======
+// "tensorflow::StringPiece" arguments can be provided by a simple Python 'str' string
+// or a 'unicode' object. If 'unicode', it's translated using the default
+// encoding, i.e., sys.getdefaultencoding(). If passed None, a tensorflow::StringPiece
+// of zero length with a NULL pointer is provided.
+%typemap(in) tensorflow::StringPiece {
+  if ($input != Py_None) {
+    char * buf;
+    Py_ssize_t len;
+%#if PY_VERSION_HEX >= 0x03030000
+    /* Do unicode handling as PyBytes_AsStringAndSize doesn't in Python 3. */
+    if (PyUnicode_Check($input)) {
+      buf = PyUnicode_AsUTF8AndSize($input, &len);
+      if (buf == NULL)
+        SWIG_fail;
+    } else {
+%#elif PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 3
+%#  error "Unsupported Python 3.x C API version (3.3 or later required)."
+%#endif
+      if (PyBytes_AsStringAndSize($input, &buf, &len) == -1) {
+        // Python has raised an error (likely TypeError or UnicodeEncodeError).
+        SWIG_fail;
+      }
+%#if PY_VERSION_HEX >= 0x03030000
+    }
+%#endif
+    $1.set(buf, len);
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // "const tensorflow::StringPiece&" arguments can be provided the same as
 // "tensorflow::StringPiece", whose typemap is defined above.
 %typemap(in) const tensorflow::StringPiece & (tensorflow::StringPiece temp) {
+<<<<<<< HEAD
   if (!_BytesToStringPiece($input, &temp)) SWIG_fail;
   $1 = &temp;
 }
@@ -74,11 +111,44 @@ bool _BytesToStringPiece(PyObject* obj, tensorflow::StringPiece* result) {
 %typemap(out) tensorflow::StringPiece {
   if ($1.data()) {
     $result = PyBytes_FromStringAndSize($1.data(), $1.size());
+=======
+  if ($input != Py_None) {
+    char * buf;
+    Py_ssize_t len;
+%#if PY_VERSION_HEX >= 0x03030000
+    /* Do unicode handling as PyBytes_AsStringAndSize doesn't in Python 3. */
+    if (PyUnicode_Check($input)) {
+      buf = PyUnicode_AsUTF8AndSize($input, &len);
+      if (buf == NULL)
+        SWIG_fail;
+    } else {
+%#elif PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 3
+%#  error "Unsupported Python 3.x C API version (3.3 or later required)."
+%#endif
+      if (PyBytes_AsStringAndSize($input, &buf, &len) == -1) {
+        // Python has raised an error (likely TypeError or UnicodeEncodeError).
+        SWIG_fail;
+      }
+%#if PY_VERSION_HEX >= 0x03030000
+    }
+%#endif
+    temp.set(buf, len);
+  }
+  $1 = &temp;
+}
+
+// C++ functions returning tensorflow::StringPiece will simply return bytes in Python,
+// or None if the StringPiece contained a NULL pointer.
+%typemap(out) tensorflow::StringPiece {
+  if ($1.data()) {
+    $result = PyString_FromStringAndSize($1.data(), $1.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   } else {
     Py_INCREF(Py_None);
     $result = Py_None;
   }
 }
+<<<<<<< HEAD
 
 // Converts a C++ string vector to a list of Python bytes objects.
 %typemap(out) std::vector<string> {
@@ -103,3 +173,5 @@ bool _BytesToStringPiece(PyObject* obj, tensorflow::StringPiece* result) {
   }
   $result = temp_string_list.release();
 }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

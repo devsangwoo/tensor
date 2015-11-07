@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,10 +49,37 @@ limitations under the License.
 
 namespace tensorflow {
 class GPUKernelTracker;
+=======
+#if !GOOGLE_CUDA
+#error This file must only be included when building with Cuda support
+#endif
+
+#ifndef TENSORFLOW_COMMON_RUNTIME_GPU_GPU_DEVICE_H_
+#define TENSORFLOW_COMMON_RUNTIME_GPU_GPU_DEVICE_H_
+
+#include "tensorflow/core/common_runtime/device_factory.h"
+#include "tensorflow/core/common_runtime/gpu_device_context.h"
+#include "tensorflow/core/common_runtime/local_device.h"
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/framework/device_base.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/session_options.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/common_runtime/gpu/gpu_event_mgr.h"
+#include "tensorflow/stream_executor/stream.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+
+namespace tensorflow {
+
+class EigenAllocator;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 class BaseGPUDevice : public LocalDevice {
  public:
   BaseGPUDevice(const SessionOptions& options, const string& name,
+<<<<<<< HEAD
                 Bytes memory_limit, const DeviceLocality& locality,
                 TfGpuId tf_gpu_id, const string& physical_device_desc,
                 Allocator* gpu_allocator, Allocator* cpu_allocator,
@@ -70,6 +98,21 @@ class BaseGPUDevice : public LocalDevice {
   void ConsumeListOfAccessedTensors(
       DeviceContext* device_context,
       const TensorReferenceVector& tensor_refs) override;
+=======
+                Bytes memory_limit, BusAdjacency bus_adjacency, int gpu_id,
+                const string& physical_device_desc, Allocator* gpu_allocator,
+                Allocator* cpu_allocator);
+
+  ~BaseGPUDevice() override;
+
+  // GPU devices require the Op Compute method to save a reference to
+  // any temporary tensors that are allocated until the Op execution
+  // completes.
+  bool SaveTemporaryTensors() const override { return true; }
+
+  Status FillContextMap(const Graph* graph,
+                        DeviceContextMap* device_context_map);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void Compute(OpKernel* op_kernel, OpKernelContext* context) override;
 
@@ -82,6 +125,7 @@ class BaseGPUDevice : public LocalDevice {
                              const AllocatorAttributes alloc_attrs,
                              Tensor* tensor) override;
 
+<<<<<<< HEAD
   void CopyTensorInSameDevice(const Tensor* input_tensor, Tensor* output_tensor,
                               const DeviceContext* device_context,
                               StatusCallback done) override;
@@ -122,11 +166,17 @@ class BaseGPUDevice : public LocalDevice {
   // Returns the number of kernels that have been queued for execution on
   // the compute stream and are not yet known to have completed.
   int PendingKernels();
+=======
+  // The caller owns the returned device.
+  const PerOpGpuDevice* MakeGpuDevice(DeviceContext* dc,
+                                      Allocator* allocator) override;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  protected:
   Allocator* gpu_allocator_;  // not owned
   Allocator* cpu_allocator_;  // not owned
 
+<<<<<<< HEAD
   se::StreamExecutor* executor_;  // not owned
   std::unique_ptr<ScopedAllocatorMgr> scoped_allocator_mgr_;
 
@@ -307,10 +357,22 @@ class GPUKernelTracker {
   // Sum of weights of the outstanding events marking tracked kernels.
   int num_pending_ GUARDED_BY(mu_) = 0;
   condition_variable pending_decreased_ GUARDED_BY(mu_);
+=======
+ private:
+  std::vector<gpu::Stream*> streams_;
+  std::vector<GPUDeviceContext*> device_contexts_;
+  GpuDeviceInfo* gpu_device_info_ = nullptr;
+  mutex trace_mu_;
+  int gpu_id_ = -1;
+  std::unique_ptr<EventMgr> em_;
+
+  const PerOpGpuDevice* NewDevice(int stream_id, Allocator* allocator);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 class BaseGPUDeviceFactory : public DeviceFactory {
  public:
+<<<<<<< HEAD
   Status ListPhysicalDevices(std::vector<string>* devices) override;
   Status CreateDevices(const SessionOptions& options, const string& name_prefix,
                        std::vector<std::unique_ptr<Device>>* devices) override;
@@ -375,8 +437,29 @@ class BaseGPUDeviceFactory : public DeviceFactory {
   // visible_gpu_initialized_[platform_gpu_id] is true if visible GPU
   // platform_gpu_id has been initialized by the process.
   std::unordered_map<int, bool> visible_gpu_initialized_;
+=======
+  void CreateDevices(const SessionOptions& options, const string& name_prefix,
+                     std::vector<Device*>* devices) override;
+
+ private:
+  LocalDevice* CreateGPUDevice(const SessionOptions& options,
+                               const string& name, int gpu_id);
+
+  virtual LocalDevice* CreateGPUDevice(const SessionOptions& options,
+                                       const string& name, Bytes memory_limit,
+                                       BusAdjacency bus_adjacency, int gpu_id,
+                                       const string& physical_device_desc,
+                                       Allocator* gpu_allocator,
+                                       Allocator* cpu_allocator) = 0;
+
+  void GetValidDeviceIds(std::vector<int>* ids);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_COMMON_RUNTIME_GPU_GPU_DEVICE_H_
+=======
+#endif  // TENSORFLOW_COMMON_RUNTIME_GPU_GPU_DEVICE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

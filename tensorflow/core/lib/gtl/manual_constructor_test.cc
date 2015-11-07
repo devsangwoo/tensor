@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/gtl/manual_constructor.h"
 
 #include <stdint.h>
 
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/test.h"
+=======
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -95,6 +102,12 @@ TEST(ManualConstructorTest, Alignment) {
 #ifdef ARCH_K8
   EXPECT_EQ(reinterpret_cast<intptr_t>(test2.b.get()) % 16, 0);
 #endif
+<<<<<<< HEAD
+=======
+#ifdef ARCH_PIII
+  EXPECT_EQ(reinterpret_cast<intptr_t>(test2.b.get()) % 4, 0);
+#endif
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(ManualConstructorTest, DefaultInitialize) {

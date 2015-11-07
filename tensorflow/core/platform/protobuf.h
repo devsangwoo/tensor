@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,10 +19,15 @@ limitations under the License.
 
 #include "tensorflow/core/platform/platform.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_PLATFORM_PROTOBUF_H_
+#define TENSORFLOW_PLATFORM_PROTOBUF_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Import whatever namespace protobuf comes from into the
 // ::tensorflow::protobuf namespace.
 //
+<<<<<<< HEAD
 // TensorFlow code should use the ::tensorflow::protobuf namespace to
 // refer to all protobuf APIs.
 
@@ -50,10 +56,26 @@ using protobuf_uint64 = ::google::protobuf::uint64;
 extern const char* kProtobufInt64Typename;
 extern const char* kProtobufUint64Typename;
 
+=======
+// TensorFlow code should the ::tensorflow::protobuf namespace to refer
+// to all protobuf APIs.
+
+#include "tensorflow/core/platform/port.h"
+#if defined(PLATFORM_GOOGLE)
+#include "tensorflow/core/platform/google/protobuf.h"
+#elif defined(PLATFORM_GOOGLE_ANDROID)
+#include "tensorflow/core/platform/google/protobuf_android.h"
+#else
+#include "tensorflow/core/platform/default/protobuf.h"
+#endif
+
+namespace tensorflow {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Parses a protocol buffer contained in a string in the binary wire format.
 // Returns true on success. Note: Unlike protobuf's builtin ParseFromString,
 // this function has no size restrictions on the total size of the encoded
 // protocol buffer.
+<<<<<<< HEAD
 bool ParseProtoUnlimited(protobuf::MessageLite* proto,
                          const string& serialized);
 bool ParseProtoUnlimited(protobuf::MessageLite* proto, const void* serialized,
@@ -122,3 +144,11 @@ typedef protobuf::io::StringOutputStream TStringOutputStream;
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_PLATFORM_PROTOBUF_H_
+=======
+bool ParseProtoUnlimited(protobuf::Message* proto, const string& serialized);
+bool ParseProtoUnlimited(protobuf::Message* proto, const void* serialized,
+                         size_t size);
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_PLATFORM_PROTOBUF_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

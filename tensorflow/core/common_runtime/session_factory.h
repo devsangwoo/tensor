@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,10 +23,21 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_COMMON_RUNTIME_SESSION_FACTORY_H_
+#define TENSORFLOW_COMMON_RUNTIME_SESSION_FACTORY_H_
+
+#include <string>
+
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 class Session;
+<<<<<<< HEAD
 struct SessionOptions;
 
 class SessionFactory {
@@ -69,8 +81,22 @@ class SessionFactory {
   static void Register(const string& runtime_type, SessionFactory* factory);
   static Status GetFactory(const SessionOptions& options,
                            SessionFactory** out_factory);
+=======
+class SessionOptions;
+
+class SessionFactory {
+ public:
+  virtual Session* NewSession(const SessionOptions& options) = 0;
+  virtual ~SessionFactory() {}
+  static void Register(const string& runtime_type, SessionFactory* factory);
+  static SessionFactory* GetFactory(const string& runtime_type);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_COMMON_RUNTIME_SESSION_FACTORY_H_
+=======
+#endif  // TENSORFLOW_COMMON_RUNTIME_SESSION_FACTORY_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

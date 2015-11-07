@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // This simple class finds the top n elements of an incrementally provided set
 // of elements which you push one at a time.  If the number of elements exceeds
 // n, the lowest elements are incrementally dropped.  At the end you get
@@ -235,6 +238,7 @@ void TopN<T, Cmp>::PushInternal(U &&v, T *dropped) {  // NOLINT(build/c++11)
   } else {
     // Only insert the new element if it is greater than the least element.
     if (cmp_(v, elements_.front())) {
+<<<<<<< HEAD
       // Store new element in the last slot of elements_.  Remember from the
       // comments on elements_ that this last slot is unused, so we don't
       // overwrite anything useful.
@@ -247,6 +251,12 @@ void TopN<T, Cmp>::PushInternal(U &&v, T *dropped) {  // NOLINT(build/c++11)
       // more info, see https://en.cppreference.com/w/cpp/algorithm/pop_heap.
       std::pop_heap(elements_.begin(), elements_.end(), cmp_);
       if (dropped) *dropped = std::move(elements_.back());
+=======
+      elements_.back() = std::forward<U>(v);  // NOLINT(build/c++11)
+      std::push_heap(elements_.begin(), elements_.end(), cmp_);
+      if (dropped) *dropped = std::move(elements_.front());
+      std::pop_heap(elements_.begin(), elements_.end(), cmp_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     } else {
       if (dropped) *dropped = std::forward<U>(v);  // NOLINT(build/c++11)
     }

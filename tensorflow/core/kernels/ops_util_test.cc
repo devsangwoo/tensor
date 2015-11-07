@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,10 @@ limitations under the License.
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/kernels/ops_util.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -68,6 +73,7 @@ class OpsUtilTest : public ::testing::Test {
 
   static void VerifyGet2dOutputSizeBoundaries(padding_struct pad_struct,
                                               error::Code code) {
+<<<<<<< HEAD
     int64 new_height, new_width, pad_rows, pad_cols;
     Status status = GetWindowedOutputSize(
         pad_struct.input.in_height, pad_struct.input.filter_height,
@@ -77,12 +83,21 @@ class OpsUtilTest : public ::testing::Test {
     status = GetWindowedOutputSize(
         pad_struct.input.in_width, pad_struct.input.filter_width,
         pad_struct.input.col_stride, pad_struct.input.padding, &new_width,
+=======
+    int new_height, new_width, pad_rows, pad_cols;
+    Status status = Get2dOutputSize(
+        pad_struct.input.in_height, pad_struct.input.in_width,
+        pad_struct.input.filter_height, pad_struct.input.filter_width,
+        pad_struct.input.row_stride, pad_struct.input.col_stride,
+        pad_struct.input.padding, &new_height, &new_width, &pad_rows,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         &pad_cols);
     EXPECT_EQ(status.code(), code) << status;
   }
 
   static void VerifyGet2dOutputSizeValues(padding_struct pad_struct,
                                           error::Code code) {
+<<<<<<< HEAD
     int64 new_height, new_width, pad_rows, pad_cols;
     Status status = GetWindowedOutputSize(
         pad_struct.input.in_height, pad_struct.input.filter_height,
@@ -92,6 +107,14 @@ class OpsUtilTest : public ::testing::Test {
     status = GetWindowedOutputSize(
         pad_struct.input.in_width, pad_struct.input.filter_width,
         pad_struct.input.col_stride, pad_struct.input.padding, &new_width,
+=======
+    int new_height, new_width, pad_rows, pad_cols;
+    Status status = Get2dOutputSize(
+        pad_struct.input.in_height, pad_struct.input.in_width,
+        pad_struct.input.filter_height, pad_struct.input.filter_width,
+        pad_struct.input.row_stride, pad_struct.input.col_stride,
+        pad_struct.input.padding, &new_height, &new_width, &pad_rows,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         &pad_cols);
     EXPECT_EQ(status.code(), code) << status;
     EXPECT_EQ(pad_struct.output.new_height, new_height);
@@ -102,6 +125,7 @@ class OpsUtilTest : public ::testing::Test {
 
   static void VerifyGet2dOutputVerboseSizeValues(padding_struct pad_struct,
                                                  error::Code code) {
+<<<<<<< HEAD
     int64 new_height, new_width, pad_top, pad_bottom, pad_left, pad_right;
     Status status = GetWindowedOutputSizeVerbose(
         pad_struct.input.in_height, pad_struct.input.filter_height,
@@ -112,6 +136,15 @@ class OpsUtilTest : public ::testing::Test {
         pad_struct.input.in_width, pad_struct.input.filter_width,
         pad_struct.input.col_stride, pad_struct.input.padding, &new_width,
         &pad_left, &pad_right);
+=======
+    int new_height, new_width, pad_top, pad_bottom, pad_left, pad_right;
+    Status status = Get2dOutputSizeVerbose(
+        pad_struct.input.in_height, pad_struct.input.in_width,
+        pad_struct.input.filter_height, pad_struct.input.filter_width,
+        pad_struct.input.row_stride, pad_struct.input.col_stride,
+        pad_struct.input.padding, &new_height, &new_width, &pad_top,
+        &pad_bottom, &pad_left, &pad_right);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_EQ(status.code(), code) << status;
     EXPECT_EQ(pad_struct.output.new_height, new_height);
     EXPECT_EQ(pad_struct.output.new_width, new_width);
@@ -140,6 +173,15 @@ class OpsUtilTest : public ::testing::Test {
   }
 };
 
+<<<<<<< HEAD
+=======
+// Test stride > ksize fails with INVALID_ARGUMENT.
+TEST_F(OpsUtilTest, Get2dOutputSizeInvalidTest) {
+  padding_struct pad_struct = {{3, 3, 1, 2, 2, 2, SAME}, {3, 3, 1, 1, 1, 1}};
+  VerifyGet2dOutputSizeBoundaries(pad_struct, error::INVALID_ARGUMENT);
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST_F(OpsUtilTest, Get2dOutputSizeNegativeSizeTest) {
   padding_struct pad_struct = {{1, 1, 3, 3, 1, 1, VALID}, {-1, -1, 0, 0, 0, 0}};
   VerifyGet2dOutputSizeBoundaries(pad_struct, error::INVALID_ARGUMENT);
@@ -173,6 +215,15 @@ TEST_F(OpsUtilTest, Get2dOutputSizeVerbose) {
   VerifyGet2dOutputVerboseSizeValues(pad_struct2, error::OK);
 }
 
+<<<<<<< HEAD
+=======
+// Test stride > ksize fails with INVALID_ARGUMENT.
+TEST_F(OpsUtilTest, GetBroadcastTest3_1_2_0) {
+  bcast_struct bcast = {{0, 3, 1, 2, 0}, {0, 3}};
+  VerifyBoundaries(bcast, error::INVALID_ARGUMENT);
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Test index * stride > in_size fails with INVALID_ARGUMENT.
 TEST_F(OpsUtilTest, GetBroadcastTestBadIndex) {
   bcast_struct bcast = {{2, 3, 1, 2, 0}, {0, 3}};
@@ -218,8 +269,12 @@ TEST_F(OpsUtilTest, GetBroadcastTest3_3_1_2) {
 // in_size = 3, ksize = 3, stride = 2, pad_size = 0
 TEST_F(OpsUtilTest, GetBroadcastTest3_3_2_0) {
   bcast_struct bcast[] = {
+<<<<<<< HEAD
       {{0, 3, 3, 2, 0}, {0, 3}},
       {{1, 3, 3, 2, 0}, {2, 1}},
+=======
+      {{0, 3, 3, 2, 0}, {0, 3}}, {{1, 3, 3, 2, 0}, {2, 1}},
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   };
   for (size_t i = 0; i < sizeof(bcast) / sizeof(bcast[0]); ++i) {
     VerifyBcastValues(bcast[i]);
@@ -229,8 +284,12 @@ TEST_F(OpsUtilTest, GetBroadcastTest3_3_2_0) {
 // in_size = 3, ksize = 3, stride = 2, pad_size = 1
 TEST_F(OpsUtilTest, GetBroadcastTest3_3_2_1) {
   bcast_struct bcast[] = {
+<<<<<<< HEAD
       {{0, 3, 3, 2, 1}, {0, 2}},
       {{1, 3, 3, 2, 1}, {1, 2}},
+=======
+      {{0, 3, 3, 2, 1}, {0, 2}}, {{1, 3, 3, 2, 1}, {1, 2}},
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   };
   for (size_t i = 0; i < sizeof(bcast) / sizeof(bcast[0]); ++i) {
     VerifyBcastValues(bcast[i]);
@@ -260,8 +319,12 @@ TEST_F(OpsUtilTest, GetBroadcastTest3_3_3_0) {
 // in_size = 3, ksize = 3, stride = 3, pad_size = 1
 TEST_F(OpsUtilTest, GetBroadcastTest3_3_3_1) {
   bcast_struct bcast[] = {
+<<<<<<< HEAD
       {{0, 3, 3, 3, 1}, {0, 2}},
       {{1, 3, 3, 3, 1}, {2, 1}},
+=======
+      {{0, 3, 3, 3, 1}, {0, 2}}, {{1, 3, 3, 3, 1}, {2, 1}},
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   };
   for (size_t i = 0; i < sizeof(bcast) / sizeof(bcast[0]); ++i) {
     VerifyBcastValues(bcast[i]);
@@ -278,6 +341,7 @@ TEST_F(OpsUtilTest, GetBroadcastTest3_3_3_2) {
   }
 }
 
+<<<<<<< HEAD
 // in_size = 3, ksize = 1, stride = 2, pad_size = 0
 TEST_F(OpsUtilTest, GetBroadcastTest3_1_2_0) {
   bcast_struct bcast[] = {
@@ -405,5 +469,7 @@ TEST_F(OpsUtilTest, MisalignedEmptyDim0) {
   EXPECT_EQ(output, false);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

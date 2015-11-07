@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +22,22 @@ limitations under the License.
 
 #include "tensorflow/core/framework/allocator.h"
 #include "tensorflow/core/framework/attr_value.pb.h"
+=======
+#include "tensorflow/core/framework/op_kernel.h"
+
+#include <memory>
+#include <vector>
+#include "tensorflow/core/framework/allocator.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/attr_value_util.h"
 #include "tensorflow/core/framework/fake_input.h"
 #include "tensorflow/core/framework/node_def_builder.h"
 #include "tensorflow/core/framework/op.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor_shape.pb.h"
 #include "tensorflow/core/framework/tensor_util.h"
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/types.pb.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/core/status_test_util.h"
@@ -34,10 +45,14 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/strcat.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/protobuf.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
 #include "tensorflow/core/public/version.h"
 #include "tensorflow/core/util/device_name_utils.h"
+=======
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 class DummyKernel : public tensorflow::OpKernel {
  public:
@@ -105,6 +120,7 @@ REGISTER_OP("Test4").Input("i: float").Output("o: float");
 REGISTER_KERNEL_BUILDER(Name("Test4").Device(DEVICE_CPU), DummyKernel);
 REGISTER_KERNEL_BUILDER(Name("Test4").Device(DEVICE_GPU), DummyKernel);
 
+<<<<<<< HEAD
 // Kernels with different priorities.
 REGISTER_OP("Test5").Input("a: T").Input("b: T").Attr("T: type");
 
@@ -128,6 +144,8 @@ class TestOp5Gpu : public tensorflow::OpKernel {
 REGISTER_KERNEL_BUILDER(Name("Test5").Device(DEVICE_GPU).Priority(1),
                         TestOp5Gpu);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static std::vector<DeviceType> DeviceTypes() {
   return {DeviceType(DEVICE_GPU), DeviceType(DEVICE_CPU)};
 }
@@ -137,13 +155,20 @@ class OpKernelTest : public ::testing::Test {
   OpKernelTest() : device_(Env::Default()) {}
 
  protected:
+<<<<<<< HEAD
   NodeDef CreateNodeDef(const string& op_type, const DataTypeVector& inputs,
                         const string& device = "") {
+=======
+  NodeDef CreateNodeDef(const string& op_type, const DataTypeVector& inputs) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     NodeDefBuilder builder(op_type + "-op", op_type);
     for (DataType dt : inputs) {
       builder.Input(FakeInput(dt));
     }
+<<<<<<< HEAD
     builder.Device(device);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     NodeDef node_def;
     TF_CHECK_OK(builder.Finalize(&node_def));
     return node_def;
@@ -152,8 +177,13 @@ class OpKernelTest : public ::testing::Test {
   void ExpectEqual(const string& what, const DataTypeVector& expected,
                    const DataTypeVector& observed) {
     EXPECT_EQ(expected.size(), observed.size()) << what;
+<<<<<<< HEAD
     const size_t size = std::min(expected.size(), observed.size());
     for (size_t i = 0; i < size; ++i) {
+=======
+    const int size = std::min(expected.size(), observed.size());
+    for (int i = 0; i < size; ++i) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       bool match = TypesCompatible(expected[i], observed[i]);
       EXPECT_TRUE(match) << what << " i:" << i << ", expected: " << expected[i]
                          << ", observed: " << observed[i];
@@ -164,9 +194,15 @@ class OpKernelTest : public ::testing::Test {
                      const DataTypeVector& inputs,
                      const DataTypeVector& outputs) {
     Status status;
+<<<<<<< HEAD
     std::unique_ptr<OpKernel> op(CreateOpKernel(
         std::move(device_type), &device_, cpu_allocator(),
         CreateNodeDef(op_type, inputs), TF_GRAPH_DEF_VERSION, &status));
+=======
+    std::unique_ptr<OpKernel> op(
+        CreateOpKernel(device_type, &device_, cpu_allocator(),
+                       CreateNodeDef(op_type, inputs), &status));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_TRUE(status.ok()) << status;
     EXPECT_TRUE(op != nullptr);
     if (op != nullptr) {
@@ -180,9 +216,14 @@ class OpKernelTest : public ::testing::Test {
     NodeDef node_def;
     protobuf::TextFormat::ParseFromString(ascii_node_def, &node_def);
     Status status;
+<<<<<<< HEAD
     std::unique_ptr<OpKernel> op(
         CreateOpKernel(std::move(device_type), &device_, cpu_allocator(),
                        node_def, TF_GRAPH_DEF_VERSION, &status));
+=======
+    std::unique_ptr<OpKernel> op(CreateOpKernel(
+        device_type, &device_, cpu_allocator(), node_def, &status));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_TRUE(op == nullptr);
     EXPECT_FALSE(status.ok());
     if (!status.ok()) {
@@ -213,6 +254,7 @@ TEST_F(OpKernelTest, SuccessBothCpuAndGpu) {
 
 TEST_F(OpKernelTest, CpuTypeRegistered) {
   NodeDef ndef = CreateNodeDef("Test1", {DT_FLOAT, DT_INT32});
+<<<<<<< HEAD
   PrioritizedDeviceTypeVector devs;
   TF_ASSERT_OK(SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs));
   EXPECT_EQ(1, devs.size());
@@ -249,6 +291,12 @@ TEST_F(OpKernelTest, KernelNotRegistered) {
                                              &local_device_name));
     EXPECT_EQ(0, devs.size());
   }
+=======
+  DeviceTypeVector devs;
+  ASSERT_OK(SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs));
+  EXPECT_EQ(1, devs.size());
+  EXPECT_EQ(DeviceType(DEVICE_CPU), devs[0]);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(OpKernelTest, CpuAndGpuTypeRegistered) {
@@ -256,31 +304,51 @@ TEST_F(OpKernelTest, CpuAndGpuTypeRegistered) {
     // Try a node def of an op that is registered for a specific type
     // only on CPU.
     NodeDef ndef = CreateNodeDef("Test3", {DT_INT8, DT_INT8});
+<<<<<<< HEAD
     PrioritizedDeviceTypeVector devs;
     TF_ASSERT_OK(SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs));
     EXPECT_EQ(1, devs.size());
     EXPECT_EQ(DeviceType(DEVICE_CPU), devs[0].first);
+=======
+    DeviceTypeVector devs;
+    ASSERT_OK(SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs));
+    EXPECT_EQ(1, devs.size());
+    EXPECT_EQ(DeviceType(DEVICE_CPU), devs[0]);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   {
     // Try a node def of an op that is registered for a specific type
     // only on GPU.
     NodeDef ndef = CreateNodeDef("Test3", {DT_FLOAT, DT_FLOAT});
+<<<<<<< HEAD
     PrioritizedDeviceTypeVector devs;
     TF_ASSERT_OK(SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs));
     EXPECT_EQ(1, devs.size());
     EXPECT_EQ(DeviceType(DEVICE_GPU), devs[0].first);
+=======
+    DeviceTypeVector devs;
+    ASSERT_OK(SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs));
+    EXPECT_EQ(1, devs.size());
+    EXPECT_EQ(DeviceType(DEVICE_GPU), devs[0]);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   {
     // Try a node def of an op that is only registered for other types.
     NodeDef ndef = CreateNodeDef("Test3", {DT_STRING, DT_STRING});
+<<<<<<< HEAD
     PrioritizedDeviceTypeVector devs;
     TF_ASSERT_OK(SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs));
+=======
+    DeviceTypeVector devs;
+    ASSERT_OK(SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_EQ(0, devs.size());
   }
 
   {
     // Try a node def of an op that is registered for both.
     NodeDef ndef = CreateNodeDef("Test4", {DT_FLOAT});
+<<<<<<< HEAD
     PrioritizedDeviceTypeVector devs;
     TF_ASSERT_OK(SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs));
     EXPECT_EQ(2, devs.size());
@@ -298,6 +366,13 @@ TEST_F(OpKernelTest, CpuAndGpuTypeRegistered) {
     EXPECT_EQ(2, devs[0].second);
     EXPECT_EQ(DeviceType(DEVICE_GPU), devs[1].first);
     EXPECT_EQ(1, devs[1].second);
+=======
+    DeviceTypeVector devs;
+    ASSERT_OK(SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs));
+    EXPECT_EQ(2, devs.size());
+    EXPECT_EQ(DeviceType(DEVICE_GPU), devs[0]);
+    EXPECT_EQ(DeviceType(DEVICE_CPU), devs[1]);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
@@ -348,7 +423,11 @@ TEST_F(OpKernelTest, MatchSignatureFailes) {
 class DummyDevice : public DeviceBase {
  public:
   DummyDevice(Env* env, bool save) : DeviceBase(env), save_(save) {}
+<<<<<<< HEAD
   bool RequiresRecordingAccessedTensors() const override { return save_; }
+=======
+  bool SaveTemporaryTensors() const override { return save_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Allocator* GetAllocator(AllocatorAttributes /*attr*/) override {
     return cpu_allocator();
   }
@@ -360,6 +439,7 @@ class DummyDevice : public DeviceBase {
 TEST_F(OpKernelTest, SaveTempFalse) {
   Env* env = Env::Default();
   OpKernelContext::Params params;
+<<<<<<< HEAD
   params.record_tensor_accesses = false;
   auto device =
       absl::make_unique<DummyDevice>(env, params.record_tensor_accesses);
@@ -379,11 +459,30 @@ TEST_F(OpKernelTest, SaveTempFalse) {
   TensorReferenceVector referenced_tensors;
   ctx->retrieve_accessed_tensors(&referenced_tensors);
   EXPECT_EQ(0, referenced_tensors.size());
+=======
+  params.device = new DummyDevice(env, false);
+  Status status;
+  std::unique_ptr<OpKernel> op(
+      CreateOpKernel(DEVICE_CPU, params.device, cpu_allocator(),
+                     CreateNodeDef("Test1", {DT_FLOAT, DT_INT32}), &status));
+  EXPECT_TRUE(status.ok());
+  params.op_kernel = op.get();
+  OpKernelContext* ctx = new OpKernelContext(params);
+
+  Tensor t;
+  EXPECT_OK(ctx->allocate_temp(DT_FLOAT, TensorShape(), &t));
+
+  EXPECT_EQ(0, ctx->num_temps());
+
+  delete ctx;
+  delete params.device;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(OpKernelTest, SaveTempTrue) {
   Env* env = Env::Default();
   OpKernelContext::Params params;
+<<<<<<< HEAD
   params.record_tensor_accesses = true;
   auto device =
       absl::make_unique<DummyDevice>(env, params.record_tensor_accesses);
@@ -531,6 +630,24 @@ TEST_F(OpKernelTest, ScopedAllocationTest) {
   ctx->set_output(0, temp1);
   EXPECT_EQ(sa_device->num_allocations(false), 2);
   EXPECT_EQ(sa_device->num_allocations(true), 1);
+=======
+  params.device = new DummyDevice(env, true);
+  Status status;
+  std::unique_ptr<OpKernel> op(
+      CreateOpKernel(DEVICE_CPU, params.device, cpu_allocator(),
+                     CreateNodeDef("Test1", {DT_FLOAT, DT_INT32}), &status));
+  EXPECT_TRUE(status.ok());
+  params.op_kernel = op.get();
+  OpKernelContext* ctx = new OpKernelContext(params);
+
+  Tensor t;
+  EXPECT_OK(ctx->allocate_temp(DT_FLOAT, TensorShape(), &t));
+
+  EXPECT_EQ(1, ctx->num_temps());
+
+  delete ctx;
+  delete params.device;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 class OpKernelBuilderTest : public ::testing::Test {
@@ -553,7 +670,11 @@ class OpKernelBuilderTest : public ::testing::Test {
   }
 
   std::unique_ptr<OpKernel> ExpectSuccess(const string& op_type,
+<<<<<<< HEAD
                                           const DeviceType& device_type,
+=======
+                                          DeviceType device_type,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                           const std::vector<string>& attrs,
                                           DataTypeSlice input_types = {}) {
     Status status;
@@ -566,9 +687,14 @@ class OpKernelBuilderTest : public ::testing::Test {
     DeviceBase device(env);
 
     // Test CreateOpKernel()
+<<<<<<< HEAD
     std::unique_ptr<OpKernel> op(CreateOpKernel(device_type, &device,
                                                 cpu_allocator(), def,
                                                 TF_GRAPH_DEF_VERSION, &status));
+=======
+    std::unique_ptr<OpKernel> op(
+        CreateOpKernel(device_type, &device, cpu_allocator(), def, &status));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_TRUE(status.ok()) << status;
     EXPECT_TRUE(op != nullptr);
     if (op != nullptr) {
@@ -577,11 +703,19 @@ class OpKernelBuilderTest : public ::testing::Test {
     }
 
     // Test SupportedDeviceTypesForNode()
+<<<<<<< HEAD
     PrioritizedDeviceTypeVector devices;
     TF_EXPECT_OK(SupportedDeviceTypesForNode(DeviceTypes(), def, &devices));
     bool found = false;
     for (const auto& dt : devices) {
       if (dt.first == device_type) {
+=======
+    DeviceTypeVector devices;
+    EXPECT_OK(SupportedDeviceTypesForNode(DeviceTypes(), def, &devices));
+    bool found = false;
+    for (DeviceType dt : devices) {
+      if (dt == device_type) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         found = true;
       }
     }
@@ -592,7 +726,11 @@ class OpKernelBuilderTest : public ::testing::Test {
     return op;
   }
 
+<<<<<<< HEAD
   void ExpectFailure(const string& op_type, const DeviceType& device_type,
+=======
+  void ExpectFailure(const string& op_type, DeviceType device_type,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                      const std::vector<string>& attrs, error::Code code) {
     Status status;
     const NodeDef def = CreateNodeDef(op_type, attrs);
@@ -600,9 +738,14 @@ class OpKernelBuilderTest : public ::testing::Test {
     DeviceBase device(env);
 
     // Test CreateOpKernel().
+<<<<<<< HEAD
     std::unique_ptr<OpKernel> op(CreateOpKernel(device_type, &device,
                                                 cpu_allocator(), def,
                                                 TF_GRAPH_DEF_VERSION, &status));
+=======
+    std::unique_ptr<OpKernel> op(
+        CreateOpKernel(device_type, &device, cpu_allocator(), def, &status));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_TRUE(op == nullptr);
     EXPECT_FALSE(status.ok());
     if (!status.ok()) {
@@ -610,11 +753,19 @@ class OpKernelBuilderTest : public ::testing::Test {
       EXPECT_EQ(code, status.code());
 
       // Test SupportedDeviceTypesForNode().
+<<<<<<< HEAD
       PrioritizedDeviceTypeVector devices;
       if (errors::IsNotFound(status)) {
         TF_EXPECT_OK(SupportedDeviceTypesForNode(DeviceTypes(), def, &devices));
         for (const auto& dt : devices) {
           EXPECT_NE(dt.first, device_type);
+=======
+      DeviceTypeVector devices;
+      if (errors::IsNotFound(status)) {
+        EXPECT_OK(SupportedDeviceTypesForNode(DeviceTypes(), def, &devices));
+        for (DeviceType dt : devices) {
+          EXPECT_NE(dt, device_type);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         }
       } else {
         Status status2 =
@@ -623,6 +774,7 @@ class OpKernelBuilderTest : public ::testing::Test {
       }
     }
   }
+<<<<<<< HEAD
 
   string GetKernelClassName(const string& op_type,
                             const DeviceType& device_type,
@@ -645,6 +797,8 @@ class OpKernelBuilderTest : public ::testing::Test {
       return status.ToString();
     }
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 REGISTER_OP("BuildCPU");
@@ -652,9 +806,13 @@ REGISTER_KERNEL_BUILDER(Name("BuildCPU").Device(DEVICE_CPU), DummyKernel);
 
 TEST_F(OpKernelBuilderTest, BuilderCPU) {
   ExpectSuccess("BuildCPU", DEVICE_CPU, {});
+<<<<<<< HEAD
   EXPECT_EQ("DummyKernel", GetKernelClassName("BuildCPU", DEVICE_CPU, {}));
   ExpectFailure("BuildCPU", DEVICE_GPU, {}, error::NOT_FOUND);
   EXPECT_EQ("not found", GetKernelClassName("BuildCPU", DEVICE_GPU, {}));
+=======
+  ExpectFailure("BuildCPU", DEVICE_GPU, {}, error::NOT_FOUND);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 REGISTER_OP("BuildGPU");
@@ -675,9 +833,16 @@ TEST_F(OpKernelBuilderTest, BuilderBoth) {
 }
 
 REGISTER_OP("BuildTypeAttr").Attr("T: type");
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(
     Name("BuildTypeAttr").Device(DEVICE_CPU).TypeConstraint<float>("T"),
     DummyKernel);
+=======
+REGISTER_KERNEL_BUILDER(Name("BuildTypeAttr")
+                            .Device(DEVICE_CPU)
+                            .TypeConstraint<float>("T"),
+                        DummyKernel);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TEST_F(OpKernelBuilderTest, BuilderTypeAttr) {
   ExpectSuccess("BuildTypeAttr", DEVICE_CPU, {"T|type|DT_FLOAT"});
@@ -689,6 +854,7 @@ TEST_F(OpKernelBuilderTest, BuilderTypeAttr) {
 }
 
 REGISTER_OP("BuildTypeListAttr").Attr("T: list(type)");
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(
     Name("BuildTypeListAttr").Device(DEVICE_CPU).TypeConstraint<bool>("T"),
     DummyKernel);
@@ -715,6 +881,21 @@ TEST_F(OpKernelBuilderTest, BuilderTypeListAttr) {
       absl::StrContains(GetKernelClassName("BuildTypeListAttr", DEVICE_CPU, {}),
                         "Invalid argument: "));
 
+=======
+REGISTER_KERNEL_BUILDER(Name("BuildTypeListAttr")
+                            .Device(DEVICE_CPU)
+                            .TypeConstraint<bool>("T"),
+                        DummyKernel);
+
+TEST_F(OpKernelBuilderTest, BuilderTypeListAttr) {
+  ExpectSuccess("BuildTypeListAttr", DEVICE_CPU, {"T|list(type)|[]"});
+  ExpectSuccess("BuildTypeListAttr", DEVICE_CPU, {"T|list(type)|[DT_BOOL]"});
+  ExpectSuccess("BuildTypeListAttr", DEVICE_CPU,
+                {"T|list(type)|[DT_BOOL, DT_BOOL]"});
+  ExpectFailure("BuildTypeListAttr", DEVICE_CPU, {"T|list(type)|[DT_FLOAT]"},
+                error::NOT_FOUND);
+  ExpectFailure("BuildTypeListAttr", DEVICE_CPU, {}, error::INVALID_ARGUMENT);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ExpectFailure("BuildTypeListAttr", DEVICE_CPU, {"T|int|7"},
                 error::INVALID_ARGUMENT);
 }
@@ -727,31 +908,58 @@ REGISTER_KERNEL_BUILDER(Name("DuplicateKernel").Device(DEVICE_CPU),
 
 TEST_F(OpKernelBuilderTest, DuplicateKernel) {
   const NodeDef ndef = CreateNodeDef("DuplicateKernel", {});
+<<<<<<< HEAD
   PrioritizedDeviceTypeVector devs;
   Status status = SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs);
   ASSERT_FALSE(status.ok());
   EXPECT_TRUE(absl::StrContains(
       status.error_message(), "Multiple OpKernel registrations match NodeDef"));
+=======
+  DeviceTypeVector devs;
+  Status status = SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs);
+  ASSERT_FALSE(status.ok());
+  EXPECT_TRUE(StringPiece(status.error_message())
+                  .contains("Multiple OpKernel registrations match NodeDef"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ExpectFailure("DuplicateKernel", DEVICE_CPU, {}, error::INVALID_ARGUMENT);
 }
 
 REGISTER_OP("DuplicateKernelForT").Attr("T: type");
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(
     Name("DuplicateKernelForT").Device(DEVICE_CPU).TypeConstraint<float>("T"),
     DummyKernel);
 REGISTER_KERNEL_BUILDER(
     Name("DuplicateKernelForT").Device(DEVICE_CPU).TypeConstraint<float>("T"),
     DummyKernel);
+=======
+REGISTER_KERNEL_BUILDER(Name("DuplicateKernelForT")
+                            .Device(DEVICE_CPU)
+                            .TypeConstraint<float>("T"),
+                        DummyKernel);
+REGISTER_KERNEL_BUILDER(Name("DuplicateKernelForT")
+                            .Device(DEVICE_CPU)
+                            .TypeConstraint<float>("T"),
+                        DummyKernel);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TEST_F(OpKernelBuilderTest, DuplicateKernelForT) {
   const NodeDef ndef =
       CreateNodeDef("DuplicateKernelForT", {"T|type|DT_FLOAT"});
+<<<<<<< HEAD
   PrioritizedDeviceTypeVector devs;
   Status status = SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs);
   ASSERT_FALSE(status.ok());
   EXPECT_TRUE(absl::StrContains(
       status.error_message(), "Multiple OpKernel registrations match NodeDef"));
+=======
+  DeviceTypeVector devs;
+  Status status = SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs);
+  ASSERT_FALSE(status.ok());
+  EXPECT_TRUE(StringPiece(status.error_message())
+                  .contains("Multiple OpKernel registrations match NodeDef"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ExpectFailure("DuplicateKernelForT", DEVICE_CPU, {"T|type|DT_FLOAT"},
                 error::INVALID_ARGUMENT);
@@ -768,6 +976,7 @@ REGISTER_KERNEL_BUILDER(Name("BadConstraint")
 
 TEST_F(OpKernelBuilderTest, BadConstraint) {
   const NodeDef ndef = CreateNodeDef("BadConstraint", {});
+<<<<<<< HEAD
   PrioritizedDeviceTypeVector devs;
   Status status = SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs);
   ASSERT_FALSE(status.ok());
@@ -775,11 +984,20 @@ TEST_F(OpKernelBuilderTest, BadConstraint) {
       absl::StrContains(status.error_message(),
                         "OpKernel 'BadConstraint' has constraint on attr "
                         "'T' not in NodeDef"));
+=======
+  DeviceTypeVector devs;
+  Status status = SupportedDeviceTypesForNode(DeviceTypes(), ndef, &devs);
+  ASSERT_FALSE(status.ok());
+  EXPECT_TRUE(StringPiece(status.error_message())
+                  .contains("OpKernel 'BadConstraint' has constraint on attr "
+                            "'T' not in NodeDef"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ExpectFailure("BadConstraint", DEVICE_CPU, {"dtype|type|DT_FLOAT"},
                 error::INVALID_ARGUMENT);
 }
 
+<<<<<<< HEAD
 REGISTER_OP("ListOut").Output("a: int32").Output("b: T").Attr("T: list(type)");
 REGISTER_KERNEL_BUILDER(Name("ListOut").Device(tensorflow::DEVICE_CPU),
                         DummyKernel);
@@ -810,6 +1028,8 @@ TEST_F(OpKernelBuilderTest, OpOutputList) {
   EXPECT_EQ(DT_INT32, out_list.expected_output_dtype(1));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class GetAttrKernel : public ::tensorflow::OpKernel {
  public:
   explicit GetAttrKernel(OpKernelConstruction* context) : OpKernel(context) {
@@ -963,7 +1183,11 @@ TEST_F(GetAttrTest, Shape) {
   auto* get_attr_kernel = static_cast<GetAttrKernel*>(op_kernel.get());
   get_attr_kernel->ExpectOk({"shape", "shape_proto"});
   EXPECT_EQ(get_attr_kernel->shape_proto.ShortDebugString(), "dim { size: 3 }");
+<<<<<<< HEAD
   EXPECT_EQ("[3]", get_attr_kernel->shape.DebugString());
+=======
+  EXPECT_EQ("[3]", get_attr_kernel->shape.ShortDebugString());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   op_kernel = ExpectSuccess(
       "GetAttrShape", DEVICE_CPU,
@@ -977,8 +1201,13 @@ TEST_F(GetAttrTest, Shape) {
   EXPECT_EQ(get_attr_kernel->shape_proto_list[1].ShortDebugString(),
             "dim { size: 4 }");
   ASSERT_EQ(2, get_attr_kernel->shape_list.size());
+<<<<<<< HEAD
   EXPECT_EQ("[2]", get_attr_kernel->shape_list[0].DebugString());
   EXPECT_EQ("[4]", get_attr_kernel->shape_list[1].DebugString());
+=======
+  EXPECT_EQ("[2]", get_attr_kernel->shape_list[0].ShortDebugString());
+  EXPECT_EQ("[4]", get_attr_kernel->shape_list[1].ShortDebugString());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 REGISTER_OP("GetAttrType").Attr("attr_name: string").Attr("a: type");
@@ -1011,6 +1240,46 @@ TEST_F(GetAttrTest, TypeList) {
   EXPECT_EQ(DT_BOOL, get_attr_kernel->type_vector[1]);
 }
 
+<<<<<<< HEAD
+=======
+REGISTER_OP("HostMemoryTest")
+    .Input("a: float")
+    .Input("b: T")
+    .Input("c: N * string")
+    .Output("o: N * T")
+    .Attr("T: type")
+    .Attr("N: int");
+REGISTER_KERNEL_BUILDER(Name("HostMemoryTest").Device(DEVICE_CPU), DummyKernel);
+REGISTER_KERNEL_BUILDER(Name("HostMemoryTest")
+                            .Device(DEVICE_GPU)
+                            .HostMemory("a")
+                            .HostMemory("c")
+                            .HostMemory("o"),
+                        DummyKernel);
+
+TEST(MemoryTypesForNode, Simple) {
+  NodeDef node_def;
+  ASSERT_OK(NodeDefBuilder("test", "HostMemoryTest")
+                .Input(FakeInput())
+                .Input(FakeInput(DT_BOOL))
+                .Input(FakeInput(3))
+                .Finalize(&node_def));
+  MemoryTypeVector input, output;
+
+  EXPECT_OK(MemoryTypesForNode(OpRegistry::Global(), DEVICE_CPU, node_def,
+                               &input, &output));
+  EXPECT_EQ(MemoryTypeVector(5, DEVICE_MEMORY), input);
+  EXPECT_EQ(MemoryTypeVector(3, DEVICE_MEMORY), output);
+
+  EXPECT_OK(MemoryTypesForNode(OpRegistry::Global(), DEVICE_GPU, node_def,
+                               &input, &output));
+  EXPECT_EQ(MemoryTypeVector({HOST_MEMORY, DEVICE_MEMORY, HOST_MEMORY,
+                              HOST_MEMORY, HOST_MEMORY}),
+            input);
+  EXPECT_EQ(MemoryTypeVector(3, HOST_MEMORY), output);
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class BaseKernel : public ::tensorflow::OpKernel {
  public:
   explicit BaseKernel(OpKernelConstruction* context) : OpKernel(context) {}
@@ -1042,9 +1311,12 @@ TEST_F(LabelTest, Default) {
       ExpectSuccess("LabeledKernel", DEVICE_CPU, {});
   auto* get_labeled_kernel = static_cast<BaseKernel*>(op_kernel.get());
   EXPECT_EQ(0, get_labeled_kernel->Which());
+<<<<<<< HEAD
 
   EXPECT_EQ("LabeledKernel<0>",
             GetKernelClassName("LabeledKernel", DEVICE_CPU, {}));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(LabelTest, Specified) {
@@ -1052,8 +1324,11 @@ TEST_F(LabelTest, Specified) {
       ExpectSuccess("LabeledKernel", DEVICE_CPU, {"_kernel|string|'one'"});
   auto* get_labeled_kernel = static_cast<BaseKernel*>(op_kernel.get());
   EXPECT_EQ(1, get_labeled_kernel->Which());
+<<<<<<< HEAD
   EXPECT_EQ("LabeledKernel<1>", GetKernelClassName("LabeledKernel", DEVICE_CPU,
                                                    {"_kernel|string|'one'"}));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(LabelTest, Duplicate) {
@@ -1061,6 +1336,7 @@ TEST_F(LabelTest, Duplicate) {
                 error::INVALID_ARGUMENT);
 }
 
+<<<<<<< HEAD
 void BM_InputRangeHelper(int iters, const NodeDef& node_def,
                          const char* input_name, int expected_start,
                          int expected_stop) {
@@ -1167,5 +1443,7 @@ TEST(RegisteredKernels, GetRegisteredKernelsForOp) {
   EXPECT_EQ(kernel_list.kernel(0).device_type(), "CPU");
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

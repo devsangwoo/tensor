@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,13 @@ limitations under the License.
 // NOLINTNEXTLINE
 #include "tensorflow/core/platform/cord.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_LIB_HASH_CRC32C_H_
+#define TENSORFLOW_LIB_HASH_CRC32C_H_
+
+#include <stddef.h>
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace crc32c {
@@ -35,11 +43,14 @@ extern uint32 Extend(uint32 init_crc, const char* data, size_t n);
 // Return the crc32c of data[0,n-1]
 inline uint32 Value(const char* data, size_t n) { return Extend(0, data, n); }
 
+<<<<<<< HEAD
 #if defined(PLATFORM_GOOGLE)
 extern uint32 Extend(uint32 init_crc, const absl::Cord& cord);
 inline uint32 Value(const absl::Cord& cord) { return Extend(0, cord); }
 #endif
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static const uint32 kMaskDelta = 0xa282ead8ul;
 
 // Return a masked representation of crc.
@@ -61,4 +72,8 @@ inline uint32 Unmask(uint32 masked_crc) {
 }  // namespace crc32c
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_LIB_HASH_CRC32C_H_
+=======
+#endif  // TENSORFLOW_LIB_HASH_CRC32C_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

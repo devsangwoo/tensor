@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/array_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 #define EIGEN_USE_GPU
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
@@ -48,12 +52,27 @@ using stream_executor::cuda::ScopedActivateExecutorContext;
 using stream_executor::rocm::ScopedActivateExecutorContext;
 #endif  // TENSORFLOW_USE_ROCM
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#include "tensorflow/core/kernels/where_op.h"
+
+#include <memory>
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
 
+<<<<<<< HEAD
 namespace functor {
 
 namespace {
@@ -128,10 +147,17 @@ template <typename T>
 class WhereCPUOp : public OpKernel {
  public:
   explicit WhereCPUOp(OpKernelConstruction* context) : OpKernel(context) {}
+=======
+template <typename Device>
+class WhereOp : public OpKernel {
+ public:
+  explicit WhereOp(OpKernelConstruction* context) : OpKernel(context) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void Compute(OpKernelContext* context) override {
     const Tensor& input = context->input(0);
 
+<<<<<<< HEAD
     OP_REQUIRES(
         context, input.dtype() != DT_HALF,
         errors::Unimplemented("No WhereOp available for float16/half type on "
@@ -151,10 +177,21 @@ class WhereCPUOp : public OpKernel {
         context, context->eigen_device<CPUDevice>(), input.flat<T>(),
         num_true_t);
     OP_REQUIRES_OK(context, s);
+=======
+    const int input_dims = input.dims();
+    Tensor num_true;
+    OP_REQUIRES_OK(
+        context, context->allocate_temp(DT_INT64, TensorShape({}), &num_true));
+    auto num_true_t = num_true.scalar<int64>();
+
+    functor::NumTrue<Device>::Compute(context->eigen_device<Device>(),
+                                      input.flat<bool>(), num_true_t);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     TensorShape output_shape({num_true_t(), input_dims});
     Tensor* output = nullptr;
     OP_REQUIRES_OK(context, context->allocate_output(0, output_shape, &output));
 
+<<<<<<< HEAD
     // TODO(ebrevdo): Replace single-threaded copy with a
     // multithreaded block copy by getting block counts above instead
     // of a global NumTrue, then having each block filled in in
@@ -168,6 +205,14 @@ class WhereCPUOp : public OpKernel {
         output->matrix<int64>(), &found_true);                                \
     OP_REQUIRES_OK(context, s);                                               \
   } break;
+=======
+#define HANDLE_DIM(NDIM)                                                   \
+  case NDIM:                                                               \
+    functor::Where<Device, NDIM>::Compute(context->eigen_device<Device>(), \
+                                          input.tensor<bool, NDIM>(),      \
+                                          output->matrix<int64>());        \
+    break;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     switch (input_dims) {
       HANDLE_DIM(1);
@@ -175,9 +220,12 @@ class WhereCPUOp : public OpKernel {
       HANDLE_DIM(3);
       HANDLE_DIM(4);
       HANDLE_DIM(5);
+<<<<<<< HEAD
       HANDLE_DIM(6);
       HANDLE_DIM(7);
       HANDLE_DIM(8);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       default:
         OP_REQUIRES(context, false,
@@ -185,6 +233,7 @@ class WhereCPUOp : public OpKernel {
                         "WhereOp : Unhandled input dimensions: ", input_dims));
     }
 #undef HANDLE_DIM
+<<<<<<< HEAD
 
     OP_REQUIRES(
         context, found_true == num_true_t(),
@@ -393,5 +442,17 @@ REGISTER_KERNEL_BUILDER(Name("Where")
 #undef REGISTER_GPU_WHERE_OP
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+  }
+
+ private:
+  TF_DISALLOW_COPY_AND_ASSIGN(WhereOp);
+};
+
+#define REGISTER_WHERE() \
+  REGISTER_KERNEL_BUILDER(Name("Where").Device(DEVICE_CPU), WhereOp<CPUDevice>);
+
+REGISTER_WHERE();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

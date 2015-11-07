@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+//
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // An iterator yields a sequence of key/value pairs from a source.
 // The following class defines the interface.  Multiple implementations
 // are provided by this library.  In particular, iterators are provided
@@ -26,8 +33,13 @@ limitations under the License.
 #ifndef TENSORFLOW_LIB_IO_ITERATOR_H_
 #define TENSORFLOW_LIB_IO_ITERATOR_H_
 
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/platform/stringpiece.h"
+=======
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace table {

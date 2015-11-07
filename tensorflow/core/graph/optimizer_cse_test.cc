@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,12 @@ limitations under the License.
 #include <vector>
 #include "tensorflow/core/framework/op.h"
 #include "tensorflow/core/framework/tensor.h"
+=======
+#include "tensorflow/core/graph/optimizer_cse.h"
+
+#include <gtest/gtest.h>
+#include "tensorflow/core/framework/op.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/graph/graph_constructor.h"
 #include "tensorflow/core/graph/testlib.h"
@@ -28,8 +35,13 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/stringprintf.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/protobuf.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -46,7 +58,11 @@ static void InitGraph(const string& s, Graph* graph) {
 
 class OptimizerCSETest : public ::testing::Test {
  public:
+<<<<<<< HEAD
   OptimizerCSETest() : graph_(OpRegistry::Global()) {}
+=======
+  OptimizerCSETest() : graph_(OpRegistry::Global()) { RequireDefaultOps(); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void InitGraph(const string& s) {
     ::tensorflow::InitGraph(s, &graph_);
@@ -82,11 +98,19 @@ class OptimizerCSETest : public ::testing::Test {
     // Canonicalize
     std::sort(nodes.begin(), nodes.end());
     std::sort(edges.begin(), edges.end());
+<<<<<<< HEAD
     return strings::StrCat(absl::StrJoin(nodes, ";"), "|",
                            absl::StrJoin(edges, ";"));
   }
 
   string DoCSE(const std::function<bool(const Node*)>& consider_fn = nullptr) {
+=======
+    return strings::StrCat(str_util::Join(nodes, ";"), "|",
+                           str_util::Join(edges, ";"));
+  }
+
+  string DoCSE(std::function<bool(const Node*)> consider_fn = nullptr) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     string before = CanonicalGraphString(&graph_);
     LOG(ERROR) << "Before rewrites: " << before;
 
@@ -115,8 +139,13 @@ TEST_F(OptimizerCSETest, Simple) {
       "node { name: 'D' op: 'Mul' attr { key: 'T' value { type: DT_FLOAT } }"
       " input: ['A', 'B'] }");
   EXPECT_EQ(DoCSE(),
+<<<<<<< HEAD
             "A(Input);B(Input);C(Mul)|"
             "A->C;B->C:1");
+=======
+            "A(Input);B(Input);D(Mul)|"
+            "A->D;B->D:1");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(OptimizerCSETest, Simple_ThreeEquivalent) {
@@ -130,8 +159,13 @@ TEST_F(OptimizerCSETest, Simple_ThreeEquivalent) {
       "node { name: 'E' op: 'Mul' attr { key: 'T' value { type: DT_FLOAT } }"
       " input: ['A', 'B'] }");
   EXPECT_EQ(DoCSE(),
+<<<<<<< HEAD
             "A(Input);B(Input);C(Mul)|"
             "A->C;B->C:1");
+=======
+            "A(Input);B(Input);E(Mul)|"
+            "A->E;B->E:1");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(OptimizerCSETest, Simple_WithFixups) {
@@ -145,8 +179,13 @@ TEST_F(OptimizerCSETest, Simple_WithFixups) {
       "node { name: 'E' op: 'Mul' attr { key: 'T' value { type: DT_FLOAT } }"
       " input: ['C', 'D'] }");
   EXPECT_EQ(DoCSE(),
+<<<<<<< HEAD
             "A(Input);B(Input);C(Mul);E(Mul)|"
             "A->C;B->C:1;C->E;C->E:1");
+=======
+            "A(Input);B(Input);D(Mul);E(Mul)|"
+            "A->D;B->D:1;D->E;D->E:1");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(OptimizerCSETest, Simple_Commutative) {
@@ -158,8 +197,13 @@ TEST_F(OptimizerCSETest, Simple_Commutative) {
       "node { name: 'D' op: 'Mul' attr { key: 'T' value { type: DT_FLOAT } }"
       " input: ['B', 'A'] }");
   EXPECT_EQ(DoCSE(),
+<<<<<<< HEAD
             "A(Input);B(Input);C(Mul)|"
             "A->C;B->C:1");
+=======
+            "A(Input);B(Input);D(Mul)|"
+            "A->D:1;B->D");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 static bool IsNotMultiply(const Node* n) { return n->type_string() != "Mul"; }
@@ -210,8 +254,13 @@ TEST_F(OptimizerCSETest, Simple_SameOps_SameAttrs1) {
       " input: ['A', 'B'] attr { key: 'shape'"
       "    value { shape: { dim: { size: 37 name: 'SAME_NAME' } } } } }");
   EXPECT_EQ(DoCSE(),
+<<<<<<< HEAD
             "A(Input);B(Input);C(Mul)|"
             "A->C;B->C:1");
+=======
+            "A(Input);B(Input);D(Mul)|"
+            "A->D;B->D:1");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(OptimizerCSETest, Simple_SameOps_SameAttrs2) {
@@ -229,8 +278,13 @@ TEST_F(OptimizerCSETest, Simple_SameOps_SameAttrs2) {
       "    attr { key: 't' value { type: DT_INT32 } }"
       "    attr { key: 'a' value { i: 3 } } }");
   EXPECT_EQ(DoCSE(),
+<<<<<<< HEAD
             "A(Input);B(Input);C(Mul)|"
             "A->C;B->C:1");
+=======
+            "A(Input);B(Input);D(Mul)|"
+            "A->D;B->D:1");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(OptimizerCSETest, SameConstants) {
@@ -249,8 +303,13 @@ TEST_F(OptimizerCSETest, SameConstants) {
       "node { name: 'D' op: 'Mul' attr { key: 'T' value { type: DT_INT32 } }"
       " input: ['A', 'B'] }");
   EXPECT_EQ(DoCSE(),
+<<<<<<< HEAD
             "A(Const);D(Mul)|"
             "A->D;A->D:1");
+=======
+            "B(Const);D(Mul)|"
+            "B->D;B->D:1");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(OptimizerCSETest, DifferentConstants) {
@@ -327,7 +386,11 @@ TEST_F(OptimizerCSETest, Constant_Dedup) {
 
   // A graph contains a bunch of constants.
   Graph g(OpRegistry::Global());
+<<<<<<< HEAD
   for (const auto& val : {a, b, c, d, d, c, b, a}) {
+=======
+  for (auto val : {a, b, c, d, d, c, b, a}) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     test::graph::Constant(&g, val);  // Node name is n/_0, n/_1, ...
   }
   GraphDef gdef;
@@ -337,6 +400,7 @@ TEST_F(OptimizerCSETest, Constant_Dedup) {
   EXPECT_EQ(OriginalGraph(),
             "n/_0(Const);n/_1(Const);n/_2(Const);n/_3(Const);"
             "n/_4(Const);n/_5(Const);n/_6(Const);n/_7(Const)|");
+<<<<<<< HEAD
   std::vector<string> nodes = str_util::Split(DoCSE(), ";|");
   std::set<string> node_set(nodes.begin(), nodes.end());
   // Expect exactly one of each type of node to be retained after CSE.
@@ -344,6 +408,11 @@ TEST_F(OptimizerCSETest, Constant_Dedup) {
   EXPECT_EQ(node_set.count("n/_1(Const)") + node_set.count("n/_6(Const)"), 1);
   EXPECT_EQ(node_set.count("n/_2(Const)") + node_set.count("n/_5(Const)"), 1);
   EXPECT_EQ(node_set.count("n/_3(Const)") + node_set.count("n/_4(Const)"), 1);
+=======
+  // In theory, there are 2^4 possible correct output of CSE.  In this
+  // test, it happens happens to eliminate the first 4 nodes.
+  EXPECT_EQ(DoCSE(), "n/_4(Const);n/_5(Const);n/_6(Const);n/_7(Const)|");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 static void BM_CSE(int iters, int op_nodes) {

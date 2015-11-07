@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,13 @@ limitations under the License.
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/framework/kernel_def_builder.h"
+
+#include "tensorflow/core/framework/kernel_def.pb.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -73,6 +81,7 @@ TEST(KernelDefBuilderTest, TypeConstraint) {
   delete def;
 }
 
+<<<<<<< HEAD
 TEST(KernelDefBuilderTest, Int64Constraint) {
   const KernelDef* def =
       KernelDefBuilder("B").Device(DEVICE_GPU).AttrConstraint("T", 5ll).Build();
@@ -153,6 +162,8 @@ TEST(KernelDefBuilderTest, StringConstraint) {
   delete def;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(KernelDefBuilderTest, HostMemory) {
   const KernelDef* def = KernelDefBuilder("E")
                              .Device(DEVICE_GPU)

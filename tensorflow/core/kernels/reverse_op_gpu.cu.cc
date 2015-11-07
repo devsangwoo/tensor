@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +15,9 @@ limitations under the License.
 ==============================================================================*/
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define EIGEN_USE_GPU
 
@@ -25,6 +29,7 @@ namespace tensorflow {
 
 typedef Eigen::GpuDevice GPUDevice;
 
+<<<<<<< HEAD
 #define DEFINE_REVERSE(T, DIM) \
   template struct functor::Reverse<GPUDevice, T, DIM>;
 #define DEFINE_REVERSE_ALL_DIMS(T) \
@@ -52,3 +57,26 @@ TF_CALL_complex128(DEFINE_REVERSE_ALL_DIMS);
 }  // namespace tensorflow
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#define DEFINE_REVERSE(DIM)                                \
+  template struct functor::Reverse<GPUDevice, uint8, DIM>; \
+  template struct functor::Reverse<GPUDevice, int8, DIM>;  \
+  template struct functor::Reverse<GPUDevice, int32, DIM>; \
+  template struct functor::Reverse<GPUDevice, bool, DIM>;  \
+  template struct functor::Reverse<GPUDevice, float, DIM>; \
+  template struct functor::Reverse<GPUDevice, double, DIM>;
+DEFINE_REVERSE(0)
+DEFINE_REVERSE(1)
+DEFINE_REVERSE(2)
+DEFINE_REVERSE(3)
+DEFINE_REVERSE(4)
+DEFINE_REVERSE(5)
+DEFINE_REVERSE(6)
+DEFINE_REVERSE(7)
+DEFINE_REVERSE(8)
+#undef DEFINE_REVERSE
+
+}  // namespace tensorflow
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

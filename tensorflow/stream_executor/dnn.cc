@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,6 +73,17 @@ string QuantizedActivationModeString(QuantizedActivationMode mode) {
   return "unknown quantized_activation_mode";
 }
 
+=======
+#include "tensorflow/stream_executor/dnn.h"
+
+#include "tensorflow/stream_executor/lib/strcat.h"
+#include "tensorflow/stream_executor/lib/stringprintf.h"
+
+namespace perftools {
+namespace gputools {
+namespace dnn {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 string ActivationModeString(ActivationMode mode) {
   switch (mode) {
     case ActivationMode::kSigmoid:
@@ -84,12 +96,18 @@ string ActivationModeString(ActivationMode mode) {
       return "reluX";
     case ActivationMode::kTanh:
       return "tanh";
+<<<<<<< HEAD
     case ActivationMode::kBandPass:
       return "bandpass";
     default:
       LOG(FATAL) << "Unknown activation_mode " << static_cast<int32>(mode);
   }
   return "unknown activation_mode";
+=======
+    default:
+      LOG(FATAL) << "Unknown activation_mode " << static_cast<int32>(mode);
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 string ElementwiseOperationString(ElementwiseOperation op) {
@@ -101,7 +119,10 @@ string ElementwiseOperationString(ElementwiseOperation op) {
     default:
       LOG(FATAL) << "Unknown elementwise op " << static_cast<int32>(op);
   }
+<<<<<<< HEAD
   return "unknown element wise op";
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 string DataLayoutString(DataLayout layout) {
@@ -114,22 +135,31 @@ string DataLayoutString(DataLayout layout) {
       return "BatchYXDepth";
     case DataLayout::kBatchDepthYX:
       return "BatchDepthYX";
+<<<<<<< HEAD
     case DataLayout::kBatchDepthYX4:
       return "BatchDepthYX4";
     default:
       LOG(FATAL) << "Unknown data layout " << static_cast<int32>(layout);
   }
   return "unknown data layout";
+=======
+    default:
+      LOG(FATAL) << "Unknown data layout " << static_cast<int32>(layout);
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 string FilterLayoutString(FilterLayout layout) {
   switch (layout) {
     case FilterLayout::kOutputInputYX:
       return "OutputInputYX";
+<<<<<<< HEAD
     case FilterLayout::kOutputYXInput:
       return "OutputYXInput";
     case FilterLayout::kOutputInputYX4:
       return "OutputInputYX4";
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     case FilterLayout::kInputYXOutput:
       return "InputYXOutput";
     case FilterLayout::kYXInputOutput:
@@ -137,6 +167,7 @@ string FilterLayoutString(FilterLayout layout) {
     default:
       LOG(FATAL) << "Unknown filter layout " << static_cast<int32>(layout);
   }
+<<<<<<< HEAD
   return "unknown filter layout";
 }
 
@@ -240,10 +271,13 @@ string AlgorithmConfig::ToString() const {
     algo_no_scratch = algorithm_no_scratch()->ToString();
   }
   return absl::StrCat(algo, ", ", algo_no_scratch);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // -- BatchDescriptor
 
+<<<<<<< HEAD
 BatchDescriptor::BatchDescriptor(int ndims)
     : value_max_(0.0),
       value_min_(0.0),
@@ -286,10 +320,31 @@ void BatchDescriptor::CloneFrom(const BatchDescriptor& other) {
   tensor_ = other.tensor_;
   value_max_ = other.value_max_;
   value_min_ = other.value_min_;
+=======
+BatchDescriptor::BatchDescriptor()
+    : count_(0),
+      feature_map_count_(0),
+      height_(0),
+      width_(0),
+      value_max_(0.0),
+      value_min_(0.0),
+      layout_(DataLayout::kYXDepthBatch),
+      quantized_activation_mode_(QuantizedActivationMode::k8Bit) {}
+
+void BatchDescriptor::CloneFrom(const BatchDescriptor& other) {
+  count_ = other.count_;
+  feature_map_count_ = other.feature_map_count_;
+  height_ = other.height_;
+  width_ = other.width_;
+  value_max_ = other.value_max_;
+  value_min_ = other.value_min_;
+  layout_ = other.layout_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   quantized_activation_mode_ = other.quantized_activation_mode_;
 }
 
 string BatchDescriptor::ToString() const {
+<<<<<<< HEAD
   string spatial;
   for (int i = 0; i < ndims(); i++) {
     absl::StrAppendFormat(&spatial, "%d ", spatial_size()[i]);
@@ -299,12 +354,20 @@ string BatchDescriptor::ToString() const {
       "value_min: %f value_max: %f layout: %s}",
       count(), feature_map_count(), spatial, value_min_, value_max_,
       DataLayoutString(layout()));
+=======
+  return port::Printf(
+      "{count: %lld feature_map_count: %lld height: %lld width: %lld "
+      "value_min: %f value_max: %f layout: %s}",
+      count_, feature_map_count_, height_, width_, value_min_, value_max_,
+      DataLayoutString(layout_).c_str());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 string BatchDescriptor::ToShortString() const {
   // All the constituent strings are less than 15 characters, so the
   // small string optimization ensures that there will be at most one
   // heap memory allocation.
+<<<<<<< HEAD
   string depth = absl::StrCat("d", feature_map_count());
   string batch = absl::StrCat("b", count());
 
@@ -316,6 +379,16 @@ string BatchDescriptor::ToShortString() const {
   string suffix;
   if (value_min() != value_max()) {
     absl::StrAppend(&suffix, "[", value_min(), ";", value_max(), "]");
+=======
+  string x = port::StrCat("x", width());
+  string y = port::StrCat("y", height());
+  string depth = port::StrCat("d", feature_map_count());
+  string batch = port::StrCat("b", count());
+
+  string suffix;
+  if (value_min() != value_max()) {
+    port::StrAppend(&suffix, "[", value_min(), ";", value_max(), "]");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   if (quantized_activation_mode() == QuantizedActivationMode::k16Bit) {
     suffix += "_16bit";
@@ -323,6 +396,7 @@ string BatchDescriptor::ToShortString() const {
 
   switch (layout()) {
     case DataLayout::kYXDepthBatch:
+<<<<<<< HEAD
       return absl::StrCat(spatial, depth, batch, suffix);
     case DataLayout::kYXBatchDepth:
       return absl::StrCat(spatial, batch, depth, suffix);
@@ -352,6 +426,28 @@ int64 BatchDescriptor::NodesAcrossFeatureMaps() const {
 
 int64 BatchDescriptor::ElementCount() const {
   return count() * feature_map_count() * NodesPerFeatureMap();
+=======
+      return port::StrCat(y, x, depth, batch, suffix);
+    case DataLayout::kYXBatchDepth:
+      return port::StrCat(y, x, batch, depth, suffix);
+    case DataLayout::kBatchYXDepth:
+      return port::StrCat(batch, y, x, depth, suffix);
+    case DataLayout::kBatchDepthYX:
+      return port::StrCat(batch, depth, y, x, suffix);
+    default:
+      LOG(FATAL) << "Unknown layout " << static_cast<int32>(layout());
+  }
+}
+
+int64 BatchDescriptor::NodesPerFeatureMap() const { return width_ * height_; }
+
+int64 BatchDescriptor::NodesAcrossFeatureMaps() const {
+  return NodesPerFeatureMap() * feature_map_count_;
+}
+
+int64 BatchDescriptor::ElementCount() const {
+  return count_ * feature_map_count_ * height_ * width_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 int64 BatchDescriptor::FullyConnectedWeightCount(
@@ -363,6 +459,7 @@ int64 BatchDescriptor::FullyConnectedBiasCount(const BatchDescriptor& output) {
   return output.NodesAcrossFeatureMaps();
 }
 
+<<<<<<< HEAD
 BatchDescriptor BatchDescriptor::DepthConcatenateOutputDescriptor(
     port::ArraySlice<dnn::BatchDescriptor> inputs) {
   if (inputs.empty()) {
@@ -395,10 +492,21 @@ FilterDescriptor::FilterDescriptor(int ndims) {
 }
 
 FilterDescriptor::FilterDescriptor() : FilterDescriptor(/*ndims=*/2) {}
+=======
+// -- FilterDescriptor
+
+FilterDescriptor::FilterDescriptor()
+    : output_feature_map_count_(0),
+      input_feature_map_count_(0),
+      input_filter_height_(0),
+      input_filter_width_(0),
+      layout_(FilterLayout::kOutputInputYX) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 FilterDescriptor::~FilterDescriptor() {}
 
 void FilterDescriptor::CloneFrom(const FilterDescriptor& other) {
+<<<<<<< HEAD
   tensor_ = other.tensor_;
 }
 
@@ -414,12 +522,28 @@ string FilterDescriptor::ToString() const {
   absl::StrAppend(&desc, "}");
 
   return desc;
+=======
+  set_output_feature_map_count(other.output_feature_map_count())
+      .set_input_feature_map_count(other.input_feature_map_count())
+      .set_input_filter_height(other.input_filter_height())
+      .set_input_filter_width(other.input_filter_width())
+      .set_layout(other.layout());
+}
+
+string FilterDescriptor::ToString() const {
+  return port::Printf(
+      "{output_feature_map_count: %lld input_feature_map_count: %lld "
+      "input_filter_height: %lld input_filter_width: %lld layout: %s}",
+      output_feature_map_count_, input_feature_map_count_, input_filter_height_,
+      input_filter_width_, FilterLayoutString(layout_).c_str());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 string FilterDescriptor::ToShortString() const {
   // All the constituent strings are less than 15 characters, so the
   // small string optimization ensures that there will be at most one
   // heap memory allocation.
+<<<<<<< HEAD
   string od = absl::StrCat("od", output_feature_map_count());
   string id = absl::StrCat("id", input_feature_map_count());
 
@@ -442,10 +566,27 @@ string FilterDescriptor::ToShortString() const {
     default:
       LOG(FATAL) << "Unknown layout " << static_cast<int32>(layout());
       return "";  // Avoid return warning (unreachable)
+=======
+  string od = port::StrCat("od", output_feature_map_count_);
+  string id = port::StrCat("id", input_feature_map_count_);
+  string y = port::StrCat("y", input_filter_height_);
+  string x = port::StrCat("x", input_filter_width_);
+
+  switch (layout_) {
+    case FilterLayout::kOutputInputYX:
+      return port::StrCat(od, id, y, x);
+    case FilterLayout::kInputYXOutput:
+      return port::StrCat(id, y, x, od);
+    case FilterLayout::kYXInputOutput:
+      return port::StrCat(y, x, id, od);
+    default:
+      LOG(FATAL) << "Unknown layout " << static_cast<int32>(layout_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
 int64 FilterDescriptor::ComputeWeightCount() const {
+<<<<<<< HEAD
   int64 ret = output_feature_map_count() * input_feature_map_count();
   for (int i = 0; i < ndims(); i++) {
     ret *= input_filter_dims()[i];
@@ -457,10 +598,15 @@ TensorDescriptorProto FilterDescriptor::ToProto(DataType data_type) const {
   TensorDescriptorProto ret = tensor_;
   ret.set_data_type(data_type);
   return ret;
+=======
+  return output_feature_map_count_ * input_feature_map_count_ *
+         input_filter_height_ * input_filter_width_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // -- ConvolutionDescriptor
 
+<<<<<<< HEAD
 ConvolutionDescriptor::ConvolutionDescriptor(int ndims) {
   proto_.mutable_paddings()->Resize(ndims, 0);
   proto_.mutable_strides()->Resize(ndims, 1);
@@ -471,10 +617,18 @@ ConvolutionDescriptor::ConvolutionDescriptor(int ndims) {
 
 ConvolutionDescriptor::ConvolutionDescriptor()
     : ConvolutionDescriptor(/*ndims=*/2) {}
+=======
+ConvolutionDescriptor::ConvolutionDescriptor()
+    : zero_padding_height_(0),
+      zero_padding_width_(0),
+      vertical_filter_stride_(1),
+      horizontal_filter_stride_(1) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 ConvolutionDescriptor::~ConvolutionDescriptor() {}
 
 string ConvolutionDescriptor::ToString() const {
+<<<<<<< HEAD
   string padding;
   string strides;
   string dilations;
@@ -503,10 +657,24 @@ string ConvolutionDescriptor::ToShortString() const {
     absl::StrAppendFormat(&desc, "_d%d:%d", i, dilations()[i]);
   }
   return desc;
+=======
+  return port::Printf(
+      "{zero_padding_height: %lld zero_padding_width: %lld "
+      "vertical_filter_stride: %lld horizontal_filter_stride: %lld}",
+      zero_padding_height_, zero_padding_width_, vertical_filter_stride_,
+      horizontal_filter_stride_);
+}
+
+string ConvolutionDescriptor::ToShortString() const {
+  return port::StrCat("py:", zero_padding_height_, "_px:", zero_padding_width_,
+                      "_sy:", vertical_filter_stride_, "_sx:",
+                      horizontal_filter_stride_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // -- PoolingDescriptor
 
+<<<<<<< HEAD
 PoolingDescriptor::PoolingDescriptor(int ndims)
     : mode_(dnn::PoolingMode::kMaximum),
       ndims_(ndims),
@@ -524,11 +692,31 @@ void PoolingDescriptor::CloneFrom(const PoolingDescriptor& other) {
   padding_ = other.padding_;
   strides_ = other.strides_;
   propagate_nans_ = other.propagate_nans_;
+=======
+PoolingDescriptor::PoolingDescriptor()
+    : mode_(dnn::PoolingMode::kMaximum),
+      window_height_(0),
+      window_width_(0),
+      vertical_padding_(0),
+      horizontal_padding_(0),
+      vertical_stride_(0),
+      horizontal_stride_(0) {}
+
+void PoolingDescriptor::CloneFrom(const PoolingDescriptor& other) {
+  mode_ = other.mode_;
+  window_height_ = other.window_height_;
+  window_width_ = other.window_width_;
+  vertical_padding_ = other.vertical_padding_;
+  horizontal_padding_ = other.horizontal_padding_;
+  vertical_stride_ = other.vertical_stride_;
+  horizontal_stride_ = other.horizontal_stride_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 string PoolingDescriptor::ToString() const {
   const char* mode_string =
       mode_ == dnn::PoolingMode::kMaximum ? "kMaximum" : "kAverage";
+<<<<<<< HEAD
 
   string window, strides, padding;
   for (int i = 0; i < ndims_; i++) {
@@ -554,6 +742,21 @@ string PoolingDescriptor::ToShortString() const {
   return absl::StrCat(mode_ == dnn::PoolingMode::kMaximum ? "max" : "avg",
                       window, strides, padding,
                       propagate_nans_ ? "propagate_nans" : "ignore_nans");
+=======
+  return port::Printf(
+      "{mode: %s window_height: %lld window_width: %lld vertical_stride: %lld "
+      "horizontal_stride: %lld vertical padding: %lld horizontal padding: "
+      "%lld}",
+      mode_string, window_height_, window_width_, vertical_stride_,
+      horizontal_stride_, vertical_padding_, horizontal_padding_);
+}
+
+string PoolingDescriptor::ToShortString() const {
+  return port::StrCat(mode_ == dnn::PoolingMode::kMaximum ? "max" : "avg",
+                      "_y:", window_height_, "_x:", window_width_, "_py:",
+                      vertical_padding_, "_px:", horizontal_padding_, "_sy:",
+                      vertical_stride_, "_sx:", horizontal_stride_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // -- NormalizeDescriptor
@@ -576,13 +779,18 @@ void NormalizeDescriptor::CloneFrom(const NormalizeDescriptor& other) {
 }
 
 string NormalizeDescriptor::ToString() const {
+<<<<<<< HEAD
   return absl::StrFormat(
+=======
+  return port::Printf(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       "{bias: %f range: %d alpha: %f beta: %f wrap_around: %d "
       "segment_size: %d}",
       bias_, range_, alpha_, beta_, wrap_around_, segment_size_);
 }
 
 string NormalizeDescriptor::ToShortString() const {
+<<<<<<< HEAD
   return absl::StrCat("bias:", bias_, "_range:", range_, "_alpha:", alpha_,
                       "_beta:", beta_, "_wrap:", wrap_around_,
                       "_size:", segment_size_);
@@ -600,3 +808,13 @@ bool DnnSupport::IsStatusOk(const port::Status& status, bool report_error) {
 
 }  // namespace dnn
 }  // namespace stream_executor
+=======
+  return port::StrCat("bias:", bias_, "_range:", range_, "_alpha:", alpha_,
+                      "_beta:", beta_, "_wrap:", wrap_around_, "_size:",
+                      segment_size_);
+}
+
+}  // namespace dnn
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

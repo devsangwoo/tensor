@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +18,17 @@ limitations under the License.
 #define TENSORFLOW_CORE_FRAMEWORK_RESOURCE_MGR_H_
 
 #include <memory>
+=======
+#ifndef TENSORFLOW_FRAMEWORK_RESOURCE_MGR_H_
+#define TENSORFLOW_FRAMEWORK_RESOURCE_MGR_H_
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <string>
 #include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
 
+<<<<<<< HEAD
 #include "tensorflow/core/framework/common_shape_fns.h"
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/resource_handle.h"
@@ -38,6 +45,15 @@ limitations under the License.
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/thread_annotations.h"
+=======
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/lib/core/refcount.h"
+#include "tensorflow/core/lib/hash/hash.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/thread_annotations.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -63,9 +79,15 @@ namespace tensorflow {
 //
 //   // Create a var.
 //   MyVar* my_var = new MyVar;
+<<<<<<< HEAD
 //   my_var->val = Tensor(DT_FLOAT, my_shape);
 //   my_var->val.flat<float>().setZeros();   // 0 initialized.
 //   ctx->SetStatus(rm.Create("my_container", "my_name", my_var));
+=======
+//   my_var.val = Tensor(DT_FLOAT, my_shape);
+//   my_val.val.flat<float>().setZeros();   // 0 initialized.
+//   ctx->SetStatus(rm.Create("my_container", "my_name", my_val));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 //   // += a variable.
 //   MyVar* my_var = nullptr;
@@ -78,6 +100,7 @@ namespace tensorflow {
 class ResourceBase : public core::RefCounted {
  public:
   // Returns a debug string for *this.
+<<<<<<< HEAD
   virtual string DebugString() const = 0;
 
   // Returns memory used by this resource.
@@ -151,6 +174,9 @@ class ScopedStepContainer {
   const std::function<void(const string&)> cleanup_;
   mutex mu_;
   mutable std::atomic<bool> dirty_ GUARDED_BY(mu_);
+=======
+  virtual string DebugString() = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 class ResourceMgr {
@@ -163,8 +189,12 @@ class ResourceMgr {
   const string& default_container() const { return default_container_; }
 
   // Creates a resource "name" in the "container".  The caller transfers
+<<<<<<< HEAD
   // the ownership of one ref on "resource" to *this, regardless of whether this
   // operation succeeds or fails.
+=======
+  // the ownership of one ref on "resource" to *this
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //
   // REQUIRES: std::is_base_of<ResourceBase, T>
   // REQUIRES: resource != nullptr.
@@ -177,6 +207,7 @@ class ResourceMgr {
   //
   // REQUIRES: std::is_base_of<ResourceBase, T>
   // REQUIRES: resource != nullptr
+<<<<<<< HEAD
   template <typename T, bool use_dynamic_cast = false>
   Status Lookup(const string& container, const string& name,
                 T** resource) const TF_MUST_USE_RESULT;
@@ -190,10 +221,17 @@ class ResourceMgr {
                     std::vector<std::unique_ptr<T, core::RefCountDeleter>>*
                         resources) const TF_MUST_USE_RESULT;
 
+=======
+  template <typename T>
+  Status Lookup(const string& container, const string& name,
+                T** resource) const TF_MUST_USE_RESULT;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // If "container" has a resource "name", returns it in
   // "*resource". Otherwise, invokes creator() to create the resource.
   // The caller takes the ownership of one ref on "*resource".
   //
+<<<<<<< HEAD
   // WARNING: creator() must not call any methods on ResourceMgr during its
   // execution, because a non-reentrant lock is held during the creator() call
   // in order to guarantee atomicity of LookupOrCreate().
@@ -201,6 +239,11 @@ class ResourceMgr {
   // REQUIRES: std::is_base_of<ResourceBase, T>
   // REQUIRES: resource != nullptr
   template <typename T, bool use_dynamic_cast = false>
+=======
+  // REQUIRES: std::is_base_of<ResourceBase, T>
+  // REQUIRES: resource != nullptr
+  template <typename T>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Status LookupOrCreate(const string& container, const string& name,
                         T** resource,
                         std::function<Status(T**)> creator) TF_MUST_USE_RESULT;
@@ -211,15 +254,19 @@ class ResourceMgr {
   template <typename T>
   Status Delete(const string& container, const string& name) TF_MUST_USE_RESULT;
 
+<<<<<<< HEAD
   // Deletes the resource pointed by "handle".
   Status Delete(const ResourceHandle& handle) TF_MUST_USE_RESULT;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Deletes all resources from the "container" and removes the container.
   Status Cleanup(const string& container) TF_MUST_USE_RESULT;
 
   // Deletes all resources in all containers.
   void Clear();
 
+<<<<<<< HEAD
   // Returns a text description for all resources.
   string DebugString() const;
 
@@ -228,6 +275,13 @@ class ResourceMgr {
   struct KeyHash {
     std::size_t operator()(const Key& k) const {
       return Hash64(k.second.data(), k.second.size(), k.first);
+=======
+ private:
+  typedef std::pair<std::type_index, string> Key;
+  struct KeyHash {
+    std::size_t operator()(const Key& k) const {
+      return Hash64(k.second.data(), k.second.size(), k.first.hash_code());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   };
   struct KeyEqual {
@@ -235,6 +289,7 @@ class ResourceMgr {
       return (x.second == y.second) && (x.first == y.first);
     }
   };
+<<<<<<< HEAD
   struct ResourceAndName {
     core::RefCountPtr<ResourceBase> resource;
     std::unique_ptr<string> name;
@@ -250,11 +305,15 @@ class ResourceMgr {
     TF_DISALLOW_COPY_AND_ASSIGN(ResourceAndName);
   };
   typedef std::unordered_map<Key, ResourceAndName, KeyHash, KeyEqual> Container;
+=======
+  typedef std::unordered_map<Key, ResourceBase*, KeyHash, KeyEqual> Container;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   const string default_container_;
   mutable mutex mu_;
   std::unordered_map<string, Container*> containers_ GUARDED_BY(mu_);
 
+<<<<<<< HEAD
   template <typename T, bool use_dynamic_cast = false>
   Status LookupInternal(const string& container, const string& name,
                         T** resource) const
@@ -286,10 +345,21 @@ class ResourceMgr {
 
   // Map from type hash_code to type name.
   std::unordered_map<uint64, string> debug_type_names_ GUARDED_BY(mu_);
+=======
+  Status DoCreate(const string& container, std::type_index type,
+                  const string& name,
+                  ResourceBase* resource) TF_MUST_USE_RESULT;
+  Status DoLookup(const string& container, std::type_index type,
+                  const string& name,
+                  ResourceBase** resource) const TF_MUST_USE_RESULT;
+  Status DoDelete(const string& container, std::type_index type,
+                  const string& name) TF_MUST_USE_RESULT;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   TF_DISALLOW_COPY_AND_ASSIGN(ResourceMgr);
 };
 
+<<<<<<< HEAD
 // Makes a resource handle with the specified type for a given container /
 // name.
 ResourceHandle MakeResourceHandle(
@@ -373,6 +443,8 @@ Status DeleteResource(OpKernelContext* ctx, const ResourceHandle& p);
 // resource is not present in the container.
 Status DeleteResource(OpKernelContext* ctx, const ResourceHandle& p);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Policy helper to decide which container/shared_name to use for a
 // stateful kernel that accesses shared resource.
 class ContainerInfo {
@@ -432,6 +504,7 @@ template <typename T>
 Status GetResourceFromContext(OpKernelContext* ctx, const string& input_name,
                               T** resource);
 
+<<<<<<< HEAD
 // Utility op kernel to check if a handle to resource type T is initialized.
 template <typename T>
 class IsResourceInitialized : public OpKernel {
@@ -569,6 +642,8 @@ class ResourceDeleter {
   std::shared_ptr<Helper> deleter_;
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Implementation details below.
 
 template <typename T>
@@ -582,6 +657,7 @@ Status ResourceMgr::Create(const string& container, const string& name,
                            T* resource) {
   CheckDeriveFromResourceBase<T>();
   CHECK(resource != nullptr);
+<<<<<<< HEAD
   mutex_lock l(mu_);
   return DoCreate(container, MakeTypeIndex<T>(), name, resource);
 }
@@ -634,10 +710,26 @@ Status ResourceMgr::LookupInternal(const string& container, const string& name,
     // It's safe to down cast 'found' to T* since
     // typeid(T).hash_code() is part of the map key.
     *resource = TypeCastFunctor<T, use_dynamic_cast>::Cast(found);
+=======
+  return DoCreate(container, std::type_index(typeid(T)), name, resource);
+}
+
+template <typename T>
+Status ResourceMgr::Lookup(const string& container, const string& name,
+                           T** resource) const {
+  CheckDeriveFromResourceBase<T>();
+  ResourceBase* found = nullptr;
+  Status s = DoLookup(container, std::type_index(typeid(T)), name, &found);
+  if (s.ok()) {
+    // It's safe to down cast 'found' to T* since
+    // typeid(T).hash_code() is part of the map key.
+    *resource = static_cast<T*>(found);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return s;
 }
 
+<<<<<<< HEAD
 template <typename T, bool use_dynamic_cast>
 Status ResourceMgr::LookupOrCreate(const string& container, const string& name,
                                    T** resource,
@@ -659,18 +751,44 @@ Status ResourceMgr::LookupOrCreate(const string& container, const string& name,
     return errors::Internal("LookupOrCreate failed unexpectedly");
   }
   (*resource)->Ref();
+=======
+template <typename T>
+Status ResourceMgr::LookupOrCreate(const string& container, const string& name,
+                                   T** resource,
+                                   std::function<Status(T**)> creator) {
+  Status s;
+  *resource = nullptr;
+  while (*resource == nullptr) {
+    s = Lookup(container, name, resource);
+    if (s.ok()) break;
+    s = creator(resource);
+    if (!s.ok()) break;
+    s = Create(container, name, *resource);
+    if (s.ok()) {
+      (*resource)->Ref();
+      break;
+    }
+    // Rare event. Concurrent racy creation. Redo the lookup.
+    *resource = nullptr;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return s;
 }
 
 template <typename T>
 Status ResourceMgr::Delete(const string& container, const string& name) {
   CheckDeriveFromResourceBase<T>();
+<<<<<<< HEAD
   return DoDelete(container, MakeTypeIndex<T>(), name);
+=======
+  return DoDelete(container, std::type_index(typeid(T)), name);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 template <typename T>
 Status GetResourceFromContext(OpKernelContext* ctx, const string& input_name,
                               T** resource) {
+<<<<<<< HEAD
   DataType dtype;
   TF_RETURN_IF_ERROR(ctx->input_dtype(input_name, &dtype));
   if (dtype == DT_RESOURCE) {
@@ -678,6 +796,8 @@ Status GetResourceFromContext(OpKernelContext* ctx, const string& input_name,
     TF_RETURN_IF_ERROR(ctx->input(input_name, &handle));
     return LookupResource(ctx, handle->scalar<ResourceHandle>()(), resource);
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string container;
   string shared_name;
   {
@@ -691,12 +811,18 @@ Status GetResourceFromContext(OpKernelContext* ctx, const string& input_name,
           "Resource handle must have 2 elements, but had shape: ",
           tensor.shape().DebugString());
     }
+<<<<<<< HEAD
     container = tensor.flat<tstring>()(0);
     shared_name = tensor.flat<tstring>()(1);
+=======
+    container = tensor.flat<string>()(0);
+    shared_name = tensor.flat<string>()(1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return ctx->resource_manager()->Lookup(container, shared_name, resource);
 }
 
+<<<<<<< HEAD
 namespace internal {
 
 Status ValidateDevice(OpKernelContext* ctx, const ResourceHandle& p);
@@ -911,3 +1037,8 @@ Status ScopedStepContainer::Delete(ResourceMgr* rm, const string& name) {
 }  //  end namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_RESOURCE_MGR_H_
+=======
+}  //  end namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_RESOURCE_MGR_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

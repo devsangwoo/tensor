@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Description:
 #   Eigen is a C++ template library for linear algebra: vectors,
 #   matrices, and related algorithms.
@@ -75,3 +76,15 @@ genrule(
     """,
     tags = ["manual"],
 )
+=======
+licenses(["restricted"])  # MPL2, portions GPL v3, LGPL v3, BSD-like
+
+cc_library(
+    name = "eigen3",
+    hdrs = glob([
+        "**/*.h",
+    ]),
+    includes = [ "." ],
+    visibility = ["//visibility:public"],
+)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

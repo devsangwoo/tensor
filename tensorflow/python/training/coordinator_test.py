@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,10 +19,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+=======
+"""Tests for Coordinator."""
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import sys
 import threading
 import time
 
+<<<<<<< HEAD
 from tensorflow.python.framework import errors_impl
 from tensorflow.python.platform import test
 from tensorflow.python.training import coordinator
@@ -38,10 +43,28 @@ def RaiseOnEvent(coord, wait_for_stop, set_when_stopped, ex, report_exception):
     wait_for_stop.wait()
     raise ex
   except RuntimeError as e:
+=======
+import tensorflow.python.platform
+
+import tensorflow as tf
+
+
+def StopInN(coord, n_secs):
+  time.sleep(n_secs)
+  coord.request_stop()
+
+
+def RaiseInN(coord, n_secs, ex, report_exception):
+  try:
+    time.sleep(n_secs)
+    raise ex
+  except RuntimeError, e:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if report_exception:
       coord.request_stop(e)
     else:
       coord.request_stop(sys.exc_info())
+<<<<<<< HEAD
   finally:
     if set_when_stopped:
       set_when_stopped.set()
@@ -73,6 +96,18 @@ class CoordinatorTest(test.TestCase):
 
   def testStopAPI(self):
     coord = coordinator.Coordinator()
+=======
+
+
+def SleepABit(n_secs):
+  time.sleep(n_secs)
+
+
+class CoordinatorTest(tf.test.TestCase):
+
+  def testStopAPI(self):
+    coord = tf.train.Coordinator()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     self.assertFalse(coord.should_stop())
     self.assertFalse(coord.wait_for_stop(0.01))
     coord.request_stop()
@@ -80,6 +115,7 @@ class CoordinatorTest(test.TestCase):
     self.assertTrue(coord.wait_for_stop(0.01))
 
   def testStopAsync(self):
+<<<<<<< HEAD
     coord = coordinator.Coordinator()
     self.assertFalse(coord.should_stop())
     self.assertFalse(coord.wait_for_stop(0.1))
@@ -194,10 +230,52 @@ class CoordinatorTest(test.TestCase):
 
     ev_1.set()
 
+=======
+    coord = tf.train.Coordinator()
+    self.assertFalse(coord.should_stop())
+    self.assertFalse(coord.wait_for_stop(0.1))
+    threading.Thread(target=StopInN, args=(coord, 0.02)).start()
+    self.assertFalse(coord.should_stop())
+    self.assertFalse(coord.wait_for_stop(0.01))
+    self.assertTrue(coord.wait_for_stop(0.03))
+    self.assertTrue(coord.should_stop())
+
+  def testJoin(self):
+    coord = tf.train.Coordinator()
+    threads = [
+        threading.Thread(target=SleepABit, args=(0.01,)),
+        threading.Thread(target=SleepABit, args=(0.02,)),
+        threading.Thread(target=SleepABit, args=(0.01,))]
+    for t in threads:
+      t.start()
+    coord.join(threads)
+
+  def testJoinGraceExpires(self):
+    coord = tf.train.Coordinator()
+    threads = [
+        threading.Thread(target=StopInN, args=(coord, 0.01)),
+        threading.Thread(target=SleepABit, args=(10.0,))]
+    for t in threads:
+      t.daemon = True
+      t.start()
+    with self.assertRaisesRegexp(RuntimeError, "threads still running"):
+      coord.join(threads, stop_grace_period_secs=0.02)
+
+  def testJoinRaiseReportExcInfo(self):
+    coord = tf.train.Coordinator()
+    threads = [
+        threading.Thread(target=RaiseInN,
+                         args=(coord, 0.01, RuntimeError("First"), False)),
+        threading.Thread(target=RaiseInN,
+                         args=(coord, 0.02, RuntimeError("Too late"), False))]
+    for t in threads:
+      t.start()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     with self.assertRaisesRegexp(RuntimeError, "First"):
       coord.join(threads)
 
   def testJoinRaiseReportException(self):
+<<<<<<< HEAD
     coord = coordinator.Coordinator()
     ev_1 = threading.Event()
     ev_2 = threading.Event()
@@ -375,3 +453,19 @@ class LooperTest(test.TestCase):
 
 if __name__ == "__main__":
   test.main()
+=======
+    coord = tf.train.Coordinator()
+    threads = [
+        threading.Thread(target=RaiseInN,
+                         args=(coord, 0.01, RuntimeError("First"), True)),
+        threading.Thread(target=RaiseInN,
+                         args=(coord, 0.02, RuntimeError("Too late"), True))]
+    for t in threads:
+      t.start()
+    with self.assertRaisesRegexp(RuntimeError, "First"):
+      coord.join(threads)
+
+
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

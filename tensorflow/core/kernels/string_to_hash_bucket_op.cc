@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,13 +28,32 @@ class LegacyStringToHashBucketOp : public OpKernel {
  public:
   explicit LegacyStringToHashBucketOp(OpKernelConstruction* ctx)
       : OpKernel(ctx) {
+=======
+#include <string>
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/hash/hash.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+
+namespace tensorflow {
+
+class StringToHashBucketOp : public OpKernel {
+ public:
+  explicit StringToHashBucketOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES_OK(ctx, ctx->GetAttr("num_buckets", &num_buckets_));
   }
 
   void Compute(OpKernelContext* context) override {
     const Tensor* input_tensor;
     OP_REQUIRES_OK(context, context->input("string_tensor", &input_tensor));
+<<<<<<< HEAD
     const auto& input_flat = input_tensor->flat<tstring>();
+=======
+    const auto& input_flat = input_tensor->flat<string>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Tensor* output_tensor = nullptr;
     OP_REQUIRES_OK(context,
@@ -41,8 +61,12 @@ class LegacyStringToHashBucketOp : public OpKernel {
                                             &output_tensor));
     auto output_flat = output_tensor->flat<int64>();
 
+<<<<<<< HEAD
     typedef decltype(input_flat.size()) Index;
     for (Index i = 0; i < input_flat.size(); ++i) {
+=======
+    for (int i = 0; i < input_flat.size(); ++i) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       const uint64 input_hash = Hash64(input_flat(i));
       const uint64 bucket_id = input_hash % num_buckets_;
       // The number of buckets is always in the positive range of int64 so is
@@ -55,6 +79,7 @@ class LegacyStringToHashBucketOp : public OpKernel {
  private:
   int64 num_buckets_;
 
+<<<<<<< HEAD
   TF_DISALLOW_COPY_AND_ASSIGN(LegacyStringToHashBucketOp);
 };
 
@@ -67,5 +92,12 @@ REGISTER_KERNEL_BUILDER(Name("StringToHashBucketFast").Device(DEVICE_CPU),
 
 REGISTER_KERNEL_BUILDER(Name("StringToHashBucketStrong").Device(DEVICE_CPU),
                         StringToKeyedHashBucketOp<StrongKeyedHash>);
+=======
+  TF_DISALLOW_COPY_AND_ASSIGN(StringToHashBucketOp);
+};
+
+REGISTER_KERNEL_BUILDER(Name("StringToHashBucket").Device(DEVICE_CPU),
+                        StringToHashBucketOp);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

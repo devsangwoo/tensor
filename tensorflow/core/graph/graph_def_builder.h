@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +16,21 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_GRAPH_GRAPH_DEF_BUILDER_H_
 #define TENSORFLOW_CORE_GRAPH_GRAPH_DEF_BUILDER_H_
+=======
+#ifndef TENSORFLOW_GRAPH_GRAPH_DEF_BUILDER_H_
+#define TENSORFLOW_GRAPH_GRAPH_DEF_BUILDER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <vector>
 #include "tensorflow/core/framework/graph.pb.h"
 #include "tensorflow/core/framework/op.h"
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/graph/node_builder.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/status.h"
+=======
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/core/stringpiece.h"
 #include "tensorflow/core/lib/gtl/array_slice.h"
 
@@ -37,7 +46,11 @@ namespace tensorflow {
 //     node_builder.Input(input);
 //     return opts.FinalizeBuilder(&node_builder);
 //   }
+<<<<<<< HEAD
 //   }  // namespace ops
+=======
+//   }  // namspace ops
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 //   // Or, alternatively:
 //   namespace ops {
@@ -45,15 +58,26 @@ namespace tensorflow {
 //     static const string kOpName = "Identity";
 //     return UnaryOp(kOpName, input, opts);
 //   }
+<<<<<<< HEAD
 //   }  // namespace ops
+=======
+//   }  // namspace ops
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 // You call it like:
 //   GraphDefBuilder b;
 //   using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
+<<<<<<< HEAD
 //   Node* na = Const(7, b.opts());
 //   // Note: WithName() returns a copy, opts is unchanged.
 //   Node* nb = Const(5, b.opts().WithName("control-input"));
 //   Node* nc = Identity(na, b.opts().WithControlInput(nb));
+=======
+//   Node* a = Const(7, b.opts());
+//   // Note: WithName() returns a copy, opts is unchanged.
+//   Node* b = Const(5, b.opts().WithName("control-input"));
+//   Node* c = Identity(a, b.opts().WithControlInput(b));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //   GraphDef graph_def;
 //   Status status = b.ToGraphDef(&graph_def);
 //   if (!status.ok()) { /* Handle error */ }
@@ -99,10 +123,13 @@ class GraphDefBuilder {
     // Use this to skip processing that may depend on prior results.
     bool HaveError() const { return status_ != nullptr && !status_->ok(); }
 
+<<<<<<< HEAD
     // Returns a string representation of the status associated with *this.
     // Returns the string `"OK"` if the status doesn't have any error.
     string StatusToString() const { return status_->ToString(); }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Given the Op type name, return a name for a node of that type.
     // Uses the value set in WithName() if that has been called.  Otherwise,
     // returns a name built out of the Op type name.
@@ -128,7 +155,11 @@ class GraphDefBuilder {
     Options WithControlInputsImpl(gtl::ArraySlice<Node*> control_inputs);
     template <class T>
     Options WithAttrImpl(StringPiece name, T&& value) {
+<<<<<<< HEAD
       attrs_.emplace_back(string(name), AttrValue());
+=======
+      attrs_.emplace_back(name.ToString(), AttrValue());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       SetAttrValue(std::forward<T>(value), &attrs_.back().second);
       return *this;
     }
@@ -161,6 +192,7 @@ class GraphDefBuilder {
   // successful, and if so fill *graph_def.
   Status ToGraphDef(GraphDef* graph_def) const;
 
+<<<<<<< HEAD
   // Adds the function and gradient definitions in `fdef_lib` to this graph's op
   // registry. Ignores duplicate functions, and returns a bad status if an
   // imported function differs from an existing function or op with the same
@@ -174,6 +206,15 @@ class GraphDefBuilder {
   bool HasFunction(const string& name) {
     return graph_.flib_def().Find(name) != nullptr;
   }
+=======
+  // Like ToGraphDef(), but converts to a Graph (using the default
+  // GraphConstructorOptions).
+  // TODO(josh11b): Make this faster; right now it converts
+  // Graph->GraphDef->Graph.  This cleans up the graph (e.g. adds
+  // edges from the source and to the sink node, resolves back edges
+  // by name), and makes sure the resulting graph is valid.
+  Status ToGraph(Graph* graph) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   Graph graph_;
@@ -203,4 +244,8 @@ Node* BinaryOp(const string& op_name, NodeOut a, NodeOut b,
 }  // namespace ops
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_GRAPH_GRAPH_DEF_BUILDER_H_
+=======
+#endif  // TENSORFLOW_GRAPH_GRAPH_DEF_BUILDER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

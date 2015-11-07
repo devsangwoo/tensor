@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/sparse/sparse_tensor.h"
 
 #include <string>
 #include <vector>
 
+<<<<<<< HEAD
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/tensor_types.h"
@@ -26,6 +30,13 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include "tensorflow/core/framework/tensor_types.h"
+#include "tensorflow/core/lib/strings/str_util.h"
+#include "tensorflow/core/public/tensor.h"
+#include <gtest/gtest.h>
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace sparse {
@@ -57,7 +68,11 @@ GetSimpleIndexTensor(int N, const int NDIM) {
 }
 
 TEST(SparseTensorTest, DimComparatorSorts) {
+<<<<<<< HEAD
   int64 N = 5;
+=======
+  std::size_t N = 5;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const int NDIM = 3;
   auto ix = GetSimpleIndexTensor(N, NDIM);
   TTypes<int64>::Matrix map(ix.data(), N, NDIM);
@@ -67,6 +82,7 @@ TEST(SparseTensorTest, DimComparatorSorts) {
 
   // new order should be: {0, 4, 3, 2, 1}
   std::vector<int64> order{0, 1, 2};
+<<<<<<< HEAD
   std::vector<int64> shape{N, N, N};
   DimComparator sorter(map, order, shape);
   std::sort(sorting.begin(), sorting.end(), sorter);
@@ -74,10 +90,16 @@ TEST(SparseTensorTest, DimComparatorSorts) {
 
   FixedDimComparator<3> sorter_fixed(map, order, shape);
   std::sort(sorting.begin(), sorting.end(), sorter_fixed);
+=======
+  DimComparator sorter(map, order, NDIM);
+  std::sort(sorting.begin(), sorting.end(), sorter);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(sorting, std::vector<int64>({0, 4, 3, 2, 1}));
 
   // new order should be: {0, 3, 2, 1, 4}
   std::vector<int64> order1{2, 0, 1};
+<<<<<<< HEAD
   DimComparator sorter1(map, order1, shape);
   for (std::size_t n = 0; n < N; ++n) sorting[n] = n;
   std::sort(sorting.begin(), sorting.end(), sorter1);
@@ -166,11 +188,24 @@ TEST(SparseTensorTest, SparseTensorInvalidShape) {
       error::INVALID_ARGUMENT);
 }
 
+=======
+  DimComparator sorter1(map, order1, NDIM);
+  for (std::size_t n = 0; n < N; ++n) sorting[n] = n;
+  std::sort(sorting.begin(), sorting.end(), sorter1);
+
+  EXPECT_EQ(sorting, std::vector<int64>({0, 3, 2, 1, 4}));
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(SparseTensorTest, SparseTensorConstruction) {
   int N = 5;
   const int NDIM = 3;
   auto ix_c = GetSimpleIndexTensor(N, NDIM);
+<<<<<<< HEAD
   Eigen::Tensor<tstring, 1, Eigen::RowMajor> vals_c(N);
+=======
+  Eigen::Tensor<string, 1, Eigen::RowMajor> vals_c(N);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   vals_c(0) = "hi0";
   vals_c(1) = "hi1";
   vals_c(2) = "hi2";
@@ -181,12 +216,17 @@ TEST(SparseTensorTest, SparseTensorConstruction) {
   Tensor vals(DT_STRING, TensorShape({N}));
 
   auto ix_t = ix.matrix<int64>();
+<<<<<<< HEAD
   auto vals_t = vals.vec<tstring>();
+=======
+  auto vals_t = vals.vec<string>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   vals_t = vals_c;
   ix_t = ix_c;
 
   TensorShape shape({10, 10, 10});
   std::vector<int64> order{0, 1, 2};
+<<<<<<< HEAD
   SparseTensor st;
   TF_ASSERT_OK(SparseTensor::Create(ix, vals, shape, order, &st));
   Status st_indices_valid = st.IndicesValid();
@@ -202,6 +242,15 @@ TEST(SparseTensorTest, SparseTensorConstruction) {
   // duplicates, the resulting indices are valid.
   st.Reorder<tstring>({2, 0, 1});
   TF_EXPECT_OK(st.IndicesValid());
+=======
+  SparseTensor st(ix, vals, shape, order);
+  EXPECT_FALSE(st.IndicesValid());  // Out of order
+
+  // Regardless of how order is updated; so long as there are no
+  // duplicates, the resulting indices are valid.
+  st.Reorder<string>({2, 0, 1});
+  EXPECT_TRUE(st.IndicesValid());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(vals_t(0), "hi0");
   EXPECT_EQ(vals_t(1), "hi3");
   EXPECT_EQ(vals_t(2), "hi2");
@@ -210,8 +259,13 @@ TEST(SparseTensorTest, SparseTensorConstruction) {
 
   ix_t = ix_c;
   vals_t = vals_c;
+<<<<<<< HEAD
   st.Reorder<tstring>({0, 1, 2});
   TF_EXPECT_OK(st.IndicesValid());
+=======
+  st.Reorder<string>({0, 1, 2});
+  EXPECT_TRUE(st.IndicesValid());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(vals_t(0), "hi0");
   EXPECT_EQ(vals_t(1), "hi4");
   EXPECT_EQ(vals_t(2), "hi3");
@@ -220,8 +274,13 @@ TEST(SparseTensorTest, SparseTensorConstruction) {
 
   ix_t = ix_c;
   vals_t = vals_c;
+<<<<<<< HEAD
   st.Reorder<tstring>({2, 1, 0});
   TF_EXPECT_OK(st.IndicesValid());
+=======
+  st.Reorder<string>({2, 1, 0});
+  EXPECT_TRUE(st.IndicesValid());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(SparseTensorTest, EmptySparseTensorAllowed) {
@@ -231,6 +290,7 @@ TEST(SparseTensorTest, EmptySparseTensorAllowed) {
   Tensor ix(DT_INT64, TensorShape({N, NDIM}));
   Tensor vals(DT_STRING, TensorShape({N}));
 
+<<<<<<< HEAD
   std::vector<int64> shape{10, 10, 10};
   std::vector<int64> order{0, 1, 2};
   SparseTensor st;
@@ -241,6 +301,17 @@ TEST(SparseTensorTest, EmptySparseTensorAllowed) {
   std::vector<int64> new_order{1, 0, 2};
   st.Reorder<tstring>(new_order);
   TF_EXPECT_OK(st.IndicesValid());
+=======
+  TensorShape shape({10, 10, 10});
+  std::vector<int64> order{0, 1, 2};
+  SparseTensor st(ix, vals, shape, order);
+  EXPECT_TRUE(st.IndicesValid());
+  EXPECT_EQ(st.order(), order);
+
+  std::vector<int64> new_order{1, 0, 2};
+  st.Reorder<string>(new_order);
+  EXPECT_TRUE(st.IndicesValid());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(st.order(), new_order);
 }
 
@@ -251,14 +322,19 @@ TEST(SparseTensorTest, SortingWorksCorrectly) {
   Tensor ix(DT_INT64, TensorShape({N, NDIM}));
   Tensor vals(DT_STRING, TensorShape({N}));
   TensorShape shape({1000, 1000, 1000, 1000});
+<<<<<<< HEAD
   SparseTensor st;
   TF_ASSERT_OK(SparseTensor::Create(ix, vals, shape, &st));
+=======
+  SparseTensor st(ix, vals, shape);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   auto ix_t = ix.matrix<int64>();
 
   for (int n = 0; n < 100; ++n) {
     ix_t = ix_t.random(Eigen::internal::UniformRandomGenerator<int64>(n + 1));
     ix_t = ix_t.abs() % 1000;
+<<<<<<< HEAD
     st.Reorder<tstring>({0, 1, 2, 3});
     TF_EXPECT_OK(st.IndicesValid());
     st.Reorder<tstring>({3, 2, 1, 0});
@@ -267,6 +343,16 @@ TEST(SparseTensorTest, SortingWorksCorrectly) {
     TF_EXPECT_OK(st.IndicesValid());
     st.Reorder<tstring>({3, 0, 2, 1});
     TF_EXPECT_OK(st.IndicesValid());
+=======
+    st.Reorder<string>({0, 1, 2, 3});
+    EXPECT_TRUE(st.IndicesValid());
+    st.Reorder<string>({3, 2, 1, 0});
+    EXPECT_TRUE(st.IndicesValid());
+    st.Reorder<string>({1, 0, 2, 3});
+    EXPECT_TRUE(st.IndicesValid());
+    st.Reorder<string>({3, 0, 2, 1});
+    EXPECT_TRUE(st.IndicesValid());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
@@ -291,6 +377,7 @@ TEST(SparseTensorTest, ValidateIndicesFindsInvalid) {
 
   TensorShape shape({10, 10, 10});
   std::vector<int64> order{0, 1, 2};
+<<<<<<< HEAD
   SparseTensor st;
   TF_ASSERT_OK(SparseTensor::Create(ix, vals, shape, order, &st));
 
@@ -312,6 +399,22 @@ TEST(SparseTensorTest, ValidateIndicesFindsInvalid) {
   EXPECT_FALSE(st_indices_valid.ok());  // first index now (0, 0, 1)
   EXPECT_EQ("indices[1] = [0,0,1] is repeated",
             st_indices_valid.error_message());
+=======
+  SparseTensor st(ix, vals, shape, order);
+
+  st.Reorder<string>(order);
+  EXPECT_FALSE(st.IndicesValid());  // two indices are identical
+
+  ix_orig(1, 2) = 1;
+  ix_t = ix_orig;
+  st.Reorder<string>(order);
+  EXPECT_TRUE(st.IndicesValid());  // second index now (0, 0, 1)
+
+  ix_orig(0, 2) = 1;
+  ix_t = ix_orig;
+  st.Reorder<string>(order);
+  EXPECT_FALSE(st.IndicesValid());  // first index now (0, 0, 1)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(SparseTensorTest, SparseTensorCheckBoundaries) {
@@ -328,6 +431,7 @@ TEST(SparseTensorTest, SparseTensorCheckBoundaries) {
   TensorShape shape({10, 10, 10});
   std::vector<int64> order{0, 1, 2};
 
+<<<<<<< HEAD
   SparseTensor st;
   TF_ASSERT_OK(SparseTensor::Create(ix, vals, shape, order, &st));
   EXPECT_FALSE(st.IndicesValid().ok());
@@ -356,6 +460,28 @@ TEST(SparseTensorTest, SparseTensorCheckBoundaries) {
   ix.matrix<int64>() = ix_t;
   st.Reorder<tstring>(order);
   TF_EXPECT_OK(st.IndicesValid());
+=======
+  SparseTensor st(ix, vals, shape, order);
+  EXPECT_FALSE(st.IndicesValid());
+
+  st.Reorder<string>(order);
+  EXPECT_TRUE(st.IndicesValid());
+
+  ix_t(0, 0) = 11;
+  ix.matrix<int64>() = ix_t;
+  st.Reorder<string>(order);
+  EXPECT_FALSE(st.IndicesValid());
+
+  ix_t(0, 0) = -1;
+  ix.matrix<int64>() = ix_t;
+  st.Reorder<string>(order);
+  EXPECT_FALSE(st.IndicesValid());
+
+  ix_t(0, 0) = 0;
+  ix.matrix<int64>() = ix_t;
+  st.Reorder<string>(order);
+  EXPECT_TRUE(st.IndicesValid());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(SparseTensorTest, SparseTensorToDenseTensor) {
@@ -366,7 +492,11 @@ TEST(SparseTensorTest, SparseTensorToDenseTensor) {
   Tensor vals(DT_STRING, TensorShape({N}));
 
   auto ix_t = GetSimpleIndexTensor(N, NDIM);
+<<<<<<< HEAD
   auto vals_t = vals.vec<tstring>();
+=======
+  auto vals_t = vals.vec<string>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ix.matrix<int64>() = ix_t;
 
@@ -378,6 +508,7 @@ TEST(SparseTensorTest, SparseTensorToDenseTensor) {
 
   TensorShape shape({4, 4, 5});
   std::vector<int64> order{0, 1, 2};
+<<<<<<< HEAD
   SparseTensor st;
   TF_ASSERT_OK(SparseTensor::Create(ix, vals, shape, order, &st));
 
@@ -385,6 +516,14 @@ TEST(SparseTensorTest, SparseTensorToDenseTensor) {
   st.ToDense<tstring>(&dense);
 
   auto dense_t = dense.tensor<tstring, 3>();
+=======
+  SparseTensor st(ix, vals, shape, order);
+
+  Tensor dense(DT_STRING, TensorShape({4, 4, 5}));
+  st.ToDense<string>(&dense);
+
+  auto dense_t = dense.tensor<string, 3>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Eigen::array<Eigen::DenseIndex, NDIM> ix_n;
   for (int n = 0; n < N; ++n) {
     for (int d = 0; d < NDIM; ++d) ix_n[d] = ix_t(n, d);
@@ -406,7 +545,11 @@ TEST(SparseTensorTest, SparseTensorToLargerDenseTensor) {
   Tensor vals(DT_STRING, TensorShape({N}));
 
   auto ix_t = GetSimpleIndexTensor(N, NDIM);
+<<<<<<< HEAD
   auto vals_t = vals.vec<tstring>();
+=======
+  auto vals_t = vals.vec<string>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ix.matrix<int64>() = ix_t;
 
@@ -418,6 +561,7 @@ TEST(SparseTensorTest, SparseTensorToLargerDenseTensor) {
 
   TensorShape shape({4, 4, 5});
   std::vector<int64> order{0, 1, 2};
+<<<<<<< HEAD
   SparseTensor st;
   TF_ASSERT_OK(SparseTensor::Create(ix, vals, shape, order, &st));
 
@@ -425,6 +569,14 @@ TEST(SparseTensorTest, SparseTensorToLargerDenseTensor) {
   st.ToDense<tstring>(&dense);
 
   auto dense_t = dense.tensor<tstring, 3>();
+=======
+  SparseTensor st(ix, vals, shape, order);
+
+  Tensor dense(DT_STRING, TensorShape({10, 10, 10}));
+  st.ToDense<string>(&dense);
+
+  auto dense_t = dense.tensor<string, 3>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Eigen::array<Eigen::DenseIndex, NDIM> ix_n;
   for (int n = 0; n < N; ++n) {
     for (int d = 0; d < NDIM; ++d) ix_n[d] = ix_t(n, d);
@@ -462,8 +614,12 @@ TEST(SparseTensorTest, SparseTensorGroup) {
   TensorShape shape({10, 10, 10});
   std::vector<int64> order{0, 1, 2};
 
+<<<<<<< HEAD
   SparseTensor st;
   TF_ASSERT_OK(SparseTensor::Create(ix, vals, shape, order, &st));
+=======
+  SparseTensor st(ix, vals, shape, order);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   st.Reorder<int32>(order);
 
   std::vector<std::vector<int64> > groups;
@@ -476,7 +632,11 @@ TEST(SparseTensorTest, SparseTensorGroup) {
   // All the hard work is right here!
   for (const auto& g : gi) {
     groups.push_back(g.group());
+<<<<<<< HEAD
     VLOG(1) << "Group: " << absl::StrJoin(g.group(), ",");
+=======
+    VLOG(1) << "Group: " << str_util::Join(g.group(), ",");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     VLOG(1) << "Indices: " << g.indices();
     VLOG(1) << "Values: " << g.values<int32>();
 
@@ -544,13 +704,18 @@ TEST(SparseTensorTest, Concat) {
   auto ix_c = GetSimpleIndexTensor(N, NDIM);
 
   auto ix_t = ix.matrix<int64>();
+<<<<<<< HEAD
   auto vals_t = vals.vec<tstring>();
+=======
+  auto vals_t = vals.vec<string>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ix_t = ix_c;
 
   TensorShape shape({10, 10, 10});
   std::vector<int64> order{0, 1, 2};
 
+<<<<<<< HEAD
   SparseTensor st;
   TF_ASSERT_OK(SparseTensor::Create(ix, vals, shape, order, &st));
   EXPECT_FALSE(st.IndicesValid().ok());
@@ -566,6 +731,22 @@ TEST(SparseTensorTest, Concat) {
 
   auto conc_ix_t = concatted.indices().matrix<int64>();
   auto conc_vals_t = concatted.values().vec<tstring>();
+=======
+  SparseTensor st(ix, vals, shape, order);
+  EXPECT_FALSE(st.IndicesValid());
+  st.Reorder<string>(order);
+  EXPECT_TRUE(st.IndicesValid());
+
+  SparseTensor concatted = SparseTensor::Concat<string>({st, st, st, st});
+  EXPECT_EQ(concatted.order(), st.order());
+  TensorShape expected_shape({40, 10, 10});
+  EXPECT_EQ(concatted.shape(), expected_shape);
+  EXPECT_EQ(concatted.num_entries(), 4 * N);
+  EXPECT_TRUE(concatted.IndicesValid());
+
+  auto conc_ix_t = concatted.indices().matrix<int64>();
+  auto conc_vals_t = concatted.values().vec<string>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   for (int n = 0; n < 4; ++n) {
     for (int i = 0; i < N; ++i) {
@@ -582,10 +763,15 @@ TEST(SparseTensorTest, Concat) {
 
   // Concat works if non-primary ix is out of order, but output order
   // is not defined
+<<<<<<< HEAD
   SparseTensor st_ooo;
   TF_ASSERT_OK(SparseTensor::Create(ix, vals, shape, {0, 2, 1},
                                     &st_ooo));  // non-primary ix OOO
   SparseTensor conc_ooo = SparseTensor::Concat<tstring>({st, st, st, st_ooo});
+=======
+  SparseTensor st_ooo(ix, vals, shape, {0, 2, 1});  // non-primary ix OOO
+  SparseTensor conc_ooo = SparseTensor::Concat<string>({st, st, st, st_ooo});
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   std::vector<int64> expected_ooo{-1, -1, -1};
   EXPECT_EQ(conc_ooo.order(), expected_ooo);
   EXPECT_EQ(conc_ooo.shape(), expected_shape);
@@ -596,6 +782,7 @@ TEST(SparseTensorTest, Concat) {
 // reduce_fn sees slices of resorted values based on generator (dim: DDIMS), and
 // slices of resorted indices on generator.
 
+<<<<<<< HEAD
 TEST(SparseTensorTest, Split) {
   const int N = 4;
   const int DIM = 2;
@@ -806,6 +993,8 @@ BENCHMARK(BM_SparseReorderString)->ArgPair(100, 3);
 BENCHMARK(BM_SparseReorderString)->ArgPair(1000, 3);
 BENCHMARK(BM_SparseReorderString)->ArgPair(10000, 3);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace sparse
 }  // namespace tensorflow

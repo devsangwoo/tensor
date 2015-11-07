@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,10 @@ limitations under the License.
 
 #include <algorithm>
 
+=======
+#include "tensorflow/core/util/device_name_utils.h"
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/lib/strings/strcat.h"
@@ -28,6 +33,7 @@ static bool IsAlpha(char c) {
   return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
+<<<<<<< HEAD
 static bool IsAlphaNumOrUnderscore(char c) {
   return IsAlpha(c) || (c >= '0' && c <= '9') || c == '_';
 }
@@ -49,18 +55,61 @@ static bool ConsumePrefix(StringPiece* in, string* out,
   }
   out->assign(in->begin(), end_it);
   in->remove_prefix(end_it - in->begin());
+=======
+static bool IsAlphaNum(char c) { return IsAlpha(c) || (c >= '0' && c <= '9'); }
+
+// Returns true iff "in" is a valid job name.
+static bool IsJobName(StringPiece in) {
+  if (in.empty()) return false;
+  if (!IsAlpha(in[0])) return false;
+  for (size_t i = 1; i < in.size(); ++i) {
+    if (!(IsAlphaNum(in[i]) || in[i] == '_')) return false;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return true;
 }
 
 // Returns true and fills in "*job" iff "*in" starts with a job name.
 static bool ConsumeJobName(StringPiece* in, string* job) {
+<<<<<<< HEAD
   return ConsumePrefix(in, job, "/");
+=======
+  if (in->empty()) return false;
+  if (!IsAlpha((*in)[0])) return false;
+  size_t i = 1;
+  for (; i < in->size(); ++i) {
+    const char c = (*in)[i];
+    if (c == '/') break;
+    if (!(IsAlphaNum(c) || c == '_')) {
+      return false;
+    }
+  }
+  job->assign(in->data(), i);
+  in->remove_prefix(i);
+  return true;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // Returns true and fills in "*device_type" iff "*in" starts with a device type
 // name.
 static bool ConsumeDeviceType(StringPiece* in, string* device_type) {
+<<<<<<< HEAD
   return ConsumePrefix(in, device_type, "/:");
+=======
+  if (in->empty()) return false;
+  if (!IsAlpha((*in)[0])) return false;
+  size_t i = 1;
+  for (; i < in->size(); ++i) {
+    const char c = (*in)[i];
+    if (c == '/' || c == ':') break;
+    if (!(IsAlphaNum(c) || c == '_')) {
+      return false;
+    }
+  }
+  device_type->assign(in->data(), i);
+  in->remove_prefix(i);
+  return true;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // Returns true and fills in "*val" iff "*in" starts with a decimal
@@ -75,6 +124,7 @@ static bool ConsumeNumber(StringPiece* in, int* val) {
   }
 }
 
+<<<<<<< HEAD
 // Returns a fully qualified device name given the parameters.
 static string DeviceName(const string& job, int replica, int task,
                          const string& device_prefix, const string& device_type,
@@ -101,11 +151,26 @@ string LegacyName(const string& job, int replica, int task, const string& type,
 }
 }  // anonymous namespace
 
+=======
+/* static */
+string DeviceNameUtils::FullName(const string& job, int replica, int task,
+                                 const string& type, int id) {
+  CHECK(IsJobName(job)) << job;
+  CHECK_LE(0, replica);
+  CHECK_LE(0, task);
+  CHECK(!type.empty());
+  CHECK_LE(0, id);
+  return strings::StrCat("/job:", job, "/replica:", replica, "/task:", task,
+                         "/device:", type, ":", id);
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 bool DeviceNameUtils::ParseFullName(StringPiece fullname, ParsedName* p) {
   p->Clear();
   if (fullname == "/") {
     return true;
   }
+<<<<<<< HEAD
   while (!fullname.empty()) {
     bool progress = false;
     if (absl::ConsumePrefix(&fullname, "/job:")) {
@@ -138,10 +203,39 @@ bool DeviceNameUtils::ParseFullName(StringPiece fullname, ParsedName* p) {
         p->has_id = false;
       } else {
         p->has_id = !absl::ConsumePrefix(&fullname, "*");
+=======
+  StringPiece tmp;
+  while (!fullname.empty()) {
+    if (str_util::ConsumePrefix(&fullname, "/job:")) {
+      p->has_job = !str_util::ConsumePrefix(&fullname, "*");
+      if (p->has_job && !ConsumeJobName(&fullname, &p->job)) {
+        return false;
+      }
+    } else if (str_util::ConsumePrefix(&fullname, "/replica:")) {
+      p->has_replica = !str_util::ConsumePrefix(&fullname, "*");
+      if (p->has_replica && !ConsumeNumber(&fullname, &p->replica)) {
+        return false;
+      }
+    } else if (str_util::ConsumePrefix(&fullname, "/task:")) {
+      p->has_task = !str_util::ConsumePrefix(&fullname, "*");
+      if (p->has_task && !ConsumeNumber(&fullname, &p->task)) {
+        return false;
+      }
+    } else if (str_util::ConsumePrefix(&fullname, "/device:")) {
+      p->has_type = !str_util::ConsumePrefix(&fullname, "*");
+      if (p->has_type && !ConsumeDeviceType(&fullname, &p->type)) {
+        return false;
+      }
+      if (!str_util::ConsumePrefix(&fullname, ":")) {
+        p->has_id = false;
+      } else {
+        p->has_id = !str_util::ConsumePrefix(&fullname, "*");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         if (p->has_id && !ConsumeNumber(&fullname, &p->id)) {
           return false;
         }
       }
+<<<<<<< HEAD
       progress = true;
     }
 
@@ -168,12 +262,33 @@ bool DeviceNameUtils::ParseFullName(StringPiece fullname, ParsedName* p) {
     }
 
     if (!progress) {
+=======
+
+    } else if (str_util::ConsumePrefix(&fullname, "/cpu:") ||
+               str_util::ConsumePrefix(&fullname, "/CPU:")) {
+      p->has_type = true;
+      p->type = "CPU";  // Treat '/cpu:..' as uppercase '/device:CPU:...'
+      p->has_id = !str_util::ConsumePrefix(&fullname, "*");
+      if (p->has_id && !ConsumeNumber(&fullname, &p->id)) {
+        return false;
+      }
+    } else if (str_util::ConsumePrefix(&fullname, "/gpu:") ||
+               str_util::ConsumePrefix(&fullname, "/GPU:")) {
+      p->has_type = true;
+      p->type = "GPU";  // Treat '/gpu:..' as uppercase '/device:GPU:...'
+      p->has_id = !str_util::ConsumePrefix(&fullname, "*");
+      if (p->has_id && !ConsumeNumber(&fullname, &p->id)) {
+        return false;
+      }
+    } else {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       return false;
     }
   }
   return true;
 }
 
+<<<<<<< HEAD
 namespace {
 
 void CompleteName(const DeviceNameUtils::ParsedName& parsed_basename,
@@ -235,6 +350,8 @@ Status DeviceNameUtils::CanonicalizeDeviceName(StringPiece fullname,
                                  "specification.");
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 /* static */
 string DeviceNameUtils::ParsedNameToString(const ParsedName& pn) {
   string buf;
@@ -242,7 +359,11 @@ string DeviceNameUtils::ParsedNameToString(const ParsedName& pn) {
   if (pn.has_replica) strings::StrAppend(&buf, "/replica:", pn.replica);
   if (pn.has_task) strings::StrAppend(&buf, "/task:", pn.task);
   if (pn.has_type) {
+<<<<<<< HEAD
     strings::StrAppend(&buf, "/device:", pn.type, ":");
+=======
+    strings::StrAppend(&buf, "/", pn.type, ":");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (pn.has_id) {
       strings::StrAppend(&buf, pn.id);
     } else {
@@ -280,6 +401,7 @@ bool DeviceNameUtils::IsSpecification(const ParsedName& less_specific,
 }
 
 /* static */
+<<<<<<< HEAD
 bool DeviceNameUtils::AreCompatibleDevNames(const ParsedName& a,
                                             const ParsedName& b) {
   if (a.has_job && b.has_job && (a.job != b.job)) {
@@ -325,6 +447,8 @@ void DeviceNameUtils::EnsureSpecification(ParsedName* more_specific,
 }
 
 /* static */
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 bool DeviceNameUtils::IsCompleteSpecification(const ParsedName& pattern,
                                               const ParsedName& name) {
   CHECK(name.has_job && name.has_replica && name.has_task && name.has_type &&
@@ -338,11 +462,18 @@ bool DeviceNameUtils::IsCompleteSpecification(const ParsedName& pattern,
   return true;
 }
 
+<<<<<<< HEAD
 namespace {
 Status MergeDevNamesImpl(DeviceNameUtils::ParsedName* target,
                          const DeviceNameUtils::ParsedName& other,
                          bool allow_soft_placement, bool override_conflicts) {
   const auto& ParsedNameToString = DeviceNameUtils::ParsedNameToString;
+=======
+/* static */
+Status DeviceNameUtils::MergeDevNames(ParsedName* target,
+                                      const ParsedName& other,
+                                      bool allow_soft_placement) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (other.has_job) {
     if (target->has_job && target->job != other.job) {
       return errors::InvalidArgument(
@@ -386,8 +517,11 @@ Status MergeDevNamesImpl(DeviceNameUtils::ParsedName* target,
             "Cannot merge devices with incompatible types: '",
             ParsedNameToString(*target), "' and '", ParsedNameToString(other),
             "'");
+<<<<<<< HEAD
       } else if (override_conflicts) {
         target->type = other.type;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       } else {
         target->has_id = false;
         target->has_type = false;
@@ -406,8 +540,11 @@ Status MergeDevNamesImpl(DeviceNameUtils::ParsedName* target,
             "Cannot merge devices with incompatible ids: '",
             ParsedNameToString(*target), "' and '", ParsedNameToString(other),
             "'");
+<<<<<<< HEAD
       } else if (override_conflicts) {
         target->id = other.id;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       } else {
         target->has_id = false;
         return Status::OK();
@@ -421,6 +558,7 @@ Status MergeDevNamesImpl(DeviceNameUtils::ParsedName* target,
   return Status::OK();
 }
 
+<<<<<<< HEAD
 }  // namespace
 
 /* static */
@@ -438,6 +576,8 @@ Status DeviceNameUtils::MergeOverrideDevNames(ParsedName* target,
                            /*override_conflicts=*/true);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 /* static */
 bool DeviceNameUtils::IsSameAddressSpace(const ParsedName& a,
                                          const ParsedName& b) {
@@ -455,6 +595,7 @@ bool DeviceNameUtils::IsSameAddressSpace(StringPiece src, StringPiece dst) {
 }
 
 /* static */
+<<<<<<< HEAD
 bool DeviceNameUtils::IsDifferentAddressSpace(const ParsedName& a,
                                               const ParsedName& b) {
   return (a.has_job && b.has_job && (a.job != b.job)) ||
@@ -487,6 +628,11 @@ string LegacyLocalName(StringPiece type, int id) {
   return strings::StrCat(type, ":", id);
 }
 }  // anonymous namespace
+=======
+string DeviceNameUtils::LocalName(StringPiece type, int id) {
+  return strings::StrCat(type, ":", id);
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 /* static */
 string DeviceNameUtils::LocalName(StringPiece fullname) {
@@ -497,17 +643,28 @@ string DeviceNameUtils::LocalName(StringPiece fullname) {
 
 /* static */
 bool DeviceNameUtils::ParseLocalName(StringPiece name, ParsedName* p) {
+<<<<<<< HEAD
   if (!ConsumeDeviceType(&name, &p->type)) {
     return false;
   }
   p->has_type = true;
   if (!absl::ConsumePrefix(&name, ":")) {
+=======
+  ParsedName x;
+  if (!ConsumeDeviceType(&name, &p->type)) {
+    return false;
+  }
+  if (!str_util::ConsumePrefix(&name, ":")) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return false;
   }
   if (!ConsumeNumber(&name, &p->id)) {
     return false;
   }
+<<<<<<< HEAD
   p->has_id = true;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return name.empty();
 }
 
@@ -516,6 +673,7 @@ bool DeviceNameUtils::SplitDeviceName(StringPiece name, string* task,
                                       string* device) {
   ParsedName pn;
   if (ParseFullName(name, &pn) && pn.has_type && pn.has_id) {
+<<<<<<< HEAD
     task->clear();
     task->reserve(
         (pn.has_job ? (5 + pn.job.size()) : 0) +
@@ -547,11 +705,19 @@ bool DeviceNameUtils::GetTaskName(const ParsedName& pn, string* task) {
     strings::StrAppend(task, "/job:", pn.job);
     strings::StrAppend(task, "/replica:", pn.replica);
     strings::StrAppend(task, "/task:", pn.task);
+=======
+    *task = strings::StrCat(
+        (pn.has_job ? strings::StrCat("/job:", pn.job) : ""),
+        (pn.has_replica ? strings::StrCat("/replica:", pn.replica) : ""),
+        (pn.has_task ? strings::StrCat("/task:", pn.task) : ""));
+    *device = strings::StrCat(pn.type, ":", pn.id);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return true;
   }
   return false;
 }
 
+<<<<<<< HEAD
 std::vector<string> DeviceNameUtils::GetNamesForDeviceMappings(
     const ParsedName& pn) {
   if (pn.has_job && pn.has_replica && pn.has_task && pn.has_type && pn.has_id) {
@@ -591,4 +757,6 @@ std::ostream& operator<<(std::ostream& os,
   return os;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

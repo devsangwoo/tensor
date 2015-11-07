@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,4 +44,14 @@ REGISTER_KERNEL_BUILDER(Name("Square")
                             .TypeConstraint<int32>("T"),
                         UnaryOp<CPUDevice, functor::square<int32>>);
 #endif  // TENSORFLOW_USE_SYC
+=======
+#include "tensorflow/core/kernels/cwise_ops_common.h"
+
+namespace tensorflow {
+REGISTER5(UnaryOp, CPU, "Square", functor::square, float, double, int32,
+          complex64, int64);
+#if GOOGLE_CUDA
+REGISTER3(UnaryOp, GPU, "Square", functor::square, float, double, int64);
+#endif
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

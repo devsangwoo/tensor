@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifndef TENSORFLOW_LIB_IO_INPUTBUFFER_H_
 #define TENSORFLOW_LIB_IO_INPUTBUFFER_H_
 
 #include <string>
+<<<<<<< HEAD
 
 #include "tensorflow/core/lib/core/coding.h"
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace io {
@@ -33,7 +42,12 @@ namespace io {
 class InputBuffer {
  public:
   // Create an InputBuffer for "file" with a buffer size of
+<<<<<<< HEAD
   // "buffer_bytes" bytes.  'file' must outlive *this.
+=======
+  // "buffer_bytes" bytes.  Takes ownership of "file" and will
+  // delete it when the InputBuffer is destroyed.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   InputBuffer(RandomAccessFile* file, size_t buffer_bytes);
   ~InputBuffer();
 
@@ -44,8 +58,12 @@ class InputBuffer {
   // If successful, returns OK.  If we are already at the end of the
   // file, we return an OUT_OF_RANGE error.  Otherwise, we return
   // some other non-OK status.
+<<<<<<< HEAD
   template <typename T>
   Status ReadLine(T* result);
+=======
+  Status ReadLine(string* result);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Reads bytes_to_read bytes into *result, overwriting *result.
   //
@@ -54,6 +72,7 @@ class InputBuffer {
   // Otherwise, we return some other non-OK status.
   Status ReadNBytes(int64 bytes_to_read, string* result);
 
+<<<<<<< HEAD
   // An overload that writes to char*.  Caller must ensure result[0,
   // bytes_to_read) is valid to be overwritten.  Returns OK iff "*bytes_read ==
   // bytes_to_read".
@@ -97,6 +116,18 @@ class InputBuffer {
   Status ReadVarintFallback(T* result, int max_bytes);
 
   RandomAccessFile* file_;  // Not owned
+=======
+  // Like ReadNBytes() without returning the bytes read.
+  Status SkipNBytes(int64 bytes_to_skip);
+
+  // Returns the position in the file.
+  int64 Tell() const { return file_pos_ - (limit_ - pos_); }
+
+ private:
+  Status FillBuffer();
+
+  RandomAccessFile* file_;  // Owned
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int64 file_pos_;          // Next position to read from in "file_"
   size_t size_;             // Size of "buf_"
   char* buf_;               // The buffer itself
@@ -107,6 +138,7 @@ class InputBuffer {
   TF_DISALLOW_COPY_AND_ASSIGN(InputBuffer);
 };
 
+<<<<<<< HEAD
 // Implementation details.
 
 // Explicit instantiations defined in inputbuffer.cc.
@@ -143,6 +175,8 @@ inline Status InputBuffer::ReadVarint64(uint64* result) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace io
 }  // namespace tensorflow
 

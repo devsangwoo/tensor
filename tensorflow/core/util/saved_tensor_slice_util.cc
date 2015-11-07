@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/saved_tensor_slice_util.h"
 
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/strings/ordered_code.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/strings/str_util.h"
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -87,6 +93,7 @@ Status DecodeTensorNameSlice(const string& code, string* name,
   return Status::OK();
 }
 
+<<<<<<< HEAD
 Status ParseShapeAndSlice(const string& shape_and_slice, TensorShape* shape,
                           TensorSlice* slice, TensorShape* shape_slice) {
   CHECK(!shape_and_slice.empty());
@@ -122,6 +129,8 @@ Status ParseShapeAndSlice(const string& shape_and_slice, TensorShape* shape,
   return slice->SliceTensorShape(*shape, shape_slice);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace checkpoint
 
 }  // namespace tensorflow

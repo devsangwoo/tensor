@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,11 +25,22 @@ limitations under the License.
 #include "tensorflow/core/kernels/ops_testutil.h"
 #include "tensorflow/core/kernels/ops_util.h"
 #include "tensorflow/core/lib/strings/str_util.h"
+=======
+#include "tensorflow/core/framework/fake_input.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/tensor_testutil.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/kernels/ops_testutil.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/strings/strcat.h"
 
 namespace tensorflow {
 namespace {
 
+<<<<<<< HEAD
 class PrintingV2GraphTest : public OpsTestBase {
  protected:
   Status Init(const string& output_stream = "log(warning)") {
@@ -60,6 +72,13 @@ class PrintingGraphTest : public OpsTestBase {
  protected:
   Status Init(DataType input_type1, DataType input_type2, string msg = "",
               int first_n = -1, int summarize = 3) {
+=======
+class PrintingGraphTest : public OpsTestBase {
+ protected:
+  Status Init(DataType input_type1, DataType input_type2, string msg = "",
+                   int first_n = -1, int summarize = 3) {
+    RequireDefaultOps();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     TF_CHECK_OK(NodeDefBuilder("op", "Print")
                     .Input(FakeInput(input_type1))
                     .Input(FakeInput(2, input_type2))
@@ -72,61 +91,103 @@ class PrintingGraphTest : public OpsTestBase {
 };
 
 TEST_F(PrintingGraphTest, Int32Success_6) {
+<<<<<<< HEAD
   TF_ASSERT_OK(Init(DT_INT32, DT_INT32));
   AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
   AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
   AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(Init(DT_INT32, DT_INT32));
+  AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
+  AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
+  AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Tensor expected(allocator(), DT_INT32, TensorShape({6}));
   test::FillValues<int32>(&expected, {1, 2, 3, 4, 5, 6});
   test::ExpectTensorEqual<int32>(expected, *GetOutput(0));
 }
 
 TEST_F(PrintingGraphTest, Int32Success_Summarize6) {
+<<<<<<< HEAD
   TF_ASSERT_OK(Init(DT_INT32, DT_INT32, "", -1, 6));
   AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
   AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
   AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(Init(DT_INT32, DT_INT32, "", -1, 6));
+  AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
+  AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
+  AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Tensor expected(allocator(), DT_INT32, TensorShape({6}));
   test::FillValues<int32>(&expected, {1, 2, 3, 4, 5, 6});
   test::ExpectTensorEqual<int32>(expected, *GetOutput(0));
 }
 
 TEST_F(PrintingGraphTest, StringSuccess) {
+<<<<<<< HEAD
   TF_ASSERT_OK(Init(DT_INT32, DT_STRING));
   AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
   AddInputFromArray<tstring>(TensorShape({}), {"foo"});
   AddInputFromArray<tstring>(TensorShape({}), {"bar"});
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(Init(DT_INT32, DT_STRING));
+  AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
+  AddInputFromArray<string>(TensorShape({}), {"foo"});
+  AddInputFromArray<string>(TensorShape({}), {"bar"});
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Tensor expected(allocator(), DT_INT32, TensorShape({6}));
   test::FillValues<int32>(&expected, {1, 2, 3, 4, 5, 6});
   test::ExpectTensorEqual<int32>(expected, *GetOutput(0));
 }
 
 TEST_F(PrintingGraphTest, MsgSuccess) {
+<<<<<<< HEAD
   TF_ASSERT_OK(Init(DT_INT32, DT_STRING, "Message: "));
   AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
   AddInputFromArray<tstring>(TensorShape({}), {"foo"});
   AddInputFromArray<tstring>(TensorShape({}), {"bar"});
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(Init(DT_INT32, DT_STRING, "Message: "));
+  AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
+  AddInputFromArray<string>(TensorShape({}), {"foo"});
+  AddInputFromArray<string>(TensorShape({}), {"bar"});
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Tensor expected(allocator(), DT_INT32, TensorShape({6}));
   test::FillValues<int32>(&expected, {1, 2, 3, 4, 5, 6});
   test::ExpectTensorEqual<int32>(expected, *GetOutput(0));
 }
 
 TEST_F(PrintingGraphTest, FirstNSuccess) {
+<<<<<<< HEAD
   TF_ASSERT_OK(Init(DT_INT32, DT_STRING, "", 3));
   AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
   AddInputFromArray<tstring>(TensorShape({}), {"foo"});
   AddInputFromArray<tstring>(TensorShape({}), {"bar"});
   // run 4 times but we only print 3 as intended
   for (int i = 0; i < 4; i++) TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(Init(DT_INT32, DT_STRING, "", 3));
+  AddInputFromArray<int32>(TensorShape({6}), {1, 2, 3, 4, 5, 6});
+  AddInputFromArray<string>(TensorShape({}), {"foo"});
+  AddInputFromArray<string>(TensorShape({}), {"bar"});
+  // run 4 times but we only print 3 as intended
+  for (int i = 0; i < 4; i++) ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Tensor expected(allocator(), DT_INT32, TensorShape({6}));
   test::FillValues<int32>(&expected, {1, 2, 3, 4, 5, 6});
   test::ExpectTensorEqual<int32>(expected, *GetOutput(0));
 }
 
+<<<<<<< HEAD
 class TimestampTest : public OpsTestBase {
  protected:
   Status Init() {
@@ -149,5 +210,7 @@ TEST_F(TimestampTest, WaitAtLeast) {
   EXPECT_LE(1.0, ts2 - ts1);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace
 }  // end namespace tensorflow

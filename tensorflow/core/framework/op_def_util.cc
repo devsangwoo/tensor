@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +35,19 @@ limitations under the License.
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/framework/op_def_util.h"
+
+#include <set>
+#include "tensorflow/core/framework/attr_value_util.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/lib/gtl/map_util.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/regexp.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {  // ------ Helper functions ------
@@ -65,7 +79,11 @@ Status AllowedTypeValue(DataType dt, const OpDef::AttrDef& attr) {
 
 Status AllowedStringValue(const string& str, const OpDef::AttrDef& attr) {
   const AttrValue& allowed_values(attr.allowed_values());
+<<<<<<< HEAD
   for (const auto& allowed : allowed_values.list().s()) {
+=======
+  for (auto allowed : allowed_values.list().s()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (str == allowed) {
       return Status::OK();
     }
@@ -86,7 +104,11 @@ Status AllowedStringValue(const string& str, const OpDef::AttrDef& attr) {
 
 // Requires: attr has already been validated.
 Status ValidateAttrValue(const AttrValue& attr_value,
+<<<<<<< HEAD
                          const OpDef::AttrDef& attr) {
+=======
+                              const OpDef::AttrDef& attr) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Is it a valid value?
   TF_RETURN_WITH_CONTEXT_IF_ERROR(AttrValueHasType(attr_value, attr.type()),
                                   " for attr '", attr.name(), "'");
@@ -115,8 +137,11 @@ Status ValidateAttrValue(const AttrValue& attr_value,
         length = attr_value.list().shape_size();
       } else if (attr.type() == "list(tensor)") {
         length = attr_value.list().tensor_size();
+<<<<<<< HEAD
       } else if (attr.type() == "list(func)") {
         length = attr_value.list().func_size();
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
       if (length < attr.minimum()) {
         return errors::InvalidArgument(
@@ -166,6 +191,7 @@ OpDef::AttrDef* FindAttrMutable(StringPiece name, OpDef* op_def) {
   return nullptr;
 }
 
+<<<<<<< HEAD
 const OpDef::ArgDef* FindInputArg(StringPiece name, const OpDef& op_def) {
   for (int i = 0; i < op_def.input_arg_size(); ++i) {
     if (op_def.input_arg(i).name() == name) {
@@ -198,6 +224,22 @@ static Status ValidateArg(const OpDef::ArgDef& arg, const OpDef& op_def,
       output ? " for output '" : " for input '", arg.name(), "'");
   VALIDATE(gtl::InsertIfNotPresent(names, arg.name()),
            "Duplicate name: ", arg.name());
+=======
+#define VALIDATE(EXPR, ...)                                       \
+  do {                                                            \
+    if (!(EXPR)) {                                                \
+      return errors::InvalidArgument(__VA_ARGS__, "; in OpDef: ", \
+                                     op_def.ShortDebugString());  \
+    }                                                             \
+  } while (false)
+
+static Status ValidateArg(const OpDef::ArgDef& arg, const OpDef& op_def,
+                               bool output, std::set<string>* names) {
+  const string suffix = strings::StrCat(
+      output ? " for output '" : " for input '", arg.name(), "'");
+  VALIDATE(gtl::InsertIfNotPresent(names, arg.name()), "Duplicate name: ",
+           arg.name());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   VALIDATE(HasAttrStyleType(arg), "Missing type", suffix);
 
   if (!arg.number_attr().empty()) {
@@ -249,6 +291,7 @@ static Status ValidateArg(const OpDef::ArgDef& arg, const OpDef& op_def,
   return Status::OK();
 }
 
+<<<<<<< HEAD
 bool IsValidOpName(StringPiece sp) {
   using ::tensorflow::strings::Scanner;
 
@@ -273,23 +316,41 @@ Status ValidateOpDef(const OpDef& op_def) {
     VALIDATE(IsValidOpName(op_def.name()), "Invalid name: ", op_def.name(),
              " (Did you use CamelCase?)");
   }
+=======
+Status ValidateOpDef(const OpDef& op_def) {
+  VALIDATE(RE2::FullMatch(op_def.name(), "(?:_.*|[A-Z][a-zA-Z0-9]*)"),
+           "Invalid name: ", op_def.name(), " (Did you use CamelCase?)");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   std::set<string> names;  // for detecting duplicate names
   for (const auto& attr : op_def.attr()) {
     // Validate name
+<<<<<<< HEAD
     VALIDATE(gtl::InsertIfNotPresent(&names, attr.name()),
              "Duplicate name: ", attr.name());
+=======
+    VALIDATE(gtl::InsertIfNotPresent(&names, attr.name()), "Duplicate name: ",
+             attr.name());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     DataType dt;
     VALIDATE(!DataTypeFromString(attr.name(), &dt), "Attr can't have name ",
              attr.name(), " that matches a data type");
 
     // Validate type
     StringPiece type(attr.type());
+<<<<<<< HEAD
     bool is_list = absl::ConsumePrefix(&type, "list(");
     bool found = false;
     for (StringPiece valid : {"string", "int", "float", "bool", "type", "shape",
                               "tensor", "func"}) {
       if (absl::ConsumePrefix(&type, valid)) {
+=======
+    bool is_list = type.Consume("list(");
+    bool found = false;
+    for (StringPiece valid : {"string", "int", "float", "bool", "type", "shape",
+                              "tensor", "func"}) {
+      if (type.Consume(valid)) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         found = true;
         break;
       }
@@ -297,9 +358,14 @@ Status ValidateOpDef(const OpDef& op_def) {
     VALIDATE(found, "Unrecognized type '", type, "' in attr '", attr.name(),
              "'");
     if (is_list) {
+<<<<<<< HEAD
       VALIDATE(absl::ConsumePrefix(&type, ")"),
                "'list(' is missing ')' in attr ", attr.name(), "'s type ",
                attr.type());
+=======
+      VALIDATE(type.Consume(")"), "'list(' is missing ')' in attr ",
+               attr.name(), "'s type ", attr.type());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     VALIDATE(type.empty(), "Extra '", type, "' at the end of attr ",
              attr.name(), "'s type ", attr.type());
@@ -350,6 +416,7 @@ Status ValidateOpDef(const OpDef& op_def) {
 
 #undef VALIDATE
 
+<<<<<<< HEAD
 Status CheckOpDeprecation(const OpDef& op_def, int graph_def_version) {
   if (op_def.has_deprecation()) {
     const OpDeprecation& dep = op_def.deprecation();
@@ -377,6 +444,8 @@ Status CheckOpDeprecation(const OpDef& op_def, int graph_def_version) {
   return Status::OK();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace {
 
 string SummarizeArgs(const protobuf::RepeatedPtrField<OpDef::ArgDef>& args) {
@@ -435,6 +504,7 @@ string SummarizeOpDef(const OpDef& op_def) {
   return ret;
 }
 
+<<<<<<< HEAD
 namespace {
 
 // Returns true if every element of `sub` is contained in `super`.
@@ -885,4 +955,6 @@ uint64 OpDefHash(const OpDef& o) {
   return DeterministicProtoHash64(o_copy, h);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

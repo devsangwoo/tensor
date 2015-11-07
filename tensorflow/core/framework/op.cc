@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/op.h"
 
 #include <algorithm>
 #include <memory>
 #include <vector>
+<<<<<<< HEAD
 
 #include "tensorflow/core/framework/op_def_builder.h"
 #include "tensorflow/core/framework/op_kernel.h"
@@ -29,6 +33,14 @@ limitations under the License.
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/gtl/map_util.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/protobuf.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -36,6 +48,7 @@ namespace tensorflow {
 
 OpRegistryInterface::~OpRegistryInterface() {}
 
+<<<<<<< HEAD
 Status OpRegistryInterface::LookUpOpDef(const string& op_type_name,
                                         const OpDef** op_def) const {
   *op_def = nullptr;
@@ -156,14 +169,64 @@ Status OpRegistry::SetWatcher(const Watcher& watcher) {
   }
   watcher_ = watcher;
   return Status::OK();
+=======
+OpRegistry::OpRegistry() : initialized_(false) {}
+
+void OpRegistry::Register(std::function<OpDef(void)> func) {
+  mutex_lock lock(mu_);
+  if (initialized_) {
+    OpDef def = func();
+    TF_QCHECK_OK(RegisterAlreadyLocked(def)) << "Attempting to register: "
+                                             << SummarizeOpDef(def);
+  } else {
+    deferred_.push_back(func);
+  }
+}
+
+const OpDef* OpRegistry::LookUp(const string& op_type_name,
+                                Status* status) const {
+  const OpDef* op_def = nullptr;
+  bool first_call = false;
+  {  // Scope for lock.
+    mutex_lock lock(mu_);
+    first_call = CallDeferred();
+    op_def = gtl::FindWithDefault(registry_, op_type_name, nullptr);
+    // Note: Can't hold mu_ while calling Export() below.
+  }
+  if (first_call) {
+    TF_QCHECK_OK(ValidateKernelRegistrations(this));
+  }
+  if (op_def == nullptr) {
+    status->Update(
+        errors::NotFound("Op type not registered '", op_type_name, "'"));
+    static bool first = true;
+    if (first) {
+      OpList op_list;
+      Export(true, &op_list);
+      LOG(INFO) << "All registered Ops:";
+      for (const auto& op : op_list.op()) {
+        LOG(INFO) << SummarizeOpDef(op);
+      }
+      first = false;
+    }
+  }
+  return op_def;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void OpRegistry::Export(bool include_internal, OpList* ops) const {
   mutex_lock lock(mu_);
+<<<<<<< HEAD
   MustCallDeferred();
 
   std::vector<std::pair<string, const OpRegistrationData*>> sorted(
       registry_.begin(), registry_.end());
+=======
+  CallDeferred();
+
+  std::vector<std::pair<string, const OpDef*>> sorted(registry_.begin(),
+                                                      registry_.end());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   std::sort(sorted.begin(), sorted.end());
 
   auto out = ops->mutable_op();
@@ -171,12 +234,18 @@ void OpRegistry::Export(bool include_internal, OpList* ops) const {
   out->Reserve(sorted.size());
 
   for (const auto& item : sorted) {
+<<<<<<< HEAD
     if (include_internal || !absl::StartsWith(item.first, "_")) {
       *out->Add() = item.second->op_def;
+=======
+    if (include_internal || !StringPiece(item.first).starts_with("_")) {
+      *out->Add() = *item.second;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 }
 
+<<<<<<< HEAD
 void OpRegistry::DeferRegistrations() {
   mutex_lock lock(mu_);
   initialized_ = false;
@@ -192,6 +261,8 @@ Status OpRegistry::ProcessRegistrations() const {
   return CallDeferred();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 string OpRegistry::DebugString(bool include_internal) const {
   OpList op_list;
   Export(include_internal, &op_list);
@@ -202,16 +273,27 @@ string OpRegistry::DebugString(bool include_internal) const {
   return ret;
 }
 
+<<<<<<< HEAD
 bool OpRegistry::MustCallDeferred() const {
   if (initialized_) return false;
   initialized_ = true;
   for (size_t i = 0; i < deferred_.size(); ++i) {
     TF_QCHECK_OK(RegisterAlreadyLocked(deferred_[i]));
+=======
+bool OpRegistry::CallDeferred() const {
+  if (initialized_) return false;
+  initialized_ = true;
+  for (const auto& fn : deferred_) {
+    OpDef def = fn();
+    TF_QCHECK_OK(RegisterAlreadyLocked(def)) << "Attempting to register: "
+                                             << SummarizeOpDef(def);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   deferred_.clear();
   return true;
 }
 
+<<<<<<< HEAD
 Status OpRegistry::CallDeferred() const {
   if (initialized_) return Status::OK();
   initialized_ = true;
@@ -247,6 +329,18 @@ Status OpRegistry::RegisterAlreadyLocked(
     op_reg_data.reset();
   }
   return watcher_status;
+=======
+Status OpRegistry::RegisterAlreadyLocked(const OpDef& def) const {
+  TF_RETURN_IF_ERROR(ValidateOpDef(def));
+
+  std::unique_ptr<OpDef> copy(new OpDef(def));
+  if (gtl::InsertIfNotPresent(&registry_, def.name(), copy.get())) {
+    copy.release();  // Ownership transferred to op_registry
+    return Status::OK();
+  } else {
+    return errors::AlreadyExists("Op with name ", def.name());
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // static
@@ -255,6 +349,7 @@ OpRegistry* OpRegistry::Global() {
   return global_op_registry;
 }
 
+<<<<<<< HEAD
 // OpListOpRegistry -----------------------------------------------------------
 
 OpListOpRegistry::OpListOpRegistry(const OpList* op_list) {
@@ -293,6 +388,19 @@ OpDefBuilderReceiver::OpDefBuilderReceiver(
       [wrapper](OpRegistrationData* op_reg_data) -> Status {
         return wrapper.builder().Finalize(op_reg_data);
       });
+=======
+namespace register_op {
+OpDefBuilder& RegisterOp(StringPiece name) {
+  VLOG(1) << "RegisterOp: " << name;
+  OpDefBuilder* b = new OpDefBuilder(name);
+  OpRegistry::Global()->Register([b]() -> ::tensorflow::OpDef {
+    OpDef op_def;
+    TF_QCHECK_OK(b->Finalize(&op_def));
+    delete b;
+    return op_def;
+  });
+  return *b;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 }  // namespace register_op
 

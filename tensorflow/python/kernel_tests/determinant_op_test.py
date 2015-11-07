@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,11 +38,30 @@ class DeterminantOpTest(test.TestCase):
 
   def _compareDeterminantBase(self, matrix_x, tf_ans):
     out = self.evaluate(tf_ans)
+=======
+"""Tests for tensorflow.ops.tf.MatrixDeterminant."""
+import tensorflow.python.platform
+
+import numpy as np
+import tensorflow as tf
+
+
+class DeterminantOpTest(tf.test.TestCase):
+
+  def _compareDeterminant(self, matrix_x):
+    with self.test_session():
+      if matrix_x.ndim == 2:
+        tf_ans = tf.matrix_determinant(matrix_x)
+      else:
+        tf_ans = tf.batch_matrix_determinant(matrix_x)
+      out = tf_ans.eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     shape = matrix_x.shape
     if shape[-1] == 0 and shape[-2] == 0:
       np_ans = np.ones(shape[:-2]).astype(matrix_x.dtype)
     else:
       np_ans = np.array(np.linalg.det(matrix_x)).astype(matrix_x.dtype)
+<<<<<<< HEAD
     self.assertShapeEqual(np_ans, tf_ans)
     self.assertAllClose(np_ans, out, atol=5e-5)
 
@@ -68,16 +88,26 @@ class DeterminantOpTest(test.TestCase):
                                    linalg_ops.matrix_determinant(matrix_x))
       self._compareLogDeterminantBase(
           matrix_x, gen_linalg_ops.log_matrix_determinant(matrix_x))
+=======
+    self.assertAllClose(np_ans, out)
+    self.assertShapeEqual(np_ans, tf_ans)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testBasic(self):
     # 2x2 matrices
     self._compareDeterminant(np.array([[2., 3.], [3., 4.]]).astype(np.float32))
     self._compareDeterminant(np.array([[0., 0.], [0., 0.]]).astype(np.float32))
     # 5x5 matrices (Eigen forces LU decomposition)
+<<<<<<< HEAD
     self._compareDeterminant(
         np.array([[2., 3., 4., 5., 6.], [3., 4., 9., 2., 0.], [
             2., 5., 8., 3., 8.
         ], [1., 6., 7., 4., 7.], [2., 3., 4., 5., 6.]]).astype(np.float32))
+=======
+    self._compareDeterminant(np.array(
+        [[2., 3., 4., 5., 6.], [3., 4., 9., 2., 0.], [2., 5., 8., 3., 8.],
+         [1., 6., 7., 4., 7.], [2., 3., 4., 5., 6.]]).astype(np.float32))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     # A multidimensional batch of 2x2 matrices
     self._compareDeterminant(np.random.rand(3, 4, 5, 2, 2).astype(np.float32))
 
@@ -86,6 +116,7 @@ class DeterminantOpTest(test.TestCase):
     self._compareDeterminant(np.array([[2., 3.], [3., 4.]]).astype(np.float64))
     self._compareDeterminant(np.array([[0., 0.], [0., 0.]]).astype(np.float64))
     # 5x5 matrices (Eigen forces LU decomposition)
+<<<<<<< HEAD
     self._compareDeterminant(
         np.array([[2., 3., 4., 5., 6.], [3., 4., 9., 2., 0.], [
             2., 5., 8., 3., 8.
@@ -134,10 +165,25 @@ class DeterminantOpTest(test.TestCase):
     self._compareDeterminant(huge_matrix)
 
   @test_util.run_v1_only("b/120545219")
+=======
+    self._compareDeterminant(np.array(
+        [[2., 3., 4., 5., 6.], [3., 4., 9., 2., 0.], [2., 5., 8., 3., 8.],
+         [1., 6., 7., 4., 7.], [2., 3., 4., 5., 6.]]).astype(np.float64))
+    # A multidimensional batch of 2x2 matrices
+    self._compareDeterminant(np.random.rand(3, 4, 5, 2, 2).astype(np.float64))
+
+  def testOverflow(self):
+    max_double = np.finfo("d").max
+    huge_matrix = np.array([[max_double, 0.0], [0.0, max_double]])
+    with self.assertRaisesOpError("not finite"):
+      self._compareDeterminant(huge_matrix)
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testNonSquareMatrix(self):
     # When the determinant of a non-square matrix is attempted we should return
     # an error
     with self.assertRaises(ValueError):
+<<<<<<< HEAD
       linalg_ops.matrix_determinant(
           np.array([[1., 2., 3.], [3., 5., 4.]]).astype(np.float32))
 
@@ -147,11 +193,22 @@ class DeterminantOpTest(test.TestCase):
     tensor1 = constant_op.constant([1., 2.])
     with self.assertRaises(ValueError):
       linalg_ops.matrix_determinant(tensor1)
+=======
+      tf.matrix_determinant(
+          np.array([[1., 2., 3.], [3., 5., 4.]]).astype(np.float32))
+
+  def testWrongDimensions(self):
+    # The input to the determinant should be a 2-dimensional tensor.
+    tensor1 = tf.constant([1., 2.])
+    with self.assertRaises(ValueError):
+      tf.matrix_determinant(tensor1)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def testEmpty(self):
     self._compareDeterminant(np.empty([0, 2, 2]))
     self._compareDeterminant(np.empty([2, 0, 0]))
 
+<<<<<<< HEAD
   @test_util.run_v1_only("b/120545219")
   def testConcurrentExecutesWithoutError(self):
     with self.session(use_gpu=True) as sess:
@@ -218,3 +275,8 @@ class MatrixDeterminantBenchmark(test.Benchmark):
 
 if __name__ == "__main__":
   test.main()
+=======
+
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

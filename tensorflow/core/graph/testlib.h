@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,22 +18,40 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_GRAPH_TESTLIB_H_
 #define TENSORFLOW_CORE_GRAPH_TESTLIB_H_
+=======
+// DEPRECATED: Use GraphDefBuilder instead.
+
+#ifndef TENSORFLOW_GRAPH_TESTLIB_H_
+#define TENSORFLOW_GRAPH_TESTLIB_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <string>
 #include <vector>
 
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/graph/types.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/graph/graph.h"
+#include "tensorflow/core/graph/types.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace test {
 namespace graph {
 
 // Converts "g" into its corresponding GraphDef "def".
+<<<<<<< HEAD
 ABSL_DEPRECATED("Call g->ToGraphDef(def) instead.")
+=======
+// DEPRECATED: call g->ToGraphDef(def) instead.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 void ToGraphDef(Graph* g, GraphDef* def);
 
 // A few helpers to construct a graph.
@@ -41,6 +60,7 @@ void ToGraphDef(Graph* g, GraphDef* def);
 Node* Constant(Graph* g, const Tensor& tensor);
 Node* Constant(Graph* g, const Tensor& tensor, const string& name);
 
+<<<<<<< HEAD
 // Adds a node in "g" producing a constant "tensor" on the host.
 // The given node which, unlike the regular Constant above, always
 // stores its output on the host.  This is necessary for use
@@ -53,6 +73,10 @@ Node* HostConstant(Graph* g, const Tensor& tensor, const string& name);
 Node* Var(Graph* g, const DataType dtype, const TensorShape& shape);
 Node* Var(Graph* g, const DataType dtype, const TensorShape& shape,
           const string& name);
+=======
+// Adds a variable in "g" of the given "shape" and "dtype".
+Node* Var(Graph* g, const DataType dtype, const TensorShape& shape);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Adds an assign node in "g" which assigns "val" into "var".
 Node* Assign(Graph* g, Node* var, Node* val);
@@ -68,10 +92,13 @@ Node* Recv(Graph* g, const string& tensor, const string& type,
            const string& sender, const uint64 sender_incarnation,
            const string& receiver);
 
+<<<<<<< HEAD
 // Adds a cumsum "node" in "g" doing cumsum(data, axes).
 Node* Cumsum(Graph* g, Node* data, Node* axes, bool exclusive = false,
              bool reverse = false);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Adds a reduction "node" in "g" doing sum(data, axes).  "reduce" is
 // a reduction, e.g., Sum, Max, Min, Mean, etc.
 Node* Reduce(Graph* g, const string& reduce, Node* data, Node* axes,
@@ -81,9 +108,12 @@ Node* Reduce(Graph* g, const string& reduce, Node* data, Node* axes,
 Node* Matmul(Graph* g, Node* in0, Node* in1, bool transpose_a,
              bool transpose_b);
 
+<<<<<<< HEAD
 // Adds a Matmul node in g doing in0.contract(in1).
 Node* BatchMatmul(Graph* g, Node* in0, Node* in1, bool adj_x, bool adj_y);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Adds a Quantize node into g that quantize floats into QUINT8. The range of
 // the input float tensor is assumed to be [-1, 1].
 Node* QuantizeToUINT8(Graph* g, Node* data);
@@ -96,23 +126,35 @@ Node* Unary(Graph* g, const string& func, Node* input, int index = 0);
 Node* Identity(Graph* g, Node* input, int index = 0);
 
 // Adds a binary function "func" node in "g" taking "in0" and "in1".
+<<<<<<< HEAD
 Node* Binary(Graph* g, const string& func, Node* in0, Node* in1);
 
 // Adds a function "func" node in "g" taking inputs "ins".
+=======
+// Requires that "func" name an attr-style Op.
+Node* Binary(Graph* g, const string& func, Node* in0, Node* in1);
+
+// Adds a function "func" node in "g" taking inputs "ins".
+// Requires that "func" name an attr-style Op.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Node* Multi(Graph* g, const string& func, gtl::ArraySlice<Node*> ins);
 
 // Adds a binary add node in "g" doing in0 + in1.
 Node* Add(Graph* g, Node* in0, Node* in1);
 
+<<<<<<< HEAD
 // Reverses <axis> dimensions of <tensor>>
 Node* Reverse(Graph* g, Node* tensor, Node* axis);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Generates random unit uniform distribution of the input shape.
 Node* RandomUniform(Graph* g, Node* input, DataType dtype);
 
 // Generates random unit normal distribution of the input shape.
 Node* RandomGaussian(Graph* g, Node* input, DataType dtype);
 
+<<<<<<< HEAD
 // Generates random gamma distribution with the given shape and alpha[s].
 // Output dtype determined by alpha.
 Node* RandomGamma(Graph* g, Node* shape, Node* alpha);
@@ -133,6 +175,15 @@ Node* TruncatedNormal(Graph* g, Node* input, DataType dtype);
 // generates an error with the given error message "errmsg".
 Node* Error(Graph* g, Node* input, const string& errmsg,
             bool log_error = false);
+=======
+// Generates random parameters from the truncated standard normal distribution
+// of the nput shape
+Node* RandomParameters(Graph* g, Node* input, DataType dtype);
+
+// Adds an error node in "g". The node's computation always
+// generates an error with the given error message "errmsg".
+Node* Error(Graph* g, Node* input, const string& errmsg);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Adds a node that generates a invalid ref output.
 Node* InvalidRefType(Graph* g, DataType out_type, DataType invalid_type);
@@ -180,6 +231,7 @@ Node* Select(Graph* g, Node* c, Node* inx, Node* iny);
 // Casts "in" into data type "dst".
 Node* Cast(Graph* g, Node* in, DataType dst);
 
+<<<<<<< HEAD
 // Perform gather op on params "in0" with indices "in1" and axis "axis".
 Node* Gather(Graph* g, Node* in0, Node* in1, Node* axis);
 
@@ -223,8 +275,14 @@ Node* Arg(Graph* g, int64 index, DataType type);
 // Add a _Retval node in "g".
 Node* Retval(Graph* g, int64 index, Node* in);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace graph
 }  // end namespace test
 }  // end namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_GRAPH_TESTLIB_H_
+=======
+#endif  // TENSORFLOW_GRAPH_TESTLIB_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -108,4 +109,30 @@ void SubAllocator::VisitFree(void* ptr, int index, size_t num_bytes) {
     free_visitors_[i](ptr, index, num_bytes);
   }
 }
+=======
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/platform/port.h"
+
+namespace tensorflow {
+
+Allocator::~Allocator() {}
+
+class CPUAllocator : public Allocator {
+ public:
+  ~CPUAllocator() override {}
+
+  string Name() override { return "cpu"; }
+  void* AllocateRaw(size_t alignment, size_t num_bytes) override {
+    return port::aligned_malloc(num_bytes, alignment);
+  }
+
+  void DeallocateRaw(void* ptr) override { port::aligned_free(ptr); }
+};
+
+Allocator* cpu_allocator() {
+  static CPUAllocator* cpu_alloc = new CPUAllocator;
+  return cpu_alloc;
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

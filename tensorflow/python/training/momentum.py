@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,6 +46,23 @@ class MomentumOptimizer(optimizer.Optimizer):
 
   def __init__(self, learning_rate, momentum,
                use_locking=False, name="Momentum", use_nesterov=False):
+=======
+"""Momentum for TensorFlow."""
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import constant_op
+from tensorflow.python.training import optimizer
+from tensorflow.python.training import training_ops
+
+
+class MomentumOptimizer(optimizer.Optimizer):
+  """Optimizer that implements the Momentum algorithm.
+
+  @@__init__
+  """
+
+  def __init__(self, learning_rate, momentum,
+               use_locking=False, name="Momentum"):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Construct a new Momentum optimizer.
 
     Args:
@@ -53,6 +71,7 @@ class MomentumOptimizer(optimizer.Optimizer):
       use_locking: If `True` use locks for update operations.
       name: Optional name prefix for the operations created when applying
         gradients.  Defaults to "Momentum".
+<<<<<<< HEAD
       use_nesterov: If `True` use Nesterov Momentum.
         See (Sutskever et al., 2013).
         This implementation always computes gradients at the value of the
@@ -76,17 +95,23 @@ class MomentumOptimizer(optimizer.Optimizer):
     can be useful for changing these values across different invocations of
     optimizer functions.
     @end_compatibility
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """
     super(MomentumOptimizer, self).__init__(use_locking, name)
     self._learning_rate = learning_rate
     self._momentum = momentum
+<<<<<<< HEAD
     self._use_nesterov = use_nesterov
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _create_slots(self, var_list):
     for v in var_list:
       self._zeros_slot(v, "momentum", self._name)
 
   def _prepare(self):
+<<<<<<< HEAD
     learning_rate = self._learning_rate
     if callable(learning_rate):
       learning_rate = learning_rate()
@@ -96,11 +121,18 @@ class MomentumOptimizer(optimizer.Optimizer):
     if callable(momentum):
       momentum = momentum()
     self._momentum_tensor = ops.convert_to_tensor(momentum, name="momentum")
+=======
+    self._learning_rate_tensor = ops.convert_to_tensor(self._learning_rate,
+                                                       name="learning_rate")
+    self._momentum_tensor = ops.convert_to_tensor(self._momentum,
+                                                  name="momentum")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _apply_dense(self, grad, var):
     mom = self.get_slot(var, "momentum")
     return training_ops.apply_momentum(
         var, mom,
+<<<<<<< HEAD
         math_ops.cast(self._learning_rate_tensor, var.dtype.base_dtype),
         grad,
         math_ops.cast(self._momentum_tensor, var.dtype.base_dtype),
@@ -116,11 +148,16 @@ class MomentumOptimizer(optimizer.Optimizer):
         math_ops.cast(self._momentum_tensor, grad.dtype.base_dtype),
         use_locking=self._use_locking,
         use_nesterov=self._use_nesterov)
+=======
+        self._learning_rate_tensor, grad, self._momentum_tensor,
+        use_locking=self._use_locking).op
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _apply_sparse(self, grad, var):
     mom = self.get_slot(var, "momentum")
     return training_ops.sparse_apply_momentum(
         var, mom,
+<<<<<<< HEAD
         math_ops.cast(self._learning_rate_tensor, var.dtype.base_dtype),
         grad.values, grad.indices,
         math_ops.cast(self._momentum_tensor, var.dtype.base_dtype),
@@ -136,3 +173,7 @@ class MomentumOptimizer(optimizer.Optimizer):
         math_ops.cast(self._momentum_tensor, grad.dtype),
         use_locking=self._use_locking,
         use_nesterov=self._use_nesterov)
+=======
+        self._learning_rate_tensor, grad.values, grad.indices,
+        self._momentum_tensor, use_locking=self._use_locking).op
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

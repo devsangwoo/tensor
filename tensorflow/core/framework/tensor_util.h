@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +26,12 @@ limitations under the License.
 #include "tensorflow/core/framework/type_traits.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_TENSOR_UTIL_H_
+#define TENSORFLOW_FRAMEWORK_TENSOR_UTIL_H_
+
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace tensor {
@@ -38,6 +45,7 @@ namespace tensor {
 //           'other' is not appropriately memory-aligned.
 Tensor DeepCopy(const Tensor& other);
 
+<<<<<<< HEAD
 // Deep copies input to output.  This function is similar to above, but assumes
 // that the memory for the output has already been allocated.
 void DeepCopy(const Tensor& input, Tensor* output);
@@ -329,3 +337,9 @@ inline bool CompressTensorProtoInPlace(TensorProto* tensor) {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_TENSOR_UTIL_H_
+=======
+}  // namespace tensor
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_TENSOR_UTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

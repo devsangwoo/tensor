@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/graph/algorithm.h"
 
 #include <algorithm>
 #include <deque>
 #include <vector>
 
+<<<<<<< HEAD
 #include "tensorflow/core/platform/logging.h"
 
 namespace tensorflow {
@@ -132,13 +136,30 @@ void ReverseDFSFromHelper(const Graph& g, gtl::ArraySlice<T> start,
   for (int i = 0; i < start.size(); ++i) {
     stack[i] = Work{start[i], false};
   }
+=======
+namespace tensorflow {
+
+void DFS(const Graph& g, std::function<void(Node*)> enter,
+         std::function<void(Node*)> leave) {
+  // Stack of work to do.
+  struct Work {
+    Node* node;
+    bool leave;  // Are we entering or leaving n?
+  };
+  std::vector<Work> stack;
+  stack.push_back(Work{g.source_node(), false});
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   std::vector<bool> visited(g.num_node_ids(), false);
   while (!stack.empty()) {
     Work w = stack.back();
     stack.pop_back();
 
+<<<<<<< HEAD
     T n = w.node;
+=======
+    Node* n = w.node;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (w.leave) {
       leave(n);
       continue;
@@ -151,11 +172,17 @@ void ReverseDFSFromHelper(const Graph& g, gtl::ArraySlice<T> start,
     // Arrange to call leave(n) when all done with descendants.
     if (leave) stack.push_back(Work{n, true});
 
+<<<<<<< HEAD
     auto add_work = [&visited, &stack](T out) {
+=======
+    // Arrange to work on descendants.
+    for (Node* out : n->out_nodes()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if (!visited[out->id()]) {
         // Note; we must not mark as visited until we actually process it.
         stack.push_back(Work{out, false});
       }
+<<<<<<< HEAD
     };
 
     if (stable_comparator) {
@@ -171,10 +198,13 @@ void ReverseDFSFromHelper(const Graph& g, gtl::ArraySlice<T> start,
       for (const Edge* in_edge : n->in_edges()) {
         add_work(in_edge->src());
       }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 }
 
+<<<<<<< HEAD
 }  // namespace
 
 void ReverseDFSFrom(const Graph& g, gtl::ArraySlice<const Node*> start,
@@ -224,10 +254,40 @@ bool PruneForReverseReachability(Graph* g,
         visited[in->id()] = true;
         queue.push_back(in);
         VLOG(2) << "Reverse reach : " << n->name() << " from " << in->name();
+=======
+void GetPostOrder(const Graph& g, std::vector<Node*>* order) {
+  order->clear();
+  DFS(g, nullptr, [order](Node* n) { order->push_back(n); });
+}
+
+void GetReversePostOrder(const Graph& g, std::vector<Node*>* order) {
+  GetPostOrder(g, order);
+  std::reverse(order->begin(), order->end());
+}
+
+void PruneForReverseReachability(Graph* g,
+                                 const std::unordered_set<const Node*>& nodes) {
+  std::unordered_set<const Node*> visited;
+
+  // Compute set of nodes that we need to traverse in order to reach
+  // the nodes in "nodes" by performing a breadth-first search from those
+  // nodes, and accumulating the visited nodes.
+  std::deque<const Node*> queue;
+  for (const Node* n : nodes) {
+    queue.push_back(n);
+  }
+  while (!queue.empty()) {
+    const Node* n = queue.front();
+    queue.pop_front();
+    if (visited.insert(n).second) {
+      for (const Node* in : n->in_nodes()) {
+        queue.push_back(in);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     }
   }
 
+<<<<<<< HEAD
   // Make a pass over the graph to remove nodes not in "visited".
   bool any_removed = false;
   for (int i = 0; i < visited.size(); ++i) {
@@ -258,6 +318,35 @@ bool FixupSourceAndSinkEdges(Graph* g) {
     }
   }
   return changed;
+=======
+  // Make a pass over the graph to remove nodes not in "visited"
+  std::vector<Node*> all_nodes;
+  for (Node* n : g->nodes()) {
+    all_nodes.push_back(n);
+  }
+
+  for (Node* n : all_nodes) {
+    if (visited.count(n) == 0 && !n->IsSource() && !n->IsSink()) {
+      g->RemoveNode(n);
+    }
+  }
+
+  // Reconnect nodes with no outgoing edges to the sink node
+  FixupSourceAndSinkEdges(g);
+}
+
+void FixupSourceAndSinkEdges(Graph* g) {
+  // Connect all nodes with no incoming edges to source.
+  // Connect all nodes with no outgoing edges to sink.
+  for (Node* n : g->nodes()) {
+    if (!n->IsSource() && n->in_edges().empty()) {
+      g->AddControlEdge(g->source_node(), n);
+    }
+    if (!n->IsSink() && n->out_edges().empty()) {
+      g->AddControlEdge(n, g->sink_node());
+    }
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

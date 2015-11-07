@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,11 +42,28 @@ limitations under the License.
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/util/device_name_utils.h"
 #include "tensorflow/core/util/dump_graph.h"
+=======
+#include "tensorflow/core/graph/graph_partition.h"
+
+#include <deque>
+#include <unordered_map>
+
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/graph/costmodel.h"
+#include "tensorflow/core/graph/graph_def_builder.h"
+#include "tensorflow/core/graph/node_builder.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/hash/hash.h"
+#include "tensorflow/core/platform/logging.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 namespace {
 
+<<<<<<< HEAD
 inline bool IsMerge(const NodeDef& node_def) {
   return node_def.op() == "Merge" || node_def.op() == "RefMerge" ||
          node_def.op() == "_XlaMerge";
@@ -56,11 +74,14 @@ inline bool IsNextIteration(const NodeDef& node_def) {
          node_def.op() == "RefNextIteration";
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 struct DupRecvKey {
   int src_node_id;           // Edge's src node id
   int src_output_slot;       // Edge's src node output slot
   GraphDef* dst_graph;       // Edge's dst node is in this subgraph
   bool recv_output_on_host;  // The output of recv is on host
+<<<<<<< HEAD
 
   template <typename H>
   friend H AbslHashValue(H h, const DupRecvKey& c) {
@@ -70,6 +91,24 @@ struct DupRecvKey {
   }
 
   friend bool operator==(const DupRecvKey& x, const DupRecvKey& y) {
+=======
+};
+
+struct DupRecvKeyHash {
+  size_t operator()(const DupRecvKey& k) const {
+    size_t h = Hash64(reinterpret_cast<const char*>(&k.src_node_id),
+                      sizeof(k.src_node_id), k.src_output_slot);
+    h = Hash64(reinterpret_cast<const char*>(&k.dst_graph), sizeof(k.dst_graph),
+               h);
+    h = Hash64(reinterpret_cast<const char*>(&k.recv_output_on_host),
+               sizeof(k.recv_output_on_host), h);
+    return h;
+  }
+};
+
+struct DupRecvKeyEq {
+  bool operator()(const DupRecvKey& x, const DupRecvKey& y) const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return (x.src_node_id == y.src_node_id) &&
            (x.src_output_slot == y.src_output_slot) &&
            (x.dst_graph == y.dst_graph) &&
@@ -84,6 +123,7 @@ struct RecvInfo {
   int64 start_time;
 };
 
+<<<<<<< HEAD
 typedef absl::flat_hash_map<DupRecvKey, RecvInfo> DupRecvTable;
 
 // A map used to store memory types for the inputs/outputs of every node.
@@ -104,6 +144,29 @@ struct NodePort {
 };
 
 typedef absl::flat_hash_map<NodePort, MemoryType> MemoryTypeMap;
+=======
+typedef std::unordered_map<DupRecvKey, RecvInfo, DupRecvKeyHash, DupRecvKeyEq>
+    DupRecvTable;
+
+// Control flow info for a graph node.
+struct ControlFlowInfo {
+  const Node* frame = nullptr;         // frame of a node
+  const Node* parent_frame = nullptr;  // parent frame of a node
+  string frame_name;                   // frame name of a node
+  int iter_level = -1;                 // level of a node
+};
+
+struct PairIntHash {
+ public:
+  std::size_t operator()(const std::pair<int, int>& x) const {
+    return std::hash<int>()(x.first) ^ std::hash<int>()(x.second);
+  }
+};
+// A map used to store memory types for the inputs/outputs of every node.
+// The key is a pair of ints consisting of a node id and input/output index.
+typedef std::unordered_map<std::pair<int, int>, MemoryType, PairIntHash>
+    MemoryTypeMap;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // We collect the following information about the graph before performing
 // graph partitioning.
@@ -122,18 +185,31 @@ DataType EdgeType(const Edge* e) {
   }
 }
 
+<<<<<<< HEAD
 // Return true iff we need to add the same device send/recv for 'edge'.
+=======
+// Return true iff we need to add a same device send/recv for 'edge'.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 bool NeedSameDeviceSendRecv(const Edge* edge, const GraphInfo& info) {
   if (edge->IsControlEdge()) {
     return false;
   }
 
+<<<<<<< HEAD
   const Node* src = edge->src();
   const Node* dst = edge->dst();
   if (src->assigned_device_name() == dst->assigned_device_name()) {
     int src_port = edge->src_output();
     int dst_port = edge->dst_input();
     if (info.device_types[src->id()] != DEVICE_CPU) {
+=======
+  Node* src = edge->src();
+  Node* dst = edge->dst();
+  if (src->assigned_device_name() == dst->assigned_device_name()) {
+    int src_port = edge->src_output();
+    int dst_port = edge->dst_input();
+    if (info.device_types[src->id()] == DEVICE_GPU) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       auto src_it = info.output_types.find({src->id(), src_port});
       DCHECK(src_it != info.output_types.end());
       auto dst_it = info.input_types.find({dst->id(), dst_port});
@@ -146,9 +222,15 @@ bool NeedSameDeviceSendRecv(const Edge* edge, const GraphInfo& info) {
 
 // Return true iff (dst, dst_input) is specified on host memory.
 bool IsDstInputOnHost(const Edge* edge, const GraphInfo& info) {
+<<<<<<< HEAD
   const Node* dst = edge->dst();
   int dst_port = edge->dst_input();
   if (info.device_types[dst->id()] != DEVICE_CPU) {
+=======
+  Node* dst = edge->dst();
+  int dst_port = edge->dst_input();
+  if (info.device_types[dst->id()] == DEVICE_GPU) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (edge->IsControlEdge()) return false;
     auto dst_it = info.input_types.find({dst->id(), dst_port});
     DCHECK(dst_it != info.input_types.end());
@@ -212,13 +294,18 @@ NodeDef* AddSend(const PartitionOptions& opts, const GraphInfo& g_info,
   // NOTE(yuanbyu): Only cast for cross-device send/recv.
   if (dtype != cast_dtype && !NeedSameDeviceSendRecv(edge, g_info)) {
     const string cast_op = (host_memory) ? "_HostCast" : "Cast";
+<<<<<<< HEAD
     NodeDefBuilder cast_builder(opts.new_name(src->name()), cast_op,
                                 NodeDebugInfo(*src));
+=======
+    NodeDefBuilder cast_builder(opts.new_name(src->name()), cast_op);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     cast_builder.Device(src->assigned_device_name()).Input(send_from);
     if (opts.scheduling_for_recvs) {
       cast_builder.Attr("_start_time", start_time);
     }
     cast_builder.Attr("DstT", cast_dtype);
+<<<<<<< HEAD
 
     if (cast_dtype == DT_BFLOAT16) {
       // the below attribute specifies that the cast to bfloat16 should use
@@ -229,6 +316,10 @@ NodeDef* AddSend(const PartitionOptions& opts, const GraphInfo& g_info,
 
     NodeDef* cast = gdef->add_node();
     *status = cast_builder.Finalize(cast, /*consume=*/true);
+=======
+    NodeDef* cast = gdef->add_node();
+    *status = cast_builder.Finalize(cast);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!status->ok()) return nullptr;
 
     // Connect the Send op to the cast.
@@ -237,15 +328,23 @@ NodeDef* AddSend(const PartitionOptions& opts, const GraphInfo& g_info,
 
   // Add the send node.
   const string send_op = (host_memory) ? "_HostSend" : "_Send";
+<<<<<<< HEAD
   NodeDefBuilder send_builder(opts.new_name(src->name()), send_op,
                               NodeDebugInfo(*src));
+=======
+  NodeDefBuilder send_builder(opts.new_name(src->name()), send_op);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   SetSendRecvAttrs(opts, edge, &send_builder);
   send_builder.Device(src->assigned_device_name()).Input(send_from);
   if (opts.scheduling_for_recvs) {
     send_builder.Attr("_start_time", start_time);
   }
   NodeDef* send = gdef->add_node();
+<<<<<<< HEAD
   *status = send_builder.Finalize(send, /*consume=*/true);
+=======
+  *status = send_builder.Finalize(send);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return send;
 }
 
@@ -264,12 +363,16 @@ NodeDef* AddRecv(const PartitionOptions& opts, const GraphInfo& g_info,
   }
 
   // host_memory = true iff we need to use HostRecv/HostCast.
+<<<<<<< HEAD
   // Also log the introduction of the send-recv pair, for performance debugging.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool host_memory = false;
   if (!edge->IsControlEdge()) {
     auto dst_it = g_info.input_types.find({dst->id(), dst_port});
     DCHECK(dst_it != g_info.input_types.end());
     host_memory = (dst_it->second == HOST_MEMORY);
+<<<<<<< HEAD
     bool src_host_memory = false;
     if (VLOG_IS_ON(1)) {
       const int src_port = edge->src_output();
@@ -292,40 +395,66 @@ NodeDef* AddRecv(const PartitionOptions& opts, const GraphInfo& g_info,
             << " on " << src->assigned_device_name() << " for " << dst->name()
             << " (" << dst->type_string() << ")"
             << " on " << dst->assigned_device_name();
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Add the recv node.
   const string recv_op = (host_memory) ? "_HostRecv" : "_Recv";
+<<<<<<< HEAD
   NodeDefBuilder recv_builder(opts.new_name(src->name()), recv_op,
                               NodeDebugInfo(*src));
+=======
+  NodeDefBuilder recv_builder(opts.new_name(src->name()), recv_op);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   SetSendRecvAttrs(opts, edge, &recv_builder);
   recv_builder.Device(dst->assigned_device_name())
       .Attr("tensor_type", cast_dtype);
   NodeDef* recv = gdef->add_node();
+<<<<<<< HEAD
   *status = recv_builder.Finalize(recv, /*consume=*/true);
+=======
+  *status = recv_builder.Finalize(recv);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!status->ok()) return nullptr;
   *real_recv = recv;
 
   // Add the cast node (from cast_dtype to dtype) or an Identity node.
   if (dtype != cast_dtype) {
     const string cast_op = (host_memory) ? "_HostCast" : "Cast";
+<<<<<<< HEAD
     NodeDefBuilder cast_builder(opts.new_name(src->name()), cast_op,
                                 NodeDebugInfo(*src));
+=======
+    NodeDefBuilder cast_builder(opts.new_name(src->name()), cast_op);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     cast_builder.Attr("DstT", dtype);
     cast_builder.Device(dst->assigned_device_name())
         .Input(recv->name(), 0, cast_dtype);
     NodeDef* cast = gdef->add_node();
+<<<<<<< HEAD
     *status = cast_builder.Finalize(cast, /*consume=*/true);
+=======
+    *status = cast_builder.Finalize(cast);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!status->ok()) return nullptr;
     return cast;
   } else if (edge->IsControlEdge()) {
     // An Identity is only needed for control edges.
+<<<<<<< HEAD
     NodeDefBuilder id_builder(opts.new_name(src->name()), "Identity",
                               NodeDebugInfo(*src));
     id_builder.Device(dst->assigned_device_name())
         .Input(recv->name(), 0, cast_dtype);
     NodeDef* id = gdef->add_node();
     *status = id_builder.Finalize(id, /*consume=*/true);
+=======
+    NodeDefBuilder id_builder(opts.new_name(src->name()), "Identity");
+    id_builder.Device(dst->assigned_device_name())
+        .Input(recv->name(), 0, cast_dtype);
+    NodeDef* id = gdef->add_node();
+    *status = id_builder.Finalize(id);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!status->ok()) return nullptr;
     return id;
   } else {
@@ -342,7 +471,11 @@ NodeDef* AddDummyConst(const PartitionOptions& opts, GraphDef* gdef,
                 .Device(src->assigned_device_name())
                 .Attr("dtype", DT_FLOAT)
                 .Attr("value", tensor)
+<<<<<<< HEAD
                 .Finalize(result, /*consume=*/true);
+=======
+                .Finalize(result);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return result;
 }
 
@@ -355,6 +488,7 @@ NodeDef* AddControlTrigger(const PartitionOptions& opts, GraphDef* gdef,
                            "ControlTrigger")
                 .Device(assigned_device_name)
                 .Attr("_start_time", starttime)
+<<<<<<< HEAD
                 .Finalize(result, /*consume=*/true);
   return result;
 }
@@ -405,6 +539,113 @@ void OptimizeControlFlowColocation(Graph* graph) {
     }
   };
   DFS(*graph, visit, {});
+=======
+                .Finalize(result);
+  return result;
+}
+
+// Assign to each node the name of the frame and the level it belongs to.
+// We check the well-formedness of the graph: All inputs to a node must
+// come from the same frame and have the same "static" iteration level.
+// NOTE(yuanbyu): For now, we require all sends/recvs have iteration level
+// 0. This essentially means there can't be multiple serial Nexts in
+// an iteration, which all sane front-ends should satisfy.
+Status BuildControlFlowInfo(Graph* g, std::vector<ControlFlowInfo>* info) {
+  info->clear();
+  info->resize(g->num_node_ids());
+
+  Node* src_node = g->source_node();
+  ControlFlowInfo& src_info = (*info)[src_node->id()];
+  src_info.frame = src_node;
+  src_info.parent_frame = src_node;
+  src_info.iter_level = 0;
+
+  string frame_name;
+  std::deque<const Node*> ready;
+  ready.push_back(src_node);
+  while (!ready.empty()) {
+    const Node* curr_node = ready.front();
+    ready.pop_front();
+    const ControlFlowInfo& curr_info = (*info)[curr_node->id()];
+    const Node* frame = curr_info.frame;
+    const Node* parent = curr_info.parent_frame;
+    frame_name = curr_info.frame_name;
+    int iter_level = curr_info.iter_level;
+
+    if (IsExit(curr_node)) {
+      const ControlFlowInfo& parent_info = (*info)[parent->id()];
+      frame = parent_info.frame;
+      parent = parent_info.parent_frame;
+      frame_name = parent_info.frame_name;
+      iter_level = parent_info.iter_level;
+    }
+
+    for (const Edge* out_edge : curr_node->out_edges()) {
+      const Node* out = out_edge->dst();
+      int out_id = out->id();
+      ControlFlowInfo* out_info = &(*info)[out_id];
+      const Node* out_parent = out_info->parent_frame;
+      bool is_visited = (out_info->iter_level != -1);
+
+      // Skip Sink/Source nodes.
+      if (!out->IsOp()) continue;
+
+      // Add to ready queue if not seen.
+      if (!is_visited) {
+        ready.push_back(out);
+      }
+
+      // Process the node 'out'.
+      if (IsEnter(out)) {
+        if (is_visited) {
+          const string& parent_name = (*info)[out_parent->id()].frame_name;
+          if (parent_name != frame_name || iter_level != out_info->iter_level) {
+            return errors::InvalidArgument(
+                "All inputs to Enter must be from the same frame and level.");
+          }
+        } else {
+          out_info->frame = out;
+          out_info->parent_frame = frame;
+          TF_RETURN_IF_ERROR(
+              GetNodeAttr(out->def(), "frame_name", &out_info->frame_name));
+          if (out_info->frame_name.empty()) {
+            return errors::InvalidArgument(
+                "Enter must have a non-empty frame name.");
+          }
+          out_info->iter_level = 0;
+        }
+      } else if (IsNextIteration(out)) {
+        if (is_visited) {
+          if (out_info->frame_name != frame_name ||
+              out_info->iter_level != (iter_level + 1)) {
+            return errors::InvalidArgument(
+                "All inputs to NextIteration must be from the same frame "
+                "and level.");
+          }
+        } else {
+          out_info->frame = frame;
+          out_info->parent_frame = parent;
+          out_info->frame_name = frame_name;
+          out_info->iter_level = iter_level + 1;
+        }
+      } else {
+        if (is_visited) {
+          if (out_info->frame_name != frame_name) {
+            return errors::InvalidArgument(
+                "All inputs to a node must be from the same frame.");
+          }
+        } else {
+          out_info->frame = frame;
+          out_info->parent_frame = parent;
+          out_info->frame_name = frame_name;
+          out_info->iter_level = iter_level;
+        }
+      }
+    }
+  }
+
+  return Status::OK();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 string ControlLoopName(const string& name) {
@@ -412,8 +653,13 @@ string ControlLoopName(const string& name) {
 }
 
 bool IsControlLoop(const Node* node) {
+<<<<<<< HEAD
   const string& name = node->name();
   return absl::StartsWith(name, "_cloop");
+=======
+  const string& name = node->def().name();
+  return StringPiece(name).starts_with("_cloop");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // An enter node for control flow.
@@ -425,7 +671,11 @@ Node* AddControlEnter(Graph* g, const string& node_name,
   node_builder.Attr("frame_name", frame_name);
   node_builder.Attr("parallel_iterations", parallel_iterations);
   Node* res_node;
+<<<<<<< HEAD
   *status = node_builder.Finalize(g, &res_node, /*consume=*/true);
+=======
+  *status = node_builder.Finalize(g, &res_node);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!status->ok()) return nullptr;
   res_node->set_assigned_device_name(device_name);
   return res_node;
@@ -438,7 +688,11 @@ Node* AddControlMerge(const string& in_name1, const string& in_name2, Graph* g,
   NodeBuilder node_builder(node_name, "Merge", g->op_registry());
   node_builder.Input({{in_name1, 0, DT_FLOAT}, {in_name2, 0, DT_FLOAT}});
   Node* res_node;
+<<<<<<< HEAD
   *status = node_builder.Finalize(g, &res_node, /*consume=*/true);
+=======
+  *status = node_builder.Finalize(g, &res_node);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!status->ok()) return nullptr;
   res_node->set_assigned_device_name(device_name);
   return res_node;
@@ -448,8 +702,12 @@ Node* AddControlMerge(const string& in_name1, const string& in_name2, Graph* g,
 Node* AddControlSwitch(NodeBuilder::NodeOut input1, NodeBuilder::NodeOut input2,
                        const string& device_name,
                        const GraphDefBuilder::Options& bopts) {
+<<<<<<< HEAD
   Node* res_node =
       ops::BinaryOp("Switch", std::move(input1), std::move(input2), bopts);
+=======
+  Node* res_node = ops::BinaryOp("Switch", input1, input2, bopts);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (bopts.HaveError()) return nullptr;
   res_node->set_assigned_device_name(device_name);
   return res_node;
@@ -458,7 +716,11 @@ Node* AddControlSwitch(NodeBuilder::NodeOut input1, NodeBuilder::NodeOut input2,
 // A next_iteration node for control flow.
 Node* AddControlNext(NodeBuilder::NodeOut input, const string& device_name,
                      const GraphDefBuilder::Options& bopts) {
+<<<<<<< HEAD
   Node* res_node = ops::UnaryOp("NextIteration", std::move(input), bopts);
+=======
+  Node* res_node = ops::UnaryOp("NextIteration", input, bopts);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (bopts.HaveError()) return nullptr;
   res_node->set_assigned_device_name(device_name);
   return res_node;
@@ -495,7 +757,11 @@ struct ControlLoop {
 };
 
 // Add the control flow info of a new node added during partitioning.
+<<<<<<< HEAD
 // The new node has the same control flow info as src.
+=======
+// The new node has the same control flow info as edge->src().
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 void AddControlFlowInfo(const Node* node, const Node* src,
                         std::vector<ControlFlowInfo>* cf_info) {
   int id = node->id();
@@ -507,6 +773,10 @@ void AddControlFlowInfo(const Node* node, const Node* src,
   info->frame = src_info.frame;
   info->parent_frame = src_info.parent_frame;
   info->frame_name = src_info.frame_name;
+<<<<<<< HEAD
+=======
+  info->iter_level = src_info.iter_level;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // Constructs a control loop. Returns a struct containing the newly created
@@ -525,7 +795,11 @@ Status AddControlLoop(const PartitionOptions& opts, Graph* g, const Node* src,
   const string& device_name = edge->dst()->assigned_device_name();
   const string& frame_name = src_info.frame_name;
   int parallel_iterations;
+<<<<<<< HEAD
   status = GetNodeAttr(src_info.frame->attrs(), "parallel_iterations",
+=======
+  status = GetNodeAttr(src_info.frame->def(), "parallel_iterations",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                        &parallel_iterations);
   if (!status.ok()) return status;
 
@@ -572,11 +846,21 @@ Status AddControlLoop(const PartitionOptions& opts, Graph* g, const Node* src,
 // TODO(yuanbyu): It might be simpler if we convert MemoryType to
 // DeviceType for the inputs/outputs of each node.
 Status BuildMemoryDeviceInfo(const Graph& g, GraphInfo* info) {
+<<<<<<< HEAD
+=======
+  Status status;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   MemoryTypeVector input_memory_types;
   MemoryTypeVector output_memory_types;
 
   info->device_types.resize(g.num_node_ids(), DEVICE_CPU);
+<<<<<<< HEAD
   for (const Node* node : g.op_nodes()) {
+=======
+  for (const Node* node : g.nodes()) {
+    if (!node->IsOp()) continue;  // Skip Sink/Source nodes.
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     DeviceNameUtils::ParsedName parsed;
     if (!DeviceNameUtils::ParseFullName(node->assigned_device_name(),
                                         &parsed)) {
@@ -584,6 +868,7 @@ Status BuildMemoryDeviceInfo(const Graph& g, GraphInfo* info) {
                               node->assigned_device_name(), "'");
     }
 
+<<<<<<< HEAD
     TF_RETURN_IF_ERROR(MemoryTypesForNode(
         g.op_registry(), DeviceType(parsed.type), node->def(),
         &input_memory_types, &output_memory_types));
@@ -618,6 +903,27 @@ const Node* OutputFrame(const Node* node,
     return node;
   }
   return cf_info[node->id()].parent_frame;
+=======
+    input_memory_types.clear();
+    input_memory_types.resize(node->num_inputs());
+    output_memory_types.clear();
+    output_memory_types.resize(node->num_outputs());
+    status = MemoryTypesForNode(g.op_registry(), DeviceType(parsed.type),
+                                node->def(), &input_memory_types,
+                                &output_memory_types);
+    if (!status.ok()) return status;
+
+    int node_id = node->id();
+    info->device_types[node_id] = DeviceType(parsed.type);
+    for (size_t i = 0; i < input_memory_types.size(); ++i) {
+      info->input_types[{node_id, i}] = input_memory_types[i];
+    }
+    for (size_t i = 0; i < output_memory_types.size(); ++i) {
+      info->output_types[{node_id, i}] = output_memory_types[i];
+    }
+  }
+  return status;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // Each participating device needs to decide a) if there is a next iteration,
@@ -640,8 +946,11 @@ Status AddControlFlow(const PartitionOptions& opts, Graph* g,
   status = BuildControlFlowInfo(g, &cf_info);
   if (!status.ok()) return status;
 
+<<<<<<< HEAD
   OptimizeControlFlowColocation(g);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // The map from frames to their LoopCond nodes.
   std::unordered_map<string, Node*> frame_cond_map;
   int num_node_ids = g->num_node_ids();
@@ -680,12 +989,19 @@ Status AddControlFlow(const PartitionOptions& opts, Graph* g,
     // Skip local edges.
     if (src_device == dst_device) continue;
 
+<<<<<<< HEAD
     const Node* src_frame = OutputFrame(src, cf_info);
     const Node* dst_frame = InputFrame(dst, cf_info);
     const string& src_frame_name = cf_info[src_frame->id()].frame_name;
     const string& dst_frame_name = cf_info[dst_frame->id()].frame_name;
     // Skip if src and dst are not in the same frame.
     if (src_frame_name.empty() || src_frame_name != dst_frame_name) {
+=======
+    const string& src_frame = cf_info[src->id()].frame_name;
+    const string& dst_frame = cf_info[dst->id()].frame_name;
+    // Skip if src and dst are not in the same frame.
+    if (src_frame.empty() || src_frame != dst_frame) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       continue;
     }
 
@@ -694,8 +1010,13 @@ Status AddControlFlow(const PartitionOptions& opts, Graph* g,
     // for its outer frame when nested.
     ControlLoop child_loop;
     while (true) {
+<<<<<<< HEAD
       const string& curr_frame_name = cf_info[src_frame->id()].frame_name;
       if (curr_frame_name.empty()) {
+=======
+      const string& curr_frame = cf_info[src->id()].frame_name;
+      if (curr_frame.empty()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         // We have reached the root frame.
         if (child_loop.merge != nullptr) {
           const string& node_name = opts.new_name(edge->dst()->name());
@@ -703,13 +1024,21 @@ Status AddControlFlow(const PartitionOptions& opts, Graph* g,
           Node* const_node =
               AddControlConst(device_name, bopts.WithName(node_name));
           if (!status.ok()) return status;
+<<<<<<< HEAD
           AddControlFlowInfo(const_node, src_frame, &cf_info);
+=======
+          AddControlFlowInfo(const_node, src, &cf_info);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           g->AddEdge(const_node, 0, child_loop.enter, 0);
         }
         break;
       }
 
+<<<<<<< HEAD
       const string& cl_key = strings::StrCat(curr_frame_name, "$$", dst_device);
+=======
+      const string& cl_key = strings::StrCat(curr_frame, "$$", dst_device);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       auto it = control_loops.find(cl_key);
       if (it != control_loops.end()) {
         if (child_loop.enter != nullptr) {
@@ -719,18 +1048,30 @@ Status AddControlFlow(const PartitionOptions& opts, Graph* g,
       }
 
       // Get the frame's LoopCond.
+<<<<<<< HEAD
       auto cond_it = frame_cond_map.find(curr_frame_name);
       if (cond_it == frame_cond_map.end()) {
         return errors::InvalidArgument(
             "A cross-device loop must have a pivot predicate: ",
             curr_frame_name);
+=======
+      auto cond_it = frame_cond_map.find(curr_frame);
+      if (cond_it == frame_cond_map.end()) {
+        return errors::InvalidArgument(
+            "A cross-device loop must have a pivot predicate: ", curr_frame);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
       Node* loop_cond = cond_it->second;
 
       // Add the control loop.
       ControlLoop curr_loop;
+<<<<<<< HEAD
       status = AddControlLoop(opts, g, src_frame, edge, loop_cond, &cf_info,
                               &curr_loop);
+=======
+      status =
+          AddControlLoop(opts, g, src, edge, loop_cond, &cf_info, &curr_loop);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if (!status.ok()) return status;
       control_loops[cl_key] = curr_loop;
 
@@ -738,7 +1079,11 @@ Status AddControlFlow(const PartitionOptions& opts, Graph* g,
         // Connect the merge of the outer loop to the enter of the inner.
         g->AddEdge(curr_loop.merge, 0, child_loop.enter, 0);
       }
+<<<<<<< HEAD
       src_frame = cf_info[src_frame->id()].parent_frame;
+=======
+      src = cf_info[src->id()].parent_frame;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       child_loop = curr_loop;
     }
   }
@@ -760,6 +1105,7 @@ Status AddControlFlow(const PartitionOptions& opts, Graph* g,
     const string& src_device = src->assigned_device_name();
     const string& dst_device = dst->assigned_device_name();
     if (src_device != dst_device) {
+<<<<<<< HEAD
       const Node* src_frame = OutputFrame(src, cf_info);
       const Node* dst_frame = InputFrame(dst, cf_info);
       const string& src_frame_name = cf_info[src_frame->id()].frame_name;
@@ -773,12 +1119,22 @@ Status AddControlFlow(const PartitionOptions& opts, Graph* g,
         // cross-device inputs. This is expected by the logic in Partition(), so
         // it can add control edges to the recv nodes once they're created.
         g->AddControlEdge(loop.merge, dst, /*allow_duplicates=*/true);
+=======
+      const string& src_frame = cf_info[src->id()].frame_name;
+      const string& dst_frame = cf_info[dst->id()].frame_name;
+      if (!src_frame.empty() && src_frame == dst_frame) {
+        const string& cl_key = strings::StrCat(dst_frame, "$$", dst_device);
+        ControlLoop loop = control_loops[cl_key];
+        DCHECK(loop.enter != nullptr);
+        g->AddControlEdge(loop.merge, dst);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     }
   }
   return Status::OK();
 }
 
+<<<<<<< HEAD
 struct PriorityTopoSortNode {
   PriorityTopoSortNode(const NodeDef* n, int64 st) : node(n), start_time(st) {}
 
@@ -879,6 +1235,9 @@ Status TopologicalSortNodesWithTimePriority(
   node_to_start_time_out->swap(node_to_start_time);
   return Status::OK();
 }
+=======
+}  // end namespace
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 Status AddControlEdges(const PartitionOptions& opts,
                        std::unordered_map<string, GraphDef>* partitions) {
@@ -887,6 +1246,7 @@ Status AddControlEdges(const PartitionOptions& opts,
   const int num_epochs = 100;
   const int prefetch = 6;
 
+<<<<<<< HEAD
   for (auto& part : *partitions) {
     GraphDef* gdef = &part.second;
     std::vector<std::pair<const NodeDef*, int64>> start_times;
@@ -897,6 +1257,29 @@ Status AddControlEdges(const PartitionOptions& opts,
       return status;
     }
 
+=======
+  typedef std::pair<const NodeDef*, int64> NodeStartTime;
+  for (auto& part : *partitions) {
+    GraphDef* gdef = &part.second;
+
+    std::vector<NodeStartTime> start_times;
+    start_times.resize(gdef->node_size());
+    for (int n = 0; n < gdef->node_size(); ++n) {
+      const NodeDef& ndef = gdef->node(n);
+      int64 start_time;
+      status = GetNodeAttr(ndef, "_start_time", &start_time);
+      if (!status.ok()) {
+        return status;
+      }
+      start_times[n] = std::make_pair(&ndef, start_time);
+    }
+
+    // Sort the nodes based on their start times.
+    std::sort(
+        start_times.begin(), start_times.end(),
+        [](NodeStartTime x, NodeStartTime y) { return x.second < y.second; });
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Add a dummy node for every epoch, and add a control edge from the
     // "last" node in the preceding epoch to the dummy node.
     string device_name = gdef->node(0).device();
@@ -928,8 +1311,17 @@ Status AddControlEdges(const PartitionOptions& opts,
     for (int n = 0; n < gdef->node_size(); ++n) {
       NodeDef* ndef = gdef->mutable_node(n);
       if (ndef->op() == "_Recv") {
+<<<<<<< HEAD
         const int64 start_time = node_to_start_time[ndef];
         const int recv_epoch = start_time / resolution;
+=======
+        int64 start_time;
+        status = GetNodeAttr(*ndef, "_start_time", &start_time);
+        if (!status.ok()) {
+          return status;
+        }
+        int recv_epoch = start_time / resolution;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         if (recv_epoch >= prefetch) {
           NodeDef* dummy = dummys[recv_epoch - prefetch];
           AddInput(ndef, dummy->name(), Graph::kControlSlot);
@@ -940,6 +1332,7 @@ Status AddControlEdges(const PartitionOptions& opts,
   return Status::OK();
 }
 
+<<<<<<< HEAD
 // If 'ndef' is a Send or Recv, fills its attr send_device_incarnation
 // if possible.
 void SetIncarnation(const PartitionOptions& opts, NodeDef* ndef) {
@@ -975,6 +1368,8 @@ void SetIncarnation(const PartitionOptions& opts, GraphDef* gdef) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Status Partition(const PartitionOptions& opts, Graph* g,
                  std::unordered_map<string, GraphDef>* partitions) {
   Status status;
@@ -990,7 +1385,10 @@ Status Partition(const PartitionOptions& opts, Graph* g,
     status = AddControlFlow(opts, g, &g_info);
     if (!status.ok()) return status;
   }
+<<<<<<< HEAD
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // At this point, all the graph mutations have been done. Build memory
   // and device type info for every node and edge in the graph.
   status = BuildMemoryDeviceInfo(*g, &g_info);
@@ -1008,11 +1406,18 @@ Status Partition(const PartitionOptions& opts, Graph* g,
 
   int32 num_data = 0;
   int32 num_control = 0;
+<<<<<<< HEAD
   for (const Node* dst : g->op_nodes()) {
+=======
+  for (const Node* dst : g->nodes()) {
+    if (!dst->IsOp()) continue;  // Skip Sink/Source nodes.
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     dstp = opts.node_to_loc(dst);
     GraphDef* dst_graph = &(*partitions)[dstp];
     NodeDef* dst_def = dst_graph->add_node();
     *dst_def = dst->def();
+<<<<<<< HEAD
     MergeDebugInfo(NodeDebugInfo(dst->def()), dst_def);
     dst_def->set_device(dst->assigned_device_name());
     dst_def->clear_input();  // Inputs are filled below
@@ -1025,6 +1430,13 @@ Status Partition(const PartitionOptions& opts, Graph* g,
       } else if (!status.ok()) {
         return status;
       }
+=======
+    dst_def->set_device(dst->assigned_device_name());
+    dst_def->clear_input();  // Inputs are filled below
+    if (opts.need_to_record_start_times) {
+      int64 start_time = opts.start_times[dst->id()].value();
+      AddNodeAttr("_start_time", start_time, dst_def);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
 
     // Arrange the incoming edges to dst so that input[i] holds the
@@ -1035,22 +1447,31 @@ Status Partition(const PartitionOptions& opts, Graph* g,
     ref_recvs.clear();
     ref_control_inputs.clear();
     const Edge* control_flow_edge = nullptr;
+<<<<<<< HEAD
     int32 num_control_flow_edges = 0;
     int32 num_input_edges = 0;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (const Edge* edge : dst->in_edges()) {
       if (edge->IsControlEdge()) {
         if (IsMerge(edge->src()) && IsControlLoop(edge->src())) {
           // This is one of the control edges added for control flow. There
           // can be multiple such edges as the dest node may have multiple
+<<<<<<< HEAD
           // remote inputs. We keep track of the number of such edges.
           control_flow_edge = edge;
           ++num_control_flow_edges;
+=======
+          // remote inputs. We will just take one and ignore the others.
+          control_flow_edge = edge;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         } else {
           inputs.push_back(edge);
         }
       } else {
         DCHECK(inputs[edge->dst_input()] == nullptr);
         inputs[edge->dst_input()] = edge;
+<<<<<<< HEAD
         ++num_input_edges;
       }
     }
@@ -1063,6 +1484,14 @@ Status Partition(const PartitionOptions& opts, Graph* g,
 
     // Process in order so that all data edges are added as inputs to
     // dst in Edge::dst_input() order.
+=======
+      }
+    }
+
+    // Process in order so that all data edges are added as inputs to
+    // dst in Edge::dst_input() order.
+    bool recv_added = false;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (const Edge* edge : inputs) {
       const Node* src = edge->src();
       if (!src->IsOp()) continue;  // Skip Sink/Source nodes.
@@ -1081,6 +1510,7 @@ Status Partition(const PartitionOptions& opts, Graph* g,
       int64 send_start_time = 0;
       int64 recv_start_time = 0;
       if (opts.scheduling_for_recvs) {
+<<<<<<< HEAD
         status = GetNodeAttr(src->attrs(), "_start_time", &send_start_time);
         if (errors::IsNotFound(status) && opts.need_to_record_start_times) {
           send_start_time = opts.start_times[src->id()].value();
@@ -1093,6 +1523,20 @@ Status Partition(const PartitionOptions& opts, Graph* g,
           recv_start_time = opts.start_times[dst->id()].value();
         } else if (!status.ok()) {
           return status;
+=======
+        if (opts.need_to_record_start_times) {
+          send_start_time = opts.start_times[src->id()].value();
+          recv_start_time = opts.start_times[dst->id()].value();
+        } else {
+          status = GetNodeAttr(src->def(), "_start_time", &send_start_time);
+          if (!status.ok()) {
+            return status;
+          }
+          status = GetNodeAttr(dst->def(), "_start_time", &recv_start_time);
+          if (!status.ok()) {
+            return status;
+          }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         }
       }
 
@@ -1109,8 +1553,11 @@ Status Partition(const PartitionOptions& opts, Graph* g,
         } else {
           AddInput(dst_def, recv_node_name, 0);
         }
+<<<<<<< HEAD
         ref_control_inputs.push_back(recv_node_name);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         // We want the start_time for the recv to be the smallest of the start
         // times of it's consumers. So we update this whenever we use a recv,
         // and write it out to the attribute at the end of the subroutine
@@ -1150,6 +1597,7 @@ Status Partition(const PartitionOptions& opts, Graph* g,
           AddRecv(opts, g_info, dst_graph, edge, &real_recv, &status);
       if (!status.ok()) return status;
 
+<<<<<<< HEAD
       // Fix up the control flow edge.
       // NOTE(yuanbyu): 'real_recv' must be the real recv node.
       if (src_graph == dst_graph) {
@@ -1161,16 +1609,34 @@ Status Partition(const PartitionOptions& opts, Graph* g,
         // Redirect control edge to the real recv since this is not the same
         // device send/recv.
         --num_control_flow_edges;
+=======
+      // Fix up the control flow edge. Redirect it to the recv.
+      // NOTE(yuanbyu): 'real_recv' must be the real recv node.
+      recv_added = true;
+      if (control_flow_edge != nullptr) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         AddInput(real_recv, control_flow_edge->src()->name(),
                  Graph::kControlSlot);
       }
 
+<<<<<<< HEAD
       if (!edge->IsControlEdge() &&
           IsRefType(src->output_type(edge->src_output()))) {
         AddNodeAttr("_start_time", recv_start_time, recv);
         if (real_recv != recv) {
           AddNodeAttr("_start_time", recv_start_time, real_recv);
         }
+=======
+      // For same device send/recv, add a control edge from send to recv.
+      // This prevents the asynchronous recv kernel from being scheduled
+      // immediately.
+      if (src_graph == dst_graph) {
+        AddInput(real_recv, send->name(), Graph::kControlSlot);
+      }
+
+      if (!edge->IsControlEdge() &&
+          IsRefType(src->output_type(edge->src_output()))) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         // If src is of ref type and the edge is not a control edge, dst has
         // read semantics and therefore we must control the recv.
         ref_recvs.push_back(real_recv);
@@ -1194,13 +1660,18 @@ Status Partition(const PartitionOptions& opts, Graph* g,
     // Add control edges from 'ref_control_inputs' to 'ref_recvs'.
     // NOTE(yuanbyu): Adding these control edges should not introduce
     // deadlocks. 'dst' has implicit "read" nodes that, when we split
+<<<<<<< HEAD
     // across devices, are made explicit; Retargeting the dependencies
+=======
+    // across devices, are made explicit; Retargettig the dependencies
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // to 'dst' to those nodes would not introduce cycles if there isn't
     // one before the transformation.
     // NOTE(yuanbyu): This may impact performance because it defers the
     // execution of recvs until all the other inputs become available.
     AddReadControl(ref_recvs, ref_control_inputs);
 
+<<<<<<< HEAD
     // Add back the control edges for control flow that are not used.
     if (control_flow_edge != nullptr) {
       for (int i = 0; i < num_control_flow_edges; ++i) {
@@ -1227,6 +1698,14 @@ Status Partition(const PartitionOptions& opts, Graph* g,
     SetIncarnation(opts, gdef);
   }
 
+=======
+    // Add back this control edge for control flow if not used.
+    if (!recv_added && (control_flow_edge != nullptr)) {
+      AddInput(dst_def, control_flow_edge->src()->name(), Graph::kControlSlot);
+    }
+  }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Set the start times for recvs at the very end.
   if (opts.scheduling_for_recvs) {
     for (auto& it : dup_recv) {
@@ -1239,6 +1718,7 @@ Status Partition(const PartitionOptions& opts, Graph* g,
 
   VLOG(1) << "Added send/recv: controls=" << num_control
           << ", data=" << num_data;
+<<<<<<< HEAD
   if (VLOG_IS_ON(2)) {
     for (auto& it : *partitions) {
       GraphDef* gdef = &it.second;
@@ -1247,6 +1727,8 @@ Status Partition(const PartitionOptions& opts, Graph* g,
                          *gdef);
     }
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return Status::OK();
 }
 

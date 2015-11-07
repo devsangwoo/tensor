@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // This file defines functions to compress and uncompress JPEG data
 // to and from memory, as well as some direct manipulations of JPEG string
 
@@ -23,6 +26,7 @@ limitations under the License.
 #include <algorithm>
 #include <memory>
 #include <string>
+<<<<<<< HEAD
 #include <utility>
 
 #include "tensorflow/core/lib/jpeg/jpeg_handle.h"
@@ -30,6 +34,12 @@ limitations under the License.
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/mem.h"
 #include "tensorflow/core/platform/types.h"
+=======
+
+#include "tensorflow/core/lib/jpeg/jpeg_handle.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace jpeg {
@@ -45,17 +55,30 @@ enum JPEGErrors {
   JPEGERRORS_BAD_PARAM
 };
 
+<<<<<<< HEAD
 // Prevent bad compiler behavior in ASAN mode by wrapping most of the
 // arguments in a struct struct.
 class FewerArgsForCompiler {
  public:
   FewerArgsForCompiler(int datasize, const UncompressFlags& flags, int64* nwarn,
+=======
+// Prevent bad compiler behaviour in ASAN mode by wrapping most of the
+// arguments in a struct struct.
+class FewerArgsForCompiler {
+ public:
+  FewerArgsForCompiler(int datasize, const UncompressFlags& flags, int* nwarn,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                        std::function<uint8*(int, int, int)> allocate_output)
       : datasize_(datasize),
         flags_(flags),
         pnwarn_(nwarn),
+<<<<<<< HEAD
         allocate_output_(std::move(allocate_output)),
         height_read_(0),
+=======
+        allocate_output_(allocate_output),
+        fraction_read_(0.),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         height_(0),
         stride_(0) {
     if (pnwarn_ != nullptr) *pnwarn_ = 0;
@@ -63,13 +86,20 @@ class FewerArgsForCompiler {
 
   const int datasize_;
   const UncompressFlags flags_;
+<<<<<<< HEAD
   int64* const pnwarn_;
   std::function<uint8*(int, int, int)> allocate_output_;
   int height_read_;  // number of scanline lines successfully read
+=======
+  int* const pnwarn_;
+  std::function<uint8*(int, int, int)> allocate_output_;
+  float fraction_read_;  // fraction of scanline lines successfully read
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int height_;
   int stride_;
 };
 
+<<<<<<< HEAD
 // Check whether the crop window is valid, assuming crop is true.
 bool IsCropWindowValid(const UncompressFlags& flags, int input_image_width,
                        int input_image_height) {
@@ -87,20 +117,30 @@ bool IsCropWindowValid(const UncompressFlags& flags, int input_image_width,
 void no_print(j_common_ptr cinfo) {}
 #endif
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
   // unpack the argball
   const int datasize = argball->datasize_;
   const auto& flags = argball->flags_;
   const int ratio = flags.ratio;
   int components = flags.components;
+<<<<<<< HEAD
   int stride = flags.stride;              // may be 0
   int64* const nwarn = argball->pnwarn_;  // may be NULL
 
   // Can't decode if the ratio is not recognized by libjpeg
+=======
+  int stride = flags.stride;            // may be 0
+  int* const nwarn = argball->pnwarn_;  // may be NULL
+
+  // can't decode if the ratio is not recognized by libjpeg
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if ((ratio != 1) && (ratio != 2) && (ratio != 4) && (ratio != 8)) {
     return nullptr;
   }
 
+<<<<<<< HEAD
   // Channels must be autodetect, grayscale, or rgb.
   if (!(components == 0 || components == 1 || components == 3)) {
     return nullptr;
@@ -108,6 +148,10 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
 
   // if empty image, return
   if (datasize == 0 || srcdata == nullptr) return nullptr;
+=======
+  // if empty image, return
+  if (datasize == 0 || srcdata == NULL) return nullptr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Declare temporary buffer pointer here so that we can free on error paths
   JSAMPLE* tempdata = nullptr;
@@ -118,6 +162,7 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
   cinfo.err = jpeg_std_error(&jerr);
+<<<<<<< HEAD
   jerr.error_exit = CatchError;
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
@@ -128,6 +173,12 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
   cinfo.client_data = &jpeg_jmpbuf;
   if (setjmp(jpeg_jmpbuf)) {
     delete[] tempdata;
+=======
+  jmp_buf jpeg_jmpbuf;
+  cinfo.client_data = &jpeg_jmpbuf;
+  jerr.error_exit = CatchError;
+  if (setjmp(jpeg_jmpbuf)) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return nullptr;
   }
 
@@ -135,8 +186,13 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
   SetSrc(&cinfo, srcdata, datasize, flags.try_recover_truncated_jpeg);
   jpeg_read_header(&cinfo, TRUE);
 
+<<<<<<< HEAD
   // Set components automatically if desired, autoconverting cmyk to rgb.
   if (components == 0) components = std::min(cinfo.num_components, 3);
+=======
+  // Set components automatically if desired
+  if (components == 0) components = cinfo.num_components;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // set grayscale and ratio parameters
   switch (components) {
@@ -144,10 +200,18 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
       cinfo.out_color_space = JCS_GRAYSCALE;
       break;
     case 3:
+<<<<<<< HEAD
       if (cinfo.jpeg_color_space == JCS_CMYK ||
           cinfo.jpeg_color_space == JCS_YCCK) {
         // Always use cmyk for output in a 4 channel jpeg. libjpeg has a builtin
         // decoder.  We will further convert to rgb below.
+=======
+    case 4:
+      if (cinfo.jpeg_color_space == JCS_CMYK ||
+          cinfo.jpeg_color_space == JCS_YCCK) {
+        // always use cmyk for output in a 4 channel jpeg. libjpeg has a builtin
+        // decoder.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         cinfo.out_color_space = JCS_CMYK;
       } else {
         cinfo.out_color_space = JCS_RGB;
@@ -161,6 +225,7 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
   cinfo.do_fancy_upsampling = boolean(flags.fancy_upscaling);
   cinfo.scale_num = 1;
   cinfo.scale_denom = ratio;
+<<<<<<< HEAD
   cinfo.dct_method = flags.dct_method;
 
   // Determine the output image size before attempting decompress to prevent
@@ -223,6 +288,15 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
 
   // check for compatible stride
   const int min_stride = target_output_width * components * sizeof(JSAMPLE);
+=======
+  // Activating this has a quality/speed trade-off implication:
+  // cinfo.dct_method = JDCT_IFAST;
+
+  jpeg_start_decompress(&cinfo);
+
+  // check for compatible stride
+  const int min_stride = cinfo.output_width * components * sizeof(JSAMPLE);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (stride == 0) {
     stride = min_stride;
   } else if (stride < min_stride) {
@@ -232,6 +306,7 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
   }
 
   // Remember stride and height for use in Uncompress
+<<<<<<< HEAD
   argball->height_ = target_output_height;
   argball->stride_ = stride;
 
@@ -247,12 +322,20 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
   uint8* dstdata = argball->allocate_output_(target_output_width,
                                              target_output_height, components);
 #endif
+=======
+  argball->height_ = cinfo.output_height;
+  argball->stride_ = stride;
+
+  uint8* const dstdata = argball->allocate_output_(
+      cinfo.output_width, cinfo.output_height, components);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (dstdata == nullptr) {
     jpeg_destroy_decompress(&cinfo);
     return nullptr;
   }
   JSAMPLE* output_line = static_cast<JSAMPLE*>(dstdata);
 
+<<<<<<< HEAD
   // jpeg_read_scanlines requires the buffers to be allocated based on
   // cinfo.output_width, but the target image width might be different if crop
   // is enabled and crop_width is not MCU aligned. In this case, we need to
@@ -314,6 +397,38 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
       num_lines_read = jpeg_read_scanlines(&cinfo, &tempdata, 1);
       if (num_lines_read > 0) {
         memcpy(output_line, tempdata + mcu_align_offset, min_stride);
+=======
+  // Temporary buffer used for CMYK -> RGB conversion.
+  const bool use_cmyk = (cinfo.out_color_space == JCS_CMYK);
+  tempdata = use_cmyk ? new JSAMPLE[cinfo.output_width * 4] : NULL;
+
+  // If there is an error reading a line, this aborts the reading.
+  // Save the fraction of the image that has been read.
+  argball->fraction_read_ = 1.0;
+  while (cinfo.output_scanline < cinfo.output_height) {
+    int num_lines_read = 0;
+    if (cinfo.out_color_space == JCS_CMYK) {
+      num_lines_read = jpeg_read_scanlines(&cinfo, &tempdata, 1);
+      // Convert CMYK to RGB
+      for (size_t i = 0; i < cinfo.output_width; ++i) {
+        int c = tempdata[4 * i + 0];
+        int m = tempdata[4 * i + 1];
+        int y = tempdata[4 * i + 2];
+        int k = tempdata[4 * i + 3];
+        int r, g, b;
+        if (cinfo.saw_Adobe_marker) {
+          r = (k * c) / 255;
+          g = (k * m) / 255;
+          b = (k * y) / 255;
+        } else {
+          r = (255 - k) * (255 - c) / 255;
+          g = (255 - k) * (255 - m) / 255;
+          b = (255 - k) * (255 - y) / 255;
+        }
+        output_line[3 * i + 0] = r;
+        output_line[3 * i + 1] = g;
+        output_line[3 * i + 2] = b;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     } else {
       num_lines_read = jpeg_read_scanlines(&cinfo, &output_line, 1);
@@ -321,6 +436,7 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
     // Handle error cases
     if (num_lines_read == 0) {
       LOG(ERROR) << "Premature end of JPEG data. Stopped at line "
+<<<<<<< HEAD
                  << cinfo.output_scanline - skipped_scanlines << "/"
                  << target_output_height;
       if (!flags.try_recover_truncated_jpeg) {
@@ -328,6 +444,15 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
         error = JPEGERRORS_UNEXPECTED_END_OF_DATA;
       } else {
         for (size_t line = cinfo.output_scanline; line < max_scanlines_to_read;
+=======
+                 << cinfo.output_scanline << "/" << cinfo.output_height;
+      if (!flags.try_recover_truncated_jpeg) {
+        argball->fraction_read_ =
+            static_cast<float>(cinfo.output_scanline) / cinfo.output_height;
+        error = JPEGERRORS_UNEXPECTED_END_OF_DATA;
+      } else {
+        for (size_t line = cinfo.output_scanline; line < cinfo.output_height;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
              ++line) {
           if (line == 0) {
             // If even the first line is missing, fill with black color
@@ -338,10 +463,16 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
           }
           output_line += stride;
         }
+<<<<<<< HEAD
         argball->height_read_ =
             target_output_height;  // consider all lines as read
         // prevent error-on-exit in libjpeg:
         cinfo.output_scanline = max_scanlines_to_read;
+=======
+        argball->fraction_read_ = 1.0;  // consider all lines as read
+        // prevent error-on-exit in libjpeg:
+        cinfo.output_scanline = cinfo.output_height;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
       break;
     }
@@ -350,6 +481,7 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
     output_line += stride;
   }
   delete[] tempdata;
+<<<<<<< HEAD
   tempdata = nullptr;
 
 #if defined(LIBJPEG_TURBO_VERSION)
@@ -361,12 +493,15 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
     // otherwise, jpeg_destroy_decompress would fail.
   }
 #endif
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Convert the RGB data to RGBA, with alpha set to 0xFF to indicate
   // opacity.
   // RGBRGBRGB... --> RGBARGBARGBA...
   if (components == 4) {
     // Start on the last line.
+<<<<<<< HEAD
     JSAMPLE* scanlineptr = static_cast<JSAMPLE*>(
         dstdata + static_cast<int64>(target_output_height - 1) * stride);
     const JSAMPLE kOpaque = -1;  // All ones appropriate for JSAMPLE.
@@ -374,11 +509,24 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
     const int right_rgba = (target_output_width - 1) * 4;
 
     for (int y = target_output_height; y-- > 0;) {
+=======
+    JSAMPLE* scanlineptr =
+        static_cast<JSAMPLE*>(dstdata + (cinfo.output_height - 1) * stride);
+    const JSAMPLE kOpaque = -1;  // All ones appropriate for JSAMPLE.
+    const int right_rgb = (cinfo.output_width - 1) * 3;
+    const int right_rgba = (cinfo.output_width - 1) * 4;
+
+    for (int y = cinfo.output_height; y-- > 0;) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // We do all the transformations in place, going backwards for each row.
       const JSAMPLE* rgb_pixel = scanlineptr + right_rgb;
       JSAMPLE* rgba_pixel = scanlineptr + right_rgba;
       scanlineptr -= stride;
+<<<<<<< HEAD
       for (int x = target_output_width; x-- > 0;
+=======
+      for (int x = cinfo.output_width; x-- > 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
            rgba_pixel -= 4, rgb_pixel -= 3) {
         // We copy the 3 bytes at rgb_pixel into the 4 bytes at rgba_pixel
         // The "a" channel is set to be opaque.
@@ -409,7 +557,11 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
       }
       break;
     default:
+<<<<<<< HEAD
       // will never happen, should be caught by the previous switch
+=======
+      // will never happen, should be catched by the previous switch
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       LOG(ERROR) << "Invalid components value " << components << std::endl;
       jpeg_destroy_decompress(&cinfo);
       return nullptr;
@@ -433,6 +585,7 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
       LOG(ERROR) << "Unhandled case " << error;
       break;
   }
+<<<<<<< HEAD
 
 #if !defined(LIBJPEG_TURBO_VERSION)
   // TODO(tanmingxing): delete all these code after migrating to libjpeg_turbo
@@ -488,6 +641,10 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
 #endif
 
   jpeg_destroy_decompress(&cinfo);
+=======
+  jpeg_destroy_decompress(&cinfo);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return dstdata;
 }
 
@@ -502,6 +659,7 @@ uint8* UncompressLow(const void* srcdata, FewerArgsForCompiler* argball) {
 //  parameters won't get clobbered by the longjmp.  So we help
 //  it out a little.
 uint8* Uncompress(const void* srcdata, int datasize,
+<<<<<<< HEAD
                   const UncompressFlags& flags, int64* nwarn,
                   std::function<uint8*(int, int, int)> allocate_output) {
   FewerArgsForCompiler argball(datasize, flags, nwarn,
@@ -516,12 +674,29 @@ uint8* Uncompress(const void* srcdata, int datasize,
       fraction_read < std::min(1.0f, flags.min_acceptable_fraction)) {
     // Major failure, none or too-partial read returned; get out
     return nullptr;
+=======
+                  const UncompressFlags& flags, int* nwarn,
+                  std::function<uint8*(int, int, int)> allocate_output) {
+  FewerArgsForCompiler argball(datasize, flags, nwarn, allocate_output);
+  uint8* const dstdata = UncompressLow(srcdata, &argball);
+  const float fraction_read = argball.fraction_read_;
+  if (dstdata == NULL ||
+      fraction_read < std::min(1.0f, flags.min_acceptable_fraction)) {
+    // Major failure, none or too-partial read returned; get out
+    return NULL;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // If there was an error in reading the jpeg data,
   // set the unread pixels to black
+<<<<<<< HEAD
   if (argball.height_read_ != argball.height_) {
     const int first_bad_line = argball.height_read_;
+=======
+  if (fraction_read < 1.0) {
+    const int first_bad_line =
+        static_cast<int>(fraction_read * argball.height_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     uint8* start = dstdata + first_bad_line * argball.stride_;
     const int nbytes = (argball.height_ - first_bad_line) * argball.stride_;
     memset(static_cast<void*>(start), 0, nbytes);
@@ -532,8 +707,13 @@ uint8* Uncompress(const void* srcdata, int datasize,
 
 uint8* Uncompress(const void* srcdata, int datasize,
                   const UncompressFlags& flags, int* pwidth, int* pheight,
+<<<<<<< HEAD
                   int* pcomponents, int64* nwarn) {
   uint8* buffer = nullptr;
+=======
+                  int* pcomponents, int* nwarn) {
+  uint8* buffer = NULL;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   uint8* result =
       Uncompress(srcdata, datasize, flags, nwarn,
                  [=, &buffer](int width, int height, int components) {
@@ -558,7 +738,11 @@ bool GetImageInfo(const void* srcdata, int datasize, int* width, int* height,
   if (components) *components = 0;
 
   // If empty image, return
+<<<<<<< HEAD
   if (datasize == 0 || srcdata == nullptr) return false;
+=======
+  if (datasize == 0 || srcdata == NULL) return false;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Initialize libjpeg structures to have a memory source
   // Modify the usual jpeg error manager to catch fatal errors.
@@ -592,6 +776,7 @@ bool GetImageInfo(const void* srcdata, int datasize, int* width, int* height,
 
 namespace {
 bool CompressInternal(const uint8* srcdata, int width, int height,
+<<<<<<< HEAD
                       const CompressFlags& flags, tstring* output) {
   output->clear();
   const int components = (static_cast<int>(flags.format) & 0xff);
@@ -608,6 +793,11 @@ bool CompressInternal(const uint8* srcdata, int width, int height,
     return false;
   }
 
+=======
+                      const CompressFlags& flags, string* output) {
+  output->clear();
+  const int components = (static_cast<int>(flags.format) & 0xff);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int in_stride = flags.stride;
   if (in_stride == 0) {
     in_stride = width * (static_cast<int>(flags.format) & 0xff);
@@ -616,7 +806,11 @@ bool CompressInternal(const uint8* srcdata, int width, int height,
     return false;
   }
 
+<<<<<<< HEAD
   JOCTET* buffer = nullptr;
+=======
+  JOCTET* buffer = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // NOTE: for broader use xmp_metadata should be made a unicode string
   CHECK(srcdata != nullptr);
@@ -747,7 +941,11 @@ bool CompressInternal(const uint8* srcdata, int width, int height,
         row_pointer[0] = reinterpret_cast<JSAMPLE*>(const_cast<JSAMPLE*>(r));
       }
     }
+<<<<<<< HEAD
     CHECK_EQ(jpeg_write_scanlines(&cinfo, row_pointer, 1), 1u);
+=======
+    CHECK_EQ(jpeg_write_scanlines(&cinfo, row_pointer, 1), 1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   jpeg_finish_compress(&cinfo);
 
@@ -762,14 +960,24 @@ bool CompressInternal(const uint8* srcdata, int width, int height,
 // -----------------------------------------------------------------------------
 
 bool Compress(const void* srcdata, int width, int height,
+<<<<<<< HEAD
               const CompressFlags& flags, tstring* output) {
+=======
+              const CompressFlags& flags, string* output) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return CompressInternal(static_cast<const uint8*>(srcdata), width, height,
                           flags, output);
 }
 
+<<<<<<< HEAD
 tstring Compress(const void* srcdata, int width, int height,
                  const CompressFlags& flags) {
   tstring temp;
+=======
+string Compress(const void* srcdata, int width, int height,
+                const CompressFlags& flags) {
+  string temp;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   CompressInternal(static_cast<const uint8*>(srcdata), width, height, flags,
                    &temp);
   // If CompressInternal fails, temp will be empty.

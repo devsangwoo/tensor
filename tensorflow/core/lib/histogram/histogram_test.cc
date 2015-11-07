@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,13 @@ limitations under the License.
 #include "tensorflow/core/framework/summary.pb.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/lib/histogram/histogram.h"
+#include <float.h>
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/framework/summary.pb.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace histogram {
@@ -66,11 +74,16 @@ TEST(Histogram, CustomBuckets) {
   Validate(h);
 }
 
+<<<<<<< HEAD
 TEST(Histogram, Median) {
+=======
+TEST(Histogram, Percentile) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Histogram h({0, 10, 100, DBL_MAX});
   h.Add(-2);
   h.Add(-2);
   h.Add(0);
+<<<<<<< HEAD
   double median = h.Median();
   EXPECT_EQ(median, -0.5);
 }
@@ -101,6 +114,12 @@ TEST(Histogram, Percentile) {
   EXPECT_EQ(h.Percentile(100), 3.9);   // 3.9 = histo.max_
 }
 
+=======
+  double median = h.Percentile(50.0);
+  EXPECT_EQ(median, -0.5);
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(Histogram, Basic) {
   Histogram h;
   for (int i = 0; i < 100; i++) {

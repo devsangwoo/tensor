@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,16 @@ REGISTER6(BinaryOp, CPU, "Minimum", functor::minimum, float, Eigen::half,
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 REGISTER4(BinaryOp, GPU, "Minimum", functor::minimum, float, Eigen::half,
           double, int64);
+=======
+#include "tensorflow/core/kernels/cwise_ops_common.h"
+
+namespace tensorflow {
+REGISTER4(BinaryOp, CPU, "Minimum", functor::minimum, float, double, int32,
+          int64);
+#if GOOGLE_CUDA
+REGISTER3(BinaryOp, GPU, "Minimum", functor::minimum, float, double, int64);
+#endif
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // A special GPU kernel for int32.
 // TODO(b/25387198): Also enable int32 in device memory. This kernel
@@ -32,6 +43,7 @@ REGISTER_KERNEL_BUILDER(Name("Minimum")
                             .HostMemory("z")
                             .TypeConstraint<int32>("T"),
                         BinaryOp<CPUDevice, functor::minimum<int32>>);
+<<<<<<< HEAD
 #endif
 
 #ifdef TENSORFLOW_USE_SYCL
@@ -44,5 +56,7 @@ REGISTER_KERNEL_BUILDER(Name("Minimum")
                             .TypeConstraint<int32>("T"),
                         BinaryOp<CPUDevice, functor::minimum<int32>>);
 #endif  // TENSORFLOW_USE_SYCL
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -119,6 +120,25 @@ Node::NodeClass Node::GetNodeClassForOp(const string& ts) {
 }
 
 string Node::DebugString() const {
+=======
+#include "tensorflow/core/graph/graph.h"
+
+#include "tensorflow/core/framework/node_def_util.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/gtl/map_util.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/platform/logging.h"
+
+namespace tensorflow {
+
+// Node
+
+string Node::DebugString() const {
+  if (this == nullptr) {
+    return "{nullptr}";
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string ret = strings::StrCat("{name:'", name(), "' id:", id_);
   if (IsSource()) {
     strings::StrAppend(&ret, " source}");
@@ -126,13 +146,19 @@ string Node::DebugString() const {
     strings::StrAppend(&ret, " sink}");
   } else {
     strings::StrAppend(&ret, " op device:");
+<<<<<<< HEAD
     strings::StrAppend(&ret, "{", assigned_device_name(), "}");
     strings::StrAppend(&ret, " def:{", SummarizeNode(*this), "}}");
+=======
+    strings::StrAppend(&ret, "{", assigned_device_name_, "}");
+    strings::StrAppend(&ret, " def:{", SummarizeNodeDef(def()), "}}");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return ret;
 }
 
 Node::Node()
+<<<<<<< HEAD
     : id_(-1),
       cost_id_(-1),
       class_(NC_UNINITIALIZED),
@@ -143,12 +169,24 @@ Node::Node()
 void Node::Initialize(int id, int cost_id,
                       std::shared_ptr<NodeProperties> props,
                       bool is_function_op) {
+=======
+    : id_(-1), cost_id_(-1), props_(nullptr), assigned_device_name_() {}
+
+Node::~Node() {
+  if (props_) {
+    props_->Unref();
+  }
+}
+
+void Node::Initialize(int id, int cost_id, Properties* props) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   DCHECK_EQ(id_, -1);
   DCHECK(in_edges_.empty());
   DCHECK(out_edges_.empty());
   id_ = id;
   cost_id_ = cost_id;
 
+<<<<<<< HEAD
   props_ = std::move(props);
   // Initialize the class_ based on the type string
   if (is_function_op) {
@@ -156,6 +194,13 @@ void Node::Initialize(int id, int cost_id,
   } else {
     class_ = GetNodeClassForOp(props_->node_def.op());
   }
+=======
+  // Unref the old, assign the new properties.
+  if (props_) {
+    props_->Unref();
+  }
+  props_ = props;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void Node::Clear() {
@@ -163,6 +208,7 @@ void Node::Clear() {
   out_edges_.clear();
   id_ = -1;
   cost_id_ = -1;
+<<<<<<< HEAD
   class_ = NC_UNINITIALIZED;
   props_.reset();
   assigned_device_name_index_ = 0;
@@ -204,6 +250,17 @@ const protobuf::RepeatedPtrField<string>& Node::requested_inputs() const {
 
 const string& Node::requested_device() const { return def().device(); }
 
+=======
+
+  if (props_) {
+    props_->Unref();
+    props_ = nullptr;
+  }
+
+  assigned_device_name_.clear();
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 gtl::iterator_range<NeighborIter> Node::out_nodes() const {
   return gtl::make_range(NeighborIter(out_edges_.begin(), false),
                          NeighborIter(out_edges_.end(), false));
@@ -214,6 +271,7 @@ gtl::iterator_range<NeighborIter> Node::in_nodes() const {
                          NeighborIter(in_edges_.end(), true));
 }
 
+<<<<<<< HEAD
 void Node::MaybeCopyOnWrite() {
   // NodeProperties may be shared between Nodes. Make a copy if so.
   if (!props_.unique()) {
@@ -365,10 +423,24 @@ uint64 OutputTensor::Hash::operator()(OutputTensor const& s) const {
   return Hash64Combine(std::hash<const Node*>()(s.node),
                        std::hash<int>()(s.index));
 }
+=======
+// Node::Properties
+
+Node::Properties::Properties(const OpDef* op_def, const NodeDef& node_def,
+                             const DataTypeSlice inputs,
+                             const DataTypeSlice outputs)
+    : op_def_(op_def),
+      node_def_(node_def),
+      input_types_(inputs.begin(), inputs.end()),
+      output_types_(outputs.begin(), outputs.end()) {}
+
+Node::Properties::~Properties() {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Graph
 
 Graph::Graph(const OpRegistryInterface* ops)
+<<<<<<< HEAD
     : ops_(ops, FunctionDefLibrary()),
       versions_(new VersionDef),
       arena_(8 << 10 /* 8kB */) {
@@ -379,6 +451,9 @@ Graph::Graph(const OpRegistryInterface* ops)
   device_names_.push_back("");
   DCHECK_EQ(0, InternDeviceName(""));
 
+=======
+    : ops_(ops), arena_(8 << 10 /* 8kB */) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Source and sink have no endpoints, just control edges.
   NodeDef def;
   def.set_name("_SOURCE");
@@ -396,6 +471,7 @@ Graph::Graph(const OpRegistryInterface* ops)
   AddControlEdge(source, sink);
 }
 
+<<<<<<< HEAD
 Graph::Graph(const FunctionLibraryDefinition& flib_def)
     : Graph(flib_def.default_registry()) {
   // Need a new-enough consumer to support the functions we add to the graph.
@@ -406,6 +482,8 @@ Graph::Graph(const FunctionLibraryDefinition& flib_def)
   CHECK(s.ok()) << s.error_message();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Graph::~Graph() {
   // Manually call the destructors for all the Nodes we constructed using
   // placement new.
@@ -421,6 +499,7 @@ Graph::~Graph() {
   // destroy them.
 }
 
+<<<<<<< HEAD
 const VersionDef& Graph::versions() const { return *versions_; }
 void Graph::set_versions(const VersionDef& versions) { *versions_ = versions; }
 
@@ -428,17 +507,34 @@ Node* Graph::AddNode(NodeDef node_def, Status* status) {
   const OpRegistrationData* op_reg_data;
   status->Update(ops_.LookUp(node_def.op(), &op_reg_data));
   if (!status->ok()) return nullptr;
+=======
+Node* Graph::AddNode(const NodeDef& node_def, Status* status) {
+  const OpDef* op_def = ops_->LookUp(node_def.op(), status);
+  if (op_def == nullptr) return nullptr;
+
+  // TODO(vrv,josh11b): Find a location higher in the stack to add these defaults
+  // to the NodeDef.
+  NodeDef node_def_with_defaults(node_def);
+  AddDefaultsToNodeDef(*op_def, &node_def_with_defaults);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   DataTypeVector inputs;
   DataTypeVector outputs;
   status->Update(
+<<<<<<< HEAD
       InOutTypesForNode(node_def, op_reg_data->op_def, &inputs, &outputs));
   if (!status->ok()) {
     *status = AttachDef(*status, node_def);
+=======
+      InOutTypesForNode(node_def_with_defaults, *op_def, &inputs, &outputs));
+  if (!status->ok()) {
+    *status = AttachDef(*status, node_def_with_defaults);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return nullptr;
   }
 
   Node* node = AllocateNode(
+<<<<<<< HEAD
       std::make_shared<NodeProperties>(&op_reg_data->op_def,
                                        std::move(node_def), inputs, outputs),
       nullptr, op_reg_data->is_function_op);
@@ -462,15 +558,34 @@ Node* Graph::CopyNode(const Node* node) {
     copy->props_->op_def = op_def;
   }
 
+=======
+      new Node::Properties(op_def, node_def_with_defaults, inputs, outputs),
+      nullptr);
+  return node;
+}
+
+Node* Graph::CopyNode(Node* node) {
+  DCHECK(!node->IsSource());
+  DCHECK(!node->IsSink());
+  Node::Properties* props = node->properties();
+  props->Ref();
+  Node* copy = AllocateNode(props, node);
+  copy->set_assigned_device_name(node->assigned_device_name());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return copy;
 }
 
 void Graph::RemoveNode(Node* node) {
+<<<<<<< HEAD
   TF_DCHECK_OK(IsValidNode(node)) << node->DebugString();
+=======
+  DCHECK(IsValidNode(node)) << node->DebugString();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   DCHECK(!node->IsSource());
   DCHECK(!node->IsSink());
 
   // Remove any edges involving this node.
+<<<<<<< HEAD
   for (const Edge* e : node->in_edges_) {
     CHECK_EQ(e->src_->out_edges_.erase(e), size_t{1});
     edges_[e->id_] = nullptr;
@@ -485,12 +600,25 @@ void Graph::RemoveNode(Node* node) {
     --num_edges_;
   }
   node->out_edges_.clear();
+=======
+  while (!node->in_edges_.empty()) {
+    RemoveEdge(*node->in_edges_.begin());
+  }
+  while (!node->out_edges_.empty()) {
+    RemoveEdge(*node->out_edges_.begin());
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ReleaseNode(node);
 }
 
 const Edge* Graph::AddEdge(Node* source, int x, Node* dest, int y) {
+<<<<<<< HEAD
   TF_DCHECK_OK(IsValidNode(source)) << source->DebugString();
   TF_DCHECK_OK(IsValidNode(dest)) << dest->DebugString();
+=======
+  DCHECK(IsValidNode(source)) << source->DebugString();
+  DCHECK(IsValidNode(dest)) << dest->DebugString();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // source/sink must only be linked via control slots, and
   // control slots must only be linked to control slots.
@@ -515,11 +643,16 @@ const Edge* Graph::AddEdge(Node* source, int x, Node* dest, int y) {
   CHECK(source->out_edges_.insert(e).second);
   CHECK(dest->in_edges_.insert(e).second);
   edges_.push_back(e);
+<<<<<<< HEAD
   ++num_edges_;
+=======
+  edge_set_.insert(e);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return e;
 }
 
 void Graph::RemoveEdge(const Edge* e) {
+<<<<<<< HEAD
   TF_DCHECK_OK(IsValidNode(e->src_)) << e->src_->DebugString();
   TF_DCHECK_OK(IsValidNode(e->dst_)) << e->dst_->DebugString();
   CHECK_EQ(e->src_->out_edges_.erase(e), size_t{1});
@@ -634,6 +767,24 @@ Status Graph::AddFunctionLibrary(const FunctionDefLibrary& fdef_lib) {
     versions_->set_min_consumer(12);
   }
   return ops_.AddLibrary(fdef_lib);
+=======
+  DCHECK(IsValidNode(e->src_)) << e->src_->DebugString();
+  DCHECK(IsValidNode(e->dst_)) << e->dst_->DebugString();
+  CHECK_EQ(e->src_->out_edges_.erase(e), 1);
+  CHECK_EQ(e->dst_->in_edges_.erase(e), 1);
+  CHECK_EQ(e, edges_[e->id_]);
+
+  CHECK_EQ(edge_set_.erase(e), 1);
+  edges_[e->id_] = nullptr;
+
+  Edge* del = const_cast<Edge*>(e);
+  del->src_ = nullptr;
+  del->dst_ = nullptr;
+  del->id_ = -1;
+  del->src_output_ = kControlSlot - 1;
+  del->dst_input_ = kControlSlot - 1;
+  free_edges_.push_back(del);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 namespace {
@@ -651,6 +802,7 @@ void AddInput(NodeDef* dst, StringPiece src_name, int src_slot) {
 }  // namespace
 
 void Graph::ToGraphDef(GraphDef* graph_def) const {
+<<<<<<< HEAD
   ToGraphDefSubRange(graph_def, 0);
 }
 
@@ -672,6 +824,13 @@ void Graph::ToGraphDefSubRange(GraphDef* graph_def, int from_node_id) const {
   for (auto id = from_node_id; id < num_node_ids(); ++id) {
     const Node* node = FindNodeId(id);
     if (node == nullptr || !node->IsOp()) continue;
+=======
+  graph_def->Clear();
+  std::vector<const Edge*>
+      inputs;  // Construct this outside the loop for speed.
+  for (const Node* node : nodes()) {
+    if (!node->IsOp()) continue;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     NodeDef* node_def = graph_def->add_node();
     *node_def = node->def();
 
@@ -689,6 +848,7 @@ void Graph::ToGraphDefSubRange(GraphDef* graph_def, int from_node_id) const {
       if (edge->IsControlEdge()) {
         inputs.push_back(edge);
       } else {
+<<<<<<< HEAD
         DCHECK(edge->dst_input() < inputs.size())
             << "Edge " << edge->DebugString()
             << " is overflowing the expected number of inputs ("
@@ -718,6 +878,17 @@ void Graph::ToGraphDefSubRange(GraphDef* graph_def, int from_node_id) const {
         } else {
           node_def->add_input("");
         }
+=======
+        DCHECK(inputs[edge->dst_input()] == nullptr);
+        inputs[edge->dst_input()] = edge;
+      }
+    }
+    node_def->clear_input();
+    for (size_t i = 0; i < inputs.size(); ++i) {
+      const Edge* edge = inputs[i];
+      if (edge == nullptr) {
+        node_def->add_input(node->def().input(i));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       } else {
         const Node* src = edge->src();
         if (!src->IsOp()) continue;
@@ -731,6 +902,7 @@ string Graph::NewName(StringPiece prefix) {
   return strings::StrCat(prefix, "/_", name_counter_++);
 }
 
+<<<<<<< HEAD
 Status Graph::IsValidNode(const Node* node) const {
   if (node == nullptr) {
     return errors::InvalidArgument("Node is null");
@@ -775,6 +947,22 @@ Status Graph::IsValidInputTensor(const Node* node, int idx) const {
 
 Node* Graph::AllocateNode(std::shared_ptr<NodeProperties> props,
                           const Node* cost_node, bool is_function_op) {
+=======
+gtl::iterator_range<NodeIter> Graph::nodes() const {
+  // Note that NodeId 0 is always valid since we don't let the source
+  // node be removed from the graph.
+  return gtl::make_range(NodeIter(this, 0), NodeIter(this, num_node_ids()));
+}
+
+bool Graph::IsValidNode(Node* node) const {
+  if (node == nullptr) return false;
+  const int id = node->id();
+  if (id < 0 || static_cast<size_t>(id) >= nodes_.size()) return false;
+  return nodes_[id] == node;
+}
+
+Node* Graph::AllocateNode(Node::Properties* props, const Node* cost_node) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Node* node = nullptr;
   if (free_nodes_.empty()) {
     node = new (arena_.Alloc(sizeof(Node))) Node;  // placement new
@@ -782,16 +970,24 @@ Node* Graph::AllocateNode(std::shared_ptr<NodeProperties> props,
     node = free_nodes_.back();
     free_nodes_.pop_back();
   }
+<<<<<<< HEAD
   node->graph_ = this;
   const int id = nodes_.size();
   int cost_id = cost_node ? cost_node->cost_id() : id;
   node->Initialize(id, cost_id, std::move(props), is_function_op);
   nodes_.push_back(node);
   ++num_nodes_;
+=======
+  const int id = nodes_.size();
+  int cost_id = cost_node ? cost_node->cost_id() : id;
+  node->Initialize(id, cost_id, props);
+  nodes_.push_back(node);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return node;
 }
 
 void Graph::ReleaseNode(Node* node) {
+<<<<<<< HEAD
   TF_DCHECK_OK(IsValidNode(node)) << node->DebugString();
   nodes_[node->id()] = nullptr;
   free_nodes_.push_back(node);
@@ -855,4 +1051,12 @@ string Edge::DebugString() const {
                          src_output_, dst_->name().c_str(), dst_input_);
 }
 
+=======
+  DCHECK(IsValidNode(node)) << node->DebugString();
+  nodes_[node->id()] = nullptr;
+  free_nodes_.push_back(node);
+  node->Clear();
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

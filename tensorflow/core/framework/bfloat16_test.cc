@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +20,17 @@ limitations under the License.
 #include "tensorflow/core/framework/numeric_types.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include "tensorflow/core/framework/bfloat16.h"
+
+#include "tensorflow/core/platform/test_benchmark.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
 
+<<<<<<< HEAD
 TEST(Bfloat16Test, DefaultValueIsZero) {
   EXPECT_EQ(0.0f, static_cast<float>(bfloat16()));
 }
@@ -123,6 +131,13 @@ INSTANTIATE_TEST_SUITE_P(
             BinaryToFloat(0, 0b00000000, 0b1111111, 0b0000000000000000),
             BinaryToFloat(0, 0b00000001, 0b0000000, 0b0000000000000000)}));
 
+=======
+TEST(Bfloat16Test, Simple) {
+  bfloat16 a(12);
+  EXPECT_EQ(12, a.value);
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(Bfloat16Test, Conversion) {
   float a[100];
   for (int i = 0; i < 100; ++i) {
@@ -139,6 +154,7 @@ TEST(Bfloat16Test, Conversion) {
   }
 }
 
+<<<<<<< HEAD
 TEST(Bfloat16Test, Epsilon) {
   EXPECT_LT(1.0f, static_cast<float>(bfloat16::epsilon() + bfloat16(1.0f)));
   EXPECT_EQ(1.0f, static_cast<float>((bfloat16::epsilon() / bfloat16(2.0f)) +
@@ -150,6 +166,8 @@ TEST(Bfloat16Test, Negate) {
   EXPECT_EQ(4.5f, static_cast<float>(-bfloat16(-4.5f)));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static void BM_FloatToBFloat16(int iters) {
   testing::StopTiming();
   static const int N = 32 << 20;
@@ -169,6 +187,7 @@ static void BM_FloatToBFloat16(int iters) {
 }
 BENCHMARK(BM_FloatToBFloat16);
 
+<<<<<<< HEAD
 void RoundFloatToBFloat16(const float* src, bfloat16* dst, int64 size) {
   for (; size != 0; size--) {
     dst[size] = bfloat16(src[size]);
@@ -196,6 +215,8 @@ static void BM_RoundFloatToBFloat16(int iters) {
 }
 BENCHMARK(BM_RoundFloatToBFloat16);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static void BM_BFloat16ToFloat(int iters) {
   testing::StopTiming();
   static const int N = 32 << 20;

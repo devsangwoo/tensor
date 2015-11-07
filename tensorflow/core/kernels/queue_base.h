@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +34,22 @@ limitations under the License.
 namespace tensorflow {
 
 // Functionality common to asynchronous QueueInterface implementations.
+=======
+#ifndef THIRD_PARTY_TENSORFLOW_CORE_KERNELS_QUEUE_BASE_H_
+#define THIRD_PARTY_TENSORFLOW_CORE_KERNELS_QUEUE_BASE_H_
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/queue_interface.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+
+namespace tensorflow {
+
+// Functionality common to QueueInterface implementations.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class QueueBase : public QueueInterface {
  public:
   // As a possible value of 'capacity'.
@@ -44,7 +61,11 @@ class QueueBase : public QueueInterface {
   //     which must either be empty (if the shapes are not specified) or
   //     or have the same size as component_dtypes.
   //   name: A name to use for the queue.
+<<<<<<< HEAD
   QueueBase(int32 capacity, const DataTypeVector& component_dtypes,
+=======
+  QueueBase(const DataTypeVector& component_dtypes,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             const std::vector<TensorShape>& component_shapes,
             const string& name);
 
@@ -53,17 +74,21 @@ class QueueBase : public QueueInterface {
     return component_dtypes_;
   }
 
+<<<<<<< HEAD
   Status ValidateTuple(const Tuple& tuple) override;
   Status ValidateManyTuple(const Tuple& tuple) override;
 
   void Close(OpKernelContext* ctx, bool cancel_pending_enqueues,
              DoneCallback callback) override;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Other public methods -----------------------------------------------------
   const std::vector<TensorShape>& component_shapes() const {
     return component_shapes_;
   }
 
+<<<<<<< HEAD
   int32 capacity() const { return capacity_; }
 
   bool is_closed() const override {
@@ -102,6 +127,9 @@ class QueueBase : public QueueInterface {
     CancellationManager* cm;
   };
 
+=======
+ protected:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Returns the number of components in a queue-element tuple.
   int32 num_components() const { return component_dtypes_.size(); }
 
@@ -112,6 +140,7 @@ class QueueBase : public QueueInterface {
   // Code common to Validate*Tuple().
   Status ValidateTupleCommon(const Tuple& tuple) const;
 
+<<<<<<< HEAD
   TensorShape ManyOutShape(int i, int64 batch_size) {
     TensorShape shape({batch_size});
     shape.AppendShape(component_shapes_[i]);
@@ -133,6 +162,17 @@ class QueueBase : public QueueInterface {
   void FlushUnlocked();
 
   ~QueueBase() override;
+=======
+  // Copies the index^th slice (in the first dimension) of parent into element.
+  static Status CopySliceToElement(const Tensor& parent, Tensor* element,
+                                   int index);
+
+  // Copies element into the index^th slice (in the first dimension) of parent.
+  static Status CopyElementToSlice(const Tensor& element, Tensor* parent,
+                                   int index);
+
+  ~QueueBase() override {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Helpers for implementing MatchesNodeDef().
   static string ShapeListString(const gtl::ArraySlice<TensorShape>& shapes);
@@ -141,6 +181,7 @@ class QueueBase : public QueueInterface {
   Status MatchesNodeDefTypes(const NodeDef& node_def) const;
   Status MatchesNodeDefShapes(const NodeDef& node_def) const;
 
+<<<<<<< HEAD
  protected:
   const int32 capacity_;
   const DataTypeVector component_dtypes_;
@@ -176,10 +217,19 @@ class QueueBase : public QueueInterface {
   };
   std::deque<Attempt> enqueue_attempts_ GUARDED_BY(mu_);
   std::deque<Attempt> dequeue_attempts_ GUARDED_BY(mu_);
+=======
+  const DataTypeVector component_dtypes_;
+  const std::vector<TensorShape> component_shapes_;
+  const string name_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   TF_DISALLOW_COPY_AND_ASSIGN(QueueBase);
 };
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_QUEUE_BASE_H_
+=======
+#endif  // THIRD_PARTY_TENSORFLOW_CORE_KERNELS_QUEUE_BASE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+#include "tensorflow/core/lib/io/record_reader.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/core/coding.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/lib/hash/crc32c.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/io/record_reader.h"
 #include "tensorflow/core/lib/io/record_writer.h"
 #include "tensorflow/core/lib/random/simple_philox.h"
@@ -31,6 +37,18 @@ namespace {
 // Construct a string of the specified length made out of the supplied
 // partial string.
 string BigString(const string& partial_string, size_t n) {
+=======
+#include "tensorflow/core/lib/io/record_writer.h"
+#include "tensorflow/core/lib/random/simple_philox.h"
+#include "tensorflow/core/public/env.h"
+
+namespace tensorflow {
+namespace io {
+
+// Construct a string of the specified length made out of the supplied
+// partial string.
+static string BigString(const string& partial_string, size_t n) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string result;
   while (result.size() < n) {
     result.append(partial_string);
@@ -40,13 +58,18 @@ string BigString(const string& partial_string, size_t n) {
 }
 
 // Construct a string from a number
+<<<<<<< HEAD
 string NumberString(int n) {
+=======
+static string NumberString(int n) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   char buf[50];
   snprintf(buf, sizeof(buf), "%d.", n);
   return string(buf);
 }
 
 // Return a skewed potentially long string
+<<<<<<< HEAD
 string RandomSkewedString(int i, random::SimplePhilox* rnd) {
   return BigString(NumberString(i), rnd->Skewed(17));
 }
@@ -110,6 +133,57 @@ class StringSource : public RandomAccessFile {
 class RecordioTest : public ::testing::Test {
  private:
   string contents_;
+=======
+static string RandomSkewedString(int i, random::SimplePhilox* rnd) {
+  return BigString(NumberString(i), rnd->Skewed(17));
+}
+
+class RecordioTest : public testing::Test {
+ private:
+  class StringDest : public WritableFile {
+   public:
+    string contents_;
+
+    Status Close() override { return Status::OK(); }
+    Status Flush() override { return Status::OK(); }
+    Status Sync() override { return Status::OK(); }
+    Status Append(const StringPiece& slice) override {
+      contents_.append(slice.data(), slice.size());
+      return Status::OK();
+    }
+  };
+
+  class StringSource : public RandomAccessFile {
+   public:
+    StringPiece contents_;
+    mutable bool force_error_;
+    mutable bool returned_partial_;
+    StringSource() : force_error_(false), returned_partial_(false) {}
+
+    Status Read(uint64 offset, size_t n, StringPiece* result,
+                     char* scratch) const override {
+      EXPECT_FALSE(returned_partial_) << "must not Read() after eof/error";
+
+      if (force_error_) {
+        force_error_ = false;
+        returned_partial_ = true;
+        return errors::DataLoss("read error");
+      }
+
+      if (offset >= contents_.size()) {
+        return errors::OutOfRange("end of file");
+      }
+
+      if (contents_.size() < offset + n) {
+        n = contents_.size() - offset;
+        returned_partial_ = true;
+      }
+      *result = StringPiece(contents_.data() + offset, n);
+      return Status::OK();
+    }
+  };
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   StringDest dest_;
   StringSource source_;
   bool reading_;
@@ -119,9 +193,13 @@ class RecordioTest : public ::testing::Test {
 
  public:
   RecordioTest()
+<<<<<<< HEAD
       : dest_(&contents_),
         source_(&contents_),
         reading_(false),
+=======
+      : reading_(false),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         readpos_(0),
         writer_(new RecordWriter(&dest_)),
         reader_(new RecordReader(&source_)) {}
@@ -133,6 +211,7 @@ class RecordioTest : public ::testing::Test {
 
   void Write(const string& msg) {
     ASSERT_TRUE(!reading_) << "Write() after starting to read";
+<<<<<<< HEAD
     TF_ASSERT_OK(writer_->WriteRecord(StringPiece(msg)));
   }
 
@@ -144,12 +223,24 @@ class RecordioTest : public ::testing::Test {
 #endif
 
   size_t WrittenBytes() const { return contents_.size(); }
+=======
+    ASSERT_OK(writer_->WriteRecord(StringPiece(msg)));
+  }
+
+  size_t WrittenBytes() const { return dest_.contents_.size(); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   string Read() {
     if (!reading_) {
       reading_ = true;
+<<<<<<< HEAD
     }
     tstring record;
+=======
+      source_.contents_ = StringPiece(dest_.contents_);
+    }
+    string record;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Status s = reader_->ReadRecord(&readpos_, &record);
     if (s.ok()) {
       return record;
@@ -160,6 +251,7 @@ class RecordioTest : public ::testing::Test {
     }
   }
 
+<<<<<<< HEAD
   void IncrementByte(int offset, int delta) { contents_[offset] += delta; }
 
   void SetByte(int offset, char new_byte) { contents_[offset] = new_byte; }
@@ -174,6 +266,28 @@ class RecordioTest : public ::testing::Test {
   }
 
   void ForceError() { source_.force_error(); }
+=======
+  void IncrementByte(int offset, int delta) {
+    dest_.contents_[offset] += delta;
+  }
+
+  void SetByte(int offset, char new_byte) {
+    dest_.contents_[offset] = new_byte;
+  }
+
+  void ShrinkSize(int bytes) {
+    dest_.contents_.resize(dest_.contents_.size() - bytes);
+  }
+
+  void FixChecksum(int header_offset, int len) {
+    // Compute crc of type/len/data
+    uint32_t crc = crc32c::Value(&dest_.contents_[header_offset + 6], 1 + len);
+    crc = crc32c::Mask(crc);
+    core::EncodeFixed32(&dest_.contents_[header_offset], crc);
+  }
+
+  void ForceError() { source_.force_error_ = true; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void StartReadingAt(uint64_t initial_offset) { readpos_ = initial_offset; }
 
@@ -182,8 +296,14 @@ class RecordioTest : public ::testing::Test {
     Write("bar");
     Write(BigString("x", 10000));
     reading_ = true;
+<<<<<<< HEAD
     uint64 offset = WrittenBytes() + offset_past_end;
     tstring record;
+=======
+    source_.contents_ = StringPiece(dest_.contents_);
+    uint64 offset = WrittenBytes() + offset_past_end;
+    string record;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Status s = reader_->ReadRecord(&offset, &record);
     ASSERT_TRUE(errors::IsOutOfRange(s)) << s;
   }
@@ -204,6 +324,7 @@ TEST_F(RecordioTest, ReadWrite) {
   ASSERT_EQ("EOF", Read());  // Make sure reads at eof work
 }
 
+<<<<<<< HEAD
 #if defined(PLATFORM_GOOGLE)
 TEST_F(RecordioTest, ReadWriteCords) {
   Write(absl::Cord("foo"));
@@ -219,6 +340,8 @@ TEST_F(RecordioTest, ReadWriteCords) {
 }
 #endif
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST_F(RecordioTest, ManyRecords) {
   for (int i = 0; i < 100000; i++) {
     Write(NumberString(i));
@@ -248,6 +371,7 @@ TEST_F(RecordioTest, RandomRead) {
   ASSERT_EQ("EOF", Read());
 }
 
+<<<<<<< HEAD
 void TestNonSequentialReads(const RecordWriterOptions& writer_options,
                             const RecordReaderOptions& reader_options) {
   string contents;
@@ -342,6 +466,18 @@ TEST_F(RecordioTest, ReadErrorWithBuffering) {
 TEST_F(RecordioTest, ReadErrorWithCompression) {
   TestReadError(RecordWriterOptions::CreateRecordWriterOptions("ZLIB"),
                 RecordReaderOptions::CreateRecordReaderOptions("ZLIB"));
+=======
+// Tests of all the error paths in log_reader.cc follow:
+static void AssertHasSubstr(StringPiece s, StringPiece expected) {
+  EXPECT_TRUE(StringPiece(s).contains(expected)) << s << " does not contain "
+                                                 << expected;
+}
+
+TEST_F(RecordioTest, ReadError) {
+  Write("foo");
+  ForceError();
+  AssertHasSubstr(Read(), "Data loss");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(RecordioTest, CorruptLength) {
@@ -372,6 +508,9 @@ TEST_F(RecordioTest, ReadEnd) { CheckOffsetPastEndReturnsNoRecords(0); }
 
 TEST_F(RecordioTest, ReadPastEnd) { CheckOffsetPastEndReturnsNoRecords(5); }
 
+<<<<<<< HEAD
 }  // namespace
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace io
 }  // namespace tensorflow

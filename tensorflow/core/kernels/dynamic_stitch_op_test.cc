@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +31,26 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/strcat.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include <functional>
+#include <memory>
+#include <vector>
+
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/framework/fake_input.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/kernels/ops_testutil.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include <gtest/gtest.h>
+#include "tensorflow/core/lib/core/status_test_util.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -37,11 +58,20 @@ namespace {
 class DynamicStitchOpTest : public OpsTestBase {
  protected:
   void MakeOp(int n, DataType dt) {
+<<<<<<< HEAD
     TF_ASSERT_OK(NodeDefBuilder("myop", "DynamicStitch")
                      .Input(FakeInput(n, DT_INT32))
                      .Input(FakeInput(n, dt))
                      .Finalize(node_def()));
     TF_ASSERT_OK(InitOp());
+=======
+    RequireDefaultOps();
+    ASSERT_OK(NodeDefBuilder("myop", "DynamicStitch")
+                  .Input(FakeInput(n, DT_INT32))
+                  .Input(FakeInput(n, dt))
+                  .Finalize(node_def()));
+    ASSERT_OK(InitOp());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -53,7 +83,11 @@ TEST_F(DynamicStitchOpTest, Simple_OneD) {
   AddInputFromArray<int32>(TensorShape({5}), {1, 6, 2, 3, 5});
   AddInputFromArray<float>(TensorShape({3}), {0, 40, 70});
   AddInputFromArray<float>(TensorShape({5}), {10, 60, 20, 30, 50});
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the output.
   Tensor expected(allocator(), DT_FLOAT, TensorShape({8}));
@@ -71,7 +105,11 @@ TEST_F(DynamicStitchOpTest, Simple_TwoD) {
   AddInputFromArray<float>(TensorShape({3, 2}), {0, 1, 40, 41, 70, 71});
   AddInputFromArray<float>(TensorShape({2, 2}), {10, 11, 60, 61});
   AddInputFromArray<float>(TensorShape({3, 2}), {20, 21, 30, 31, 50, 51});
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the output.
   Tensor expected(allocator(), DT_FLOAT, TensorShape({8, 2}));
@@ -89,9 +127,15 @@ TEST_F(DynamicStitchOpTest, Error_IndicesMultiDimensional) {
   AddInputFromArray<float>(TensorShape({3}), {0, 40, 70});
   AddInputFromArray<float>(TensorShape({5}), {10, 60, 20, 30, 50});
   Status s = RunOpKernel();
+<<<<<<< HEAD
   EXPECT_TRUE(absl::StrContains(
       s.ToString(),
       "data[1].shape = [5] does not start with indices[1].shape = [1,5]"))
+=======
+  EXPECT_TRUE(StringPiece(s.ToString())
+                  .contains("data[1].shape = [5] does not start with "
+                            "indices[1].shape = [1,5]"))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       << s;
 }
 
@@ -104,9 +148,15 @@ TEST_F(DynamicStitchOpTest, Error_DataNumDimsMismatch) {
   AddInputFromArray<float>(TensorShape({3}), {0, 40, 70});
   AddInputFromArray<float>(TensorShape({1, 5}), {10, 60, 20, 30, 50});
   Status s = RunOpKernel();
+<<<<<<< HEAD
   EXPECT_TRUE(absl::StrContains(
       s.ToString(),
       "data[1].shape = [1,5] does not start with indices[1].shape = [5]"))
+=======
+  EXPECT_TRUE(StringPiece(s.ToString())
+                  .contains("data[1].shape = [1,5] does not start with "
+                            "indices[1].shape = [5]"))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       << s;
 }
 
@@ -120,10 +170,16 @@ TEST_F(DynamicStitchOpTest, Error_DataDimSizeMismatch) {
   AddInputFromArray<float>(TensorShape({4, 2}),
                            {10, 11, 60, 61, 20, 21, 30, 31});
   Status s = RunOpKernel();
+<<<<<<< HEAD
   EXPECT_TRUE(
       absl::StrContains(s.ToString(),
                         "Need data[0].shape[1:] = data[1].shape[1:], got "
                         "data[0].shape = [3,1], data[1].shape = [4,2]"))
+=======
+  EXPECT_TRUE(StringPiece(s.ToString())
+                  .contains("Need data[0].shape[1:] = data[1].shape[1:], "
+                            "got data[0].shape = [3,1], data[1].shape = [4,2]"))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       << s;
 }
 
@@ -136,9 +192,16 @@ TEST_F(DynamicStitchOpTest, Error_DataAndIndicesSizeMismatch) {
   AddInputFromArray<float>(TensorShape({3}), {0, 40, 70});
   AddInputFromArray<float>(TensorShape({4}), {10, 60, 20, 30});
   Status s = RunOpKernel();
+<<<<<<< HEAD
   EXPECT_TRUE(absl::StrContains(
       s.ToString(),
       "data[1].shape = [4] does not start with indices[1].shape = [5]"))
+=======
+  EXPECT_TRUE(
+      StringPiece(s.ToString())
+          .contains(
+              "data[1].shape = [4] does not start with indices[1].shape = [5]"))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       << s;
 }
 

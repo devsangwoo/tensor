@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/nn_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #include "tensorflow/core/kernels/in_topk_op.h"
 
 #include "tensorflow/core/framework/op_kernel.h"
@@ -35,11 +39,26 @@ class InTopK : public OpKernel {
     if (context->num_inputs() == 2) {
       OP_REQUIRES_OK(context, context->GetAttr("k", &k_));
     }
+=======
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+
+namespace tensorflow {
+
+template <typename T>
+class InTopK : public OpKernel {
+ public:
+  explicit InTopK(OpKernelConstruction* context) : OpKernel(context) {
+    OP_REQUIRES_OK(context, context->GetAttr("k", &k_));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void Compute(OpKernelContext* context) override {
     const auto& predictions_in = context->input(0);
     const auto& targets_in = context->input(1);
+<<<<<<< HEAD
 
     int64 k_value = k_;
     const Tensor* k_tensor = nullptr;
@@ -54,6 +73,8 @@ class InTopK : public OpKernel {
       k_tensor = &k_in;
     }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(context, predictions_in.dims() == 2,
                 errors::InvalidArgument("predictions must be 2-dimensional"));
     OP_REQUIRES(context, targets_in.dims() == 1,
@@ -63,9 +84,14 @@ class InTopK : public OpKernel {
                                         predictions_in.dim_size(0),
                                         " must match length of targets ",
                                         targets_in.dim_size(0)));
+<<<<<<< HEAD
 
     const auto predictions = predictions_in.matrix<T>();
     const auto targets = targets_in.vec<TARGET_T>();
+=======
+    const auto& predictions = predictions_in.matrix<T>();
+    const auto& targets = targets_in.vec<int>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Tensor* t_out = nullptr;
     OP_REQUIRES_OK(context,
@@ -73,17 +99,31 @@ class InTopK : public OpKernel {
                        0, TensorShape({targets_in.dim_size(0)}), &t_out));
     auto out = t_out->vec<bool>();
 
+<<<<<<< HEAD
     functor::InTopKFunctor<Device, T, TARGET_T> f;
     functor::TopKArg arg;
     arg.k_value = k_value;
     arg.k_tensor = k_tensor;
     f(context, predictions, targets, arg, out);
+=======
+    const auto size = targets.size();
+    const auto num_classes = predictions.dimension(1);
+    for (int b = 0; b < size; b++) {
+      T target_prediction = predictions(b, targets(b));
+      int more_probable_classes = 0;
+      for (int i = 0; i < num_classes; ++i) {
+        if (predictions(b, i) > target_prediction) ++more_probable_classes;
+      }
+      out(b) = more_probable_classes < k_;
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
   int k_;
 };
 
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("InTopK")
                             .Device(DEVICE_CPU)
                             .HostMemory("predictions")
@@ -143,5 +183,8 @@ REGISTER_KERNEL_BUILDER(
     InTopK<GPUDevice, float, int64>);
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+REGISTER_KERNEL_BUILDER(Name("InTopK").Device(DEVICE_CPU), InTopK<float>);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

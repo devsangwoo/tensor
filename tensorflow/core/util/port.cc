@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +17,10 @@ limitations under the License.
 #include "tensorflow/core/util/port.h"
 
 
+=======
+#include "tensorflow/core/util/port.h"
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace tensorflow {
 
 bool IsGoogleCudaEnabled() {
@@ -26,6 +31,7 @@ bool IsGoogleCudaEnabled() {
 #endif
 }
 
+<<<<<<< HEAD
 bool IsBuiltWithROCm() {
 #if TENSORFLOW_USE_ROCM
   return true;
@@ -58,4 +64,6 @@ bool IsMklEnabled() {
   return false;
 #endif  // INTEL_MKL && ENABLE_MKL
 }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace tensorflow

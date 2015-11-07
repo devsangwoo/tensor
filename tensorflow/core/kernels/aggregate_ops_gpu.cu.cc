@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +16,22 @@ limitations under the License.
 
 #if (defined(GOOGLE_CUDA) && GOOGLE_CUDA) || \
     (defined(TENSORFLOW_USE_ROCM) && TENSORFLOW_USE_ROCM)
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define EIGEN_USE_GPU
 
 #include "tensorflow/core/kernels/aggregate_ops.h"
 
+<<<<<<< HEAD
 #include "tensorflow/core/framework/register_types.h"
 #include "tensorflow/core/framework/tensor_types.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/framework/tensor_types.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -142,6 +151,7 @@ struct Add9Functor<GPUDevice, T> {
 
 }  // end namespace functor
 
+<<<<<<< HEAD
 // Instantiate the GPU implementation for GPU number types.
 #define REGISTER_FUNCTORS(type)                           \
   template struct functor::Add2Functor<GPUDevice, type>;  \
@@ -164,3 +174,19 @@ TF_CALL_complex128(REGISTER_FUNCTORS);
 }  // end namespace tensorflow
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+// Instantiate the GPU implementation for float.
+template struct functor::Add2Functor<GPUDevice, float>;
+template struct functor::Add3Functor<GPUDevice, float>;
+template struct functor::Add4Functor<GPUDevice, float>;
+template struct functor::Add5Functor<GPUDevice, float>;
+template struct functor::Add6Functor<GPUDevice, float>;
+template struct functor::Add7Functor<GPUDevice, float>;
+template struct functor::Add8Functor<GPUDevice, float>;
+template struct functor::Add8pFunctor<GPUDevice, float>;
+template struct functor::Add9Functor<GPUDevice, float>;
+
+}  // end namespace tensorflow
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

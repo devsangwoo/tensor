@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +33,26 @@ limitations under the License.
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+// The utility to write checkpoints for google brain tensor ops and v3
+// checkpoints for dist_belief.
+//
+
+#ifndef TENSORFLOW_UTIL_TENSOR_SLICE_WRITER_H_
+#define TENSORFLOW_UTIL_TENSOR_SLICE_WRITER_H_
+
+#include <unordered_map>
+
+#include "tensorflow/core/framework/tensor_slice.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/lib/gtl/map_util.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/saved_tensor_slice.pb.h"
 #include "tensorflow/core/util/saved_tensor_slice_util.h"
 
@@ -48,7 +69,12 @@ class TensorSliceWriter {
     virtual void Add(StringPiece key, StringPiece value) = 0;
     virtual Status Finish(int64* file_size) = 0;
   };
+<<<<<<< HEAD
   typedef std::function<Status(const string&, Builder**)> CreateBuilderFunction;
+=======
+  typedef std::function<Status(const string&, Builder**)>
+      CreateBuilderFunction;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   TensorSliceWriter(const string& filename,
                     CreateBuilderFunction create_builder);
@@ -57,6 +83,7 @@ class TensorSliceWriter {
   // TODO(yangke): add more supports
   template <typename T>
   Status Add(const string& name, const TensorShape& shape,
+<<<<<<< HEAD
              const TensorSlice& slice, const T* data);
   Status Finish();
 
@@ -78,6 +105,16 @@ class TensorSliceWriter {
   // However, we add 1KB of slack, to be conservative and guard
   // against other additions to the TensorProto.
   static const size_t kTensorProtoHeaderBytes = 1 << 10;
+=======
+                  const TensorSlice& slice, const T* data);
+  Status Finish();
+
+ private:
+  // Allocate "num_elements" elements in "ss" and save the data in "data"
+  // there.
+  template <typename T>
+  static void SaveData(const T* data, int num_elements, SavedSlice* ss);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   const string filename_;
   const CreateBuilderFunction create_builder_;
@@ -96,12 +133,21 @@ class TensorSliceWriter {
 
 template <typename T>
 Status TensorSliceWriter::Add(const string& name, const TensorShape& shape,
+<<<<<<< HEAD
                               const TensorSlice& slice, const T* data) {
   // The tensor and the slice have to be compatible
   if (shape.dims() != slice.dims()) {
     return errors::Internal("Incompatible tensor shape and slice: ", "shape = ",
                             shape.DebugString(),
                             ", slice = ", slice.DebugString());
+=======
+                                   const TensorSlice& slice, const T* data) {
+  // The tensor and the slice have to be compatible
+  if (shape.dims() != slice.dims()) {
+    return errors::Internal("Incompatible tensor shape and slice: ", "shape = ",
+                            shape.DebugString(), ", slice = ",
+                            slice.DebugString());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   DataType dt = DataTypeToEnum<T>::value;
   // We need to add an entry for "name" if there isn't an entry already.
@@ -113,9 +159,15 @@ Status TensorSliceWriter::Add(const string& name, const TensorShape& shape,
     CHECK_EQ(name, ssm.name()) << ssm.ShortDebugString();
     TensorShape ssm_shape(ssm.shape());
     if (!shape.IsSameSize(ssm_shape)) {
+<<<<<<< HEAD
       return errors::Internal(
           "Mismatching shapes: existing tensor = ", ssm_shape.DebugString(),
           ", trying to add name ", name, ", shape = ", shape.DebugString());
+=======
+      return errors::Internal("Mismatching shapes: existing tensor = ",
+                              ssm_shape.DebugString(), ", trying to add name ",
+                              name, ", shape = ", shape.DebugString());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     if (dt != ssm.type()) {
       return errors::Internal(
@@ -144,15 +196,23 @@ Status TensorSliceWriter::Add(const string& name, const TensorShape& shape,
     TensorShape saved_shape(ssm->shape());
     TensorShape sliced_shape;
     TF_RETURN_IF_ERROR(slice.SliceTensorShape(saved_shape, &sliced_shape));
+<<<<<<< HEAD
     TF_RETURN_IF_ERROR(SaveData(data, sliced_shape.num_elements(), ss));
+=======
+    SaveData(data, sliced_shape.num_elements(), ss);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     string key = EncodeTensorNameSlice(name, slice);
     // TODO(yangke): consider doing a two-pass thing where the first pass just
     // list the tensor slices we want to save and then another pass to actually
     // set the data. Need to figure out if the interface works well.
     std::pair<string, string> key_value(key, "");
+<<<<<<< HEAD
     if (!sts.AppendToString(&key_value.second)) {
       return errors::Internal("Error writing Tensor. Possible size overflow.");
     }
+=======
+    sts.AppendToString(&key_value.second);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     data_.insert(key_value);
   }
   ++slices_;
@@ -160,6 +220,7 @@ Status TensorSliceWriter::Add(const string& name, const TensorShape& shape,
 }
 
 template <typename T>
+<<<<<<< HEAD
 Status TensorSliceWriter::SaveData(const T* data, int64 num_elements,
                                    SavedSlice* ss) {
   size_t size_bound =
@@ -180,15 +241,30 @@ template <>
 Status TensorSliceWriter::SaveData(const tstring* data, int64 num_elements,
                                    SavedSlice* ss);
 
+=======
+void TensorSliceWriter::SaveData(const T* data, int num_elements,
+                                 SavedSlice* ss) {
+  Fill(data, num_elements, ss->mutable_data());
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Create a table builder that will write to "filename" in
 // tensorflow::io::Table format.  If successful, return OK
 // and set "*builder" to the allocated builder.  Otherwise, return a
 // non-OK status.
 Status CreateTableTensorSliceBuilder(const string& filename,
+<<<<<<< HEAD
                                      TensorSliceWriter::Builder** builder);
+=======
+                                          TensorSliceWriter::Builder** builder);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace checkpoint
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_UTIL_TENSOR_SLICE_WRITER_H_
+=======
+#endif  // TENSORFLOW_UTIL_TENSOR_SLICE_WRITER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

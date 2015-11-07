@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,10 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_COMMON_RUNTIME_THREADPOOL_DEVICE_H_
 #define TENSORFLOW_CORE_COMMON_RUNTIME_THREADPOOL_DEVICE_H_
+=======
+#ifndef TENSORFLOW_COMMON_RUNTIME_THREADPOOL_DEVICE_H_
+#define TENSORFLOW_COMMON_RUNTIME_THREADPOOL_DEVICE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/common_runtime/device_factory.h"
 #include "tensorflow/core/common_runtime/local_device.h"
@@ -25,6 +30,7 @@ namespace tensorflow {
 class ThreadPoolDevice : public LocalDevice {
  public:
   ThreadPoolDevice(const SessionOptions& options, const string& name,
+<<<<<<< HEAD
                    Bytes memory_limit, const DeviceLocality& locality,
                    Allocator* allocator);
   ~ThreadPoolDevice() override;
@@ -41,14 +47,32 @@ class ThreadPoolDevice : public LocalDevice {
   void CopyTensorInSameDevice(const Tensor* input_tensor, Tensor* output_tensor,
                               const DeviceContext* device_context,
                               StatusCallback done) override;
+=======
+                   Bytes memory_limit, BusAdjacency bus_adjacency,
+                   Allocator* allocator);
+  ~ThreadPoolDevice() override;
+
+  void Compute(OpKernel* op_kernel, OpKernelContext* context) override;
+  Allocator* GetAllocator(AllocatorAttributes attr) override;
+  Status MakeTensorFromProto(const TensorProto& tensor_proto,
+                             const AllocatorAttributes alloc_attrs,
+                             Tensor* tensor) override;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Status Sync() override { return Status::OK(); }
 
  private:
   Allocator* allocator_;  // Not owned
+<<<<<<< HEAD
   std::unique_ptr<ScopedAllocatorMgr> scoped_allocator_mgr_;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_COMMON_RUNTIME_THREADPOOL_DEVICE_H_
+=======
+#endif  // TENSORFLOW_COMMON_RUNTIME_THREADPOOL_DEVICE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

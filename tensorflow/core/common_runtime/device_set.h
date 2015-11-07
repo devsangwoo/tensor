@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +16,22 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_COMMON_RUNTIME_DEVICE_SET_H_
 #define TENSORFLOW_CORE_COMMON_RUNTIME_DEVICE_SET_H_
+=======
+#ifndef TENSORFLOW_COMMON_RUNTIME_DEVICE_SET_H_
+#define TENSORFLOW_COMMON_RUNTIME_DEVICE_SET_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <memory>
 #include <unordered_map>
 #include <vector>
 
 #include "tensorflow/core/common_runtime/device.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/device_name_utils.h"
 
 namespace tensorflow {
@@ -39,10 +48,14 @@ class DeviceSet {
 
   // Set the device designated as the "client".  This device
   // must also be registered via AddDevice().
+<<<<<<< HEAD
   void set_client_device(Device* device) {
     DCHECK(client_device_ == nullptr);
     client_device_ = device;
   }
+=======
+  void set_client_device(Device* device) { client_device_ = device; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns a pointer to the device designated as the "client".
   Device* client_device() const { return client_device_; }
@@ -64,12 +77,15 @@ class DeviceSet {
   // with more preferable devices earlier.
   std::vector<DeviceType> PrioritizedDeviceTypeList() const;
 
+<<<<<<< HEAD
   // An order to sort by device types according to system-determined
   // priority.
   //
   // Higher result implies higher priority.
   static int DeviceTypeOrder(const DeviceType& d);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  private:
   // Not owned.
   std::vector<Device*> devices_;
@@ -86,4 +102,8 @@ class DeviceSet {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_COMMON_RUNTIME_DEVICE_SET_H_
+=======
+#endif  // TENSORFLOW_COMMON_RUNTIME_DEVICE_SET_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

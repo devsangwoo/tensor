@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,6 +78,27 @@ from tensorflow.python.framework.versions import *
 from tensorflow.python.framework import config
 from tensorflow.python.framework import errors
 from tensorflow.python.framework import graph_util
+=======
+# pylint: disable=wildcard-import,unused-import,g-bad-import-order,line-too-long
+"""Import core names of TensorFlow.
+
+Programs that want to build Brain Ops and Graphs without having to import the
+constructors and utilities individually can import this file:
+
+import tensorflow.python.platform
+import tensorflow as tf
+
+"""
+
+import tensorflow.python.platform
+from tensorflow.core.framework.graph_pb2 import *
+from tensorflow.core.framework.summary_pb2 import *
+from tensorflow.core.framework.config_pb2 import *
+from tensorflow.core.util.event_pb2 import *
+
+# Framework
+from tensorflow.python.framework.framework_lib import *
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 # Session
 from tensorflow.python.client.client_lib import *
@@ -84,6 +106,7 @@ from tensorflow.python.client.client_lib import *
 # Ops
 from tensorflow.python.ops.standard_ops import *
 
+<<<<<<< HEAD
 # Namespaces
 from tensorflow.python.ops import initializers_ns as initializers
 
@@ -127,6 +150,15 @@ from tensorflow.python.ops import gen_sendrecv_ops
 # Import the names from python/training.py as train.Name.
 from tensorflow.python.training import training as train
 from tensorflow.python.training import quantize_training as _quantize_training
+=======
+# Bring nn, image_ops, user_ops as a subpackages
+from tensorflow.python.ops import nn
+from tensorflow.python.ops import image_ops as image
+from tensorflow.python.user_ops import user_ops
+
+# Import the names from python/training.py as train.Name.
+from tensorflow.python.training import training as train
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 # Sub-package for performing i/o directly instead of via ops in a graph.
 from tensorflow.python.lib.io import python_io
@@ -134,6 +166,7 @@ from tensorflow.python.lib.io import python_io
 # Make some application and test modules available.
 from tensorflow.python.platform import app
 from tensorflow.python.platform import flags
+<<<<<<< HEAD
 from tensorflow.python.platform import gfile
 from tensorflow.python.platform import tf_logging as logging
 from tensorflow.python.platform import resource_loader
@@ -220,3 +253,7 @@ _exported_dunders = set([
 # Expose symbols minus dunders, unless they are whitelisted above.
 # This is necessary to export our dunders.
 __all__ = [s for s in dir() if s in _exported_dunders or not s.startswith('_')]
+=======
+from tensorflow.python.platform import logging
+from tensorflow.python.platform import test
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

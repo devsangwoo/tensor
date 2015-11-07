@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,16 @@ limitations under the License.
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/tensor_types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_ASSIGN_OP_H_
+#define TENSORFLOW_KERNELS_ASSIGN_OP_H_
+
+#define EIGEN_USE_THREADS
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -36,6 +47,7 @@ class AssignOp : public OpKernel {
                    context->GetAttr("validate_shape", &validate_shape_));
     OP_REQUIRES(context, IsRefType(context->input_type(0)),
                 errors::InvalidArgument("lhs input needs to be a ref type"));
+<<<<<<< HEAD
     if (!context
              ->GetAttr("_grappler_relax_allocator_constraints",
                        &relax_constraints_)
@@ -46,10 +58,17 @@ class AssignOp : public OpKernel {
 
   void Compute(OpKernelContext* context) override {
     const Tensor& rhs = context->input(1);
+=======
+  }
+
+  void Compute(OpKernelContext* context) override {
+    Tensor rhs = context->input(1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // We always return the input ref.
     context->forward_ref_input_to_ref_output(0, 0);
 
+<<<<<<< HEAD
     // We can't always know how this value will be used downstream, so make
     // conservative assumptions in specifying constraints on the memory
     // allocation attributes, unless the Grappler graph analysis determined that
@@ -110,11 +129,40 @@ class AssignOp : public OpKernel {
 
         // Otherwise, create a new persistent tensor whose shape matches the
         // right hand side, hand off to lhs and copy the rhs into it.
+=======
+    // If the left hand side is not initialized, or the shape of the
+    // right-hand side is different than the left hand side, we need
+    // to allocate a new tensor.
+    {
+      mutex_lock l(*context->input_ref_mutex(0));
+
+      Tensor old_lhs = context->mutable_input(0, true);
+
+      if (validate_shape_) {
+        OP_REQUIRES(
+            context, old_lhs.shape().IsSameSize(rhs.shape()),
+            errors::InvalidArgument(
+                "Assign requires shapes of both tensors to match. lhs shape= ",
+                old_lhs.shape().ShortDebugString(), " rhs shape= ",
+                rhs.shape().ShortDebugString()));
+      }
+
+      const bool same_shape = old_lhs.shape().IsSameSize(rhs.shape());
+      if (!old_lhs.IsInitialized() || !same_shape) {
+        // Create new tensor whose shape matches the right hand side
+        // and copy then hand off to lhs.
+        // We can't always know how this value will be used downstream,
+        // so make conservative assumptions in specifying the memory
+        // allocation attributes.
+        AllocatorAttributes attr;
+        attr.set_gpu_compatible(true);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         PersistentTensor copy;
         Tensor* copyTensor = nullptr;
         OP_REQUIRES_OK(
             context, context->allocate_persistent(old_lhs.dtype(), rhs.shape(),
                                                   &copy, &copyTensor, attr));
+<<<<<<< HEAD
         // We track memory of variables in variable ops instead of in this
         // assign op.
         context->clear_recorded_memory();
@@ -123,13 +171,29 @@ class AssignOp : public OpKernel {
           Copy(context, copyTensor, rhs);
           return;
         }
+=======
+        Copy(context, copyTensor, rhs);
+        context->replace_ref_input(0, *copyTensor, true);
+        return;
+      }
+
+      // The tensor has already been initialized and the right hand side
+      // matches the left hand side's shape.
+      if (use_exclusive_lock_) {
+        Copy(context, &old_lhs, rhs);
+        return;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     }
 
     // The tensor has already been initialized and the right hand side
     // matches the left hand side's shape. We have been told to do the
     // copy outside the lock.
+<<<<<<< HEAD
     Tensor old_unlocked_lhs = context->mutable_input(0, /* lock_held */ false);
+=======
+    Tensor old_unlocked_lhs = context->mutable_input(0, false);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Copy(context, &old_unlocked_lhs, rhs);
   }
 
@@ -138,9 +202,16 @@ class AssignOp : public OpKernel {
 
   bool use_exclusive_lock_;
   bool validate_shape_;
+<<<<<<< HEAD
   bool relax_constraints_;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // end namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_ASSIGN_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_ASSIGN_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

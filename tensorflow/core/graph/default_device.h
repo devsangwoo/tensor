@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +16,18 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_GRAPH_DEFAULT_DEVICE_H_
 #define TENSORFLOW_CORE_GRAPH_DEFAULT_DEVICE_H_
+=======
+#ifndef TENSORFLOW_GRAPH_DEFAULT_DEVICE_H_
+#define TENSORFLOW_GRAPH_DEFAULT_DEVICE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <string>
 
 #include "tensorflow/core/framework/graph.pb.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/node_def.pb.h"
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace graph {
@@ -38,4 +46,8 @@ inline void SetDefaultDevice(const string& device, GraphDef* graph_def) {
 }  // namespace graph
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_GRAPH_DEFAULT_DEVICE_H_
+=======
+#endif  // TENSORFLOW_GRAPH_DEFAULT_DEVICE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,6 +53,15 @@ REGISTER5(BinaryOp, GPU, "DivNoNan", functor::div_no_nan, Eigen::half, float,
 #elif TENSORFLOW_USE_ROCM
 REGISTER3(BinaryOp, GPU, "DivNoNan", functor::div_no_nan, Eigen::half, float,
           double);
+=======
+#include "tensorflow/core/kernels/cwise_ops_common.h"
+
+namespace tensorflow {
+REGISTER5(BinaryOp, CPU, "Div", functor::div, float, double, int32, int64,
+          complex64);
+#if GOOGLE_CUDA
+REGISTER3(BinaryOp, GPU, "Div", functor::div, float, double, int64);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #endif
 
 // A special GPU kernel for int32.
@@ -63,6 +73,7 @@ REGISTER_KERNEL_BUILDER(Name("Div")
                             .HostMemory("y")
                             .HostMemory("z")
                             .TypeConstraint<int32>("T"),
+<<<<<<< HEAD
                         BinaryOp<CPUDevice, functor::safe_div<int32>>);
 #endif
 
@@ -77,4 +88,8 @@ REGISTER_KERNEL_BUILDER(Name("Div")
                             .TypeConstraint<int32>("T"),
                         BinaryOp<CPUDevice, functor::safe_div<int32>>);
 #endif  // TENSORFLOW_USE_SYCL
+=======
+                        BinaryOp<CPUDevice, functor::div<int32>>);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

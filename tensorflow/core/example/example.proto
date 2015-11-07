@@ -3,6 +3,7 @@
 syntax = "proto3";
 
 import "tensorflow/core/example/feature.proto";
+<<<<<<< HEAD
 option cc_enable_arenas = true;
 option java_outer_classname = "ExampleProtos";
 option java_multiple_files = true;
@@ -51,6 +52,39 @@ package tensorflow;
 //       value { bytes_list {
 //         value: "Inception"
 //       }}
+=======
+// option cc_enable_arenas = true;
+
+package tensorflow;
+
+// Example for a movie recommendation application:
+//   features {
+//     feature {
+//       key: "age"
+//       float_list {
+//         value: 29.0
+//       }
+//     }
+//     feature {
+//       key: "movie"
+//       bytes_list {
+//         value: "The Shawshank Redemption"
+//         value: "Fight Club"
+//       }
+//     }
+//     feature {
+//       key: "movie_ratings"
+//       float_list {
+//         value: 9.0
+//         value: 9.7
+//       }
+//     }
+//     feature {
+//       key: "suggestion"
+//       bytes_list {
+//         value: "Inception"
+//       }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //     }
 //     # Note that this feature exists to be used as a label in training.
 //     # E.g., if training a logistic regression model to predict purchase
@@ -58,9 +92,15 @@ package tensorflow;
 //     # "suggestion_purchased".
 //     feature {
 //       key: "suggestion_purchased"
+<<<<<<< HEAD
 //       value { float_list {
 //         value: 1.0
 //       }}
+=======
+//       float_list {
+//         value: 1.0
+//       }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //     }
 //     # Similar to "suggestion_purchased" above this feature exists to be used
 //     # as a label in training.
@@ -69,6 +109,7 @@ package tensorflow;
 //     # "purchase_price".
 //     feature {
 //       key: "purchase_price"
+<<<<<<< HEAD
 //       value { float_list {
 //         value: 9.99
 //       }}
@@ -76,6 +117,15 @@ package tensorflow;
 //  }
 //
 // A conformant Example data set obeys the following conventions:
+=======
+//       float_list {
+//         value: 9.99
+//       }
+//     }
+//  }
+//
+// A conformant data set obeys the following conventions:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //   - If a Feature K exists in one example with data type T, it must be of
 //       type T in all other examples when present. It may be omitted.
 //   - The number of instances of Feature K list data may vary across examples,
@@ -89,6 +139,7 @@ message Example {
   Features features = 1;
 };
 
+<<<<<<< HEAD
 // A SequenceExample is an Example representing one or more sequences, and
 // some context.  The context contains features which apply to the entire
 // example. The feature_lists contain a key, value map where each key is
@@ -298,4 +349,26 @@ message Example {
 message SequenceExample {
   Features context = 1;
   FeatureLists feature_lists = 2;
+=======
+// Example representing a ranking instance.
+message RankingExample {
+  Features context = 1;
+  repeated Features positive = 2;
+  repeated Features negative = 3;
+};
+
+// Example representing a sequence.
+// The context contains features which apply to the entire sequence.
+// Each element in example represents an entry in the sequence.
+message SequenceExample {
+  Features context = 1;
+  repeated Features features = 2;
+};
+
+// Example representing a list of feature maps.
+// The context contains features which apply to all feature maps.
+message InferenceExample {
+  Features context = 1;
+  repeated Features features = 2;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };

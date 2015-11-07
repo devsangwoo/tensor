@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,13 +118,31 @@ struct AllocatorStats {
   string DebugString() const;
 };
 
+=======
+#ifndef TENSORFLOW_FRAMEWORK_ALLOCATOR_H_
+#define TENSORFLOW_FRAMEWORK_ALLOCATOR_H_
+
+#include <stdlib.h>
+#include <unistd.h>
+
+#include <limits>
+
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/logging.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Allocator is an abstract interface for allocating and deallocating
 // device memory.
 class Allocator {
  public:
+<<<<<<< HEAD
   // Align to 64 byte boundary.
   static constexpr size_t kAllocatorAlignment = 64;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   virtual ~Allocator();
 
   // Return a string identifying this allocator
@@ -135,6 +154,7 @@ class Allocator {
   // REQUIRES: "alignment" is a power of 2.
   virtual void* AllocateRaw(size_t alignment, size_t num_bytes) = 0;
 
+<<<<<<< HEAD
   // Return an uninitialized block of memory that is "num_bytes" bytes
   // in size with specified allocation attributes.  The returned pointer is
   // guaranteed to be aligned to a multiple of "alignment" bytes.
@@ -146,10 +166,13 @@ class Allocator {
     return AllocateRaw(alignment, num_bytes);
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Deallocate a block of memory pointer to by "ptr"
   // REQUIRES: "ptr" was previously returned by a call to AllocateRaw
   virtual void DeallocateRaw(void* ptr) = 0;
 
+<<<<<<< HEAD
   // Returns true if this allocator tracks the sizes of allocations.
   // RequestedSize and AllocatedSize must be overridden if
   // TracksAllocationSizes is overridden to return true.
@@ -169,6 +192,34 @@ class Allocator {
   // destructors for complex objects, since there is no backing store for the
   // tensor in which to place their outputs.
   virtual bool AllocatesOpaqueHandle() const { return false; }
+=======
+  // Convenience functions to do typed allocation.  Note that these functions
+  // do not invoke C++ constructors or destructors.  May return NULL if the
+  // tensor has too many elements to represent in a single allocation.
+  template <typename T>
+  T* Allocate(size_t num_elements) {
+    // TODO(jeff): Do we need to allow clients to pass in alignment
+    // requirements?
+
+    if (num_elements > (std::numeric_limits<size_t>::max() / sizeof(T))) {
+      return NULL;
+    }
+
+    void* p = AllocateRaw(32 /* align to 32 byte boundary */,
+                          sizeof(T) * num_elements);
+    return reinterpret_cast<T*>(p);
+  }
+
+  template <typename T>
+  void Deallocate(T* ptr) {
+    DeallocateRaw(ptr);
+  }
+
+  // Returns true if this allocator tracks the sizes of allocations.
+  // RequestedSize and AllocatedSize must be overridden if
+  // TracksAlloctionSizes is overridden to return true.
+  virtual bool TracksAllocationSizes() { return false; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns the user-requested size of the data allocated at
   // 'ptr'.  Note that the actual buffer allocated might be larger
@@ -179,9 +230,14 @@ class Allocator {
   //
   // REQUIRES: 'ptr!=nullptr' and points to a buffer previously
   // allocated by this allocator.
+<<<<<<< HEAD
   virtual size_t RequestedSize(const void* ptr) const {
     CHECK(false) << "allocator doesn't track sizes";
     return size_t(0);
+=======
+  virtual size_t RequestedSize(void* ptr) {
+    CHECK(false) << "allocator doesn't track sizes";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Returns the allocated size of the buffer at 'ptr' if known,
@@ -192,6 +248,7 @@ class Allocator {
   //
   // REQUIRES: 'ptr!=nullptr' and points to a buffer previously
   // allocated by this allocator.
+<<<<<<< HEAD
   virtual size_t AllocatedSize(const void* ptr) const {
     return RequestedSize(ptr);
   }
@@ -281,6 +338,13 @@ class AllocatorWrapper : public Allocator {
 
  private:
   Allocator* const wrapped_;
+=======
+  virtual size_t AllocatedSize(void* ptr) { return RequestedSize(ptr); }
+
+  // TODO(jeff): Maybe provide some interface to give info about
+  // current allocation state (total number of bytes available for
+  // allocation, number of bytes free on device, etc.)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // A tensorflow Op may need access to different kinds of memory that
@@ -295,6 +359,14 @@ class AllocatorWrapper : public Allocator {
 // specification of the desired memory attributes in order to select
 // an Allocator.
 //
+<<<<<<< HEAD
+=======
+// NOTE: The upper 8 bits of the value are reserved for
+// device-specific uses.  Implementors of a device can interpret these
+// upper 8 bits in device-specific ways, and ops implemented for those
+// devices are responsible for setting those 8 bits appropriately.
+//
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Example use:
 //  // Allocator for ordinary device memory:
 //  Allocator* a = allocator(AllocatorAttributes());
@@ -310,6 +382,7 @@ struct AllocatorAttributes {
   bool nic_compatible() const { return value & (0x1 << 1); }
   void set_gpu_compatible(bool v) { value |= (static_cast<int>(v) << 2); }
   bool gpu_compatible() const { return value & (0x1 << 2); }
+<<<<<<< HEAD
   void Merge(AllocatorAttributes other) {
     value |= other.value;
     if (scope_id != other.scope_id) {
@@ -396,3 +469,18 @@ class SubAllocator {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_ALLOCATOR_H_
+=======
+
+  void Merge(AllocatorAttributes other) { value |= other.value; }
+
+  uint32 value = 0;
+};
+
+// Returns a trivial implementation of Allocator which uses the system
+// default malloc.
+Allocator* cpu_allocator();
+
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_ALLOCATOR_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

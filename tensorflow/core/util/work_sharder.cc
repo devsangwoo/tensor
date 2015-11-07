@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +16,17 @@ limitations under the License.
 
 #include "tensorflow/core/util/work_sharder.h"
 
+=======
+#include "tensorflow/core/util/work_sharder.h"
+
+#include <vector>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/core/blocking_counter.h"
 #include "tensorflow/core/platform/logging.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 /* ABSL_CONST_INIT */ thread_local int per_thread_max_parallelism = 1000000;
 
 void SetPerThreadMaxParallelism(int max_parallelism) {
@@ -30,17 +37,25 @@ void SetPerThreadMaxParallelism(int max_parallelism) {
 int GetPerThreadMaxParallelism() { return per_thread_max_parallelism; }
 
 void Shard(int max_parallelism, thread::ThreadPool* workers, int64 total,
+=======
+void Shard(int num_workers, thread::ThreadPool* workers, int64 total,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
            int64 cost_per_unit, std::function<void(int64, int64)> work) {
   CHECK_GE(total, 0);
   if (total == 0) {
     return;
   }
+<<<<<<< HEAD
   max_parallelism = std::min(max_parallelism, GetPerThreadMaxParallelism());
   if (max_parallelism <= 1) {
+=======
+  if (num_workers <= 1) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Just inline the whole work since we only have 1 thread (core).
     work(0, total);
     return;
   }
+<<<<<<< HEAD
   if (max_parallelism >= workers->NumThreads()) {
     workers->ParallelFor(total, cost_per_unit, work);
     return;
@@ -57,6 +72,9 @@ void Shard(int max_parallelism, thread::ThreadPool* workers, int64 total,
 void Sharder::Do(int64 total, int64 cost_per_unit, const Work& work,
                  const Runner& runner, int max_parallelism) {
   cost_per_unit = std::max(int64{1}, cost_per_unit);
+=======
+  cost_per_unit = std::max(1LL, cost_per_unit);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // We shard [0, total) into "num_shards" shards.
   //   1 <= num_shards <= num worker threads
   //
@@ -64,10 +82,15 @@ void Sharder::Do(int64 total, int64 cost_per_unit, const Work& work,
   // much. Let us assume each cost unit is 1ns, kMinCostPerShard=10000
   // is 10us.
   static const int64 kMinCostPerShard = 10000;
+<<<<<<< HEAD
   const int num_shards =
       std::max<int>(1, std::min(static_cast<int64>(max_parallelism),
                                 total * cost_per_unit / kMinCostPerShard));
 
+=======
+  const int num_shards = std::max(
+      1, std::min<int>(num_workers, total * cost_per_unit / kMinCostPerShard));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Each shard contains up to "block_size" units. [0, total) is sharded
   // into:
   //   [0, block_size), [block_size, 2*block_size), ...
@@ -84,7 +107,11 @@ void Sharder::Do(int64 total, int64 cost_per_unit, const Work& work,
   BlockingCounter counter(num_shards_used - 1);
   for (int64 start = block_size; start < total; start += block_size) {
     auto limit = std::min(start + block_size, total);
+<<<<<<< HEAD
     runner([&work, &counter, start, limit]() {
+=======
+    workers->Schedule([&work, &counter, start, limit]() {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       work(start, limit);        // Compute the shard.
       counter.DecrementCount();  // The shard is done.
     });

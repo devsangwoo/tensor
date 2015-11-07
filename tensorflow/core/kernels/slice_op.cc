@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/array_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 #define EIGEN_USE_GPU
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
@@ -31,6 +35,21 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/platform/prefetch.h"
+=======
+#if GOOGLE_CUDA
+#define EIGEN_USE_GPU
+#endif  // GOOGLE_CUDA
+
+#include "tensorflow/core/kernels/slice_op.h"
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -56,9 +75,12 @@ gtl::InlinedVector<int64, 4> IntTensorToInt64Vec(const Tensor& tensor) {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 typedef Eigen::SyclDevice SYCLDevice;
 #endif  // TENSORFLOW_USE_SYCL
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Shared code that is not dependent on the type of T.  We do this to reduce
 // code size by not duplicating all this for all T (float, double, int32, etc.)
@@ -72,6 +94,7 @@ static void SharedValidation(OpKernelContext* context,
   const Tensor& size_tensor = context->input(2);
 
   OP_REQUIRES(
+<<<<<<< HEAD
       context,
       context->op_kernel().IsLegacyVector(begin_tensor.shape()) &&
           context->op_kernel().IsLegacyVector(size_tensor.shape()) &&
@@ -81,6 +104,16 @@ static void SharedValidation(OpKernelContext* context,
           "Expected begin and size arguments to be 1-D tensors of size ",
           input.dims(), ", but got shapes ", begin_tensor.shape().DebugString(),
           " and ", size_tensor.shape().DebugString(), " instead."));
+=======
+      context, TensorShapeUtils::IsLegacyVector(begin_tensor.shape()) &&
+                   TensorShapeUtils::IsLegacyVector(size_tensor.shape()) &&
+                   begin_tensor.NumElements() == input.dims() &&
+                   size_tensor.NumElements() == input.dims(),
+      errors::InvalidArgument(
+          "Expected begin and size arguments to be 1-D tensors of size ",
+          input.dims(), ", but got ", begin_tensor.NumElements(), " and ",
+          size_tensor.NumElements(), " instead."));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   const int input_dims = input.dims();
   *begin = IntTensorToInt64Vec(begin_tensor);
@@ -119,6 +152,7 @@ static void SharedValidation(OpKernelContext* context,
   }
 }
 
+<<<<<<< HEAD
 // Extracted out code in SliceOp::Compute so that MklSliceOp can reuse this
 // generic code
 template <typename T>
@@ -154,6 +188,8 @@ static void SharedSliceCommonCases(OpKernelContext* context,
   OP_REQUIRES_OK(context, context->allocate_output(0, *output_shape, result));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <typename Device, typename T>
 class SliceOp : public OpKernel {
  public:
@@ -161,6 +197,7 @@ class SliceOp : public OpKernel {
 
   void Compute(OpKernelContext* context) override {
     TensorShape output_shape;
+<<<<<<< HEAD
     gtl::InlinedVector<int64, 4> begin;
     gtl::InlinedVector<int64, 4> size;
     Tensor* result = nullptr;
@@ -170,6 +207,31 @@ class SliceOp : public OpKernel {
     if (!context->status().ok() || done == true) return;
 
     const Tensor& input = context->input(0);
+=======
+    bool is_identity = true;
+    bool slice_dim0 = true;
+    gtl::InlinedVector<int64, 4> begin;
+    gtl::InlinedVector<int64, 4> size;
+    SharedValidation(context, &output_shape, &is_identity, &slice_dim0, &begin,
+                     &size);
+    if (!context->status().ok()) return;
+    const Tensor& input = context->input(0);
+    if (is_identity) {
+      VLOG(1) << "Slice identity";
+      context->set_output(0, input);
+      return;
+    }
+
+    if (slice_dim0 && IsInnerDimsSizeAligned<T>(input.shape())) {
+      VLOG(1) << "Slice dim 0: " << input.shape().DebugString();
+      CHECK_GE(input.dims(), 1);  // Otherwise, is_identity should be true.
+      context->set_output(0, input.Slice(begin[0], begin[0] + size[0]));
+      return;
+    }
+
+    Tensor* result = nullptr;
+    OP_REQUIRES_OK(context, context->allocate_output(0, output_shape, &result));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     const int input_dims = input.dims();
 
     if (output_shape.num_elements() > 0) {
@@ -180,7 +242,11 @@ class SliceOp : public OpKernel {
         // TODO(agarwal): Consider multi-threading this loop for cases where
         // size[0] is very large.
         for (int i = 0; i < size[0]; ++i) {
+<<<<<<< HEAD
           const int64 row = begin[0] + i;
+=======
+          const int row = begin[0] + i;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           if (i + 1 < size[0]) {
             port::prefetch<port::PREFETCH_HINT_T0>(&output(i + 1, 0));
             port::prefetch<port::PREFETCH_HINT_T0>(&input(row + 1, begin[1]));
@@ -200,6 +266,7 @@ class SliceOp : public OpKernel {
       HANDLE_DIM(3);
       HANDLE_DIM(4);
       HANDLE_DIM(5);
+<<<<<<< HEAD
       HANDLE_DIM(6);
       HANDLE_DIM(7);
       HANDLE_DIM(8);
@@ -209,6 +276,13 @@ class SliceOp : public OpKernel {
       OP_REQUIRES(
           context, false,
           errors::Unimplemented("SliceOp : Unhandled input dimensions"));
+=======
+
+#undef HANDLE_DIM
+
+      OP_REQUIRES(context, false, errors::Unimplemented(
+                                      "SliceOp : Unhandled input dimensions"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
@@ -216,8 +290,13 @@ class SliceOp : public OpKernel {
   template <int NDIM>
   void HandleCase(OpKernelContext* context, const gtl::ArraySlice<int64>& begin,
                   const gtl::ArraySlice<int64>& size, Tensor* result) {
+<<<<<<< HEAD
     Eigen::DSizes<Eigen::DenseIndex, NDIM> indices;
     Eigen::DSizes<Eigen::DenseIndex, NDIM> sizes;
+=======
+    Eigen::DSizes<ptrdiff_t, NDIM> indices;
+    Eigen::DSizes<ptrdiff_t, NDIM> sizes;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (int i = 0; i < NDIM; ++i) {
       indices[i] = begin[i];
       sizes[i] = size[i];
@@ -229,6 +308,7 @@ class SliceOp : public OpKernel {
   }
 };
 
+<<<<<<< HEAD
 // Forward declarations of the functor specializations for declared in the
 // sharded source files.
 namespace functor {
@@ -257,6 +337,8 @@ TF_CALL_ALL_TYPES(DECLARE_FOR_N);
 #undef DECLARE_CPU_SPEC
 }  // namespace functor
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #define REGISTER_SLICE(type)                             \
   REGISTER_KERNEL_BUILDER(Name("Slice")                  \
                               .Device(DEVICE_CPU)        \
@@ -265,11 +347,20 @@ TF_CALL_ALL_TYPES(DECLARE_FOR_N);
                               .HostMemory("size"),       \
                           SliceOp<CPUDevice, type>)
 
+<<<<<<< HEAD
 TF_CALL_POD_STRING_TYPES(REGISTER_SLICE);
 TF_CALL_QUANTIZED_TYPES(REGISTER_SLICE);
 #undef REGISTER_SLICE
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+TF_CALL_ALL_TYPES(REGISTER_SLICE);
+REGISTER_SLICE(bfloat16);
+
+#undef REGISTER_SLICE
+
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Forward declarations of the functor specializations for GPU.
 namespace functor {
 #define DECLARE_GPU_SPEC(T, NDIM)                                  \
@@ -277,8 +368,13 @@ namespace functor {
   void Slice<GPUDevice, T, NDIM>::operator()(                      \
       const GPUDevice& d, typename TTypes<T, NDIM>::Tensor output, \
       typename TTypes<T, NDIM>::ConstTensor input,                 \
+<<<<<<< HEAD
       const Eigen::DSizes<Eigen::DenseIndex, NDIM>& indices,       \
       const Eigen::DSizes<Eigen::DenseIndex, NDIM>& sizes);        \
+=======
+      const Eigen::DSizes<ptrdiff_t, NDIM>& indices,               \
+      const Eigen::DSizes<ptrdiff_t, NDIM>& sizes);                \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   extern template struct Slice<GPUDevice, T, NDIM>;
 
 #define DECLARE_FOR_N(T)  \
@@ -286,6 +382,7 @@ namespace functor {
   DECLARE_GPU_SPEC(T, 2); \
   DECLARE_GPU_SPEC(T, 3); \
   DECLARE_GPU_SPEC(T, 4); \
+<<<<<<< HEAD
   DECLARE_GPU_SPEC(T, 5); \
   DECLARE_GPU_SPEC(T, 6); \
   DECLARE_GPU_SPEC(T, 7); \
@@ -298,12 +395,18 @@ TF_CALL_bfloat16(DECLARE_FOR_N);
 TF_CALL_bool(DECLARE_FOR_N);
 TF_CALL_int8(DECLARE_FOR_N);
 TF_CALL_int64(DECLARE_FOR_N);
+=======
+  DECLARE_GPU_SPEC(T, 5);
+
+TF_CALL_GPU_NUMBER_TYPES(DECLARE_FOR_N);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 DECLARE_FOR_N(int32);
 
 #undef DECLARE_FOR_N
 #undef DECLARE_GPU_SPEC
 }  // namespace functor
 
+<<<<<<< HEAD
 #define REGISTER_GPU(type)                               \
   REGISTER_KERNEL_BUILDER(Name("Slice")                  \
                               .Device(DEVICE_GPU)        \
@@ -389,4 +492,22 @@ REGISTER_KERNEL_BUILDER(Name("Slice")
 #undef REGISTER_SYCL
 
 #endif  // TENSORFLOW_USE_SYCL
+=======
+#define REGISTER_GPU(type)                                     \
+  REGISTER_KERNEL_BUILDER(Name("Slice")                        \
+                              .Device(DEVICE_GPU)              \
+                              .TypeConstraint<type>("T")       \
+                              .HostMemory("begin")             \
+                              .HostMemory("size")              \
+                              .TypeConstraint<int32>("Index"), \
+                          SliceOp<GPUDevice, type>)
+
+TF_CALL_GPU_NUMBER_TYPES(REGISTER_GPU);
+REGISTER_GPU(int32);
+
+#undef REGISTER_GPU
+
+#endif  // GOOGLE_CUDA
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

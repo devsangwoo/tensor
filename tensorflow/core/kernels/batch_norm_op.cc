@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,33 +14,52 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/nn_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #include "tensorflow/core/kernels/batch_norm_op.h"
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/numeric_op.h"
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/register_types.h"
 #include "tensorflow/core/framework/tensor.h"
+=======
+#include "tensorflow/core/framework/numeric_op.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/kernels/batch_norm_op.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 typedef Eigen::SyclDevice SYCLDevice;
 #endif  // TENSORFLOW_USE_SYCL
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename Device, typename T>
 class BatchNormOp : public OpKernel {
  public:
   explicit BatchNormOp(OpKernelConstruction* context) : OpKernel(context) {
+<<<<<<< HEAD
     float variance_epsilon;
     OP_REQUIRES_OK(context,
                    context->GetAttr("variance_epsilon", &variance_epsilon));
     variance_epsilon_ = T(variance_epsilon);
+=======
+    OP_REQUIRES_OK(context,
+                   context->GetAttr("variance_epsilon", &variance_epsilon_));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES_OK(context, context->GetAttr("scale_after_normalization",
                                              &scale_after_normalization_));
   }
@@ -53,6 +73,7 @@ class BatchNormOp : public OpKernel {
 
     OP_REQUIRES(context, input.dims() == 4,
                 errors::InvalidArgument("input must be 4-dimensional",
+<<<<<<< HEAD
                                         input.shape().DebugString()));
     OP_REQUIRES(context, mean.dims() == 1,
                 errors::InvalidArgument("mean must be 1-dimensional",
@@ -66,6 +87,21 @@ class BatchNormOp : public OpKernel {
     OP_REQUIRES(context, gamma.dims() == 1,
                 errors::InvalidArgument("gamma must be 1-dimensional",
                                         gamma.shape().DebugString()));
+=======
+                                        input.shape().ShortDebugString()));
+    OP_REQUIRES(context, mean.dims() == 1,
+                errors::InvalidArgument("mean must be 1-dimensional",
+                                        mean.shape().ShortDebugString()));
+    OP_REQUIRES(context, var.dims() == 1,
+                errors::InvalidArgument("var must be 1-dimensional",
+                                        var.shape().ShortDebugString()));
+    OP_REQUIRES(context, beta.dims() == 1,
+                errors::InvalidArgument("beta must be 1-dimensional",
+                                        beta.shape().ShortDebugString()));
+    OP_REQUIRES(context, gamma.dims() == 1,
+                errors::InvalidArgument("gamma must be 1-dimensional",
+                                        gamma.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Tensor* output = nullptr;
     OP_REQUIRES_OK(context,
@@ -78,7 +114,11 @@ class BatchNormOp : public OpKernel {
   }
 
  private:
+<<<<<<< HEAD
   T variance_epsilon_;
+=======
+  float variance_epsilon_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool scale_after_normalization_;
 };
 
@@ -86,10 +126,15 @@ template <typename Device, typename T>
 class BatchNormGradOp : public OpKernel {
  public:
   explicit BatchNormGradOp(OpKernelConstruction* context) : OpKernel(context) {
+<<<<<<< HEAD
     float variance_epsilon;
     OP_REQUIRES_OK(context,
                    context->GetAttr("variance_epsilon", &variance_epsilon));
     variance_epsilon_ = T(variance_epsilon);
+=======
+    OP_REQUIRES_OK(context,
+                   context->GetAttr("variance_epsilon", &variance_epsilon_));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES_OK(context, context->GetAttr("scale_after_normalization",
                                              &scale_after_normalization_));
   }
@@ -103,6 +148,7 @@ class BatchNormGradOp : public OpKernel {
 
     OP_REQUIRES(context, input.dims() == 4,
                 errors::InvalidArgument("input must be 4-dimensional",
+<<<<<<< HEAD
                                         input.shape().DebugString()));
     OP_REQUIRES(context, mean.dims() == 1,
                 errors::InvalidArgument("mean must be 1-dimensional",
@@ -133,6 +179,31 @@ class BatchNormGradOp : public OpKernel {
       OP_REQUIRES_OK(context, context->forward_input_or_allocate_output(
                                   {3}, 3, mean.shape(), &db));
     }
+=======
+                                        input.shape().ShortDebugString()));
+    OP_REQUIRES(context, mean.dims() == 1,
+                errors::InvalidArgument("mean must be 1-dimensional",
+                                        mean.shape().ShortDebugString()));
+    OP_REQUIRES(context, var.dims() == 1,
+                errors::InvalidArgument("var must be 1-dimensional",
+                                        var.shape().ShortDebugString()));
+    OP_REQUIRES(context, gamma.dims() == 1,
+                errors::InvalidArgument("gamma must be 1-dimensional",
+                                        gamma.shape().ShortDebugString()));
+    OP_REQUIRES(
+        context, out_backprop.dims() == 4,
+        errors::InvalidArgument("out_backprop must be 4-dimensional",
+                                out_backprop.shape().ShortDebugString()));
+
+    Tensor* dx = nullptr;
+    OP_REQUIRES_OK(context, context->allocate_output(0, input.shape(), &dx));
+    Tensor* dm = nullptr;
+    OP_REQUIRES_OK(context, context->allocate_output(1, mean.shape(), &dm));
+    Tensor* dv = nullptr;
+    OP_REQUIRES_OK(context, context->allocate_output(2, var.shape(), &dv));
+    Tensor* db = nullptr;
+    OP_REQUIRES_OK(context, context->allocate_output(3, mean.shape(), &db));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Tensor* dg = nullptr;
     OP_REQUIRES_OK(context, context->allocate_output(4, gamma.shape(), &dg));
 
@@ -160,7 +231,11 @@ class BatchNormGradOp : public OpKernel {
   }
 
  private:
+<<<<<<< HEAD
   T variance_epsilon_;
+=======
+  float variance_epsilon_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool scale_after_normalization_;
 };
 
@@ -170,12 +245,20 @@ class BatchNormGradOp : public OpKernel {
                               .TypeConstraint<T>("T"),             \
                           BatchNormOp<CPUDevice, T>);
 
+<<<<<<< HEAD
 TF_CALL_half(REGISTER_KERNEL);
 TF_CALL_float(REGISTER_KERNEL);
 TF_CALL_double(REGISTER_KERNEL);
 #undef REGISTER_KERNEL
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+REGISTER_KERNEL(float);
+REGISTER_KERNEL(double);
+#undef REGISTER_KERNEL
+
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Forward declarations of the functor specializations for GPU.
 namespace functor {
 #define DECLARE_GPU_SPEC(T)                                                  \
@@ -184,14 +267,22 @@ namespace functor {
       const GPUDevice& d, typename TTypes<T, 4>::ConstTensor input,          \
       typename TTypes<T>::ConstVec mean, typename TTypes<T>::ConstVec var,   \
       typename TTypes<T>::ConstVec beta, typename TTypes<T>::ConstVec gamma, \
+<<<<<<< HEAD
       T variance_epsilon, bool scale_after_normalization,                    \
+=======
+      float variance_epsilon, bool scale_after_normalization,                \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       typename TTypes<T, 4>::Tensor output);                                 \
   extern template struct BatchNorm<GPUDevice, T>;
 
 #define DECLARE_GPU_SPECS(T) DECLARE_GPU_SPEC(T);
 
+<<<<<<< HEAD
 TF_CALL_half(DECLARE_GPU_SPECS);
 TF_CALL_float(DECLARE_GPU_SPECS);
+=======
+DECLARE_GPU_SPECS(float);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef DECLARE_GPU_SPEC
 }  // namespace functor
 
@@ -202,6 +293,7 @@ TF_CALL_float(DECLARE_GPU_SPECS);
                               .TypeConstraint<T>("T"),             \
                           BatchNormOp<GPUDevice, T>);
 
+<<<<<<< HEAD
 TF_CALL_half(REGISTER_GPU_KERNEL);
 TF_CALL_float(REGISTER_GPU_KERNEL);
 #undef REGISTER_GPU_KERNEL
@@ -219,6 +311,12 @@ TF_CALL_float(REGISTER_KERNEL);
 TF_CALL_double(REGISTER_KERNEL);
 #undef REGISTER_KERNEL
 #endif  // TENSORFLOW_USE_SYCL
+=======
+REGISTER_GPU_KERNEL(float);
+#undef REGISTER_GPU_KERNEL
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define REGISTER_KERNEL(T)                                             \
   REGISTER_KERNEL_BUILDER(Name("BatchNormWithGlobalNormalizationGrad") \
@@ -226,6 +324,7 @@ TF_CALL_double(REGISTER_KERNEL);
                               .TypeConstraint<T>("T"),                 \
                           BatchNormGradOp<CPUDevice, T>);
 
+<<<<<<< HEAD
 TF_CALL_half(REGISTER_KERNEL);
 TF_CALL_float(REGISTER_KERNEL);
 TF_CALL_double(REGISTER_KERNEL);
@@ -245,12 +344,36 @@ namespace functor {
       typename TTypes<T>::Vec dm, typename TTypes<T>::Vec dv,              \
       typename TTypes<T>::Vec db, typename TTypes<T>::Vec dg,              \
       typename TTypes<T>::Vec scratch1, typename TTypes<T>::Vec scratch2); \
+=======
+REGISTER_KERNEL(float);
+REGISTER_KERNEL(double);
+#undef REGISTER_KERNEL
+
+#if GOOGLE_CUDA
+// Forward declarations of the functor specializations for GPU.
+namespace functor {
+#define DECLARE_GPU_SPEC(T)                                                    \
+  template <>                                                                  \
+  void BatchNormGrad<GPUDevice, T>::operator()(                                \
+      const GPUDevice& d, typename TTypes<T, 4>::ConstTensor input,            \
+      typename TTypes<T>::ConstVec mean, typename TTypes<T>::ConstVec var,     \
+      typename TTypes<T>::ConstVec gamma,                                      \
+      typename TTypes<T, 4>::ConstTensor out_backprop, float variance_epsilon, \
+      bool scale_after_normalization, typename TTypes<T, 4>::Tensor dx,        \
+      typename TTypes<T>::Vec dm, typename TTypes<T>::Vec dv,                  \
+      typename TTypes<T>::Vec db, typename TTypes<T>::Vec dg,                  \
+      typename TTypes<T>::Vec scratch1, typename TTypes<T>::Vec scratch2);     \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   extern template struct BatchNormGrad<GPUDevice, T>;
 
 #define DECLARE_GPU_SPECS(T) DECLARE_GPU_SPEC(T);
 
+<<<<<<< HEAD
 TF_CALL_half(DECLARE_GPU_SPECS);
 TF_CALL_float(DECLARE_GPU_SPECS);
+=======
+DECLARE_GPU_SPECS(float);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef DECLARE_GPU_SPEC
 }  // namespace functor
 
@@ -261,6 +384,7 @@ TF_CALL_float(DECLARE_GPU_SPECS);
                               .TypeConstraint<T>("T"),                 \
                           BatchNormGradOp<GPUDevice, T>);
 
+<<<<<<< HEAD
 TF_CALL_half(REGISTER_GPU_KERNEL);
 TF_CALL_float(REGISTER_GPU_KERNEL);
 #undef REGISTER_GPU_KERNEL
@@ -279,5 +403,11 @@ TF_CALL_double(REGISTER_KERNEL);
 #undef REGISTER_KERNEL
 
 #endif  // TENSORFLOW_USE_SYCL
+=======
+REGISTER_GPU_KERNEL(float);
+#undef REGISTER_GPU_KERNEL
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,11 +31,26 @@ limitations under the License.
 #include "tensorflow/core/framework/function_testlib.h"
 #include "tensorflow/core/framework/op.h"
 #include "tensorflow/core/framework/versions.pb.h"
+=======
+#include "tensorflow/core/graph/graph_partition.h"
+
+#include <unordered_map>
+
+#include <gtest/gtest.h>
+#include "tensorflow/cc/ops/array_ops.h"
+#include "tensorflow/cc/ops/const_op.h"
+#include "tensorflow/cc/ops/control_flow_ops.h"
+#include "tensorflow/cc/ops/random_ops.h"
+#include "tensorflow/cc/ops/sendrecv_ops.h"
+#include "tensorflow/core/framework/op.h"
+#include "tensorflow/core/graph/equal_graph_def.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/graph/graph_constructor.h"
 #include "tensorflow/core/graph/graph_def_builder.h"
 #include "tensorflow/core/kernels/ops_util.h"
 #include "tensorflow/core/lib/core/status_test_util.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/protobuf.h"
@@ -59,6 +75,15 @@ using ops::LoopCond;
 using ops::NextIteration;
 
 const char gpu_device[] = "/job:a/replica:0/task:0/device:GPU:0";
+=======
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/protobuf.h"
+
+namespace tensorflow {
+namespace {
+
+const char gpu_device[] = "/job:a/replica:0/task:0/gpu:0";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 string SplitByDevice(const Node* node) { return node->assigned_device_name(); }
 
@@ -79,6 +104,7 @@ void Partition(const GraphDef& graph_def,
   GraphConstructorOptions opts;
   TF_CHECK_OK(ConvertGraphDefToGraph(opts, graph_def, &g));
 
+<<<<<<< HEAD
   // Assigns devices to each node. Uses 1st letter of the node name as the
   // device index if no device is specified.
   for (Node* node : g.nodes()) {
@@ -86,6 +112,12 @@ void Partition(const GraphDef& graph_def,
                              ? node->requested_device()
                              : DeviceName(node);
     node->set_assigned_device_name(device_name);
+=======
+  // Assigns devices to each node. Uses 1st letter of the node name as
+  // the device index.
+  for (Node* node : g.nodes()) {
+    node->set_assigned_device_name(DeviceName(node));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   PartitionOptions popts;
@@ -94,6 +126,7 @@ void Partition(const GraphDef& graph_def,
   popts.get_incarnation = [](const string& name) {
     return (name[0] - 'A') + 100;
   };
+<<<<<<< HEAD
   Status s = Partition(popts, &g, partitions);
   CHECK(s.ok()) << s;
 
@@ -105,11 +138,20 @@ void Partition(const GraphDef& graph_def,
     EXPECT_EQ(graph_def.versions().min_consumer(),
               it.second.versions().min_consumer());
   }
+=======
+  popts.control_flow_added = false;
+  Status s = Partition(popts, &g, partitions);
+  CHECK(s.ok()) << s;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void CheckLoopConstruction(const GraphDef& graph_def) {
   std::unordered_map<string, GraphDef> partitions;
   Partition(graph_def, &partitions);
+<<<<<<< HEAD
+=======
+  GraphConstructorOptions opts;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (const auto& kv : partitions) {
     const GraphDef& gdef = kv.second;
     bool has_control_enter = false;
@@ -121,7 +163,11 @@ void CheckLoopConstruction(const GraphDef& graph_def) {
       if (ndef.op() == "_Recv") {
         bool has_control = false;
         for (const string& input_name : ndef.input()) {
+<<<<<<< HEAD
           if (absl::StartsWith(input_name, "^")) {
+=======
+          if (StringPiece(input_name).starts_with("^")) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             has_control = true;
             break;
           }
@@ -129,7 +175,11 @@ void CheckLoopConstruction(const GraphDef& graph_def) {
         EXPECT_TRUE(has_control);
       }
       // Must have a control loop
+<<<<<<< HEAD
       if (absl::StartsWith(ndef.name(), "_cloop")) {
+=======
+      if (StringPiece(ndef.name()).starts_with("_cloop")) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         if (ndef.op() == "Enter") {
           has_control_enter = true;
         }
@@ -151,6 +201,7 @@ void CheckLoopConstruction(const GraphDef& graph_def) {
   }
 }
 
+<<<<<<< HEAD
 REGISTER_OP("FloatInput")
     .Output("o: float")
     .SetShapeFn(shape_inference::UnknownShape);
@@ -191,11 +242,29 @@ Output BoolInput(const Scope& scope) {
 
 Output Combine(const Scope& scope, Input a, Input b) {
   return ConstructOp(scope, "Combine", {std::move(a), std::move(b)});
+=======
+REGISTER_OP("Input").Output("o: float");
+REGISTER_OP("BoolInput").Output("o: bool");
+REGISTER_OP("Cross").Input("a: float").Input("b: float").Output("o: float");
+
+Node* Input(const GraphDefBuilder::Options& opts) {
+  return ops::SourceOp("Input", opts);
+}
+
+Node* BoolInput(const GraphDefBuilder::Options& opts) {
+  return ops::SourceOp("BoolInput", opts);
+}
+
+Node* Cross(ops::NodeOut a, ops::NodeOut b,
+            const GraphDefBuilder::Options& opts) {
+  return ops::BinaryOp("Cross", a, b, opts);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 class GraphPartitionTest : public ::testing::Test {
  protected:
   GraphPartitionTest()
+<<<<<<< HEAD
       : in_(Scope::NewRootScope().ExitOnError()),
         scope_a_(Scope::NewRootScope().ExitOnError().WithDevice(
             "/job:a/replica:0/task:0/cpu:0")),
@@ -204,23 +273,44 @@ class GraphPartitionTest : public ::testing::Test {
 
   const GraphDef& ToGraphDef() {
     TF_EXPECT_OK(in_.ToGraphDef(&in_graph_def_));
+=======
+      : in_(GraphDefBuilder::kFailImmediately),
+        builder_a_(GraphDefBuilder::kFailImmediately),
+        builder_b_(GraphDefBuilder::kFailImmediately),
+        a_opts_(builder_a_.opts().WithDevice("/job:a/replica:0/task:0/cpu:0")),
+        b_opts_(builder_b_.opts().WithDevice("/job:a/replica:0/task:0/cpu:1")) {
+    RequireDefaultOps();
+  }
+
+  const GraphDef& ToGraphDef() {
+    in_.ToGraphDef(&in_graph_def_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return in_graph_def_;
   }
 
   void ExpectMatchA() {
     GraphDef graph_def;
+<<<<<<< HEAD
     TF_EXPECT_OK(scope_a_.ToGraphDef(&graph_def));
+=======
+    builder_a_.ToGraphDef(&graph_def);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     string a = "/job:a/replica:0/task:0/cpu:0";
     TF_EXPECT_GRAPH_EQ(graph_def, partitions_[a]);
   }
 
   void ExpectMatchB() {
     GraphDef graph_def;
+<<<<<<< HEAD
     TF_EXPECT_OK(scope_b_.ToGraphDef(&graph_def));
+=======
+    builder_b_.ToGraphDef(&graph_def);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     string b = "/job:a/replica:0/task:0/cpu:1";
     TF_EXPECT_GRAPH_EQ(graph_def, partitions_[b]);
   }
 
+<<<<<<< HEAD
   void ExpectFunctions(const FunctionDefLibrary& library,
                        const std::set<string>& expected_names) {
     std::set<string> actual_names;
@@ -234,31 +324,58 @@ class GraphPartitionTest : public ::testing::Test {
   GraphDef in_graph_def_;
   Scope scope_a_;
   Scope scope_b_;
+=======
+  GraphDefBuilder in_;
+  GraphDef in_graph_def_;
+  GraphDefBuilder builder_a_;
+  GraphDefBuilder builder_b_;
+  GraphDefBuilder::Options a_opts_;
+  GraphDefBuilder::Options b_opts_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   std::unordered_map<string, GraphDef> partitions_;
 };
 
 TEST_F(GraphPartitionTest, SingleDevice) {
+<<<<<<< HEAD
   auto a1 = FloatInput(in_.WithOpName("A1"));
   Combine(in_.WithOpName("A2"), a1, a1);
+=======
+  using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
+  Node* a1 = Input(in_.opts().WithName("A1"));
+  Cross(a1, a1, in_.opts().WithName("A2"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Partition(ToGraphDef(), &partitions_);
   EXPECT_EQ(1, partitions_.size());
 
+<<<<<<< HEAD
   a1 = FloatInput(scope_a_.WithOpName("A1"));
   Combine(scope_a_.WithOpName("A2"), a1, a1);
+=======
+  a1 = Input(a_opts_.WithName("A1"));
+  Cross(a1, a1, a_opts_.WithName("A2"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ExpectMatchA();
 }
 
 TEST_F(GraphPartitionTest, CrossDeviceData) {
+<<<<<<< HEAD
   auto a1 = FloatInput(in_.WithOpName("A1"));
   auto b1 = FloatInput(in_.WithOpName("B1"));
   Combine(in_.WithOpName("B2"), a1, b1);
+=======
+  using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
+  Node* a1 = Input(in_.opts().WithName("A1"));
+  Node* b1 = Input(in_.opts().WithName("B1"));
+  Cross(a1, b1, in_.opts().WithName("B2"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Partition(ToGraphDef(), &partitions_);
   EXPECT_EQ(2, partitions_.size());
 
   string a = "/job:a/replica:0/task:0/cpu:0";
   string b = "/job:a/replica:0/task:0/cpu:1";
+<<<<<<< HEAD
   a1 = FloatInput(scope_a_.WithOpName("A1"));
   _Send(scope_a_.WithOpName("A1/_0"), a1, "edge_1_A1", a, 82, b);
   ExpectMatchA();
@@ -267,19 +384,37 @@ TEST_F(GraphPartitionTest, CrossDeviceData) {
   auto recv =
       _Recv(scope_b_.WithOpName("A1/_1"), DT_FLOAT, "edge_1_A1", a, 82, b);
   Combine(scope_b_.WithOpName("B2"), recv, b1);
+=======
+  a1 = Input(a_opts_.WithName("A1"));
+  _Send(a1, "edge_1_A1", a, 82, b, a_opts_.WithName("A1/_0"));
+  ExpectMatchA();
+
+  b1 = Input(b_opts_.WithName("B1"));
+  Node* recv =
+      _Recv(DT_FLOAT, "edge_1_A1", a, 82, b, b_opts_.WithName("A1/_1"));
+  Cross(recv, b1, b_opts_.WithName("B2"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ExpectMatchB();
 }
 
 TEST_F(GraphPartitionTest, CrossDeviceControl) {
+<<<<<<< HEAD
   auto a1 = FloatInput(in_.WithOpName("A1"));
   auto b1 = FloatInput(in_.WithOpName("B1"));
   Combine(in_.WithOpName("B2").WithControlDependencies(a1), b1, b1);
+=======
+  using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
+  Node* a1 = Input(in_.opts().WithName("A1"));
+  Node* b1 = Input(in_.opts().WithName("B1"));
+  Cross(b1, b1, in_.opts().WithName("B2").WithControlInput(a1));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Partition(ToGraphDef(), &partitions_);
   EXPECT_EQ(2, partitions_.size());
 
   string a = "/job:a/replica:0/task:0/cpu:0";
   string b = "/job:a/replica:0/task:0/cpu:1";
+<<<<<<< HEAD
   a1 = FloatInput(scope_a_.WithOpName("A1"));
   auto c = Const(scope_a_.WithOpName("A1/_0").WithControlDependencies(a1), {});
   _Send(scope_a_.WithOpName("A1/_1"), c, "edge_3_A1", a, 82, b);
@@ -290,20 +425,41 @@ TEST_F(GraphPartitionTest, CrossDeviceControl) {
   auto id = Identity(scope_b_.WithOpName("A1/_3"), recv);
   b1 = FloatInput(scope_b_.WithOpName("B1"));
   Combine(scope_b_.WithOpName("B2").WithControlDependencies(id), b1, b1);
+=======
+  a1 = Input(a_opts_.WithName("A1"));
+  Node* c = EmptyConst<float>(a_opts_.WithName("A1/_0").WithControlInput(a1));
+  _Send(c, "edge_3_A1", a, 82, b, a_opts_.WithName("A1/_1"));
+  ExpectMatchA();
+
+  Node* recv =
+      _Recv(DT_FLOAT, "edge_3_A1", a, 82, b, b_opts_.WithName("A1/_2"));
+  Node* id = Identity(recv, b_opts_.WithName("A1/_3"));
+  b1 = Input(b_opts_.WithName("B1"));
+  Cross(b1, b1, b_opts_.WithName("B2").WithControlInput(id));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ExpectMatchB();
 }
 
 TEST_F(GraphPartitionTest, CrossDeviceData_MultiUse) {
+<<<<<<< HEAD
   auto a1 = FloatInput(in_.WithOpName("A1"));
   auto b1 = FloatInput(in_.WithOpName("B1"));
   Combine(in_.WithOpName("B2"), a1, b1);
   Combine(in_.WithOpName("B3"), a1, a1);
+=======
+  using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
+  Node* a1 = Input(in_.opts().WithName("A1"));
+  Node* b1 = Input(in_.opts().WithName("B1"));
+  Cross(a1, b1, in_.opts().WithName("B2"));
+  Cross(a1, a1, in_.opts().WithName("B3"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Partition(ToGraphDef(), &partitions_);
   EXPECT_EQ(2, partitions_.size());
 
   string a = "/job:a/replica:0/task:0/cpu:0";
   string b = "/job:a/replica:0/task:0/cpu:1";
+<<<<<<< HEAD
   a1 = FloatInput(scope_a_.WithOpName("A1"));
   _Send(scope_a_.WithOpName("A1/_0"), a1, "edge_1_A1", a, 82, b);
   ExpectMatchA();
@@ -313,20 +469,40 @@ TEST_F(GraphPartitionTest, CrossDeviceData_MultiUse) {
   b1 = FloatInput(scope_b_.WithOpName("B1"));
   Combine(scope_b_.WithOpName("B2"), recv, b1);
   Combine(scope_b_.WithOpName("B3"), recv, recv);
+=======
+  a1 = Input(a_opts_.WithName("A1"));
+  _Send(a1, "edge_1_A1", a, 82, b, a_opts_.WithName("A1/_0"));
+  ExpectMatchA();
+
+  Node* recv =
+      _Recv(DT_FLOAT, "edge_1_A1", a, 82, b, b_opts_.WithName("A1/_1"));
+  b1 = Input(b_opts_.WithName("B1"));
+  Cross(recv, b1, b_opts_.WithName("B2"));
+  Cross(recv, recv, b_opts_.WithName("B3"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ExpectMatchB();
 }
 
 TEST_F(GraphPartitionTest, CrossDeviceControl_MultiUse) {
+<<<<<<< HEAD
   auto a1 = FloatInput(in_.WithOpName("A1"));
   auto b1 = FloatInput(in_.WithOpName("B1"));
   Combine(in_.WithOpName("B2").WithControlDependencies(a1), b1, b1);
   FloatInput(in_.WithOpName("B3").WithControlDependencies(a1));
+=======
+  using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
+  Node* a1 = Input(in_.opts().WithName("A1"));
+  Node* b1 = Input(in_.opts().WithName("B1"));
+  Cross(b1, b1, in_.opts().WithName("B2").WithControlInput(a1));
+  Input(in_.opts().WithName("B3").WithControlInput(a1));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Partition(ToGraphDef(), &partitions_);
   EXPECT_EQ(2, partitions_.size());
 
   string a = "/job:a/replica:0/task:0/cpu:0";
   string b = "/job:a/replica:0/task:0/cpu:1";
+<<<<<<< HEAD
   a1 = FloatInput(scope_a_.WithOpName("A1"));
   auto c = Const(scope_a_.WithOpName("A1/_0").WithControlDependencies(a1), {});
   _Send(scope_a_.WithOpName("A1/_1"), c, "edge_3_A1", a, 82, b);
@@ -338,20 +514,42 @@ TEST_F(GraphPartitionTest, CrossDeviceControl_MultiUse) {
   b1 = FloatInput(scope_b_.WithOpName("B1"));
   Combine(scope_b_.WithOpName("B2").WithControlDependencies(id), b1, b1);
   FloatInput(scope_b_.WithOpName("B3").WithControlDependencies(id));
+=======
+  a1 = Input(a_opts_.WithName("A1"));
+  Node* c = EmptyConst<float>(a_opts_.WithName("A1/_0").WithControlInput(a1));
+  _Send(c, "edge_1_A1", a, 82, b, a_opts_.WithName("A1/_1"));
+  ExpectMatchA();
+
+  Node* recv =
+      _Recv(DT_FLOAT, "edge_1_A1", a, 82, b, b_opts_.WithName("A1/_2"));
+  Node* id = Identity(recv, b_opts_.WithName("A1/_3"));
+  b1 = Input(b_opts_.WithName("B1"));
+  Cross(b1, b1, b_opts_.WithName("B2").WithControlInput(id));
+  Input(b_opts_.WithName("B3").WithControlInput(id));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ExpectMatchB();
 }
 
 TEST_F(GraphPartitionTest, CrossDevice_DataControl) {
+<<<<<<< HEAD
   auto a1 = FloatInput(in_.WithOpName("A1"));
   auto b1 = FloatInput(in_.WithOpName("B1"));
   Combine(in_.WithOpName("B2"), a1, b1);
   FloatInput(in_.WithOpName("B3").WithControlDependencies(a1));
+=======
+  using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
+  Node* a1 = Input(in_.opts().WithName("A1"));
+  Node* b1 = Input(in_.opts().WithName("B1"));
+  Cross(a1, b1, in_.opts().WithName("B2"));
+  Input(in_.opts().WithName("B3").WithControlInput(a1));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Partition(ToGraphDef(), &partitions_);
   EXPECT_EQ(2, partitions_.size());
 
   string a = "/job:a/replica:0/task:0/cpu:0";
   string b = "/job:a/replica:0/task:0/cpu:1";
+<<<<<<< HEAD
   a1 = FloatInput(scope_a_.WithOpName("A1"));
   _Send(scope_a_.WithOpName("A1/_0"), a1, "edge_1_A1", a, 82, b);
   auto c = Const(scope_a_.WithOpName("A1/_2").WithControlDependencies(a1), {});
@@ -705,6 +903,37 @@ TEST(TopologicalSortNodesWithTimePriority, WhileLoop) {
     EXPECT_EQ(500 - (square_index + 1), nodes[node_index].second);
     EXPECT_EQ(500 - (square_index + 1), node_to_start_time[node]);
   }
+=======
+  a1 = Input(a_opts_.WithName("A1"));
+  Node* c = EmptyConst<float>(a_opts_.WithName("A1/_0").WithControlInput(a1));
+  // NOTE: Send 0 A1/_1 -> A1/_2 is not necessarily needed. We could
+  // use A1/_0 -> A1/_4 as the control as a minor optimization.
+  _Send(c, "edge_1_A1", a, 82, b, a_opts_.WithName("A1/_1"));
+  _Send(a1, "edge_2_A1", a, 82, b, a_opts_.WithName("A1/_4"));
+  ExpectMatchA();
+
+  Node* recv1 =
+      _Recv(DT_FLOAT, "edge_1_A1", a, 82, b, b_opts_.WithName("A1/_2"));
+  Node* id1 = Identity(recv1, b_opts_.WithName("A1/_3"));
+  Node* recv2 =
+      _Recv(DT_FLOAT, "edge_2_A1", a, 82, b, b_opts_.WithName("A1/_5"));
+  b1 = Input(b_opts_.WithName("B1"));
+  Cross(recv2, b1, b_opts_.WithName("B2"));
+  Input(b_opts_.WithName("B3").WithControlInput(id1));
+  ExpectMatchB();
+}
+
+TEST_F(GraphPartitionTest, CrossDeviceLoop) {
+  using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
+  Node* a1 = BoolInput(in_.opts().WithName("A1"));
+  Node* a2 = Enter(a1, "foo", in_.opts().WithName("A2"));
+  Node* a3 = Merge({a2, {"A5", 0, DT_BOOL}}, in_.opts().WithName("A3"));
+  LoopCond(a3, in_.opts().WithName("A4"));
+  Node* b1 = Identity(a3, in_.opts().WithName("B1"));
+  NextIteration(b1, in_.opts().WithName("A5"));
+
+  CheckLoopConstruction(ToGraphDef());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace

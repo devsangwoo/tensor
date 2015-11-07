@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,11 +36,21 @@ from tensorflow.python.ops import gen_math_ops
 from tensorflow.python.ops import gen_resource_variable_ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import sparse_ops
+=======
+"""Gradients for operators defined in array_ops.py."""
+
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import constant_op
+from tensorflow.python.ops import math_ops
+from tensorflow.python.ops import gen_array_ops
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Pack")
 def _PackGrad(op, grad):
   """Gradient for pack op."""
+<<<<<<< HEAD
   return array_ops.unstack(grad, num=op.get_attr("N"), axis=op.get_attr("axis"))
 
 
@@ -229,6 +240,43 @@ def _ConcatGradV2(op, grad):
 
 
 ops.NotDifferentiable("ConcatOffset")
+=======
+  return array_ops.unpack(grad, num=op.get_attr('N'))
+
+
+@ops.RegisterGradient("Unpack")
+def _UnpackGrad(_, *grads):
+  """Gradient for unpack op."""
+  return array_ops.pack(grads)
+
+
+@ops.RegisterGradient("Concat")
+def _ConcatGrad(op, grad):
+  """Gradient for concat op."""
+  assert isinstance(grad, ops.Tensor)
+  # Degenerate concatenation, just return grad.
+  if len(op.inputs) == 2:
+    return [None, grad]
+  # Get the inputs' tensor shapes
+  sizes = [array_ops.shape(x) for x in op.inputs[1:]]
+  concat_dim = op.inputs[0]
+  # Since shape is 1-D, shape_of_shape = [rank-of-inputs]
+  shape_of_shape = array_ops.shape(sizes[0])
+  # Make a vector of length equal to the input's dimensions,
+  # with 0's everywhere and 1 in the concat dim position.
+  # Note: Can't use sparse_to_dense since it isn't GPU-capable (for now)
+  mask = array_ops.concat(0,
+                          [array_ops.fill(
+                              array_ops.expand_dims(concat_dim, 0), 0), [1],
+                           array_ops.fill(shape_of_shape - concat_dim - 1, 0)])
+  out_grads = []
+  begin = array_ops.fill(shape_of_shape, 0)
+  for i in range(len(sizes)):
+    out_grads.append(array_ops.slice(grad, begin, sizes[i]))
+    # Lint complains begin = begin + ...
+    begin = math_ops.add(begin, sizes[i] * mask)
+  return [None] + out_grads
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Slice")
@@ -248,6 +296,7 @@ def _SliceGrad(op, grad):
   input_rank = array_ops.rank(input_vec)
   slice_size = array_ops.shape(op.outputs[0])
 
+<<<<<<< HEAD
   shape = array_ops.stack([input_rank, 1])
   before_pad = array_ops.reshape(begin_vec, shape)
   after_pad = array_ops.reshape(
@@ -525,10 +574,36 @@ def _IndexedSlicesToTensorNoWarning(indexed_slices):
   return math_ops.unsorted_segment_sum(indexed_slices.values,
                                        indexed_slices.indices,
                                        indexed_slices.dense_shape[0])
+=======
+  shape = array_ops.pack([input_rank, 1])
+  before_pad = array_ops.reshape(begin_vec, shape)
+  after_pad = array_ops.reshape(
+      array_ops.shape(input_vec) - slice_size - begin_vec, shape)
+  paddings = array_ops.concat(1, [before_pad, after_pad])
+  return array_ops.pad(grad, paddings), None, None
+
+
+@ops.RegisterGradient("Split")
+def _SplitGrad(op, *grads):
+  return None, array_ops.concat(op.inputs[0], list(grads))
+
+
+ops.NoGradient("Const")
+
+# TODO(liqzhang): The gradient for Diag operator would be
+# the diagonal of the backprop. Implement if there is a need.
+ops.NoGradient("Diag")
+
+# Edit Distance has no gradient (but can be used to eval seq2seq or CTC).
+ops.NoGradient("EditDistance")
+
+ops.NoGradient("Fill")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Gather")
 def _GatherGrad(op, grad):
+<<<<<<< HEAD
   """Gradient for Gather op."""
   # params can be large, so colocate the shape calculation with it.
   #
@@ -719,6 +794,13 @@ def _CheckNumericsV2Grad(op, grad):
 
 
 @ops.RegisterGradient("PlaceholderWithDefault")
+=======
+  return [
+      ops.IndexedSlices(grad, op.inputs[1], array_ops.shape(op.inputs[0])), None
+  ]
+
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 @ops.RegisterGradient("Identity")
 def _IdGrad(_, grad):
   return grad
@@ -729,16 +811,21 @@ def _RefIdGrad(_, grad):
   return grad
 
 
+<<<<<<< HEAD
 @ops.RegisterGradient("IdentityN")
 def _IdNGrad(_, *grad):
   return grad
 
 
 ops.NotDifferentiable("StopGradient")
+=======
+ops.NoGradient("StopGradient")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Reshape")
 def _ReshapeGrad(op, grad):
+<<<<<<< HEAD
   return [
       array_ops.reshape(
           _IndexedSlicesToTensorNoWarning(grad), array_ops.shape(op.inputs[0])),
@@ -747,12 +834,22 @@ def _ReshapeGrad(op, grad):
 
 
 ops.NotDifferentiable("InvertPermutation")
+=======
+  return [array_ops.reshape(grad, array_ops.shape(op.inputs[0])), None]
+
+
+ops.NoGradient("InvertPermutation")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 def _ReshapeToInput(op, grad):
   """Reshapes the gradient to the shape of the original input."""
+<<<<<<< HEAD
   return array_ops.reshape(
       _IndexedSlicesToTensorNoWarning(grad), array_ops.shape(op.inputs[0]))
+=======
+  return array_ops.reshape(grad, array_ops.shape(op.inputs[0]))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("ExpandDims")
@@ -772,6 +869,7 @@ def _TransposeGrad(op, grad):
   return [array_ops.transpose(grad, array_ops.invert_permutation(p)), None]
 
 
+<<<<<<< HEAD
 @ops.RegisterGradient("ConjugateTranspose")
 def _ConjugateTransposeGrad(op, grad):
   """Returns conj(unshuffle(grad))."""
@@ -789,11 +887,21 @@ ops.NotDifferentiable("ShapeN")
 ops.NotDifferentiable("Rank")
 
 ops.NotDifferentiable("Size")
+=======
+ops.NoGradient("Shape")
+
+
+ops.NoGradient("Rank")
+
+
+ops.NoGradient("Size")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Tile")
 def _TileGrad(op, grad):
   """Sum reduces grad along the tiled dimensions."""
+<<<<<<< HEAD
   input_shape = array_ops.shape(op.inputs[0], out_type=op.inputs[1].dtype)
   # We interleave multiples and input_shape to get split_shape,
   # reshape grad to split_shape, and reduce along all even
@@ -822,6 +930,19 @@ def _TileGrad(op, grad):
 ops.NotDifferentiable("BroadcastGradientArgs")
 
 
+=======
+  assert isinstance(grad, ops.Tensor)
+  return [gen_array_ops._tile_grad(grad, op.inputs[1]), None]
+
+
+ops.NoGradient("TileGrad")
+
+
+ops.NoGradient("BroadcastGradientArgs")
+
+
+@ops.RegisterGradient("Pad")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 def _PadGrad(op, grad):
   """Gradient for Pad."""
   # Pad introduces values around the original tensor, so the gradient function
@@ -830,6 +951,7 @@ def _PadGrad(op, grad):
   a = op.inputs[1]  # [Rank(x), 2]
   # Takes a slice of a. The 1st column. [Rank(x), 1].
   pad_before = array_ops.slice(a, [0, 0],
+<<<<<<< HEAD
                                array_ops.stack([array_ops.rank(x), 1]))
   # Make it a 1-D tensor.
   begin = array_ops.reshape(pad_before, [-1])
@@ -843,12 +965,20 @@ def _PadGrad(op, grad):
 
 ops.RegisterGradient("Pad")(_PadGrad)
 ops.RegisterGradient("PadV2")(_PadGrad)
+=======
+                               array_ops.pack([array_ops.rank(x), 1]))
+  # Make it a 1-D tensor.
+  begin = array_ops.reshape(pad_before, [-1])
+  sizes = array_ops.shape(x)
+  return array_ops.slice(grad, begin, sizes), None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 # ReverseSequence is just a permutation.  The gradient permutes back.
 @ops.RegisterGradient("ReverseSequence")
 def _ReverseSequenceGrad(op, grad):
   seq_lengths = op.inputs[1]
+<<<<<<< HEAD
   return [
       array_ops.reverse_sequence(
           grad,
@@ -1135,3 +1265,9 @@ def _BroadcastToGrad(op, grad):
       grad, axis=reduction_axes, keepdims=True)
   updates_grad = array_ops.reshape(updates_grad_reshaped, input_value_shape)
   return [updates_grad, None]
+=======
+  return [array_ops.reverse_sequence(grad,
+                                    seq_dim=op.get_attr("seq_dim"),
+                                    seq_lengths=seq_lengths),
+          None]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

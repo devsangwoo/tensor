@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,18 @@ limitations under the License.
 #include "tensorflow/core/lib/io/format.h"
 #include "tensorflow/core/lib/io/iterator.h"
 #include "tensorflow/core/lib/io/table.h"
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+
+#include "tensorflow/core/lib/io/two_level_iterator.h"
+
+#include "tensorflow/core/lib/io/table.h"
+#include "tensorflow/core/lib/io/block.h"
+#include "tensorflow/core/lib/io/format.h"
+#include "tensorflow/core/lib/io/iterator.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace table {
@@ -32,6 +45,7 @@ class TwoLevelIterator : public Iterator {
   TwoLevelIterator(Iterator* index_iter, BlockFunction block_function,
                    void* arg);
 
+<<<<<<< HEAD
   ~TwoLevelIterator() override;
 
   void Seek(const StringPiece& target) override;
@@ -50,11 +64,35 @@ class TwoLevelIterator : public Iterator {
     return data_iter_->value();
   }
   Status status() const override {
+=======
+  virtual ~TwoLevelIterator();
+
+  virtual void Seek(const StringPiece& target);
+  virtual void SeekToFirst();
+  virtual void Next();
+
+  virtual bool Valid() const {
+    return (data_iter_ == nullptr) ? false : data_iter_->Valid();
+  }
+  virtual StringPiece key() const {
+    assert(Valid());
+    return data_iter_->key();
+  }
+  virtual StringPiece value() const {
+    assert(Valid());
+    return data_iter_->value();
+  }
+  virtual Status status() const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // It'd be nice if status() returned a const Status& instead of a
     // Status
     if (!index_iter_->status().ok()) {
       return index_iter_->status();
+<<<<<<< HEAD
     } else if (data_iter_ != nullptr && !data_iter_->status().ok()) {
+=======
+    } else if (data_iter_ != NULL && !data_iter_->status().ok()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       return data_iter_->status();
     } else {
       return status_;
@@ -84,7 +122,11 @@ TwoLevelIterator::TwoLevelIterator(Iterator* index_iter,
     : block_function_(block_function),
       arg_(arg),
       index_iter_(index_iter),
+<<<<<<< HEAD
       data_iter_(nullptr) {}
+=======
+      data_iter_(NULL) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TwoLevelIterator::~TwoLevelIterator() {
   delete index_iter_;
@@ -94,14 +136,22 @@ TwoLevelIterator::~TwoLevelIterator() {
 void TwoLevelIterator::Seek(const StringPiece& target) {
   index_iter_->Seek(target);
   InitDataBlock();
+<<<<<<< HEAD
   if (data_iter_ != nullptr) data_iter_->Seek(target);
+=======
+  if (data_iter_ != NULL) data_iter_->Seek(target);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   SkipEmptyDataBlocksForward();
 }
 
 void TwoLevelIterator::SeekToFirst() {
   index_iter_->SeekToFirst();
   InitDataBlock();
+<<<<<<< HEAD
   if (data_iter_ != nullptr) data_iter_->SeekToFirst();
+=======
+  if (data_iter_ != NULL) data_iter_->SeekToFirst();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   SkipEmptyDataBlocksForward();
 }
 
@@ -112,20 +162,35 @@ void TwoLevelIterator::Next() {
 }
 
 void TwoLevelIterator::SkipEmptyDataBlocksForward() {
+<<<<<<< HEAD
   while (data_iter_ == nullptr || !data_iter_->Valid()) {
     // Move to next block
     if (!index_iter_->Valid()) {
       SetDataIterator(nullptr);
+=======
+  while (data_iter_ == NULL || !data_iter_->Valid()) {
+    // Move to next block
+    if (!index_iter_->Valid()) {
+      SetDataIterator(NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       return;
     }
     index_iter_->Next();
     InitDataBlock();
+<<<<<<< HEAD
     if (data_iter_ != nullptr) data_iter_->SeekToFirst();
+=======
+    if (data_iter_ != NULL) data_iter_->SeekToFirst();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
 void TwoLevelIterator::SetDataIterator(Iterator* data_iter) {
+<<<<<<< HEAD
   if (data_iter_ != nullptr) {
+=======
+  if (data_iter_ != NULL) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     SaveError(data_iter_->status());
     delete data_iter_;
   }
@@ -134,10 +199,17 @@ void TwoLevelIterator::SetDataIterator(Iterator* data_iter) {
 
 void TwoLevelIterator::InitDataBlock() {
   if (!index_iter_->Valid()) {
+<<<<<<< HEAD
     SetDataIterator(nullptr);
   } else {
     StringPiece handle = index_iter_->value();
     if (data_iter_ != nullptr && handle.compare(data_block_handle_) == 0) {
+=======
+    SetDataIterator(NULL);
+  } else {
+    StringPiece handle = index_iter_->value();
+    if (data_iter_ != NULL && handle.compare(data_block_handle_) == 0) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // data_iter_ is already constructed with this iterator, so
       // no need to change anything
     } else {

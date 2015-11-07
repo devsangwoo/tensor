@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +35,24 @@ limitations under the License.
 #include "tensorflow/core/platform/types.h"
 #include "tensorflow/core/util/sparse/dim_comparator.h"
 #include "tensorflow/core/util/sparse/group_iterator.h"
+=======
+#ifndef TENSORFLOW_UTIL_SPARSE_SPARSE_TENSOR_H_
+#define TENSORFLOW_UTIL_SPARSE_SPARSE_TENSOR_H_
+
+#include <limits>
+
+#include "tensorflow/core/framework/tensor_types.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/lib/strings/str_util.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/util/sparse/dim_comparator.h"
+#include "tensorflow/core/util/sparse/group_iterator.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace sparse {
@@ -41,6 +60,7 @@ namespace sparse {
 class SparseTensor {
  public:
   typedef typename gtl::ArraySlice<int64> VarDimArray;
+<<<<<<< HEAD
   typedef typename gtl::InlinedVector<int64, 8> ShapeArray;
 
   static Status Create(Tensor ix, Tensor vals, const VarDimArray shape,
@@ -100,23 +120,69 @@ class SparseTensor {
     order_ = std::move(other.order_);
     dims_ = std::move(other.dims_);
     return *this;
+=======
+
+  SparseTensor(Tensor ix, Tensor vals, const TensorShape& shape)
+      : SparseTensor(ix, vals, shape, UndefinedOrder(shape)) {}
+
+  SparseTensor(Tensor ix, Tensor vals, const TensorShape& shape,
+               const VarDimArray& order)
+      : ix_(ix),
+        vals_(vals),
+        shape_(shape),
+        order_(order.begin(), order.end()),
+        dims_(GetDimsFromIx(ix)) {
+    CHECK_EQ(ix.dtype(), DT_INT64) << "indices must be type int64 but got: "
+                                   << ix.dtype();
+    CHECK(TensorShapeUtils::IsMatrix(ix.shape()))
+        << "indices must be a matrix, but got: " << ix.shape().DebugString();
+    CHECK(TensorShapeUtils::IsVector(vals.shape()))
+        << "vals must be a vec, but got: " << vals.shape().DebugString();
+    CHECK_EQ(ix.shape().dim_size(0), vals.shape().dim_size(0))
+        << "indices and values rows (indexing dimension) must match.";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   std::size_t num_entries() const { return ix_.dim_size(0); }
 
+<<<<<<< HEAD
   int dims() const { return shape_.size(); }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const Tensor& indices() const { return ix_; }
 
   const Tensor& values() const { return vals_; }
 
   DataType dtype() const { return vals_.dtype(); }
 
+<<<<<<< HEAD
   Status IndicesValid() const;
 
   VarDimArray shape() const { return shape_; }
 
   VarDimArray order() const { return order_; }
+=======
+  bool IndicesValid() const {
+    const auto ix_t = ix_.matrix<int64>();
+    for (int64 ord : order_) {
+      CHECK_GE(ord, 0) << "Order was not provided.  Provide an order at "
+                          "construction time or run ReorderInPlace";
+    }
+
+    for (std::size_t n = 0; n < num_entries(); ++n) {
+      if (!IndexValid(ix_t, n)) return false;
+    }
+
+    return true;
+  }
+
+  // Returns the tensor shape (the dimensions of the "densified"
+  // tensor this tensor represents).
+  const TensorShape shape() const { return shape_; }
+
+  const VarDimArray order() const { return order_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Resorts the indices and values according to the dimensions in order.
   template <typename T>
@@ -128,12 +194,21 @@ class SparseTensor {
   // Precondition: order()[0..group_ix.size()] == group_ix.
   //
   // See the README.md in this directory for more usage information.
+<<<<<<< HEAD
   GroupIterable group(const VarDimArray& group_ix) const {
     DCHECK_LE(group_ix.size(), dims_);
     for (std::size_t di = 0; di < group_ix.size(); ++di) {
       DCHECK_GE(group_ix[di], 0) << "Group dimension out of range";
       DCHECK_LT(group_ix[di], dims_) << "Group dimension out of range";
       DCHECK_EQ(group_ix[di], order_[di])
+=======
+  GroupIterable group(const VarDimArray& group_ix) {
+    CHECK_LE(group_ix.size(), dims_);
+    for (std::size_t di = 0; di < group_ix.size(); ++di) {
+      CHECK_GE(group_ix[di], 0) << "Group dimension out of range";
+      CHECK_LT(group_ix[di], dims_) << "Group dimension out of range";
+      CHECK_EQ(group_ix[di], order_[di])
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           << "Group dimension does not match sorted order";
     }
     return GroupIterable(ix_, vals_, dims_, group_ix);
@@ -164,6 +239,7 @@ class SparseTensor {
   template <typename T>
   static SparseTensor Concat(const gtl::ArraySlice<SparseTensor>& tensors);
 
+<<<<<<< HEAD
   // Split() will split the input SparseTensor into a list of num_split
   // SparseTensor given a splitting dimension. If the input dimension range
   // isn't an integer multiple of split_dim, we add one extra dimension for
@@ -254,12 +330,61 @@ class SparseTensor {
   ShapeArray shape_;
   ShapeArray order_;
   int dims_;
+=======
+ private:
+  static int GetDimsFromIx(const Tensor& ix) {
+    CHECK(TensorShapeUtils::IsMatrix(ix.shape()));
+    return ix.dim_size(1);
+  }
+
+  static gtl::InlinedVector<int64, 8> UndefinedOrder(const TensorShape& shape) {
+    return gtl::InlinedVector<int64, 8>(shape.dims(), -1);
+  }
+
+  // Helper for IndicesValid()
+  inline bool IndexValid(const TTypes<int64>::ConstMatrix& ix_t,
+                         int64 n) const {
+    bool different = false;
+    bool bad_order = false;
+    bool valid = true;
+    if (n == 0) {
+      for (int di = 0; di < dims_; ++di) {
+        if (ix_t(n, di) < 0 || ix_t(n, di) >= shape_.dim_size(di))
+          valid = false;
+      }
+      different = true;
+    } else {
+      for (int di = 0; di < dims_; ++di) {
+        if (ix_t(n, di) < 0 || ix_t(n, di) >= shape_.dim_size(di))
+          valid = false;
+        int64 diff = ix_t(n, order_[di]) - ix_t(n - 1, order_[di]);
+        if (diff > 0) different = true;
+        if (!different && diff < 0) bad_order = true;
+      }
+    }
+    if (!valid) return false;      // Out of bounds
+    if (!different) return false;  // The past two indices are identical...
+    if (bad_order) return false;   // Decreasing in order.
+    return true;
+  }
+
+  // Helper for ToDense<T>()
+  template <typename T>
+  bool ValidateAndInitializeToDense(Tensor* out, bool initialize);
+
+  Tensor ix_;
+  Tensor vals_;
+  TensorShape shape_;
+  gtl::InlinedVector<int64, 8> order_;
+  const int dims_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // This operation updates the indices and values Tensor rows, so it is
 // an in-place algorithm.  It requires O(N log N) time and O(N)
 // temporary space.
 template <typename T>
+<<<<<<< HEAD
 inline void SparseTensor::Reorder(const VarDimArray& order) {
   DCHECK_EQ(DataTypeToEnum<T>::v(), dtype())
       << "Reorder requested with the wrong datatype";
@@ -267,10 +392,22 @@ inline void SparseTensor::Reorder(const VarDimArray& order) {
   auto ix_t = ix_.matrix<int64>();
   auto vals_t = vals_.vec<T>();
 
+=======
+void SparseTensor::Reorder(const VarDimArray& order) {
+  CHECK_EQ(DataTypeToEnum<T>::v(), dtype())
+      << "Reorder requested with the wrong datatype";
+  CHECK_EQ(order.size(), dims_) << "Order length must be SparseTensor rank";
+  auto ix_t = ix_.matrix<int64>();
+  auto vals_t = vals_.vec<T>();
+
+  DimComparator sorter(ix_t, order, dims_);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   std::vector<int64> reorder(num_entries());
   std::iota(reorder.begin(), reorder.end(), 0);
 
   // Sort to get order of indices
+<<<<<<< HEAD
   switch (order.size()) {
 #define CASE_SORT(ORDER_SIZE)                                    \
   case ORDER_SIZE: {                                             \
@@ -290,12 +427,19 @@ inline void SparseTensor::Reorder(const VarDimArray& order) {
       std::sort(reorder.begin(), reorder.end(), sorter);
     }
   }
+=======
+  std::sort(reorder.begin(), reorder.end(), sorter);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // We have a forward reordering, but what we'll need is a
   // permutation (the inverse).  This can be calculated with O(1)
   // additional
   // and O(n) time (INVPERM) but we just do the simple thing here.
+<<<<<<< HEAD
   std::vector<size_t> permutation(reorder.size());
+=======
+  std::vector<int64> permutation(reorder.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (std::size_t n = 0; n < reorder.size(); ++n) {
     permutation[reorder[n]] = n;
   }
@@ -315,6 +459,7 @@ inline void SparseTensor::Reorder(const VarDimArray& order) {
     }
   }
 
+<<<<<<< HEAD
   order_ = ShapeArray(order.begin(), order.end());
 }
 
@@ -328,15 +473,35 @@ inline bool SparseTensor::ValidateAndInitializeToDense(Tensor* out,
       << "Incompatible dimensions between SparseTensor and output";
 
   DCHECK_EQ(out->dtype(), DataTypeToEnum<T>::v())
+=======
+  order_ = gtl::InlinedVector<int64, 8>(order.begin(), order.end());
+}
+
+template <typename T>
+bool SparseTensor::ValidateAndInitializeToDense(Tensor* out, bool initialize) {
+  CHECK_EQ(DataTypeToEnum<T>::v(), dtype())
+      << "ToDense requested with the wrong datatype";
+
+  CHECK_EQ(out->shape().dims(), dims_)
+      << "Incompatible dimensions between SparseTensor and output";
+
+  CHECK_EQ(out->dtype(), DataTypeToEnum<T>::v())
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       << "Output must be type: " << DataTypeToEnum<T>::v()
       << " but got: " << out->dtype();
 
   // Make sure the dense output is the same rank and has room
   // to hold the SparseTensor.
   const auto& out_shape = out->shape();
+<<<<<<< HEAD
   if (shape_.size() != out_shape.dims()) return false;
   for (int d = 0; d < shape_.size(); ++d) {
     if (shape_[d] > out_shape.dim_size(d)) return false;
+=======
+  if (shape_.dims() != out_shape.dims()) return false;
+  for (int d = 0; d < shape_.dims(); ++d) {
+    if (shape_.dim_size(d) > out_shape.dim_size(d)) return false;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   if (initialize) {
@@ -348,7 +513,11 @@ inline bool SparseTensor::ValidateAndInitializeToDense(Tensor* out,
 }
 
 template <typename T>
+<<<<<<< HEAD
 inline bool SparseTensor::ToDense(Tensor* out, bool initialize) {
+=======
+bool SparseTensor::ToDense(Tensor* out, bool initialize) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!ValidateAndInitializeToDense<T>(out, initialize)) return false;
 
   auto out_t = out->flat<T>();
@@ -357,19 +526,32 @@ inline bool SparseTensor::ToDense(Tensor* out, bool initialize) {
 
   std::vector<int64> strides(dims_);
   const auto& out_shape = out->shape();
+<<<<<<< HEAD
   if (dims_ > 0) {
     strides[dims_ - 1] = 1;
   }
+=======
+  strides[dims_ - 1] = 1;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (int d = dims_ - 2; d >= 0; --d) {
     strides[d] = strides[d + 1] * out_shape.dim_size(d + 1);
   }
 
+<<<<<<< HEAD
   for (int n = 0; n < vals_t.dimension(0); ++n) {
     bool invalid_dims = false;
     int64 ix = 0;
     for (int d = 0; d < dims_; ++d) {
       const int64 ix_n_d = internal::SubtleMustCopy(ix_t(n, d));
       if (!FastBoundsCheck(ix_n_d, out_shape.dim_size(d))) {
+=======
+  for (std::size_t n = 0; n < vals_t.dimension(0); ++n) {
+    bool invalid_dims = false;
+    int64 ix = 0;
+    for (int d = 0; d < dims_; ++d) {
+      const int64 ix_n_d = ix_t(n, d);
+      if (ix_n_d < 0 || ix_n_d >= out_shape.dim_size(d)) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         invalid_dims = true;
       }
       ix += strides[d] * ix_n_d;
@@ -381,6 +563,7 @@ inline bool SparseTensor::ToDense(Tensor* out, bool initialize) {
 }
 
 template <typename T>
+<<<<<<< HEAD
 inline SparseTensor SparseTensor::Concat(
     const gtl::ArraySlice<SparseTensor>& tensors) {
   DCHECK_GE(tensors.size(), size_t{1}) << "Cannot concat 0 SparseTensors";
@@ -391,10 +574,23 @@ inline SparseTensor SparseTensor::Concat(
   ShapeArray final_order(order_0.begin(), order_0.end());
   ShapeArray final_shape(tensors[0].shape().begin(), tensors[0].shape().end());
   final_shape[primary_dim] = 0;  // We'll build this up as we go along.
+=======
+SparseTensor SparseTensor::Concat(
+    const gtl::ArraySlice<SparseTensor>& tensors) {
+  CHECK_GE(tensors.size(), 1) << "Cannot concat 0 SparseTensors";
+  const int dims = tensors[0].dims_;
+  CHECK_GE(dims, 1) << "Cannot concat 0-dimensional SparseTensors";
+  auto order_0 = tensors[0].order();
+  const int primary_dim = order_0[0];
+  gtl::InlinedVector<int64, 8> final_order(order_0.begin(), order_0.end());
+  TensorShape final_shape(tensors[0].shape());
+  final_shape.set_dim(primary_dim, 0);  // We'll build this up as we go along.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int num_entries = 0;
 
   bool fully_ordered = true;
   for (const SparseTensor& st : tensors) {
+<<<<<<< HEAD
     DCHECK_EQ(st.dims_, dims) << "All SparseTensors must have the same rank.";
     DCHECK_EQ(DataTypeToEnum<T>::v(), st.dtype())
         << "Concat requested with the wrong data type";
@@ -416,6 +612,29 @@ inline SparseTensor SparseTensor::Concat(
     // Update dimension of final shape
     final_shape[primary_dim] =
         (final_shape[primary_dim] + st_shape[primary_dim]);
+=======
+    CHECK_EQ(st.dims_, dims) << "All SparseTensors must have the same rank.";
+    CHECK_EQ(DataTypeToEnum<T>::v(), st.dtype())
+        << "Concat requested with the wrong data type";
+    CHECK_GE(st.order()[0], 0) << "SparseTensor must be ordered";
+    CHECK_EQ(st.order()[0], primary_dim)
+        << "All SparseTensors' order[0] must match.  This is the concat dim.";
+    if (st.order() != final_order) fully_ordered = false;
+    const TensorShape st_shape = st.shape();
+    for (int d = 0; d < dims - 1; ++d) {
+      const int cdim = (d < primary_dim) ? d : d + 1;
+      CHECK_EQ(final_shape.dim_size(cdim), st_shape.dim_size(cdim))
+          << "All SparseTensors' shapes must match except on the concat dim.  "
+          << "Concat dim: " << primary_dim
+          << ", mismatched shape at dim: " << cdim
+          << ".  Expecting shape like: " << final_shape.DebugString()
+          << " but saw shape: " << st_shape.DebugString();
+    }
+
+    // Update dimension of final shape
+    final_shape.set_dim(primary_dim, final_shape.dim_size(primary_dim) +
+                                         st_shape.dim_size(primary_dim));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     num_entries += st.num_entries();  // Update number of entries
   }
@@ -428,12 +647,18 @@ inline SparseTensor SparseTensor::Concat(
   Tensor output_ix(DT_INT64, TensorShape({num_entries, dims}));
   Tensor output_vals(DataTypeToEnum<T>::v(), TensorShape({num_entries}));
 
+<<<<<<< HEAD
   TTypes<int64>::Matrix ix_t = output_ix.matrix<int64>();
   typename TTypes<T>::Vec vals_t = output_vals.vec<T>();
+=======
+  auto ix_t = output_ix.matrix<int64>();
+  auto vals_t = output_vals.vec<T>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Eigen::DenseIndex offset = 0;
   int64 shape_offset = 0;
   for (const SparseTensor& st : tensors) {
+<<<<<<< HEAD
     const int st_num_entries = st.num_entries();
 
     // Fill in indices & values.
@@ -447,11 +672,33 @@ inline SparseTensor SparseTensor::Concat(
 
     offset += st_num_entries;
     shape_offset += st.shape()[primary_dim];
+=======
+    int st_num_entries = st.num_entries();
+    Eigen::DSizes<Eigen::DenseIndex, 2> ix_start(offset, 0);
+    Eigen::DSizes<Eigen::DenseIndex, 2> ix_size(st_num_entries, dims);
+    Eigen::DSizes<Eigen::DenseIndex, 1> vals_start(offset);
+    Eigen::DSizes<Eigen::DenseIndex, 1> vals_size(st_num_entries);
+
+    // Fill in indices & values.
+    ix_t.slice(ix_start, ix_size) = st.ix_.matrix<int64>();
+    vals_t.slice(vals_start, vals_size) = st.vals_.vec<T>();
+
+    Eigen::DSizes<Eigen::DenseIndex, 2> ix_update_start(offset, primary_dim);
+    Eigen::DSizes<Eigen::DenseIndex, 2> ix_update_size(st_num_entries, 1);
+    // The index associated with the primary dimension gets increased
+    // by the shapes of the previous concatted Tensors.
+    auto update_slice = ix_t.slice(ix_update_start, ix_update_size);
+    update_slice += update_slice.constant(shape_offset);
+
+    offset += st_num_entries;
+    shape_offset += st.shape().dim_size(primary_dim);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   return SparseTensor(output_ix, output_vals, final_shape, final_order);
 }
 
+<<<<<<< HEAD
 template <typename T>
 inline Status SparseTensor::Split(const SparseTensor& input_tensor,
                                   const int split_dim, const int num_split,
@@ -612,3 +859,9 @@ inline SparseTensor SparseTensor::Slice(const SparseTensor& input_tensor,
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_UTIL_SPARSE_SPARSE_TENSOR_H_
+=======
+}  // namespace sparse
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_UTIL_SPARSE_SPARSE_TENSOR_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,20 +19,42 @@ limitations under the License.
 
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor_types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_REVERSE_OP_H_
+#define TENSORFLOW_KERNELS_REVERSE_OP_H_
+
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
 
+<<<<<<< HEAD
 // Functor used by ReverseOp to do the computations.
 template <typename Device, typename T, int Dims>
 struct Reverse {
   void operator()(const Device& d, typename TTypes<T, Dims>::ConstTensor input,
                   const Eigen::array<bool, Dims>& reverse_dims,
                   typename TTypes<T, Dims>::Tensor output) {
+=======
+// Functor used by MirrorOp to do the computations.
+template <typename Device, typename T, int Dims>
+struct Reverse {
+  void operator()(const Device& d, typename TTypes<T, Dims>::ConstTensor input,
+                  typename TTypes<bool, 1>::ConstTensor dims,
+                  typename TTypes<T, Dims>::Tensor output) {
+    // mirror is in host memory
+    Eigen::array<bool, Dims> reverse_dims;
+    for (int i = 0; i < Dims; ++i) {
+      reverse_dims[i] = dims(i);
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     output.device(d) = input.reverse(reverse_dims);
   }
 };
 
+<<<<<<< HEAD
 template <typename Device, typename T>
 struct Reverse<Device, T, 0> {
   void operator()(const Device& d, typename TTypes<T, 0>::ConstTensor input,
@@ -46,3 +69,9 @@ struct Reverse<Device, T, 0> {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_REVERSE_OP_H_
+=======
+}  // namespace functor
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_KERNELS_MIRROR_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

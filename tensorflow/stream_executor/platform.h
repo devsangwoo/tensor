@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Defines types and declares functions for identifying and extracting
 // information about the types of platforms and supporting libraries for which
 // StreamExecutor implementations exist.
@@ -20,20 +23,34 @@ limitations under the License.
 #define TENSORFLOW_STREAM_EXECUTOR_PLATFORM_H_
 
 #include <map>
+<<<<<<< HEAD
 
 #include "tensorflow/stream_executor/device_description.h"
 #include "tensorflow/stream_executor/device_options.h"
 #include "tensorflow/stream_executor/lib/status.h"
 #include "tensorflow/stream_executor/lib/status_macros.h"
+=======
+#include "tensorflow/stream_executor/platform/port.h"
+
+#include "tensorflow/stream_executor/device_options.h"
+#include "tensorflow/stream_executor/lib/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/lib/statusor.h"
 #include "tensorflow/stream_executor/platform/port.h"
 #include "tensorflow/stream_executor/plugin.h"
 #include "tensorflow/stream_executor/trace_listener.h"
 
+<<<<<<< HEAD
 namespace stream_executor {
 
 class StreamExecutor;
 class DeviceDescription;
+=======
+namespace perftools {
+namespace gputools {
+
+class StreamExecutor;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Describes the platform for a StreamExecutor instantiation to act upon.
 //
@@ -42,8 +59,15 @@ class DeviceDescription;
 enum class PlatformKind {
   kInvalid,
   kCuda,
+<<<<<<< HEAD
   kROCm,
   kOpenCL,
+=======
+  kOpenCL,
+  kOpenCLAltera,  // Altera FPGA OpenCL platform.
+                  // See documentation: go/fpgaopencl
+                  // (StreamExecutor integration)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   kHost,
   kMock,
   kSize,
@@ -98,7 +122,11 @@ class Platform {
   // each platform is required to expose an ID to ensure unique registration and
   // as a target against which plugins can register.
   //
+<<<<<<< HEAD
   // The macro below is provided to help generate a [process-unique] identifier.
+=======
+  // The macro below is provided to help generate a [process-unique] identifer.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   using Id = void*;
 
 // Helper macro to define a plugin ID. To be used only inside plugin
@@ -108,14 +136,21 @@ class Platform {
   namespace {                           \
   int plugin_id_value;                  \
   }                                     \
+<<<<<<< HEAD
   const ::stream_executor::Platform::Id ID_VAR_NAME = &plugin_id_value;
+=======
+  const perftools::gputools::Platform::Id ID_VAR_NAME = &plugin_id_value;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns a key uniquely identifying this platform.
   virtual Id id() const = 0;
 
+<<<<<<< HEAD
   // Name of this platform.
   virtual const string& Name() const = 0;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Returns the number of devices accessible on this platform.
   //
   // Note that, though these devices are visible, if there is only one userspace
@@ -123,6 +158,7 @@ class Platform {
   // device, a call to ExecutorForDevice may return an error status.
   virtual int VisibleDeviceCount() const = 0;
 
+<<<<<<< HEAD
   // Returns true iff the platform has been initialized.
   virtual bool Initialized() const;
 
@@ -143,6 +179,10 @@ class Platform {
   // which returns a cached instance specific to the initialized StreamExecutor.
   virtual port::StatusOr<std::unique_ptr<DeviceDescription>>
   DescriptionForDevice(int ordinal) const = 0;
+=======
+  // Name of this platform.
+  virtual const string& Name() const = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns a device with the given ordinal on this platform with a default
   // plugin configuration or, if none can be found with the given ordinal or
@@ -179,8 +219,11 @@ class Platform {
   // This is only useful on platforms which bind a device to a single process
   // that has obtained the device context. May return UNIMPLEMENTED on platforms
   // that have no reason to destroy device contexts.
+<<<<<<< HEAD
   //
   // The platform must be reinitialized after this is called.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   virtual port::Status ForceExecutorShutdown();
 
   // Registers a TraceListener to listen to all StreamExecutors for this
@@ -216,6 +259,11 @@ class Platform {
   SE_DISALLOW_COPY_AND_ASSIGN(Platform);
 };
 
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_PLATFORM_H_

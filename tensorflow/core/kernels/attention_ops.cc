@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +27,20 @@ limitations under the License.
 #include "tensorflow/core/kernels/eigen_attention.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/types.h"
+=======
+// See docs in ../ops/attention_ops.cc.
+
+#define EIGEN_USE_THREADS
+
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/framework/op.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/NeuralNetworks"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -34,6 +49,7 @@ class ExtractGlimpseOp : public OpKernel {
   explicit ExtractGlimpseOp(OpKernelConstruction* context) : OpKernel(context) {
     OP_REQUIRES_OK(context, context->GetAttr("normalized", &normalized_));
     OP_REQUIRES_OK(context, context->GetAttr("centered", &centered_));
+<<<<<<< HEAD
     bool uniform_noise = false;
     string noise;
     OP_REQUIRES_OK(context, context->GetAttr("uniform_noise", &uniform_noise));
@@ -59,29 +75,48 @@ class ExtractGlimpseOp : public OpKernel {
         noise_ = Eigen::ExtractGlimpsesNoiseMode::ZERO;
       }
     }
+=======
+    OP_REQUIRES_OK(context, context->GetAttr("uniform_noise", &uniform_noise_));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Expect input tensor of rank 4 with dimensions (batch_size, height, width,
   // depth).
   void Compute(OpKernelContext* context) override {
     const Tensor& input = context->input(0);
+<<<<<<< HEAD
     const TensorShape& input_shape = input.shape();
+=======
+    const TensorShape input_shape = input.shape();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     const int32 num_dims = input_shape.dims();
     OP_REQUIRES(
         context, num_dims == 4,
         errors::InvalidArgument(
             "input must be 4-dimensional (batch_size, height, width, depth)",
+<<<<<<< HEAD
             input_shape.DebugString()));
+=======
+            input_shape.ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     const int64 batch_size = input_shape.dim_size(0);
 
     const Tensor& window_size = context->input(1);
+<<<<<<< HEAD
     OP_REQUIRES(context,
                 (window_size.shape().dims() == 1) &&
                     window_size.shape().dim_size(0) == 2,
                 errors::InvalidArgument(
                     "input must be a vector of size 2 (height, width)",
                     window_size.shape().DebugString()));
+=======
+    OP_REQUIRES(context, (window_size.shape().dims() == 1) &&
+                             window_size.shape().dim_size(0) == 2,
+                errors::InvalidArgument(
+                    "input must be a vector of size 2 (height, width)",
+                    window_size.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     const int64 output_height = window_size.tensor<int, 1>()(0);
     const int64 output_width = window_size.tensor<int, 1>()(1);
@@ -92,6 +127,7 @@ class ExtractGlimpseOp : public OpKernel {
     const Tensor& offsets = context->input(2);
     OP_REQUIRES(context, offsets.shape().dims() == 2,
                 errors::InvalidArgument("input must be a matrix",
+<<<<<<< HEAD
                                         offsets.shape().DebugString()));
     OP_REQUIRES(context, offsets.shape().dim_size(0) == batch_size,
                 errors::InvalidArgument("first dimension should be batch",
@@ -107,6 +143,19 @@ class ExtractGlimpseOp : public OpKernel {
       // Nothing else to do.
       return;
     }
+=======
+                                        offsets.shape().ShortDebugString()));
+    OP_REQUIRES(context, offsets.shape().dim_size(0) == batch_size,
+                errors::InvalidArgument("first dimension should be batch",
+                                        offsets.shape().ShortDebugString()));
+    OP_REQUIRES(
+        context, offsets.shape().dim_size(1) == 2,
+        errors::InvalidArgument("second dimension should be of size 2 (y,x)",
+                                offsets.shape().ShortDebugString()));
+
+    Tensor* output = nullptr;
+    OP_REQUIRES_OK(context, context->allocate_output(0, output_shape, &output));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     std::vector<Eigen::IndexPair<float> > offset_vec;
     offset_vec.reserve(batch_size);
@@ -122,13 +171,21 @@ class ExtractGlimpseOp : public OpKernel {
         context->eigen_cpu_device()) =
         Eigen::ExtractGlimpses(input.tensor<float, 4>().swap_layout(),
                                output_width, output_height, offset_vec,
+<<<<<<< HEAD
                                normalized_, centered_, noise_);
+=======
+                               normalized_, centered_, uniform_noise_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
   bool normalized_;
   bool centered_;
+<<<<<<< HEAD
   Eigen::ExtractGlimpsesNoiseMode noise_;
+=======
+  bool uniform_noise_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 REGISTER_KERNEL_BUILDER(Name("ExtractGlimpse").Device(DEVICE_CPU),

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -115,6 +116,18 @@ ResourceMgr::ResourceAndName& ResourceMgr::ResourceAndName::operator=(
   return *this;
 }
 
+=======
+#include "tensorflow/core/framework/resource_mgr.h"
+
+#include "tensorflow/core/framework/node_def_util.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/gtl/map_util.h"
+#include "tensorflow/core/platform/regexp.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 ResourceMgr::ResourceMgr() : default_container_("localhost") {}
 
 ResourceMgr::ResourceMgr(const string& default_container)
@@ -123,6 +136,7 @@ ResourceMgr::ResourceMgr(const string& default_container)
 ResourceMgr::~ResourceMgr() { Clear(); }
 
 void ResourceMgr::Clear() {
+<<<<<<< HEAD
   // We do the deallocation outside of the lock to avoid a potential deadlock
   // in case any of the destructors access the resource manager.
   std::unordered_map<string, Container*> tmp_containers;
@@ -184,10 +198,36 @@ Status ResourceMgr::DoCreate(const string& container, TypeIndex type,
     TF_RETURN_IF_ERROR(InsertDebugTypeName(type.hash_code(), type.name()));
     return Status::OK();
   }
+=======
+  mutex_lock l(mu_);
+  for (const auto& p : containers_) {
+    for (const auto& q : *p.second) {
+      q.second->Unref();
+    }
+    delete p.second;
+  }
+  containers_.clear();
+}
+
+Status ResourceMgr::DoCreate(const string& container, std::type_index type,
+                             const string& name, ResourceBase* resource) {
+  {
+    mutex_lock l(mu_);
+    Container** b = &containers_[container];
+    if (*b == nullptr) {
+      *b = new Container;
+    }
+    if ((*b)->insert({{type, name}, resource}).second) {
+      return Status::OK();
+    }
+  }
+  resource->Unref();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return errors::AlreadyExists("Resource ", container, "/", name, "/",
                                type.name());
 }
 
+<<<<<<< HEAD
 Status ResourceMgr::DoLookup(const string& container, TypeIndex type,
                              const string& name,
                              ResourceBase** resource) const {
@@ -203,20 +243,43 @@ Status ResourceMgr::DoLookup(const string& container, TypeIndex type,
                             " does not exist.");
   }
   *resource = const_cast<ResourceBase*>(iter->second.resource.get());
+=======
+Status ResourceMgr::DoLookup(const string& container, std::type_index type,
+                             const string& name,
+                             ResourceBase** resource) const {
+  mutex_lock l(mu_);
+  const Container* b = gtl::FindPtrOrNull(containers_, container);
+  if (b == nullptr) {
+    return errors::NotFound("Container ", container, " does not exist.");
+  }
+  auto r = gtl::FindPtrOrNull(*b, {type, name});
+  if (r == nullptr) {
+    return errors::NotFound("Resource ", container, "/", name, "/", type.name(),
+                            " does not exist.");
+  }
+  *resource = const_cast<ResourceBase*>(r);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   (*resource)->Ref();
   return Status::OK();
 }
 
+<<<<<<< HEAD
 Status ResourceMgr::DoDelete(const string& container, uint64 type_hash_code,
                              const string& resource_name,
                              const string& type_name) {
   ResourceAndName resource_and_name;
+=======
+Status ResourceMgr::DoDelete(const string& container, std::type_index type,
+                             const string& name) {
+  ResourceBase* base = nullptr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   {
     mutex_lock l(mu_);
     Container* b = gtl::FindPtrOrNull(containers_, container);
     if (b == nullptr) {
       return errors::NotFound("Container ", container, " does not exist.");
     }
+<<<<<<< HEAD
     auto iter = b->find({type_hash_code, resource_name});
     if (iter == b->end()) {
       return errors::NotFound("Resource ", container, "/", resource_name, "/",
@@ -247,22 +310,49 @@ Status ResourceMgr::Cleanup(const string& container) {
       return Status::OK();
     }
   }
+=======
+    auto iter = b->find({type, name});
+    if (iter == b->end()) {
+      return errors::NotFound("Resource ", container, "/", name, "/",
+                              type.name(), " does not exist.");
+    }
+    base = iter->second;
+    b->erase(iter);
+  }
+  CHECK(base != nullptr);
+  base->Unref();
+  return Status::OK();
+}
+
+Status ResourceMgr::Cleanup(const string& container) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Container* b = nullptr;
   {
     mutex_lock l(mu_);
     auto iter = containers_.find(container);
     if (iter == containers_.end()) {
+<<<<<<< HEAD
       // Nothing to cleanup, it's OK (concurrent cleanup).
       return Status::OK();
+=======
+      return errors::NotFound("Container ", container, " does not exist.");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     b = iter->second;
     containers_.erase(iter);
   }
   CHECK(b != nullptr);
+<<<<<<< HEAD
+=======
+  for (const auto& p : *b) {
+    p.second->Unref();
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   delete b;
   return Status::OK();
 }
 
+<<<<<<< HEAD
 static bool IsValidContainerName(StringPiece s) {
   using ::tensorflow::strings::Scanner;
   return Scanner(s)
@@ -272,13 +362,21 @@ static bool IsValidContainerName(StringPiece s) {
       .GetResult();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Status ContainerInfo::Init(ResourceMgr* rmgr, const NodeDef& ndef,
                            bool use_node_name_as_default) {
   CHECK(rmgr);
   rmgr_ = rmgr;
   string attr_container;
   TF_RETURN_IF_ERROR(GetNodeAttr(ndef, "container", &attr_container));
+<<<<<<< HEAD
   if (!attr_container.empty() && !IsValidContainerName(attr_container)) {
+=======
+  static RE2 container_re("[A-Za-z0-9.][A-Za-z0-9_.\\-/]*");
+  if (!attr_container.empty() &&
+      !RE2::FullMatch(attr_container, container_re)) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return errors::InvalidArgument("container contains invalid characters: ",
                                    attr_container);
   }
@@ -311,6 +409,7 @@ string ContainerInfo::DebugString() const {
                          "]");
 }
 
+<<<<<<< HEAD
 const ResourceHandle& HandleFromInput(OpKernelContext* ctx, int input) {
   return ctx->input(input).flat<ResourceHandle>()(0);
 }
@@ -337,4 +436,6 @@ Status ResourceHandlesShape(shape_inference::InferenceContext* c) {
   return Status::OK();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  //  end namespace tensorflow

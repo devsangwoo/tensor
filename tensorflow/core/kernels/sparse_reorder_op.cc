@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,15 +18,27 @@ limitations under the License.
 
 #include <algorithm>
 #include <numeric>
+=======
+#define EIGEN_USE_THREADS
+
+#include <algorithm>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <unordered_map>
 #include <utility>
 
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/register_types.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/tensor_util.h"
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/lib/gtl/inlined_vector.h"
+=======
+#include "tensorflow/core/framework/tensor_util.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/gtl/inlined_vector.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/sparse/sparse_tensor.h"
 
 namespace tensorflow {
@@ -39,19 +52,31 @@ class SparseReorderOp : public OpKernel {
     const Tensor& input_ind = context->input(0);
     OP_REQUIRES(context, TensorShapeUtils::IsMatrix(input_ind.shape()),
                 errors::InvalidArgument(
+<<<<<<< HEAD
                     "Input indices should be a matrix but received shape ",
+=======
+                    "Input indices should be a matrix but received shape",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                     input_ind.shape().DebugString()));
 
     const Tensor& input_val = context->input(1);
     OP_REQUIRES(context, TensorShapeUtils::IsVector(input_val.shape()),
                 errors::InvalidArgument(
+<<<<<<< HEAD
                     "Input values should be a vector but received shape ",
+=======
+                    "Input values should be a vector but received shape",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                     input_val.shape().DebugString()));
 
     const Tensor& input_shape_in = context->input(2);
     OP_REQUIRES(context, TensorShapeUtils::IsVector(input_shape_in.shape()),
                 errors::InvalidArgument(
+<<<<<<< HEAD
                     "Input shape should be a vector but received shape ",
+=======
+                    "Input shape should be a vector but received shape",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                     input_shape_in.shape().DebugString()));
 
     const TensorShape input_shape(input_shape_in.vec<int64>());
@@ -60,21 +85,33 @@ class SparseReorderOp : public OpKernel {
     std::iota(std_order.begin(), std_order.end(), 0);
 
     // Check if the sparse tensor is already ordered correctly
+<<<<<<< HEAD
     sparse::SparseTensor input_sp;
     OP_REQUIRES_OK(
         context, sparse::SparseTensor::Create(input_ind, input_val, input_shape,
                                               std_order, &input_sp));
 
     if (input_sp.IndicesValid().ok()) {
+=======
+    sparse::SparseTensor input_sp(input_ind, input_val, input_shape, std_order);
+
+    if (input_sp.IndicesValid()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       context->set_output(0, input_sp.indices());
       context->set_output(1, input_sp.values());
     } else {
       // Deep-copy the input Tensors, then reorder in-place
+<<<<<<< HEAD
       sparse::SparseTensor reordered_sp;
       OP_REQUIRES_OK(context,
                      sparse::SparseTensor::Create(tensor::DeepCopy(input_ind),
                                                   tensor::DeepCopy(input_val),
                                                   input_shape, &reordered_sp));
+=======
+      sparse::SparseTensor reordered_sp(tensor::DeepCopy(input_ind),
+                                        tensor::DeepCopy(input_val),
+                                        input_shape);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       reordered_sp.Reorder<T>(std_order);
       context->set_output(0, reordered_sp.indices());
       context->set_output(1, reordered_sp.values());

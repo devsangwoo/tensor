@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +26,39 @@ namespace gpu {
 Event::Status GpuEvent::PollForStatus() {
   port::StatusOr<CUresult> status =
       GpuDriver::QueryEvent(parent_->gpu_context(), gpu_event_);
+=======
+#include "tensorflow/stream_executor/cuda/cuda_event.h"
+
+#include "tensorflow/stream_executor/cuda/cuda_stream.h"
+#include "tensorflow/stream_executor/lib/statusor.h"
+
+namespace perftools {
+namespace gputools {
+namespace cuda {
+
+CUDAEvent::CUDAEvent(CUDAExecutor* parent)
+    : parent_(parent), cuda_event_(nullptr) {}
+
+CUDAEvent::~CUDAEvent() {}
+
+port::Status CUDAEvent::Init() {
+  return CUDADriver::CreateEvent(parent_->cuda_context(), &cuda_event_,
+                                 CUDADriver::EventFlags::kDisableTiming);
+}
+
+port::Status CUDAEvent::Destroy() {
+  return CUDADriver::DestroyEvent(parent_->cuda_context(), &cuda_event_);
+}
+
+port::Status CUDAEvent::Record(CUDAStream* stream) {
+  return CUDADriver::RecordEvent(parent_->cuda_context(), cuda_event_,
+                                 stream->cuda_stream());
+}
+
+Event::Status CUDAEvent::PollForStatus() {
+  port::StatusOr<CUresult> status =
+      CUDADriver::QueryEvent(parent_->cuda_context(), cuda_event_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!status.ok()) {
     LOG(ERROR) << "Error polling for event status: "
                << status.status().error_message();
@@ -43,5 +77,15 @@ Event::Status GpuEvent::PollForStatus() {
   }
 }
 
+<<<<<<< HEAD
 }  // namespace gpu
 }  // namespace stream_executor
+=======
+const CUevent& CUDAEvent::cuda_event() {
+  return cuda_event_;
+}
+
+}  // namespace cuda
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

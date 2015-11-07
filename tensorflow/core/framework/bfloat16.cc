@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/bfloat16.h"
 
 namespace tensorflow {
@@ -20,6 +23,7 @@ namespace tensorflow {
 void FloatToBFloat16(const float* src, bfloat16* dst, int64 size) {
   const uint16_t* p = reinterpret_cast<const uint16_t*>(src);
   uint16_t* q = reinterpret_cast<uint16_t*>(dst);
+<<<<<<< HEAD
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   for (; size != 0; p += 2, q++, size--) {
     *q = p[0];
@@ -29,11 +33,17 @@ void FloatToBFloat16(const float* src, bfloat16* dst, int64 size) {
     *q = p[1];
   }
 #endif
+=======
+  for (; size; p += 2, q++, size--) {
+    *q = p[1];
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void BFloat16ToFloat(const bfloat16* src, float* dst, int64 size) {
   const uint16_t* p = reinterpret_cast<const uint16_t*>(src);
   uint16_t* q = reinterpret_cast<uint16_t*>(dst);
+<<<<<<< HEAD
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   for (; size != 0; p++, q += 2, size--) {
     q[0] = *p;
@@ -45,6 +55,12 @@ void BFloat16ToFloat(const bfloat16* src, float* dst, int64 size) {
     q[1] = *p;
   }
 #endif
+=======
+  for (; size; p++, q += 2, size--) {
+    q[0] = 0;
+    q[1] = *p;
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // end namespace tensorflow

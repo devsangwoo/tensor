@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,9 @@ limitations under the License.
 
 #if (defined(GOOGLE_CUDA) && GOOGLE_CUDA) || \
     (defined(TENSORFLOW_USE_ROCM) && TENSORFLOW_USE_ROCM)
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define EIGEN_USE_GPU
 
@@ -27,6 +31,7 @@ namespace tensorflow {
 typedef Eigen::GpuDevice GPUDevice;
 
 // Definition of the GPU implementations declared in pad_op.cc.
+<<<<<<< HEAD
 #define DEFINE_GPU_PAD_SPECS(T, Tpadding)                  \
   template struct functor::Pad<GPUDevice, T, Tpadding, 0>; \
   template struct functor::Pad<GPUDevice, T, Tpadding, 1>; \
@@ -49,3 +54,18 @@ TF_CALL_uint8(DEFINE_GPU_SPECS);
 }  // namespace tensorflow
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#define DEFINE_GPU_SPECS(T)                      \
+  template struct functor::Pad<GPUDevice, T, 0>; \
+  template struct functor::Pad<GPUDevice, T, 1>; \
+  template struct functor::Pad<GPUDevice, T, 2>; \
+  template struct functor::Pad<GPUDevice, T, 3>; \
+  template struct functor::Pad<GPUDevice, T, 4>; \
+  template struct functor::Pad<GPUDevice, T, 5>;
+
+TF_CALL_GPU_NUMBER_TYPES(DEFINE_GPU_SPECS);
+
+}  // namespace tensorflow
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

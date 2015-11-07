@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,6 +71,24 @@ class BcastOpsTest(test.TestCase):
 
   @test_util.run_deprecated_v1
   def testBasicGradient(self):
+=======
+"""Tests for tensorflow.kernels.bcast_ops."""
+
+import tensorflow.python.platform
+
+import tensorflow as tf
+
+from tensorflow.python.ops.gen_array_ops import _broadcast_gradient_args
+
+
+class BcastOpsTest(tf.test.TestCase):
+
+  def _GetGradientArgs(self, xs, ys):
+    with self.test_session() as sess:
+      return sess.run(_broadcast_gradient_args(xs, ys))
+
+  def testBasic(self):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     r0, r1 = self._GetGradientArgs([2, 3, 5], [1])
     self.assertAllEqual(r0, [])
     self.assertAllEqual(r1, [0, 1, 2])
@@ -110,6 +129,7 @@ class BcastOpsTest(test.TestCase):
     self.assertAllEqual(r0, [0, 2])
     self.assertAllEqual(r1, [1])
 
+<<<<<<< HEAD
   @test_util.run_deprecated_v1
   def testZeroDims(self):
     r = self._GetBroadcastShape([2, 0, 3, 0, 5], [3, 0, 5])
@@ -126,6 +146,9 @@ class BcastOpsTest(test.TestCase):
 
   @test_util.run_deprecated_v1
   def testZeroDimsGradient(self):
+=======
+  def testZeroDims(self):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     r0, r1 = self._GetGradientArgs([2, 0, 3, 0, 5], [3, 0, 5])
     self.assertAllEqual(r0, [])
     self.assertAllEqual(r1, [0, 1])
@@ -142,6 +165,7 @@ class BcastOpsTest(test.TestCase):
     self.assertAllEqual(r0, [0, 1, 3])
     self.assertAllEqual(r1, [])
 
+<<<<<<< HEAD
   @test_util.run_deprecated_v1
   def testDataTypes(self):
     for dtype in [dtypes.int32, dtypes.int64]:
@@ -159,3 +183,8 @@ class BcastOpsTest(test.TestCase):
 
 if __name__ == "__main__":
   test.main()
+=======
+
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

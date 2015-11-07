@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 /* SWIG wrapper for all of TensorFlow native functionality.
  * The includes are intentionally not alphabetically sorted, as the order of
  * includes follows dependency order */
 
+<<<<<<< HEAD
 %include "tensorflow/python/client/tf_session.i"
 
 %include "tensorflow/python/lib/io/py_record_reader.i"
@@ -34,3 +38,15 @@ limitations under the License.
 
 %ignore tensorflow::Status::operator=;
 %include "tensorflow/core/platform/status.h"
+=======
+%include "tensorflow/python/util/port.i"
+
+%include "tensorflow/python/lib/core/status.i"
+%include "tensorflow/python/lib/core/status_helper.i"
+
+%include "tensorflow/python/lib/io/py_record_reader.i"
+%include "tensorflow/python/lib/io/py_record_writer.i"
+%include "tensorflow/python/client/events_writer.i"
+
+%include "tensorflow/python/client/tf_session.i"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

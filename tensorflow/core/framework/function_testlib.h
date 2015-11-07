@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,10 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_FRAMEWORK_FUNCTION_TESTLIB_H_
 #define TENSORFLOW_CORE_FRAMEWORK_FUNCTION_TESTLIB_H_
+=======
+#ifndef TENSORFLOW_FRAMEWORK_FUNCTION_TESTLIB_H_
+#define TENSORFLOW_FRAMEWORK_FUNCTION_TESTLIB_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <string>
 
@@ -22,14 +27,20 @@ limitations under the License.
 #include "tensorflow/core/framework/function.h"
 #include "tensorflow/core/framework/function.pb.h"
 #include "tensorflow/core/framework/graph.pb.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/node_def.pb.h"
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace test {
 namespace function {
 
+<<<<<<< HEAD
 // A helper class to make AttrSlice from initializer lists
 class Attrs {
  public:
@@ -57,6 +68,11 @@ class Attrs {
 // Helper to construct a NodeDef.
 NodeDef NDef(
     StringPiece name, StringPiece op, gtl::ArraySlice<string> inputs,
+=======
+// Helper to construct a NodeDef.
+NodeDef NDef(
+    const string& name, const string& op, gtl::ArraySlice<string> inputs,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     gtl::ArraySlice<std::pair<string, FunctionDefHelper::AttrValueWrapper>>
         attrs = {},
     const string& device = "");
@@ -68,6 +84,7 @@ GraphDef GDef(gtl::ArraySlice<NodeDef> nodes,
 // For testing convenience, we provide a few simple functions that can
 // be easily executed and tested.
 
+<<<<<<< HEAD
 // x: T -> x * 2.
 FunctionDef XTimesTwo();
 
@@ -167,8 +184,32 @@ FunctionDef Unique();
 
 void FunctionTestSchedClosure(std::function<void()> fn);
 
+=======
+// x:T -> x * 2.
+FunctionDef XTimesTwo();
+
+// x:T -> (x * 2) * 2.
+FunctionDef XTimesFour();
+
+// x:T -> ((x * 2) * 2) * 2.
+FunctionDef XTimes16();
+
+// w:T, x:T, b:T -> MatMul(w, x) + b
+FunctionDef WXPlusB();
+
+// x:T -> x:T, T is a type which we automatically converts to a bool.
+FunctionDef NonZero();
+
+// x:T, y:T -> y:T, x:T
+FunctionDef Swap();
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace function
 }  // end namespace test
 }  // end namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_FUNCTION_TESTLIB_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_FUNCTION_TESTLIB_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

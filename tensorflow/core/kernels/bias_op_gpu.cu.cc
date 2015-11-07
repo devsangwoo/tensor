@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,11 +30,20 @@ limitations under the License.
 #include "tensorflow/core/kernels/reduction_ops_common.h"
 #include "tensorflow/core/platform/types.h"
 #include "tensorflow/core/util/gpu_kernel_helper.h"
+=======
+#if GOOGLE_CUDA
+
+#define EIGEN_USE_GPU
+
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/kernels/bias_op.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::GpuDevice GPUDevice;
 
+<<<<<<< HEAD
 // There are no native fp16 atomics (we simulate them using 32-bit atomics),
 // so fp16 sums are done in fp32 internally. (We don't have a lot of shared
 // memory traffic; BiasGradNCHW_SharedAtomics in particular works almost
@@ -295,3 +305,17 @@ template struct BiasGPU<int32>;
 }  // end namespace tensorflow
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+// Definition of the GPU implementations declared in bias_op.cc.
+#define DEFINE_GPU_SPECS(T)                       \
+  template struct functor::Bias<GPUDevice, T, 2>; \
+  template struct functor::Bias<GPUDevice, T, 3>; \
+  template struct functor::Bias<GPUDevice, T, 4>; \
+  template struct functor::Bias<GPUDevice, T, 5>;
+
+TF_CALL_GPU_NUMBER_TYPES(DEFINE_GPU_SPECS);
+
+}  // end namespace tensorflow
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

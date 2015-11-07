@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +16,13 @@ limitations under the License.
 
 #include "tensorflow/core/public/session.h"
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <string>
 
 #include "tensorflow/core/common_runtime/session_factory.h"
 #include "tensorflow/core/lib/core/errors.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/monitoring/gauge.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/monitoring.h"
@@ -63,10 +67,37 @@ Status Session::PRun(const string& handle,
 Session* NewSession(const SessionOptions& options) {
   SessionFactory* factory;
   Status s = SessionFactory::GetFactory(options, &factory);
+=======
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/session.h"
+
+namespace tensorflow {
+
+namespace {
+Status GetFactory(const SessionOptions& options, SessionFactory** ret) {
+  string runtime_type = "LOCAL_SESSION";
+  if (!options.target.empty()) {
+    // Use the service based session.
+    runtime_type = "REMOTE_SESSION";
+  }
+  *ret = SessionFactory::GetFactory(runtime_type);
+  if (!*ret) {
+    return errors::NotFound("Could not find session factory for ",
+                            runtime_type);
+  }
+  return Status::OK();
+}
+}  // end namespace
+
+Session* NewSession(const SessionOptions& options) {
+  SessionFactory* factory;
+  Status s = GetFactory(options, &factory);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!s.ok()) {
     LOG(ERROR) << s;
     return nullptr;
   }
+<<<<<<< HEAD
   // Starts exporting metrics through a platform-specific monitoring API (if
   // provided). For builds using "tensorflow/core/platform/default", this is
   // currently a no-op.
@@ -79,16 +110,24 @@ Session* NewSession(const SessionOptions& options) {
     return nullptr;
   }
   return out_session;
+=======
+  return factory->NewSession(options);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Status NewSession(const SessionOptions& options, Session** out_session) {
   SessionFactory* factory;
+<<<<<<< HEAD
   Status s = SessionFactory::GetFactory(options, &factory);
+=======
+  Status s = GetFactory(options, &factory);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!s.ok()) {
     *out_session = nullptr;
     LOG(ERROR) << s;
     return s;
   }
+<<<<<<< HEAD
   // Starts exporting metrics through a platform-specific monitoring API (if
   // provided). For builds using "tensorflow/core/platform/default", this is
   // currently a no-op.
@@ -106,6 +145,13 @@ Status Reset(const SessionOptions& options,
   SessionFactory* factory;
   TF_RETURN_IF_ERROR(SessionFactory::GetFactory(options, &factory));
   return factory->Reset(options, containers);
+=======
+  *out_session = factory->NewSession(options);
+  if (!*out_session) {
+    return errors::Internal("Failed to create session.");
+  }
+  return Status::OK();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

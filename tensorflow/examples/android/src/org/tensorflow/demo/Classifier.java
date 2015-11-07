@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 package org.tensorflow.demo;
 
 import android.graphics.Bitmap;
 import android.graphics.RectF;
+<<<<<<< HEAD
+=======
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import java.util.List;
 
 /**
@@ -43,8 +50,15 @@ public interface Classifier {
      */
     private final Float confidence;
 
+<<<<<<< HEAD
     /** Optional location within the source image for the location of the recognized object. */
     private RectF location;
+=======
+    /**
+     * Optional location within the source image for the location of the recognized object.
+     */
+    private final RectF location;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     public Recognition(
         final String id, final String title, final Float confidence, final RectF location) {
@@ -70,10 +84,13 @@ public interface Classifier {
       return new RectF(location);
     }
 
+<<<<<<< HEAD
     public void setLocation(RectF location) {
       this.location = location;
     }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     @Override
     public String toString() {
       String resultString = "";
@@ -99,9 +116,12 @@ public interface Classifier {
 
   List<Recognition> recognizeImage(Bitmap bitmap);
 
+<<<<<<< HEAD
   void enableStatLogging(final boolean debug);
 
   String getStatString();
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   void close();
 }

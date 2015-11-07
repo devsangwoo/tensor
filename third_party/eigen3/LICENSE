@@ -533,12 +533,18 @@ Following applies to:
 ./Eigen/src/MetisSupport/MetisSupport.h
 ./Eigen/StdVector
 ./Eigen/Core
+<<<<<<< HEAD
 ./Eigen/OrderingMethods
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 ./Eigen/SparseLU
 ./Eigen/StdList
 ./Eigen/StdDeque
 ./Eigen/SparseCholesky
+<<<<<<< HEAD
 ./Eigen/SparseCore
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 ./scripts/relicense.py
 ./scripts/relicense.py
 ./blas/BandTriangularSolver.h

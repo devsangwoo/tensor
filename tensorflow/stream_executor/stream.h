@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // The Stream is used in conjunction with the StreamExecutor "parent" to
 // perform actions with a linear stream of dependencies. Dependencies can also
 // be created between Streams to do task management (i.e. limit which tasks
@@ -25,22 +28,37 @@ limitations under the License.
 #include <functional>
 #include <memory>
 
+<<<<<<< HEAD
 #include "absl/synchronization/mutex.h"
 #include "tensorflow/core/platform/macros.h"
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/blas.h"
 #include "tensorflow/stream_executor/device_memory.h"
 #include "tensorflow/stream_executor/dnn.h"
 #include "tensorflow/stream_executor/event.h"
 #include "tensorflow/stream_executor/fft.h"
+<<<<<<< HEAD
 #include "tensorflow/stream_executor/host_or_device_scalar.h"
 #include "tensorflow/stream_executor/kernel.h"
 #include "tensorflow/stream_executor/launch_dim.h"
 #include "tensorflow/stream_executor/lib/array_slice.h"
+=======
+#include "tensorflow/stream_executor/kernel.h"
+#include "tensorflow/stream_executor/launch_dim.h"
+#include "tensorflow/stream_executor/lib/array_slice.h"
+#include "tensorflow/stream_executor/platform/mutex.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/platform/port.h"
 #include "tensorflow/stream_executor/platform/thread_annotations.h"
 #include "tensorflow/stream_executor/temporary_memory_manager.h"
 
+<<<<<<< HEAD
 namespace stream_executor {
+=======
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace host {
 class HostBlas;
@@ -64,6 +82,7 @@ class DeviceMemory;
 class Timer;
 
 namespace dnn {
+<<<<<<< HEAD
 class BatchDescriptor;
 class FilterDescriptor;
 class ConvolutionDescriptor;
@@ -77,6 +96,14 @@ class ScratchAllocator;
 // Convert a type to the corresponding QuantizedActivationMode.
 template <typename ElementType>
 struct Quantization;
+=======
+struct BatchDescriptor;
+struct FilterDescriptor;
+struct ConvolutionDescriptor;
+}  // namespace dnn
+
+class StreamExecutor;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Represents a stream of dependent computations on a GPU device.
 //
@@ -109,6 +136,7 @@ class Stream {
   // stream.
   bool ok() const { return !InErrorState(); }
 
+<<<<<<< HEAD
   // Retrieves execution status back into the stream from the underlying
   // implementation without blocking the stream.
   //
@@ -123,6 +151,11 @@ class Stream {
   // Initialize the stream. This must be performed before entraining any other
   // operations.
   Stream &Init() LOCKS_EXCLUDED(mu_);
+=======
+  // Initialize the stream. This must be performed before entraining any other
+  // operations.
+  Stream &Init();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Initializes timer t via the StreamExecutor.
   Stream &InitTimer(Timer *t);
@@ -130,6 +163,7 @@ class Stream {
   // Convenience wrapper around Init() and InitTimer().
   Stream &InitWithTimer(Timer *t);
 
+<<<<<<< HEAD
   // Get or create a sub-stream from this stream. If there is any sub-stream in
   // the pool that can be reused then just return this sub-stream.  Otherwise
   // create a new sub-stream.
@@ -142,6 +176,20 @@ class Stream {
   //
   // TODO(b/112196569): The semantics of failed sub-streams is error-prone.
   void ReturnSubStream(Stream *sub_stream) LOCKS_EXCLUDED(mu_);
+=======
+  // Warning! After calling BlockHostUntilDone(), all sub-streams will be
+  // returned and hence invalid. This may be a temporary solution to the issue
+  // b/18070215.
+  // Get or create a sub-stream from this stream. If there is any sub-stream
+  // in the pool that can be reused then just return this sub-stream.
+  // Otherwise
+  // create a new sub-stream.
+  Stream *GetOrCreateSubStream();
+
+  // Return the sub-stream back to the host stream so that it can be reused
+  // later.
+  void ReturnSubStream(Stream *sub_stream);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Allocate temporary memories. The stream will deallocate them when blocked
   // or destroyed.
@@ -172,6 +220,7 @@ class Stream {
                      const TypedKernel<Params...> &kernel, Args... args);
 
   // Record a "start" event for the interval timer at this point in the
+<<<<<<< HEAD
   // stream's execution (relative to the previously and subsequently enqueued
   // items in the stream's execution). Streams may be started/stopped multiple
   // times.
@@ -179,6 +228,16 @@ class Stream {
 
   // Record a "stop" event for the interval timer at this point in the
   // stream's execution. See also Stream::ThenStartTimer.
+=======
+  // stream's
+  // execution (relative to the previously and subsequently enqueued items in
+  // the stream's execution). Streams may be started/stopped multiple times.
+  Stream &ThenStartTimer(Timer *t);
+
+  // Record a "stop" event for the interval timer at this point in the
+  // stream's
+  // execution. See also Stream::ThenStartTimer.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Stream &ThenStopTimer(Timer *t);
 
   // TODO(leary) If work is added to the stream that is being depended upon,
@@ -194,13 +253,19 @@ class Stream {
   //
   // Checks that a stream does not wait for itself, and it is up to the
   // user to guarantee that a stream does not come to wait on itself in a
+<<<<<<< HEAD
   // cyclic manner; in that case, behavior is undefined.
+=======
+  // cyclic
+  // manner; in that case, behavior is undefined.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //
   // N.B. Base recursion case for the variadic ThenWaitFor.
   Stream &ThenWaitFor(Stream *other);
 
   // Waits for all streams values in others.
   // Checks that there is no shallow circular wait (i.e. that "this" is not in
+<<<<<<< HEAD
   // others)
   template <typename P>
   Stream &ThenWaitFor(P others) {
@@ -210,6 +275,10 @@ class Stream {
     }
     return *this;
   }
+=======
+  // others).
+  Stream &ThenWaitFor(std::vector<std::unique_ptr<Stream>> *others);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Waits for an event object to be set.
   // Note that ThenRecordEvent must have been called on the event before
@@ -229,6 +298,7 @@ class Stream {
   //
   // See DnnSupport::* for comments on the following methods.
 
+<<<<<<< HEAD
   Stream &ThenBatchNormalizationForward(
       const DeviceMemory<float> &x, const DeviceMemory<float> &scale,
       const DeviceMemory<float> &offset,
@@ -282,6 +352,9 @@ class Stream {
       DeviceMemory<uint8> *reserve_space_data,
       ScratchAllocator *workspace_allocator);
 
+=======
+  // TODO(leary) add double-precision version of this interface.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Stream &ThenConvolve(const dnn::BatchDescriptor &input_descriptor,
                        const DeviceMemory<float> &input_data,
                        const dnn::FilterDescriptor &filter_descriptor,
@@ -290,6 +363,7 @@ class Stream {
                        const dnn::BatchDescriptor &output_descriptor,
                        DeviceMemory<float> *output);
 
+<<<<<<< HEAD
   Stream &ThenConvolveQuantized(
       const dnn::BatchDescriptor &input_descriptor,
       const DeviceMemory<float> &input_data,
@@ -436,6 +510,8 @@ class Stream {
       const dnn::AlgorithmConfig &algorithm_config,
       dnn::ProfileResult *output_profile_result);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Stream &ThenSeparableConvolve(
       const dnn::BatchDescriptor &input_descriptor,
       const DeviceMemory<float> &input_data,
@@ -446,6 +522,7 @@ class Stream {
       const dnn::BatchDescriptor &output_descriptor,
       DeviceMemory<float> *output);
 
+<<<<<<< HEAD
   Stream &ThenConvolveBackwardDataWithAlgorithm(
       const dnn::FilterDescriptor &filter_descriptor,
       const DeviceMemory<double> &filter_data,
@@ -459,12 +536,16 @@ class Stream {
       dnn::ProfileResult *output_profile_result);
 
   Stream &ThenConvolveBackwardDataWithAlgorithm(
+=======
+  Stream &ThenConvolveBackwardData(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       const dnn::FilterDescriptor &filter_descriptor,
       const DeviceMemory<float> &filter_data,
       const dnn::BatchDescriptor &output_descriptor,
       DeviceMemory<float> backward_output_data,
       const dnn::ConvolutionDescriptor &convolution_descriptor,
       const dnn::BatchDescriptor &input_descriptor,
+<<<<<<< HEAD
       DeviceMemory<float> *backward_input_data,
       ScratchAllocator *scratch_allocator,
       const dnn::AlgorithmConfig &algorithm_config,
@@ -495,12 +576,18 @@ class Stream {
       dnn::ProfileResult *output_profile_result);
 
   Stream &ThenConvolveBackwardFilterWithAlgorithm(
+=======
+      DeviceMemory<float> *backward_input_data);
+
+  Stream &ThenConvolveBackwardFilter(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       const dnn::BatchDescriptor &input_descriptor,
       const DeviceMemory<float> &input_data,
       const dnn::BatchDescriptor &output_descriptor,
       DeviceMemory<float> backward_output_data,
       const dnn::ConvolutionDescriptor &convolution_descriptor,
       const dnn::FilterDescriptor &filter_descriptor,
+<<<<<<< HEAD
       DeviceMemory<float> *backward_filter_data,
       ScratchAllocator *scratch_allocator,
       const dnn::AlgorithmConfig &algorithm_config,
@@ -533,6 +620,9 @@ class Stream {
       const DeviceMemory<Eigen::half> &input_data,
       const dnn::BatchDescriptor &bias_descriptor,
       DeviceMemory<Eigen::half> *backward_bias_data);
+=======
+      DeviceMemory<float> *backward_filter_data);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Stream &ThenMatMul(const DeviceMemory<float> &input_data,
                      const DeviceMemory<float> &weights,
@@ -541,6 +631,7 @@ class Stream {
                      DeviceMemory<float> *output_data);
 
   Stream &ThenMatMulQuantized(const DeviceMemory<float> &input_data,
+<<<<<<< HEAD
                               const DeviceMemory<int8> &weights,
                               const DeviceMemory<float> &weight_scales,
                               const dnn::BatchDescriptor &input_dimensions,
@@ -553,6 +644,20 @@ class Stream {
                               const dnn::BatchDescriptor &input_dimensions,
                               const dnn::BatchDescriptor &output_dimensions,
                               DeviceMemory<float> *output_data);
+=======
+                     const DeviceMemory<int8> &weights,
+                     const DeviceMemory<float> &weight_scales,
+                     const dnn::BatchDescriptor &input_dimensions,
+                     const dnn::BatchDescriptor &output_dimensions,
+                     DeviceMemory<float> *output_data);
+
+  Stream &ThenMatMulQuantized(const DeviceMemory<float> &input_data,
+                     const DeviceMemory<int16> &weights,
+                     const DeviceMemory<float> &weight_scales,
+                     const dnn::BatchDescriptor &input_dimensions,
+                     const dnn::BatchDescriptor &output_dimensions,
+                     DeviceMemory<float> *output_data);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Stream &ThenBiasAdd(const DeviceMemory<float> &input_data,
                       const DeviceMemory<float> &biases,
@@ -561,6 +666,7 @@ class Stream {
 
   Stream &ThenPoolForward(const dnn::PoolingDescriptor &pooling_dimensions,
                           const dnn::BatchDescriptor &input_dimensions,
+<<<<<<< HEAD
                           const DeviceMemory<double> &input_data,
                           const dnn::BatchDescriptor &output_dimensions,
                           DeviceMemory<double> *output_data,
@@ -595,6 +701,11 @@ class Stream {
                            const DeviceMemory<double> &input_diff_data,
                            DeviceMemory<double> *output_diff_data,
                            ScratchAllocator *workspace_allocator = nullptr);
+=======
+                          const DeviceMemory<float> &input_data,
+                          const dnn::BatchDescriptor &output_dimensions,
+                          DeviceMemory<float> *output_data);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Stream &ThenPoolBackward(const dnn::PoolingDescriptor &pooling_dimensions,
                            const dnn::BatchDescriptor &input_dimensions,
@@ -602,6 +713,7 @@ class Stream {
                            const dnn::BatchDescriptor &output_dimensions,
                            const DeviceMemory<float> &output_data,
                            const DeviceMemory<float> &input_diff_data,
+<<<<<<< HEAD
                            DeviceMemory<float> *output_diff_data,
                            ScratchAllocator *workspace_allocator = nullptr);
 
@@ -627,12 +739,20 @@ class Stream {
       const DeviceMemory<float> &normalized_variable_gradient,
       DeviceMemory<float> *raw_variable_gradient,
       ScratchAllocator *workspace_allocator = nullptr);
+=======
+                           DeviceMemory<float> *output_diff_data);
+
+  Stream &ThenNormalize(const dnn::NormalizeDescriptor &normalize_descriptor,
+                        const DeviceMemory<float> &input_data,
+                        DeviceMemory<float> *output_data);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Stream &ThenActivate(dnn::ActivationMode activation_mode,
                        const dnn::BatchDescriptor &dimensions,
                        const DeviceMemory<float> &input_data,
                        DeviceMemory<float> *output_data);
 
+<<<<<<< HEAD
   // Same as ThenActivate, but also takes an options argument that can be used
   // for platform-specific option flags.
   Stream &ThenActivateWithOptions(dnn::ActivationMode activation_mode,
@@ -641,11 +761,14 @@ class Stream {
                                   DeviceMemory<float> *output_data,
                                   uint64 options);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Stream &ThenDepthConcatenate(
       port::ArraySlice<dnn::BatchDescriptor> input_dimensions,
       port::ArraySlice<const DeviceMemory<float> *> input_data,
       DeviceMemory<float> *output_data);
 
+<<<<<<< HEAD
   Stream &ThenSpaceConcatenate(
       port::ArraySlice<dnn::BatchDescriptor> input_dimensions,
       port::ArraySlice<const DeviceMemory<float> *> input_data,
@@ -684,6 +807,8 @@ class Stream {
                            const int sqrt_depth_increase,
                            DeviceMemory<float> *output_data);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Stream &ThenElementwiseOperate(
       dnn::ElementwiseOperation operation,
       port::ArraySlice<dnn::BatchDescriptor> input_dimensions,
@@ -691,6 +816,7 @@ class Stream {
       const dnn::BatchDescriptor &output_dimensions,
       DeviceMemory<float> *output_data);
 
+<<<<<<< HEAD
   Stream &ThenElementwiseOperateScaledQuantized(
       dnn::ElementwiseOperation operation,
       port::ArraySlice<int> input_multiplicands, int output_divisor,
@@ -758,6 +884,26 @@ class Stream {
   Stream &ThenCopyDevice2HostBuffer(
       const DeviceMemory<float> &gpu_unquantized_src, HostBuffer *buffer_dst);
 
+=======
+  // See DnnSupport::DoMemcpyD2HQuantized.
+  // TODO(wgulland) Use a template to merge the versions of
+  // ThenMemcpyD2HQuantized.
+  Stream &ThenMemcpyD2HQuantized(const DeviceMemory<float> &gpu_unquantized_src,
+                                 port::MutableArraySlice<uint8> host_dst);
+
+  // See DnnSupport::DoMemcpyD2HQuantized.
+  Stream &ThenMemcpyD2HQuantized(const DeviceMemory<float> &gpu_unquantized_src,
+                                 port::MutableArraySlice<uint16> host_dst);
+
+  // See DnnSupport::DoMemcpyD2HQuantized.
+  Stream &ThenMemcpyD2HQuantized(const DeviceMemory<float> &gpu_unquantized_src,
+                                 port::MutableArraySlice<int32> host_dst);
+
+  // See DnnSupport::DoMemcpyH2DQuantized.
+  Stream &ThenMemcpyH2DQuantized(port::ArraySlice<uint8> host_src,
+                                 DeviceMemory<float> *gpu_unquantized_dst);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   /////////////////
   // BLAS support
 
@@ -980,6 +1126,7 @@ class Stream {
                        std::complex<double> beta,
                        DeviceMemory<std::complex<double>> *y, int incy);
 
+<<<<<<< HEAD
   Stream &ThenBlasGemvWithProfiling(blas::Transpose trans, uint64 m, uint64 n,
                                     float alpha, const DeviceMemory<float> &a,
                                     int lda, const DeviceMemory<float> &x,
@@ -1005,6 +1152,8 @@ class Stream {
       std::complex<double> beta, DeviceMemory<std::complex<double>> *y,
       int incy, blas::ProfileResult *output_profile_result);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // See BlasSupport::DoBlasGer.
   Stream &ThenBlasGer(uint64 m, uint64 n, float alpha,
                       const DeviceMemory<float> &x, int incx,
@@ -1292,6 +1441,7 @@ class Stream {
                        DeviceMemory<std::complex<double>> *x, int incx);
 
   // See BlasSupport::DoBlasGemm.
+<<<<<<< HEAD
   TF_EXPORT Stream &ThenBlasGemm(blas::Transpose transa, blas::Transpose transb,
                                  uint64 m, uint64 n, uint64 k, float alpha,
                                  const DeviceMemory<Eigen::half> &a, int lda,
@@ -1425,6 +1575,32 @@ class Stream {
       const port::ArraySlice<DeviceMemory<Eigen::half> *> &b, int ldb,
       float beta, const port::ArraySlice<DeviceMemory<Eigen::half> *> &c,
       int ldc, int batch_count);
+=======
+  Stream &ThenBlasGemm(blas::Transpose transa, blas::Transpose transb, uint64 m,
+                       uint64 n, uint64 k, float alpha,
+                       const DeviceMemory<float> &a, int lda,
+                       const DeviceMemory<float> &b, int ldb, float beta,
+                       DeviceMemory<float> *c, int ldc);
+  Stream &ThenBlasGemm(blas::Transpose transa, blas::Transpose transb, uint64 m,
+                       uint64 n, uint64 k, double alpha,
+                       const DeviceMemory<double> &a, int lda,
+                       const DeviceMemory<double> &b, int ldb, double beta,
+                       DeviceMemory<double> *c, int ldc);
+  Stream &ThenBlasGemm(blas::Transpose transa, blas::Transpose transb, uint64 m,
+                       uint64 n, uint64 k, std::complex<float> alpha,
+                       const DeviceMemory<std::complex<float>> &a, int lda,
+                       const DeviceMemory<std::complex<float>> &b, int ldb,
+                       std::complex<float> beta,
+                       DeviceMemory<std::complex<float>> *c, int ldc);
+  Stream &ThenBlasGemm(blas::Transpose transa, blas::Transpose transb, uint64 m,
+                       uint64 n, uint64 k, std::complex<double> alpha,
+                       const DeviceMemory<std::complex<double>> &a, int lda,
+                       const DeviceMemory<std::complex<double>> &b, int ldb,
+                       std::complex<double> beta,
+                       DeviceMemory<std::complex<double>> *c, int ldc);
+
+  // See BlasSupport::DoBlasGemmBatched.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Stream &ThenBlasGemmBatched(blas::Transpose transa, blas::Transpose transb,
                               uint64 m, uint64 n, uint64 k, float alpha,
                               const port::ArraySlice<DeviceMemory<float> *> &a,
@@ -1457,6 +1633,7 @@ class Stream {
       std::complex<double> beta,
       const port::ArraySlice<DeviceMemory<std::complex<double>> *> &c, int ldc,
       int batch_count);
+<<<<<<< HEAD
   Stream &ThenBlasGemmBatchedWithScratch(
       blas::Transpose transa, blas::Transpose transb, uint64 m, uint64 n,
       uint64 k, float alpha,
@@ -1524,6 +1701,8 @@ class Stream {
       const DeviceMemory<std::complex<double>> &b, int ldb, int64 stride_b,
       std::complex<double> beta, DeviceMemory<std::complex<double>> *c, int ldc,
       int64 stride_c, int batch_count);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // See BlasSupport::DoBlasHemm.
   Stream &ThenBlasHemm(blas::Side side, blas::UpperLower uplo, uint64 m,
@@ -1693,7 +1872,11 @@ class Stream {
   // back-end implementation will be appropriately seeded by default.
   // At a minimum 16 bytes of data are required in the seed buffer.
   //
+<<<<<<< HEAD
   // To seed with good (non-reproducible) data:
+=======
+  // To seed with good (non-reproducable) data:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //   File* f = File::Open("/dev/random", "r");
   //   int64 bytes_read = f->Read(seed_data, bytes_to_read);
   //   < error checking >
@@ -1733,7 +1916,11 @@ class Stream {
                      uint64 size);
 
   // Alternative interface for memcpying from device to host that takes an
+<<<<<<< HEAD
   // array slice. Checks that the destination size can accommodate the host
+=======
+  // array slice. Checks that the destination size can accomodate the host
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // slice size.
   template <typename T>
   Stream &ThenMemcpyD2H(const DeviceMemory<T> &gpu_src,
@@ -1744,7 +1931,11 @@ class Stream {
   }
 
   // Alternative interface for memcpying from host to device that takes an
+<<<<<<< HEAD
   // array slice. Checks that the destination size can accommodate the host
+=======
+  // array slice. Checks that the destination size can accomodate the host
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // slice size.
   template <typename T>
   Stream &ThenMemcpyH2D(port::ArraySlice<T> host_src,
@@ -1768,6 +1959,7 @@ class Stream {
     return ThenMemcpy(gpu_dst, gpu_src, size);
   }
 
+<<<<<<< HEAD
   // Entrain onto the stream: a memset of zero at a GPU location of size bytes.
   // The location must not be null.
   Stream &ThenMemZero(DeviceMemoryBase *location, uint64 size);
@@ -1940,6 +2132,26 @@ class Stream {
   // Returns an OK status if the blocking was successful and the stream is ok().
   // Otherwise returns an error describing why the blocking failed.
   port::Status BlockHostUntilDone() LOCKS_EXCLUDED(mu_);
+=======
+  // Entrain onto the stream: a memset of zero at a GPU location of size
+  // bytes.
+  // The location must not be null.
+  // TODO(leary) Presently the size must be a 4-byte multiple.
+  Stream &ThenMemZero(DeviceMemoryBase *location, uint64 size);
+
+  // Entrain onto the stream: a memset of a 32-bit pattern at a GPU location
+  // of
+  // size bytes, where bytes must be evenly 32-bit sized (i.e. evently
+  // divisible
+  // by 4). The location must not be null.
+  Stream &ThenMemset32(DeviceMemoryBase *location, const uint32 &pattern,
+                       uint64 size);
+
+  // (Synchronously) block the host code waiting for the operations entrained
+  // on
+  // the stream (enqueued to this point in program execution) to complete.
+  bool BlockHostUntilDone();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Warning! This method interacts with internal threads in
   // sometimes-unpredictable ways and is intended for GPU-Executor-internal
@@ -1965,6 +2177,7 @@ class Stream {
   internal::StreamInterface *implementation() { return implementation_.get(); }
 
   // Entrains onto the stream a callback to the host (from the device).
+<<<<<<< HEAD
   // Behaves as ThenDoHostCallbackWithStatus below, but the callback should
   // never fail or its failure is inconsequential.
   //
@@ -1992,6 +2205,19 @@ class Stream {
   // This can act as a faster alternative to ThenDoHostCallbackWithStatus for
   // some use cases.
   Stream &ThenRunAfterNextBlockHostUntilDone(std::function<void()> callback);
+=======
+  // Host callbacks block/occupy the stream just as device functions
+  // (execute one at a time, block later stream operations).
+  // Behavior is undefined when synchronizing using OpenCL user events.
+  // Behavior is undefined if host callbacks call device routines or insert
+  // them into any stream.
+  // On certain platforms, ThenDoHostCallback is expected to have significant
+  // negative effects on performance.
+  Stream &ThenDoHostCallback(std::function<void()> callback);
+
+  // Identical to ThenDoHostCallback; only exposed for testing purposes.
+  Stream &ThenDoHostCallbackForTest(std::function<void()> callback);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns the StreamExecutor (parent object) associated with this stream.
   StreamExecutor *parent() const {
@@ -2003,6 +2229,7 @@ class Stream {
   // with this stream.
   internal::TemporaryMemoryManager *temporary_memory_manager();
 
+<<<<<<< HEAD
   // Returns a debugging string "[stream=0x...,impl=0x...]".
   string DebugStreamPointers() const;
 
@@ -2010,17 +2237,29 @@ class Stream {
   friend class host::HostBlas;  // for parent_.
   friend class host::HostFft;   // for parent_.
   friend class host::HostRng;   // for parent_.
+=======
+ private:
+  friend class host::HostBlas;   // for parent_.
+  friend class host::HostFft;    // for parent_.
+  friend class host::HostRng;    // for parent_.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   template <typename... Args>
   friend struct ThenBlasImpl;  // for implementing ThenBlasXXX.
   friend class ocl::CLBlas;    // for parent_.
 
+<<<<<<< HEAD
   bool InErrorState() const LOCKS_EXCLUDED(mu_) {
     absl::ReaderMutexLock lock(&mu_);
+=======
+  bool InErrorState() const {
+    shared_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return !ok_;
   }
 
   // Sets the error state if operation_retcode is false.
   // This is a useful shorthand for many stream routines.
+<<<<<<< HEAD
   void CheckError(bool operation_retcode) LOCKS_EXCLUDED(mu_) {
     if (operation_retcode) {
       return;
@@ -2047,13 +2286,34 @@ class Stream {
   // The StreamExecutor that supports the operation of this stream.
   StreamExecutor *parent_;
 
+=======
+  void CheckError(bool operation_retcode) {
+    if (operation_retcode) {
+      return;
+    }
+    mutex_lock lock{mu_};
+    ok_ = false;
+  }
+
+  void SetError() { CheckError(false /* = operation_retcode */); }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // The platform-dependent implementation that the StreamExecutor interface
   // delegates to.
   std::unique_ptr<internal::StreamInterface> implementation_;
 
+<<<<<<< HEAD
   // mutex that guards the allocation / error state flags.
   // Mutable so that it can be obtained via const reader lock.
   mutable absl::Mutex mu_;
+=======
+  // The StreamExecutor that supports the operation of this stream.
+  StreamExecutor *parent_;
+
+  // mutex that guards the allocation / error state flags.
+  // Mutable so that it can be obtained via const reader lock.
+  mutable mutex mu_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Whether Init() was successfully called to allocate this stream on the
   // underlying platform. It simply flips from 0 to 1 with a sanity check.
@@ -2076,6 +2336,7 @@ class Stream {
   // BlockHostUntilDone() is called.
   internal::TemporaryMemoryManager temporary_memory_manager_;
 
+<<<<<<< HEAD
   // Callbacks enqueued to be run after the next call to BlockHostUntilDone().
   std::vector<std::function<void()>> after_block_host_until_done_callbacks_
       GUARDED_BY(mu_);
@@ -2088,6 +2349,8 @@ class Stream {
       const dnn::BatchDescriptor &bias_descriptor,
       DeviceMemory<T> *backward_bias_data);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   SE_DISALLOW_COPY_AND_ASSIGN(Stream);
 };
 
@@ -2104,6 +2367,7 @@ inline internal::TemporaryMemoryManager *Stream::temporary_memory_manager() {
   return &temporary_memory_manager_;
 }
 
+<<<<<<< HEAD
 template <>
 struct Quantization<uint8> {
   static constexpr dnn::QuantizedActivationMode kModeId =
@@ -2123,5 +2387,9 @@ struct Quantization<int32> {
 };
 
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_STREAM_H_

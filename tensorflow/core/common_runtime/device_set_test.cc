@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,12 @@ limitations under the License.
 #include <vector>
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/common_runtime/device_set.h"
+
+#include "tensorflow/core/public/status.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -27,7 +34,12 @@ namespace {
 static Device* Dev(const char* type, const char* name) {
   class FakeDevice : public Device {
    public:
+<<<<<<< HEAD
     explicit FakeDevice(const DeviceAttributes& attr) : Device(nullptr, attr) {}
+=======
+    explicit FakeDevice(const DeviceAttributes& attr)
+        : Device(nullptr, attr, nullptr) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Status Sync() override { return Status::OK(); }
     Allocator* GetAllocator(AllocatorAttributes) override { return nullptr; }
   };
@@ -37,7 +49,11 @@ static Device* Dev(const char* type, const char* name) {
   return new FakeDevice(attr);
 }
 
+<<<<<<< HEAD
 class DeviceSetTest : public ::testing::Test {
+=======
+class DeviceSetTest : public testing::Test {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  public:
   void AddDevice(const char* type, const char* name) {
     Device* d = Dev(type, name);
@@ -54,6 +70,7 @@ class DeviceSetTest : public ::testing::Test {
   std::vector<std::unique_ptr<Device>> owned_;
 };
 
+<<<<<<< HEAD
 class DummyFactory : public DeviceFactory {
  public:
   Status ListPhysicalDevices(std::vector<string>* devices) override {
@@ -96,6 +113,29 @@ TEST_F(DeviceSetTest, PrioritizedDeviceTypeList) {
                 DeviceType("d3"),
             }),
             types());
+=======
+TEST_F(DeviceSetTest, PrioritizedDeviceTypeList) {
+  EXPECT_EQ(std::vector<DeviceType>{}, types());
+
+  AddDevice("CPU", "/job:a/replica:0/task:0/cpu:0");
+  EXPECT_EQ(std::vector<DeviceType>{DeviceType(DEVICE_CPU)}, types());
+
+  AddDevice("CPU", "/job:a/replica:0/task:0/cpu:1");
+  EXPECT_EQ(std::vector<DeviceType>{DeviceType(DEVICE_CPU)}, types());
+
+  AddDevice("GPU", "/job:a/replica:0/task:0/gpu:0");
+  EXPECT_EQ(
+      (std::vector<DeviceType>{DeviceType(DEVICE_GPU), DeviceType(DEVICE_CPU)}),
+      types());
+
+  AddDevice("T1", "/job:a/replica:0/task:0/device:T1:0");
+  AddDevice("T1", "/job:a/replica:0/task:0/device:T1:1");
+  AddDevice("T2", "/job:a/replica:0/task:0/device:T2:0");
+  EXPECT_EQ(
+      (std::vector<DeviceType>{DeviceType("T1"), DeviceType("T2"),
+                               DeviceType(DEVICE_GPU), DeviceType(DEVICE_CPU)}),
+      types());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace

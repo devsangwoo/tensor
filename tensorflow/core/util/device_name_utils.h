@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,15 @@ limitations under the License.
 
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/core/stringpiece.h"
+=======
+#ifndef TENSORFLOW_UTIL_DEVICE_NAME_UTILS_H_
+#define TENSORFLOW_UTIL_DEVICE_NAME_UTILS_H_
+
+#include <string>
+
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -86,6 +96,7 @@ class DeviceNameUtils {
     int id = 0;
   };
   // Parses "fullname" into "*parsed". Returns true iff succeeds.
+<<<<<<< HEAD
   // Legacy names like "/cpu:0" that don't contain "device",
   // are parsed to mean their current counterparts "/device:CPU:0". More
   // specifically, the lower case "cpu" and "gpu" is capitalized and "device"
@@ -105,6 +116,10 @@ class DeviceNameUtils {
                                        StringPiece basename,
                                        string* canonical_name);
 
+=======
+  static bool ParseFullName(StringPiece fullname, ParsedName* parsed);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Returns true if "name" specifies any non-trivial constraint on the device.
   static bool HasSomeDetails(const ParsedName& name) {
     return name.has_job || name.has_replica || name.has_task || name.has_type ||
@@ -118,19 +133,31 @@ class DeviceNameUtils {
   static bool IsSpecification(const ParsedName& less_specific,
                               const ParsedName& more_specific);
 
+<<<<<<< HEAD
   // Makes minimal changes to more_specific so that it becomes a
   // specification of less_specific.
   static void EnsureSpecification(ParsedName* more_specific,
                                   const ParsedName& less_specific);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Like IsSpecification, but the second argument "name" must have a
   // non-wildcard value for all of its components.
   static bool IsCompleteSpecification(const ParsedName& pattern,
                                       const ParsedName& name);
 
+<<<<<<< HEAD
   // True iff there exists any possible device name that is a specification of
   // both "a" and "b".
   static bool AreCompatibleDevNames(const ParsedName& a, const ParsedName& b);
+=======
+  // True iff there exists any possible complete device name that is
+  // a specification of both "a" and "b".
+  static inline bool AreCompatibleDevNames(const ParsedName& a,
+                                           const ParsedName& b) {
+    return IsSpecification(a, b) || IsSpecification(b, a);
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Merges the device specifications in "*target" and "other", and
   // stores the result in "*target". Returns OK if "*target" and
@@ -140,16 +167,20 @@ class DeviceNameUtils {
   }
   static Status MergeDevNames(ParsedName* target, const ParsedName& other,
                               bool allow_soft_placement);
+<<<<<<< HEAD
   // Same as MergeDevNames with allow_soft_placement=true, but instead of
   // clearing conflicting fields, overrides them with `other`'s values.
   static Status MergeOverrideDevNames(ParsedName* target,
                                       const ParsedName& other);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns true iff devices identified by 'src' and 'dst' are in the
   // same address space.
   static bool IsSameAddressSpace(StringPiece src, StringPiece dst);
   static bool IsSameAddressSpace(const ParsedName& src, const ParsedName& dst);
 
+<<<<<<< HEAD
   // Returns true iff devices identified by 'a' and 'b' are in different
   // address space.
   static bool IsDifferentAddressSpace(const ParsedName& a, const ParsedName& b);
@@ -158,6 +189,8 @@ class DeviceNameUtils {
   // job/replica/task of the given name.
   static const ParsedName AddressSpace(const ParsedName& name);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Returns the local device given its "type" and "id".
   static string LocalName(StringPiece type, int id);
 
@@ -179,6 +212,7 @@ class DeviceNameUtils {
   // component to be fully specified.
   static bool SplitDeviceName(StringPiece name, string* task, string* device);
 
+<<<<<<< HEAD
   // Get the task name from ParsedName. Return false if the task component is
   // not fully specified.
   static bool GetTaskName(const ParsedName& pn, string* task);
@@ -208,3 +242,11 @@ std::ostream& operator<<(std::ostream& os,
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_UTIL_DEVICE_NAME_UTILS_H_
+=======
+  static string ParsedNameToString(const ParsedName& pn);
+};
+
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_UTIL_DEVICE_NAME_UTILS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

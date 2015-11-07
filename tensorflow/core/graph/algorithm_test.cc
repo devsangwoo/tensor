@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/graph/algorithm.h"
 
 #include <string>
 #include <vector>
 
+<<<<<<< HEAD
 #include "tensorflow/core/graph/benchmark_testlib.h"
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/graph/graph_constructor.h"
@@ -29,6 +33,16 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/graph/graph.h"
+#include "tensorflow/core/graph/graph_def_builder.h"
+#include "tensorflow/core/graph/subgraph.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include <gtest/gtest.h>
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/lib/core/status_test_util.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // TODO(josh11b): Test setting the "device" field of a NodeDef.
 // TODO(josh11b): Test that feeding won't prune targets.
@@ -39,11 +53,14 @@ namespace {
 REGISTER_OP("TestParams").Output("o: float");
 REGISTER_OP("TestInput").Output("a: float").Output("b: float");
 REGISTER_OP("TestMul").Input("a: float").Input("b: float").Output("o: float");
+<<<<<<< HEAD
 REGISTER_OP("TestUnary").Input("a: float").Output("o: float");
 REGISTER_OP("TestBinary")
     .Input("a: float")
     .Input("b: float")
     .Output("o: float");
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Compares that the order of nodes in 'inputs' respects the
 // pair orders described in 'ordered_pairs'.
@@ -78,6 +95,10 @@ bool ExpectBefore(const std::vector<std::pair<string, string>>& ordered_pairs,
 }
 
 TEST(AlgorithmTest, ReversePostOrder) {
+<<<<<<< HEAD
+=======
+  RequireDefaultOps();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   GraphDefBuilder b(GraphDefBuilder::kFailImmediately);
   using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
   Node* w1 = SourceOp("TestParams", b.opts().WithName("W1"));
@@ -90,7 +111,11 @@ TEST(AlgorithmTest, ReversePostOrder) {
   BinaryOp("TestMul", w2, {input, 1}, b.opts().WithName("t3"));
 
   Graph g(OpRegistry::Global());
+<<<<<<< HEAD
   TF_ASSERT_OK(GraphDefBuilderToGraph(b, &g));
+=======
+  ASSERT_OK(b.ToGraph(&g));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   std::vector<Node*> order;
 
   // Test reverse post order:
@@ -121,6 +146,7 @@ TEST(AlgorithmTest, ReversePostOrder) {
   EXPECT_FALSE(ExpectBefore(orders, order, &error));
 }
 
+<<<<<<< HEAD
 TEST(AlgorithmTest, ReversePostOrderStable) {
   int64 run_count = 100;
   using namespace ::tensorflow::ops;  // NOLINT(build/namespaces)
@@ -241,5 +267,7 @@ BENCHMARK(BM_PruneForReverseReachability)->ArgPair(1 << 9, 16);
 BENCHMARK(BM_PruneForReverseReachability)->ArgPair(1 << 12, 16);
 BENCHMARK(BM_PruneForReverseReachability)->ArgPair(1 << 15, 16);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

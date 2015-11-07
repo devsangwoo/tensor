@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/common_runtime/gpu/gpu_stream_util.h"
 
 #include <set>
@@ -61,7 +64,11 @@ Status AssignStreams(const Graph* graph, const AssignStreamsOpts& opts,
       }
     }
   }
+<<<<<<< HEAD
   // We perform stream assignment assuming a large number of
+=======
+  // We perform stream assigmnent assuming a large number of
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // stream IDs and then map these down to the required number of streams
   // using simple round-robin.
   // Stream Assignment strategy:
@@ -82,7 +89,11 @@ Status AssignStreams(const Graph* graph, const AssignStreamsOpts& opts,
     // Determine a suitable stream to use.
     int stream_id = highest_stream_id + 1;
     for (const Edge* e : n->in_edges()) {
+<<<<<<< HEAD
       const size_t fanout = e->src()->out_edges().size();
+=======
+      const int fanout = e->src()->out_edges().size();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if (fanout == 1) {
         stream_id = (*node_to_stream_id)[e->src()->id()];
         break;

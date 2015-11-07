@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,6 +55,27 @@ namespace gputools {
 // completed the migration.
 using namespace stream_executor;  // NOLINT[build/namespaces]
 
+=======
+#ifndef TENSORFLOW_STREAM_EXECUTOR_LIB_STATUS_H_
+#define TENSORFLOW_STREAM_EXECUTOR_LIB_STATUS_H_
+
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/stream_executor/lib/error.h"
+#include "tensorflow/stream_executor/platform/logging.h"
+
+namespace perftools {
+namespace gputools {
+namespace port {
+
+using tensorflow::Status;
+
+#define SE_CHECK_OK(val) \
+  CHECK_EQ(::perftools::gputools::port::Status::OK(), (val))
+#define SE_ASSERT_OK(val) \
+  ASSERT_EQ(::perftools::gputools::port::Status::OK(), (val))
+
+}  // namespace port
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace gputools
 }  // namespace perftools
 

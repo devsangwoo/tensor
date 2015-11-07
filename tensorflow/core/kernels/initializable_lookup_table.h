@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,12 @@ limitations under the License.
 
 #include "tensorflow/core/framework/lookup_interface.h"
 #include "tensorflow/core/platform/macros.h"
+=======
+#ifndef TENSORFLOW_KERNELS_INITIALIZABLE_LOOKUP_TABLE_H_
+#define TENSORFLOW_KERNELS_INITIALIZABLE_LOOKUP_TABLE_H_
+
+#include "tensorflow/core/framework/lookup_interface.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace lookup {
@@ -43,6 +50,7 @@ class InitializableLookupTable : public LookupInterface {
   //   fails.
   // - In addition, other implementations may provide another non-OK status
   //   specific to their failure modes.
+<<<<<<< HEAD
   Status Find(OpKernelContext* ctx, const Tensor& keys, Tensor* values,
               const Tensor& default_value) final;
 
@@ -76,6 +84,13 @@ class InitializableLookupTable : public LookupInterface {
   bool is_initialized() const {
     return is_initialized_.load(std::memory_order_acquire);
   }
+=======
+  Status Find(const Tensor& keys, Tensor* values,
+              const Tensor& default_value) final;
+
+  // Returns whether the table was initialized and is ready to serve lookups.
+  bool is_initialized() const { return is_initialized_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Initializes the table from the given init table iterator.
   //
@@ -98,8 +113,11 @@ class InitializableLookupTable : public LookupInterface {
   //
   // Then the iterator is exhausted, valid returns false and status returns
   // Status::OutOfRange.
+<<<<<<< HEAD
   //
   // This class is Thread-unsafe.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   class InitTableIterator {
    public:
     InitTableIterator() {}
@@ -118,26 +136,37 @@ class InitializableLookupTable : public LookupInterface {
     // Returns a tensor that contains the current batch of 'value' values.
     virtual const Tensor& values() const = 0;
 
+<<<<<<< HEAD
     // Returns an error if one has occurred, otherwise returns Status::OK.
     virtual Status status() const = 0;
 
     // Returns the total number of elements that the iterator will produce.
     // It might return -1 in case of error.
+=======
+    // Returns an error if one has occurred, otherwire returns Status::OK.
+    virtual Status status() const = 0;
+
+    // Returns the total number of elements that the iterator will produce.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     virtual int64 total_size() const = 0;
 
    private:
     TF_DISALLOW_COPY_AND_ASSIGN(InitTableIterator);
   };
 
+<<<<<<< HEAD
   InitializableLookupTable* GetInitializableLookupTable() override {
     return this;
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  protected:
   // Prepares and allocates the underlying data structure to store the given
   // number of expected elements.
   virtual Status DoPrepare(size_t expected_num_elements) = 0;
 
+<<<<<<< HEAD
   // Same as DoPrepare() but derived implementations might choose to skip
   // calling get_expected_num_elements if size is not needed for DoPrepare.
   virtual Status DoLazyPrepare(
@@ -149,6 +178,8 @@ class InitializableLookupTable : public LookupInterface {
     return DoPrepare(expected_num_elements);
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Populates the table in batches given keys and values as tensors into the
   // underlying data structure.
   virtual Status DoInsert(const Tensor& keys, const Tensor& values) = 0;
@@ -157,6 +188,7 @@ class InitializableLookupTable : public LookupInterface {
   virtual Status DoFind(const Tensor& keys, Tensor* values,
                         const Tensor& default_value) = 0;
 
+<<<<<<< HEAD
   virtual Status AreEntriesSame(const InitTableIterator& iter, bool* result);
 
   mutex mu_;
@@ -214,9 +246,17 @@ class KeyValueTensorIterator
   const Tensor* values_;  // Doesn't own it.
   bool valid_;            // true if the iterator points to an existing range.
   Status status_;
+=======
+  mutex mu_;
+  bool is_initialized_ = false;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace lookup
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_INITIALIZABLE_LOOKUP_TABLE_H_
+=======
+#endif  // TENSORFLOW_KERNELS_INITIALIZABLE_LOOKUP_TABLE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +16,17 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_PUBLIC_SESSION_H_
 #define TENSORFLOW_CORE_PUBLIC_SESSION_H_
+=======
+#ifndef TENSORFLOW_PUBLIC_SESSION_H_
+#define TENSORFLOW_PUBLIC_SESSION_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <string>
 #include <vector>
 
 #include "tensorflow/core/framework/device_attributes.pb.h"
 #include "tensorflow/core/framework/graph.pb.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/core/status.h"
@@ -36,6 +42,14 @@ namespace thread {
 struct ThreadPoolOptions;
 
 }
+=======
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/public/session_options.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+
+namespace tensorflow {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 /// \brief A Session instance lets a caller drive a TensorFlow graph
 /// computation.
@@ -49,10 +63,15 @@ struct ThreadPoolOptions;
 ///
 /// Example:
 ///
+<<<<<<< HEAD
 /// ```c++
 ///
 ///     tensorflow::GraphDef graph;
 ///     // ... Create or load graph into "graph".
+=======
+///     tensorflow::GraphDef graph;
+///     // ... Create or load graph into 'graph'.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 ///
 ///     // This example uses the default options which connects
 ///     // to a local runtime.
@@ -78,9 +97,13 @@ struct ThreadPoolOptions;
 ///
 ///     // Close the session to release the resources associated with
 ///     // this session.
+<<<<<<< HEAD
 ///     session->Close();
 ///
 /// ```
+=======
+///     session->Close()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 ///
 /// A Session allows concurrent calls to Run(), though a Session must
 /// be created / extended by a single thread.
@@ -89,18 +112,24 @@ struct ThreadPoolOptions;
 /// after all other calls to Run() have returned.
 class Session {
  public:
+<<<<<<< HEAD
   Session();
   virtual ~Session();
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   /// \brief Create the graph to be used for the session.
   ///
   /// Returns an error if this session has already been created with a
   /// graph. To re-use the session with a different graph, the caller
   /// must Close() the session first.
   virtual Status Create(const GraphDef& graph) = 0;
+<<<<<<< HEAD
 #ifndef SWIG
   virtual Status Create(GraphDef&& graph) { return Create(graph); }
 #endif
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   /// \brief Adds operations to the graph that is already registered with the
   /// Session.
@@ -108,6 +137,7 @@ class Session {
   /// The names of new operations in "graph" must not exist in the
   /// graph that is already registered.
   virtual Status Extend(const GraphDef& graph) = 0;
+<<<<<<< HEAD
 #ifndef SWIG
   virtual Status Extend(GraphDef&& graph) { return Extend(graph); }
 #endif
@@ -131,11 +161,31 @@ class Session {
   /// `target_node_names` must be non-empty.
   ///
   /// REQUIRES: outputs is not nullptr if `output_tensor_names` is non-empty.
+=======
+
+  /// \brief Runs the graph with the provided input tensors and fills
+  /// 'outputs' for the endpoints specified in 'output_tensor_names'.
+  /// Runs to but does not return Tensors for the nodes in
+  /// 'target_node_names'.
+  ///
+  /// The order of tensors in 'outputs' will match the order provided
+  /// by 'output_tensor_names'.
+  ///
+  /// If Run returns OK(), then outputs->size() will be equal to
+  /// output_tensor_names.size().  If Run does not return OK(), the
+  /// state of outputs is undefined.
+  ///
+  /// REQUIRES: The name of each Tensor of the input or output must
+  /// match a "Tensor endpoint" in the GraphDef passed to Create().
+  ///
+  /// REQUIRES: outputs is not nullptr if output_tensor_names is non-empty.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   virtual Status Run(const std::vector<std::pair<string, Tensor> >& inputs,
                      const std::vector<string>& output_tensor_names,
                      const std::vector<string>& target_node_names,
                      std::vector<Tensor>* outputs) = 0;
 
+<<<<<<< HEAD
   /// \brief Implementations which support `RunOptions`.
   //
   /// NOTE: This API is still experimental and may change.
@@ -213,10 +263,13 @@ class Session {
   /// return a corresponding error message, and *response will be unmodified.
   virtual Status ListDevices(std::vector<DeviceAttributes>* response) = 0;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   /// \brief Closes this session.
   ///
   /// Closing a session releases the resources used by this session
   /// on the TensorFlow runtime (specified during session creation by
+<<<<<<< HEAD
   /// the `SessionOptions::target` field).
   virtual Status Close() = 0;
 
@@ -302,10 +355,17 @@ class Session {
   virtual Status Finalize() {
     return errors::Unimplemented("Finalize is not supported for this session.");
   }
+=======
+  /// the 'SessionOptions::target' field).
+  virtual Status Close() = 0;
+
+  virtual ~Session() {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 /// \brief Create a new session with the given options.
 ///
+<<<<<<< HEAD
 /// If session creation succeeds, the new `Session` will be stored in
 /// `*out_session`, the caller will take ownership of the returned
 /// `*out_session`, and this function will return `OK()`. Otherwise, this
@@ -352,3 +412,20 @@ Session* NewSession(const SessionOptions& options);
 }  // end namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_PUBLIC_SESSION_H_
+=======
+/// If a new session object could not be created, this function will
+/// return nullptr.
+Session* NewSession(const SessionOptions& options);
+
+/// \brief Create a new session with the given options.
+///
+/// If session creation succeeds, the new Session will be stored in
+/// *out_session, the caller will take ownership of the returned
+/// *out_session, and this function will return OK(). Otherwise, this
+/// function will return an error status.
+Status NewSession(const SessionOptions& options, Session** out_session);
+
+}  // end namespace tensorflow
+
+#endif  // TENSORFLOW_PUBLIC_SESSION_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,6 +1,7 @@
 # Description:
 #  Tools for building the TensorFlow pip package.
 
+<<<<<<< HEAD
 load("//tensorflow:tensorflow.bzl", "if_windows", "transitive_hdrs")
 load("//third_party/mkl:build_defs.bzl", "if_mkl", "if_mkl_ml")
 load("@local_config_cuda//cuda:build_defs.bzl", "if_cuda")
@@ -255,4 +256,29 @@ genrule(
         "//tensorflow:windows": "md5sum $(locations :build_pip_package) $(locations :simple_console_for_windows) > $@",
     }),
     visibility = ["//visibility:public"],
+=======
+package(default_visibility = ["//visibility:private"])
+
+py_binary(
+    name = "simple_console",
+    srcs = ["simple_console.py"],
+    deps = ["//tensorflow:tensorflow_py"],
+)
+
+sh_binary(
+    name = "build_pip_package",
+    srcs = ["build_pip_package.sh"],
+    data = [
+        "MANIFEST.in",
+        "README",
+        "setup.py",
+        ":simple_console",
+        "//tensorflow:tensorflow_py",
+        "//tensorflow/models/image/cifar10:cifar10_eval",
+        "//tensorflow/models/image/cifar10:cifar10_train",
+        "//tensorflow/models/image/cifar10:cifar10_multi_gpu_train",
+        "//tensorflow/models/image/mnist:convolutional",
+        "//tensorflow/tensorboard",
+    ],
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 )

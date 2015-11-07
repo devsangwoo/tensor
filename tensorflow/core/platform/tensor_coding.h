@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,17 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Helper routines for encoding/decoding tensor contents.
 #ifndef TENSORFLOW_PLATFORM_TENSOR_CODING_H_
 #define TENSORFLOW_PLATFORM_TENSOR_CODING_H_
 
 #include <string>
+<<<<<<< HEAD
 
 #include "tensorflow/core/platform/platform.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/refcount.h"
 #include "tensorflow/core/platform/stringpiece.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/lib/core/refcount.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/platform/port.h"
+
+#ifdef PLATFORM_GOOGLE
+#include "tensorflow/core/platform/google/cord_coding.h"
+#endif
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace port {
@@ -38,6 +51,7 @@ inline void CopyToArray(const string& src, char* dst) {
   memcpy(dst, src.data(), src.size());
 }
 
+<<<<<<< HEAD
 // Copy subrange [pos:(pos + n)) from src to dst. If pos >= src.size() the
 // result is empty. If pos + n > src.size() the subrange [pos, size()) is
 // copied.
@@ -53,10 +67,19 @@ void EncodeStringList(const tstring* strings, int64 n, string* out);
 // Decode n strings from src and store in strings[0..n-1].
 // Returns true if successful, false on parse error.
 bool DecodeStringList(const string& src, tstring* strings, int64 n);
+=======
+// Store encoding of strings[0..n-1] in *out.
+void EncodeStringList(const string* strings, int64 n, string* out);
+
+// Decode n strings from src and store in strings[0..n-1].
+// Returns true if successful, false on parse error.
+bool DecodeStringList(const string& src, string* strings, int64 n);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Assigns base[0..bytes-1] to *s
 void CopyFromArray(string* s, const char* base, size_t bytes);
 
+<<<<<<< HEAD
 // Encodes sequences of strings and serialized protocol buffers into a string.
 // Normal usage consists of zero or more calls to Append() and a single call to
 // Finalize().
@@ -127,6 +150,8 @@ std::unique_ptr<StringListEncoder> NewStringListEncoder(Cord* out);
 std::unique_ptr<StringListDecoder> NewStringListDecoder(const Cord& in);
 #endif  // defined(TENSORFLOW_PROTOBUF_USES_CORD)
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace port
 }  // namespace tensorflow
 

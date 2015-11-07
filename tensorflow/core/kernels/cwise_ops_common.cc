@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/kernels/cwise_ops_common.h"
 
 namespace tensorflow {
@@ -20,13 +23,18 @@ namespace tensorflow {
 BinaryOpShared::BinaryOpShared(OpKernelConstruction* ctx, DataType out,
                                DataType in)
     : OpKernel(ctx) {
+<<<<<<< HEAD
 #if !defined(INTEL_MKL) || !defined(ENABLE_MKL)
   OP_REQUIRES_OK(ctx, ctx->MatchSignature({in, in}, {out}));
 #endif  // !INTEL_MKL || !ENABLE_MKL
+=======
+  OP_REQUIRES_OK(ctx, ctx->MatchSignature({in, in}, {out}));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void BinaryOpShared::SetUnimplementedError(OpKernelContext* ctx) {
   ctx->SetStatus(errors::Unimplemented(
+<<<<<<< HEAD
       "Broadcast between ", ctx->input(0).shape().DebugString(), " and ",
       ctx->input(1).shape().DebugString(), " is not supported yet."));
 }
@@ -82,6 +90,35 @@ BinaryOpShared::BinaryOpState::BinaryOpState(OpKernelContext* ctx)
                           {0, 1}, 0, output_shape, &out));
 
   ndims = static_cast<int>(bcast.x_reshape().size());
+=======
+      "Broadcast between ", ctx->input(0).shape().ShortDebugString(), " and ",
+      ctx->input(1).shape().ShortDebugString(), " is not supported yet."));
+}
+
+static BCast::Vec FromShape(const TensorShape& shape) {
+  BCast::Vec ret;
+  for (int i = 0; i < shape.dims(); ++i) ret.push_back(shape.dim_size(i));
+  return ret;
+}
+
+static TensorShape ToShape(const BCast::Vec& vec) {
+  TensorShape shape;
+  for (auto elem : vec) shape.AddDim(elem);
+  return shape;
+}
+
+BinaryOpShared::BinaryOpState::BinaryOpState(OpKernelContext* ctx)
+    : bcast(FromShape(ctx->input(0).shape()),
+            FromShape(ctx->input(1).shape())) {
+  if (!bcast.IsValid()) {
+    ctx->SetStatus(errors::InvalidArgument(
+        "Incompatible shapes: ", ctx->input(0).shape().ShortDebugString(),
+        " vs. ", ctx->input(1).shape().ShortDebugString()));
+    return;
+  }
+  OP_REQUIRES_OK(ctx,
+                 ctx->allocate_output(0, ToShape(bcast.output_shape()), &out));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

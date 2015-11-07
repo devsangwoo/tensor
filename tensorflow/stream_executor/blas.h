@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Exposes the family of BLAS routines as pre-canned high performance calls for
 // use in conjunction with the StreamExecutor abstraction.
 //
@@ -30,8 +33,13 @@ limitations under the License.
 //  Stream stream{stream_exec};
 //  stream
 //    .Init()
+<<<<<<< HEAD
 //    .ThenBlasAxpy(1024, 5.5, x, 1, &y, 1);
 //  SE_CHECK_OK(stream.BlockHostUntilDone());
+=======
+//    .ThenBlasAxpy(1024, 5.5, x, 1, &y, 1)
+//    .BlockHostUntilDone();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //
 // By using stream operations in this manner the user can easily intermix custom
 // kernel launches (via StreamExecutor::ThenLaunch()) with these pre-canned BLAS
@@ -41,6 +49,7 @@ limitations under the License.
 #define TENSORFLOW_STREAM_EXECUTOR_BLAS_H_
 
 #include <complex>
+<<<<<<< HEAD
 #include <vector>
 
 #include "tensorflow/stream_executor/host_or_device_scalar.h"
@@ -56,6 +65,17 @@ namespace stream_executor {
 
 class Stream;
 class ScratchAllocator;
+=======
+#include "tensorflow/stream_executor/platform/port.h"
+
+#include "tensorflow/stream_executor/lib/array_slice.h"
+#include "tensorflow/stream_executor/platform/port.h"
+
+namespace perftools {
+namespace gputools {
+
+class Stream;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename ElemT>
 class DeviceMemory;
@@ -89,6 +109,7 @@ enum class Side { kLeft, kRight };
 // Returns a name for s.
 string SideString(Side s);
 
+<<<<<<< HEAD
 // Type with which intermediate computations of a blas routine are performed.
 //
 // Some blas calls can perform computations with a type that's different than
@@ -163,6 +184,8 @@ class AlgorithmConfig {
   AlgorithmType algorithm_;
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // BLAS support interface -- this can be derived from a GPU executor when the
 // underlying platform has an BLAS library implementation available. See
 // StreamExecutor::AsBlas().
@@ -478,6 +501,7 @@ class BlasSupport {
                           std::complex<double> beta,
                           DeviceMemory<std::complex<double>> *y, int incy) = 0;
 
+<<<<<<< HEAD
   virtual bool DoBlasGemvWithProfiling(
       Stream *stream, blas::Transpose trans, uint64 m, uint64 n, float alpha,
       const DeviceMemory<float> &a, int lda, const DeviceMemory<float> &x,
@@ -501,6 +525,8 @@ class BlasSupport {
       std::complex<double> beta, DeviceMemory<std::complex<double>> *y,
       int incy, ProfileResult *output_profile_result) = 0;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Performs a rank-1 update of a general matrix.
   //
   //     a <- alpha * x * y' + a,
@@ -948,6 +974,7 @@ class BlasSupport {
   // op(X) is one of op(X) = X, or op(X) = X', or op(X) = conj(X'); alpha and
   // beta are scalars; a, b, and c are matrices; op(a) is an m-by-k matrix;
   // op(b) is a k-by-n matrix; c is an m-by-n matrix.
+<<<<<<< HEAD
   //
   // Note: The half interface uses float precision internally; the version
   // that uses half precision internally is not yet supported. There is no
@@ -958,6 +985,8 @@ class BlasSupport {
                           int lda, const DeviceMemory<Eigen::half> &b, int ldb,
                           float beta, DeviceMemory<Eigen::half> *c,
                           int ldc) = 0;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   virtual bool DoBlasGemm(Stream *stream, blas::Transpose transa,
                           blas::Transpose transb, uint64 m, uint64 n, uint64 k,
                           float alpha, const DeviceMemory<float> &a, int lda,
@@ -983,6 +1012,7 @@ class BlasSupport {
                           std::complex<double> beta,
                           DeviceMemory<std::complex<double>> *c, int ldc) = 0;
 
+<<<<<<< HEAD
   virtual bool DoBlasGemmWithProfiling(
       Stream *stream, blas::Transpose transa, blas::Transpose transb, uint64 m,
       uint64 n, uint64 k, float alpha, const DeviceMemory<Eigen::half> &a,
@@ -1081,6 +1111,8 @@ class BlasSupport {
       ComputationType computation_type, AlgorithmType algorithm,
       ProfileResult *output_profile_result) = 0;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Computes a batch of matrix-matrix product with general matrices.
   // This is a batched version of DoBlasGemm.
   // The batched GEMM computes matrix product for each input/output in a, b,
@@ -1088,6 +1120,7 @@ class BlasSupport {
   virtual bool DoBlasGemmBatched(
       Stream *stream, blas::Transpose transa, blas::Transpose transb, uint64 m,
       uint64 n, uint64 k, float alpha,
+<<<<<<< HEAD
       const port::ArraySlice<DeviceMemory<Eigen::half> *> &a, int lda,
       const port::ArraySlice<DeviceMemory<Eigen::half> *> &b, int ldb,
       float beta, const port::ArraySlice<DeviceMemory<Eigen::half> *> &c,
@@ -1099,13 +1132,23 @@ class BlasSupport {
       const port::ArraySlice<DeviceMemory<float> *> &b, int ldb, float beta,
       const port::ArraySlice<DeviceMemory<float> *> &c, int ldc,
       int batch_count, ScratchAllocator *scratch_allocator) = 0;
+=======
+      const port::ArraySlice<DeviceMemory<float> *> &a, int lda,
+      const port::ArraySlice<DeviceMemory<float> *> &b, int ldb, float beta,
+      const port::ArraySlice<DeviceMemory<float> *> &c, int ldc,
+      int batch_count) = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   virtual bool DoBlasGemmBatched(
       Stream *stream, blas::Transpose transa, blas::Transpose transb, uint64 m,
       uint64 n, uint64 k, double alpha,
       const port::ArraySlice<DeviceMemory<double> *> &a, int lda,
       const port::ArraySlice<DeviceMemory<double> *> &b, int ldb, double beta,
       const port::ArraySlice<DeviceMemory<double> *> &c, int ldc,
+<<<<<<< HEAD
       int batch_count, ScratchAllocator *scratch_allocator) = 0;
+=======
+      int batch_count) = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   virtual bool DoBlasGemmBatched(
       Stream *stream, blas::Transpose transa, blas::Transpose transb, uint64 m,
       uint64 n, uint64 k, std::complex<float> alpha,
@@ -1113,7 +1156,11 @@ class BlasSupport {
       const port::ArraySlice<DeviceMemory<std::complex<float>> *> &b, int ldb,
       std::complex<float> beta,
       const port::ArraySlice<DeviceMemory<std::complex<float>> *> &c, int ldc,
+<<<<<<< HEAD
       int batch_count, ScratchAllocator *scratch_allocator) = 0;
+=======
+      int batch_count) = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   virtual bool DoBlasGemmBatched(
       Stream *stream, blas::Transpose transa, blas::Transpose transb, uint64 m,
       uint64 n, uint64 k, std::complex<double> alpha,
@@ -1121,6 +1168,7 @@ class BlasSupport {
       const port::ArraySlice<DeviceMemory<std::complex<double>> *> &b, int ldb,
       std::complex<double> beta,
       const port::ArraySlice<DeviceMemory<std::complex<double>> *> &c, int ldc,
+<<<<<<< HEAD
       int batch_count, ScratchAllocator *scratch_allocator) = 0;
 
   // Batched gemm with strides instead of pointer arrays.
@@ -1156,6 +1204,9 @@ class BlasSupport {
       const DeviceMemory<std::complex<double>> &b, int ldb, int64 stride_b,
       std::complex<double> beta, DeviceMemory<std::complex<double>> *c, int ldc,
       int64 stride_c, int batch_count) = 0;
+=======
+      int batch_count) = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Computes a matrix-matrix product where one input matrix is Hermitian:
   //
@@ -1383,8 +1434,11 @@ class BlasSupport {
                           const DeviceMemory<std::complex<double>> &a, int lda,
                           DeviceMemory<std::complex<double>> *b, int ldb) = 0;
 
+<<<<<<< HEAD
   virtual port::Status GetVersion(string *version) = 0;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  protected:
   BlasSupport() {}
 
@@ -1601,6 +1655,7 @@ class BlasSupport {
                   const DeviceMemory<std::complex<double>> &x, int incx,       \
                   std::complex<double> beta,                                   \
                   DeviceMemory<std::complex<double>> *y, int incy) override;   \
+<<<<<<< HEAD
   bool DoBlasGemvWithProfiling(                                                \
       Stream *stream, blas::Transpose trans, uint64 m, uint64 n, float alpha,  \
       const DeviceMemory<float> &a, int lda, const DeviceMemory<float> &x,     \
@@ -1623,6 +1678,8 @@ class BlasSupport {
       int lda, const DeviceMemory<std::complex<double>> &x, int incx,          \
       std::complex<double> beta, DeviceMemory<std::complex<double>> *y,        \
       int incy, blas::ProfileResult *output_profile_result) override;          \
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool DoBlasGer(Stream *stream, uint64 m, uint64 n, float alpha,              \
                  const DeviceMemory<float> &x, int incx,                       \
                  const DeviceMemory<float> &y, int incy,                       \
@@ -1874,11 +1931,14 @@ class BlasSupport {
                   DeviceMemory<std::complex<double>> *x, int incx) override;   \
   bool DoBlasGemm(Stream *stream, blas::Transpose transa,                      \
                   blas::Transpose transb, uint64 m, uint64 n, uint64 k,        \
+<<<<<<< HEAD
                   float alpha, const DeviceMemory<Eigen::half> &a, int lda,    \
                   const DeviceMemory<Eigen::half> &b, int ldb, float beta,     \
                   DeviceMemory<Eigen::half> *c, int ldc) override;             \
   bool DoBlasGemm(Stream *stream, blas::Transpose transa,                      \
                   blas::Transpose transb, uint64 m, uint64 n, uint64 k,        \
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   float alpha, const DeviceMemory<float> &a, int lda,          \
                   const DeviceMemory<float> &b, int ldb, float beta,           \
                   DeviceMemory<float> *c, int ldc) override;                   \
@@ -1901,6 +1961,7 @@ class BlasSupport {
                   const DeviceMemory<std::complex<double>> &b, int ldb,        \
                   std::complex<double> beta,                                   \
                   DeviceMemory<std::complex<double>> *c, int ldc) override;    \
+<<<<<<< HEAD
   bool DoBlasGemmWithProfiling(                                                \
       Stream *stream, blas::Transpose transa, blas::Transpose transb,          \
       uint64 m, uint64 n, uint64 k, float alpha,                               \
@@ -1997,20 +2058,30 @@ class BlasSupport {
       const port::ArraySlice<DeviceMemory<Eigen::half> *> &b, int ldb,         \
       float beta, const port::ArraySlice<DeviceMemory<Eigen::half> *> &c,      \
       int ldc, int batch_count, ScratchAllocator *scratch_allocator) override; \
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool DoBlasGemmBatched(                                                      \
       Stream *stream, blas::Transpose transa, blas::Transpose transb,          \
       uint64 m, uint64 n, uint64 k, float alpha,                               \
       const port::ArraySlice<DeviceMemory<float> *> &a, int lda,               \
       const port::ArraySlice<DeviceMemory<float> *> &b, int ldb, float beta,   \
       const port::ArraySlice<DeviceMemory<float> *> &c, int ldc,               \
+<<<<<<< HEAD
       int batch_count, ScratchAllocator *scratch_allocator) override;          \
+=======
+      int batch_count) override;                                               \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool DoBlasGemmBatched(                                                      \
       Stream *stream, blas::Transpose transa, blas::Transpose transb,          \
       uint64 m, uint64 n, uint64 k, double alpha,                              \
       const port::ArraySlice<DeviceMemory<double> *> &a, int lda,              \
       const port::ArraySlice<DeviceMemory<double> *> &b, int ldb, double beta, \
       const port::ArraySlice<DeviceMemory<double> *> &c, int ldc,              \
+<<<<<<< HEAD
       int batch_count, ScratchAllocator *scratch_allocator) override;          \
+=======
+      int batch_count) override;                                               \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool DoBlasGemmBatched(                                                      \
       Stream *stream, blas::Transpose transa, blas::Transpose transb,          \
       uint64 m, uint64 n, uint64 k, std::complex<float> alpha,                 \
@@ -2018,7 +2089,11 @@ class BlasSupport {
       const port::ArraySlice<DeviceMemory<std::complex<float>> *> &b, int ldb, \
       std::complex<float> beta,                                                \
       const port::ArraySlice<DeviceMemory<std::complex<float>> *> &c, int ldc, \
+<<<<<<< HEAD
       int batch_count, ScratchAllocator *scratch_allocator) override;          \
+=======
+      int batch_count) override;                                               \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool DoBlasGemmBatched(                                                      \
       Stream *stream, blas::Transpose transa, blas::Transpose transb,          \
       uint64 m, uint64 n, uint64 k, std::complex<double> alpha,                \
@@ -2027,6 +2102,7 @@ class BlasSupport {
       const port::ArraySlice<DeviceMemory<std::complex<double>> *> &b,         \
       int ldb, std::complex<double> beta,                                      \
       const port::ArraySlice<DeviceMemory<std::complex<double>> *> &c,         \
+<<<<<<< HEAD
       int ldc, int batch_count, ScratchAllocator *scratch_allocator) override; \
   bool DoBlasGemmStridedBatched(                                               \
       Stream *stream, blas::Transpose transa, blas::Transpose transb,          \
@@ -2060,6 +2136,9 @@ class BlasSupport {
       const DeviceMemory<std::complex<double>> &b, int ldb, int64 stride_b,    \
       std::complex<double> beta, DeviceMemory<std::complex<double>> *c,        \
       int ldc, int64 stride_c, int batch_count);                               \
+=======
+      int ldc, int batch_count) override;                                      \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool DoBlasHemm(Stream *stream, blas::Side side, blas::UpperLower uplo,      \
                   uint64 m, uint64 n, std::complex<float> alpha,               \
                   const DeviceMemory<std::complex<float>> &a, int lda,         \
@@ -2195,10 +2274,18 @@ class BlasSupport {
                   blas::Transpose transa, blas::Diagonal diag, uint64 m,       \
                   uint64 n, std::complex<double> alpha,                        \
                   const DeviceMemory<std::complex<double>> &a, int lda,        \
+<<<<<<< HEAD
                   DeviceMemory<std::complex<double>> *b, int ldb) override;    \
   port::Status GetVersion(string *version) override;
 
 }  // namespace blas
 }  // namespace stream_executor
+=======
+                  DeviceMemory<std::complex<double>> *b, int ldb) override;
+
+}  // namespace blas
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_BLAS_H_

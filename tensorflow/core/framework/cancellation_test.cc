@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,13 @@ limitations under the License.
 #include "tensorflow/core/lib/core/notification.h"
 #include "tensorflow/core/lib/core/threadpool.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/framework/cancellation.h"
+
+#include "tensorflow/core/lib/core/notification.h"
+#include "tensorflow/core/lib/core/threadpool.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -108,7 +116,10 @@ TEST(Cancellation, IsCancelled) {
     w.Schedule([n, cm]() {
       while (!cm->IsCancelled()) {
       }
+<<<<<<< HEAD
       ASSERT_FALSE(cm->IsCancelling());
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       n->Notify();
     });
   }
@@ -120,6 +131,7 @@ TEST(Cancellation, IsCancelled) {
   delete cm;
 }
 
+<<<<<<< HEAD
 TEST(Cancellation, IsCancelling) {
   CancellationManager cm;
   Notification started_cancelling;
@@ -256,4 +268,6 @@ TEST(Cancellation, Parent_RandomDestructionOrder) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

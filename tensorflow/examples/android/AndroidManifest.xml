@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+<<<<<<< HEAD
  Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+=======
+ Copyright 2014 The Android Open Source Project
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,7 +26,14 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+<<<<<<< HEAD
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+=======
+
+    <uses-sdk
+        android:minSdkVersion="21"
+        android:targetSdkVersion="23" />
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     <application android:allowBackup="true"
         android:debuggable="true"
@@ -30,6 +41,7 @@
         android:icon="@drawable/ic_launcher"
         android:theme="@style/MaterialTheme">
 
+<<<<<<< HEAD
         <activity android:name="org.tensorflow.demo.ClassifierActivity"
                   android:screenOrientation="portrait"
                   android:label="@string/activity_name_classification">
@@ -67,6 +79,14 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+=======
+        <activity android:name="org.tensorflow.demo.CameraActivity"
+                  android:screenOrientation="portrait"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             </intent-filter>
         </activity>
     </application>

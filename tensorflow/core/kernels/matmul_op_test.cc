@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -349,11 +350,27 @@ static Graph* Matmul(int m, int k, int n, bool transpose_a, bool transpose_b,
   in0.flat<T>().setRandom();
   Tensor in1(type, transpose_b ? TensorShape({n, k}) : TensorShape({k, n}));
   in1.flat<T>().setRandom();
+=======
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/common_runtime/kernel_benchmark_testlib.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include <gtest/gtest.h>
+
+namespace tensorflow {
+
+static Graph* Matmul(int m, int k, int n, bool transpose_a, bool transpose_b) {
+  Graph* g = new Graph(OpRegistry::Global());
+  Tensor in0(DT_FLOAT, transpose_a ? TensorShape({k, m}) : TensorShape({m, k}));
+  in0.flat<float>().setRandom();
+  Tensor in1(DT_FLOAT, transpose_b ? TensorShape({n, k}) : TensorShape({k, n}));
+  in1.flat<float>().setRandom();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   test::graph::Matmul(g, test::graph::Constant(g, in0),
                       test::graph::Constant(g, in1), transpose_a, transpose_b);
   return g;
 }
 
+<<<<<<< HEAD
 #define BM_MatmulDev(M, K, N, TA, TB, T, TFTYPE, DEVICE)                       \
   static void BM_Matmul##_##M##_##K##_##N##_##TA##_##TB##_##TFTYPE##_##DEVICE( \
       int iters) {                                                             \
@@ -387,35 +404,63 @@ static Graph* Matmul(int m, int k, int n, bool transpose_a, bool transpose_b,
 // Batch size of 1 included for inference.
 // Typical fully connected layers
 BM_Matmul(1, 512, 512, false, false);
+=======
+#define BM_MatmulDev(M, K, N, TA, TB, DEVICE)                           \
+  static void BM_Matmul##_##M##_##K##_##N##_##TA##_##TB##_##DEVICE(     \
+      int iters) {                                                      \
+    testing::ItemsProcessed(static_cast<int64>(iters) * M * K * N * 2); \
+    test::Benchmark(#DEVICE, Matmul(M, K, N, TA, TB)).Run(iters);       \
+  }                                                                     \
+  BENCHMARK(BM_Matmul##_##M##_##K##_##N##_##TA##_##TB##_##DEVICE);
+
+#define BM_Matmul(M, K, N, TA, TB)    \
+  BM_MatmulDev(M, K, N, TA, TB, cpu); \
+  BM_MatmulDev(M, K, N, TA, TB, gpu);
+
+// Typical fully connected layers
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 BM_Matmul(8, 512, 512, false, false);
 BM_Matmul(16, 512, 512, false, false);
 BM_Matmul(128, 512, 512, false, false);
 
+<<<<<<< HEAD
 BM_Matmul(1, 1024, 1024, false, false);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 BM_Matmul(8, 1024, 1024, false, false);
 BM_Matmul(16, 1024, 1024, false, false);
 BM_Matmul(128, 1024, 1024, false, false);
 BM_Matmul(4096, 4096, 4096, false, false);
 
 // Backward for fully connected layers
+<<<<<<< HEAD
 BM_Matmul(1, 1024, 1024, false, true);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 BM_Matmul(8, 1024, 1024, false, true);
 BM_Matmul(16, 1024, 1024, false, true);
 BM_Matmul(128, 1024, 1024, false, true);
 
 // Forward softmax with large output size
+<<<<<<< HEAD
 BM_Matmul(1, 200, 10000, false, false);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 BM_Matmul(8, 200, 10000, false, false);
 BM_Matmul(20, 200, 10000, false, false);
 BM_Matmul(20, 200, 20000, false, false);
 
 // Backward softmax with large output size
+<<<<<<< HEAD
 BM_Matmul(1, 10000, 200, false, true);
 BM_Matmul(1, 10000, 200, false, false);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 BM_Matmul(8, 10000, 200, false, true);
 BM_Matmul(20, 10000, 200, false, true);
 BM_Matmul(20, 20000, 200, false, true);
 
+<<<<<<< HEAD
 // Test some matrix-vector multiplies.
 BM_Matmul(50, 50, 1, false, false);
 BM_Matmul(50, 50, 1, true, false);
@@ -458,4 +503,6 @@ BM_Matmul(2000, 1, 2000, true, false);
 BM_Matmul(2000, 1, 2000, false, true);
 BM_Matmul(2000, 1, 2000, true, true);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace tensorflow

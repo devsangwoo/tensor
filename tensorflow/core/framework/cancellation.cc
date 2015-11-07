@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,12 @@ limitations under the License.
 #include <forward_list>
 
 #include "absl/memory/memory.h"
+=======
+#include "tensorflow/core/framework/cancellation.h"
+
+#include <vector>
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/platform/logging.h"
 
@@ -26,6 +33,7 @@ namespace tensorflow {
 const CancellationToken CancellationManager::kInvalidToken = -1;
 
 CancellationManager::CancellationManager()
+<<<<<<< HEAD
     : is_cancelling_(false),
       is_cancelled_(false),
       next_cancellation_token_(0) {}
@@ -39,12 +47,19 @@ void CancellationManager::StartCancel() {
   gtl::FlatMap<CancellationToken, CancelCallback> callbacks_to_run;
   std::forward_list<CancellationManager*> children_to_cancel;
   Notification* cancelled_notification = nullptr;
+=======
+    : is_cancelling_(false), is_cancelled_(0), next_cancellation_token_(0) {}
+
+void CancellationManager::StartCancel() {
+  std::unordered_map<CancellationToken, CancelCallback> callbacks_to_run;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   {
     mutex_lock l(mu_);
     if (is_cancelled_.load(std::memory_order_relaxed) || is_cancelling_) {
       return;
     }
     is_cancelling_ = true;
+<<<<<<< HEAD
     if (state_) {
       std::swap(state_->callbacks, callbacks_to_run);
 
@@ -59,6 +74,9 @@ void CancellationManager::StartCancel() {
 
       cancelled_notification = &state_->cancelled_notification;
     }
+=======
+    std::swap(callbacks_, callbacks_to_run);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   // We call these callbacks without holding mu_, so that concurrent
   // calls to DeregisterCallback, which can happen asynchronously, do
@@ -68,21 +86,34 @@ void CancellationManager::StartCancel() {
   for (auto key_and_value : callbacks_to_run) {
     key_and_value.second();
   }
+<<<<<<< HEAD
   for (CancellationManager* child : children_to_cancel) {
     child->StartCancel();
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   {
     mutex_lock l(mu_);
     is_cancelling_ = false;
     is_cancelled_.store(true, std::memory_order_release);
   }
+<<<<<<< HEAD
   if (cancelled_notification) {
     cancelled_notification->Notify();
   }
+=======
+  cancelled_notification_.Notify();
+}
+
+CancellationToken CancellationManager::get_cancellation_token() {
+  mutex_lock l(mu_);
+  return next_cancellation_token_++;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 bool CancellationManager::RegisterCallback(CancellationToken token,
                                            CancelCallback callback) {
+<<<<<<< HEAD
   DCHECK_LT(token, next_cancellation_token_) << "Invalid cancellation token";
   mutex_lock l(mu_);
   bool should_register = !is_cancelled_ && !is_cancelling_;
@@ -91,6 +122,13 @@ bool CancellationManager::RegisterCallback(CancellationToken token,
       state_ = absl::make_unique<State>();
     }
     std::swap(state_->callbacks[token], callback);
+=======
+  mutex_lock l(mu_);
+  CHECK_LT(token, next_cancellation_token_) << "Invalid cancellation token";
+  bool should_register = !is_cancelled_ && !is_cancelling_;
+  if (should_register) {
+    std::swap(callbacks_[token], callback);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return should_register;
 }
@@ -101,13 +139,17 @@ bool CancellationManager::DeregisterCallback(CancellationToken token) {
     mu_.unlock();
     return false;
   } else if (is_cancelling_) {
+<<<<<<< HEAD
     Notification* cancelled_notification =
         state_ ? &state_->cancelled_notification : nullptr;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     mu_.unlock();
     // Wait for all of the cancellation callbacks to be called. This
     // wait ensures that the caller of DeregisterCallback does not
     // return immediately and free objects that may be used in the
     // execution of any currently pending callbacks in StartCancel.
+<<<<<<< HEAD
     if (cancelled_notification) {
       cancelled_notification->WaitForNotification();
     }
@@ -116,11 +158,18 @@ bool CancellationManager::DeregisterCallback(CancellationToken token) {
     if (state_) {
       state_->callbacks.erase(token);
     }
+=======
+    cancelled_notification_.WaitForNotification();
+    return false;
+  } else {
+    callbacks_.erase(token);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     mu_.unlock();
     return true;
   }
 }
 
+<<<<<<< HEAD
 bool CancellationManager::RegisterChild(CancellationManager* child) {
   mutex_lock l(mu_);
   if (is_cancelled_.load(std::memory_order_relaxed) || is_cancelling_) {
@@ -205,5 +254,8 @@ bool CancellationManager::IsCancelling() {
   mutex_lock lock(mu_);
   return is_cancelling_;
 }
+=======
+CancellationManager::~CancellationManager() { StartCancel(); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // end namespace tensorflow

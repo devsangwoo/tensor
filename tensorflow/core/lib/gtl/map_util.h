@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // This file provides utility functions for use with STL map-like data
 // structures, such as std::map and hash_map. Some functions will also work with
 // sets, such as ContainsKey().
@@ -21,13 +24,20 @@ limitations under the License.
 #define TENSORFLOW_LIB_GTL_MAP_UTIL_H_
 
 #include <stddef.h>
+<<<<<<< HEAD
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <iterator>
 #include <memory>
 #include <string>
 #include <utility>
+<<<<<<< HEAD
 
 #include "tensorflow/core/lib/gtl/subtle/map_traits.h"
+=======
+#include <vector>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace gtl {
@@ -95,6 +105,7 @@ const typename Collection::value_type::second_type& FindWithDefault(
   return it->second;
 }
 
+<<<<<<< HEAD
 // Inserts the given key-value pair into the collection. Returns true if and
 // only if the key from the given pair didn't previously exist. Otherwise, the
 // value in the map is replaced with the value from the given pair.
@@ -119,6 +130,8 @@ bool InsertOrUpdate(Collection* const collection,
                         typename Collection::value_type(key, value));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Inserts the given key and value into the given collection if and only if the
 // given key did NOT already exist in the collection. If the key previously
 // existed in the collection, the value is not changed. Returns true if the
@@ -158,6 +171,7 @@ typename Collection::value_type::second_type& LookupOrInsert(
                         typename Collection::value_type(key, value));
 }
 
+<<<<<<< HEAD
 // Saves the reverse mapping into reverse. Returns true if values could all be
 // inserted.
 template <typename M, typename ReverseM>
@@ -209,6 +223,8 @@ typename Collection::value_type::second_type EraseKeyReturnValuePtr(
   return v;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace gtl
 }  // namespace tensorflow
 

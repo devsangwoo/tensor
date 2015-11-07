@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,5 +34,13 @@ REGISTER5(SimpleBinaryOp, CPU, "TanhGrad", functor::tanh_grad, float,
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 REGISTER3(SimpleBinaryOp, GPU, "TanhGrad", functor::tanh_grad, float,
           Eigen::half, double);
+=======
+#include "tensorflow/core/kernels/cwise_ops_common.h"
+
+namespace tensorflow {
+REGISTER3(UnaryOp, CPU, "Tanh", functor::tanh, float, double, complex64);
+#if GOOGLE_CUDA
+REGISTER2(UnaryOp, GPU, "Tanh", functor::tanh, float, double);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #endif
 }  // namespace tensorflow

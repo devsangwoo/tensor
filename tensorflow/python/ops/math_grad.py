@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,11 +28,21 @@ from tensorflow.python.framework import dtypes
 from tensorflow.python.framework import ops
 from tensorflow.python.framework import tensor_util
 from tensorflow.python.ops import array_ops
+=======
+"""Gradients for operators defined in math_ops.py."""
+
+from tensorflow.python.framework import ops
+from tensorflow.python.framework import types
+from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import constant_op
+from tensorflow.python.ops import data_flow_ops
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 from tensorflow.python.ops import gen_array_ops
 from tensorflow.python.ops import gen_math_ops
 from tensorflow.python.ops import math_ops
 
 
+<<<<<<< HEAD
 def _safe_shape_div(x, y):
   """Divides `x / y` assuming `x, y >= 0`, treating `0 / 0 = 0`."""
   return x // math_ops.maximum(y, 1)
@@ -142,11 +153,27 @@ _empty_tuple = ()
 
 def _IsScalar(x):
   return x._shape_tuple() is _empty_tuple  # pylint: disable=protected-access
+=======
+def _ReductionGradAssist(op):
+  """Reduction grads have much in common, so factor the commonality out."""
+  inp = op.inputs[0]                                # Example:
+  input_shape = array_ops.shape(inp)                # [2, 3, 5, 7]
+  input_rank = array_ops.rank(inp)                  # 4
+  indices = op.inputs[1]                            # [1, 2]
+  indices_shape = array_ops.shape(indices)          # [2]
+  new_output_shape = data_flow_ops.dynamic_stitch(  # [2, 1, 1, 7]
+      [math_ops.range(0, input_rank),               # [0, 1, 2, 3]
+       indices],                                    # [1, 2]
+      [input_shape,                                 # [2, 3, 5, 7]
+       array_ops.fill(indices_shape, 1)])           # [1, 1]
+  return inp, new_output_shape, input_shape
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Sum")
 def _SumGrad(op, grad):
   """Gradient for Sum."""
+<<<<<<< HEAD
   # Fast path for when reducing to a scalar and ndims is known: adds only
   # Reshape and Tile ops (and possibly a Shape).
   input_0_shape = op.inputs[0]._shape_tuple()  # pylint: disable=protected-access
@@ -233,6 +260,22 @@ def _MinOrMaxGrad(op, grad):
       math_ops.reduce_sum(indicators, op.inputs[1]), output_shape_kept_dims)
 
   return [math_ops.divide(indicators, num_selected) * grad, None]
+=======
+  _, new_output_shape, input_shape = _ReductionGradAssist(op)
+  tile_scaling = input_shape / new_output_shape
+  grad = array_ops.reshape(grad, new_output_shape)
+  return [array_ops.tile(grad, tile_scaling), None]
+
+
+def _MinOrMaxGrad(op, grad):
+  """Gradient for Max or Max. Amazingly it's precisely the same code."""
+  inp, new_output_shape, _ = _ReductionGradAssist(op)
+  y = op.outputs[0]
+  y = array_ops.reshape(y, new_output_shape)
+  grad = array_ops.reshape(grad, new_output_shape)
+  indicators = math_ops.cast(math_ops.equal(y, inp), grad.dtype)
+  return [indicators * grad, None]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Max")
@@ -250,6 +293,7 @@ def _MinGrad(op, grad):
 def _MeanGrad(op, grad):
   """Gradient for Mean."""
   sum_grad = _SumGrad(op, grad)[0]
+<<<<<<< HEAD
   input_shape = op.inputs[0]._shape_tuple()  # pylint: disable=protected-access
   output_shape = op.outputs[0]._shape_tuple()  # pylint: disable=protected-access
   if (input_shape is not None and output_shape is not None and
@@ -264,11 +308,19 @@ def _MeanGrad(op, grad):
     factor = _safe_shape_div(
         math_ops.reduce_prod(input_shape), math_ops.reduce_prod(output_shape))
   return math_ops.truediv(sum_grad, math_ops.cast(factor, sum_grad.dtype)), None
+=======
+  input_shape = array_ops.shape(op.inputs[0])
+  output_shape = array_ops.shape(op.outputs[0])
+  factor = (math_ops.reduce_prod(input_shape) /
+            math_ops.reduce_prod(output_shape))
+  return sum_grad / math_ops.cast(factor, sum_grad.dtype), None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Prod")
 def _ProdGrad(op, grad):
   """Gradient for Prod."""
+<<<<<<< HEAD
   # The gradient can be expressed by dividing the product by each entry of the
   # input tensor, but this approach can't deal with zeros in the input.
   # Here, we avoid this problem by composing the output as a product of two
@@ -313,6 +365,14 @@ def _ProdGrad(op, grad):
   # Make sure to set the statically known shape information through a reshape.
   out = grad * array_ops.transpose(y, array_ops.invert_permutation(perm))
   return array_ops.reshape(out, input_shape), None
+=======
+  # TODO(kearnes): this gives NaNs for 0s in the input tensor
+  _, new_output_shape, input_shape = _ReductionGradAssist(op)
+  tile_scaling = input_shape / new_output_shape
+  grad = array_ops.reshape(grad * op.outputs[0], new_output_shape)
+  grad = math_ops.div(array_ops.tile(grad, tile_scaling), op.inputs[0])
+  return grad, None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("SegmentSum")
@@ -325,12 +385,21 @@ def _SegmentSumGrad(op, grad):
 def _SegmentMeanGrad(op, grad):
   """Gradient for SegmentMean."""
   input_rank = array_ops.rank(op.inputs[0])
+<<<<<<< HEAD
   ones_shape = array_ops.concat([
       array_ops.shape(op.inputs[1]),
       array_ops.fill(array_ops.expand_dims(input_rank - 1, 0), 1)
   ], 0)
   ones = array_ops.fill(ones_shape, constant_op.constant(1, dtype=grad.dtype))
   scaled_grad = math_ops.divide(grad, math_ops.segment_sum(ones, op.inputs[1]))
+=======
+  ones_shape = array_ops.concat(
+      0, [array_ops.shape(op.inputs[1]),
+          array_ops.fill(array_ops.expand_dims(input_rank - 1, 0), 1)])
+  ones = array_ops.fill(ones_shape,
+                        constant_op.constant(1, dtype=grad.dtype))
+  scaled_grad = grad * math_ops.inv(math_ops.segment_sum(ones, op.inputs[1]))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return array_ops.gather(scaled_grad, op.inputs[1]), None
 
 
@@ -339,6 +408,7 @@ def _SparseSegmentSumGrad(op, grad):
   """Gradient for SparseSegmentSum."""
   input_rows = array_ops.shape(op.inputs[0])[0]
   return (math_ops.unsorted_segment_sum(
+<<<<<<< HEAD
       array_ops.gather(grad, op.inputs[2]), op.inputs[1], input_rows), None,
           None)
 
@@ -350,12 +420,17 @@ def _SparseSegmentSumWithNumSegmentsGrad(op, grad):
   return (math_ops.unsorted_segment_sum(
       array_ops.gather(grad, op.inputs[2]), op.inputs[1], input_rows), None,
           None, None)
+=======
+      array_ops.gather(grad, op.inputs[2]),
+      op.inputs[1], input_rows), None, None)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("SparseSegmentMean")
 def _SparseSegmentMeanGrad(op, grad):
   """Gradient for SparseSegmentMean."""
   dim0 = array_ops.shape(op.inputs[0])[0]
+<<<<<<< HEAD
   return (math_ops.sparse_segment_mean_grad(grad, op.inputs[1], op.inputs[2],
                                             dim0), None, None)
 
@@ -397,17 +472,35 @@ def _SegmentMinOrMaxGrad(op, grad):
   weighted_grads = math_ops.divide(grad, num_selected)
   gathered_grads = array_ops.gather(weighted_grads, op.inputs[1])
   return array_ops.where_v2(is_selected, gathered_grads, zeros), None
+=======
+  return (math_ops.sparse_segment_mean_grad(grad,
+                                            op.inputs[1],
+                                            op.inputs[2],
+                                            dim0),
+          None, None)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("SegmentMin")
 def _SegmentMinGrad(op, grad):
   """Gradient for SegmentMin."""
+<<<<<<< HEAD
   return _SegmentMinOrMaxGrad(op, grad)
+=======
+  zeros = array_ops.zeros(array_ops.shape(op.inputs[0]),
+                          dtype=op.inputs[0].dtype)
+  gathered_grads = array_ops.gather(grad, op.inputs[1])
+  gathered_outputs = array_ops.gather(op.outputs[0], op.inputs[1])
+  return math_ops.select(math_ops.greater(op.inputs[0], gathered_outputs),
+                         zeros,
+                         gathered_grads), None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("SegmentMax")
 def _SegmentMaxGrad(op, grad):
   """Gradient for SegmentMax."""
+<<<<<<< HEAD
   return _SegmentMinOrMaxGrad(op, grad)
 
 
@@ -462,10 +555,20 @@ def _UnsortedSegmentMinOrMaxGrad(op, grad):
                                               zero_clipped_indices, is_positive)
   zeros = array_ops.zeros_like(gathered_grads)
   return array_ops.where_v2(is_selected, gathered_grads, zeros), None, None
+=======
+  zeros = array_ops.zeros(array_ops.shape(op.inputs[0]),
+                          dtype=op.inputs[0].dtype)
+  gathered_grads = array_ops.gather(grad, op.inputs[1])
+  gathered_outputs = array_ops.gather(op.outputs[0], op.inputs[1])
+  return math_ops.select(math_ops.less(op.inputs[0], gathered_outputs),
+                         zeros,
+                         gathered_grads), None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("UnsortedSegmentSum")
 def _UnsortedSegmentSumGrad(op, grad):
+<<<<<<< HEAD
   """Gradient for UnsortedSegmentSum."""
   return _GatherDropNegatives(grad, op.inputs[1])[0], None, None
 
@@ -528,6 +631,10 @@ def _UnsortedSegmentProdGrad(op, grad):
   gathered_grad = _GatherDropNegatives(grad, op.inputs[1],
                                        zero_clipped_indices)[0]
   return gathered_grad * partial_derivative, None, None
+=======
+  """Gradient for SegmentSum."""
+  return array_ops.gather(grad, op.inputs[1]), None, None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Abs")
@@ -539,13 +646,18 @@ def _AbsGrad(op, grad):
 @ops.RegisterGradient("Neg")
 def _NegGrad(_, grad):
   """Returns -grad."""
+<<<<<<< HEAD
   return -grad
+=======
+  return - grad
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Inv")
 def _InvGrad(op, grad):
   """Returns -grad * (1 / x^2)."""
   y = op.outputs[0]  # y = 1 / x
+<<<<<<< HEAD
   return gen_math_ops.reciprocal_grad(y, grad)
 
 
@@ -574,21 +686,29 @@ def _ReciprocalGradGrad(op, grad):
     ca = math_ops.conj(op.inputs[0])
     cg = math_ops.conj(grad)
     return cg * -2.0 * b * ca, gen_math_ops.reciprocal_grad(ca, grad)
+=======
+  return grad * (- math_ops.square(y))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Square")
 def _SquareGrad(op, grad):
   x = op.inputs[0]
+<<<<<<< HEAD
   # Added control dependencies to prevent 2*x from being computed too early.
   with ops.control_dependencies([grad]):
     x = math_ops.conj(x)
     y = constant_op.constant(2.0, dtype=x.dtype)
     return math_ops.multiply(grad, math_ops.multiply(x, y))
+=======
+  return grad * (2.0 * x)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Sqrt")
 def _SqrtGrad(op, grad):
   y = op.outputs[0]  # y = x^(1/2)
+<<<<<<< HEAD
   return gen_math_ops.sqrt_grad(y, grad)
 
 
@@ -603,10 +723,14 @@ def _SqrtGradGrad(op, grad):
     else:
       ga = grad / a
       return -math_ops.conj(ga) * y, 0.5 * ga
+=======
+  return grad * (.5 * math_ops.inv(y))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Rsqrt")
 def _RsqrtGrad(op, grad):
+<<<<<<< HEAD
   """Returns -0.5 * grad * conj(y)^3."""
   y = op.outputs[0]  # y = x^(-1/2)
   return gen_math_ops.rsqrt_grad(y, grad)
@@ -623,12 +747,18 @@ def _RsqrtGradGrad(op, grad):
     grad_a = -1.5 * cg * b * math_ops.square(ca)
     grad_b = gen_math_ops.rsqrt_grad(ca, grad)
     return grad_a, grad_b
+=======
+  x = op.inputs[0]
+  y = op.outputs[0]  # y = x^(-1/2)
+  return grad * ((-0.5) * math_ops.inv(x) * y)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Exp")
 def _ExpGrad(op, grad):
   """Returns grad * exp(x)."""
   y = op.outputs[0]  # y = e^x
+<<<<<<< HEAD
   with ops.control_dependencies([grad]):
     y = math_ops.conj(y)
     if compat.forward_compatible(2020, 3, 14):
@@ -648,12 +778,16 @@ def _Expm1Grad(op, grad):
       return math_ops.mul_no_nan(y, grad)
     else:
       return grad * y
+=======
+  return grad * y
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Log")
 def _LogGrad(op, grad):
   """Returns grad * (1/x)."""
   x = op.inputs[0]
+<<<<<<< HEAD
   with ops.control_dependencies([grad]):
     x = math_ops.conj(x)
     if compat.forward_compatible(2020, 3, 14):
@@ -741,12 +875,16 @@ def _CoshGrad(op, grad):
   with ops.control_dependencies([grad]):
     x = math_ops.conj(x)
     return grad * math_ops.sinh(x)
+=======
+  return grad * math_ops.inv(x)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Tanh")
 def _TanhGrad(op, grad):
   """Returns grad * (1 - tanh(x) * tanh(x))."""
   y = op.outputs[0]  # y = tanh(x)
+<<<<<<< HEAD
   with ops.control_dependencies([grad]):
     y = math_ops.conj(y)
     return gen_math_ops.tanh_grad(y, grad)
@@ -1011,12 +1149,16 @@ def _PolygammaGrad(op, grad):
     else:
       return (None,
               array_ops.reshape(math_ops.reduce_sum(partial_x * grad, rx), sx))
+=======
+  return grad * (1 - math_ops.square(y))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Sigmoid")
 def _SigmoidGrad(op, grad):
   """Returns grad * sigmoid(x) * (1 - sigmoid(x))."""
   y = op.outputs[0]  # y = sigmoid(x)
+<<<<<<< HEAD
   with ops.control_dependencies([grad]):
     y = math_ops.conj(y)
     return gen_math_ops.sigmoid_grad(y, grad)
@@ -1029,6 +1171,9 @@ def _SigmoidGradGrad(op, grad):
     b = math_ops.conj(op.inputs[1])
     gb = grad * b
     return gb - 2.0 * gb * a, gen_math_ops.sigmoid_grad(a, grad)
+=======
+  return grad * (y * (1 - y))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Sign")
@@ -1042,15 +1187,20 @@ def _SignGrad(op, _):
 def _SinGrad(op, grad):
   """Returns grad * cos(x)."""
   x = op.inputs[0]
+<<<<<<< HEAD
   with ops.control_dependencies([grad]):
     x = math_ops.conj(x)
     return grad * math_ops.cos(x)
+=======
+  return grad * math_ops.cos(x)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Cos")
 def _CosGrad(op, grad):
   """Returns grad * -sin(x)."""
   x = op.inputs[0]
+<<<<<<< HEAD
   with ops.control_dependencies([grad]):
     x = math_ops.conj(x)
     return -grad * math_ops.sin(x)
@@ -1125,6 +1275,9 @@ def _Atan2Grad(op, grad):
     else:
       grad_inv = grad / (math_ops.square(x) + math_ops.square(y))
     return x * grad_inv, -y * grad_inv
+=======
+  return -grad * math_ops.sin(x)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("AddN")
@@ -1134,6 +1287,7 @@ def _AddNGrad(op, grad):
   return [grad] * len(op.inputs)
 
 
+<<<<<<< HEAD
 def _ShapesFullySpecifiedAndEqual(x, y, grad):
   # pylint: disable=protected-access
   x_shape = x._shape_tuple()
@@ -1275,10 +1429,26 @@ def _MulNoNanGrad(op, grad):
 @ops.RegisterGradient("Div")
 def _DivGrad(op, grad):
   """The gradient for the Div operator."""
+=======
+@ops.RegisterGradient("Add")
+def _AddGrad(op, grad):
   x = op.inputs[0]
   y = op.inputs[1]
   sx = array_ops.shape(x)
   sy = array_ops.shape(y)
+  rx, ry = gen_array_ops._broadcast_gradient_args(sx, sy)
+  return (array_ops.reshape(math_ops.reduce_sum(grad, rx), sx),
+          array_ops.reshape(math_ops.reduce_sum(grad, ry), sy))
+
+
+@ops.RegisterGradient("Sub")
+def _SubGrad(op, grad):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
+  x = op.inputs[0]
+  y = op.inputs[1]
+  sx = array_ops.shape(x)
+  sy = array_ops.shape(y)
+<<<<<<< HEAD
   rx, ry = gen_array_ops.broadcast_gradient_args(sx, sy)
   x = math_ops.conj(x)
   y = math_ops.conj(y)
@@ -1355,10 +1525,36 @@ def _RealDivGrad(op, grad):
 @ops.RegisterGradient("DivNoNan")
 def _DivNoNanGrad(op, grad):
   """DivNoNan op gradient."""
+=======
+  rx, ry = gen_array_ops._broadcast_gradient_args(sx, sy)
+  return (array_ops.reshape(math_ops.reduce_sum(grad, rx), sx),
+          array_ops.reshape(-math_ops.reduce_sum(grad, ry), sy))
+
+
+@ops.RegisterGradient("Mul")
+def _MulGrad(op, grad):
+  x = op.inputs[0]
+  y = op.inputs[1]
+  assert x.dtype.base_dtype == y.dtype.base_dtype, (x.dtype, " vs. ", y.dtype)
+  sx = array_ops.shape(x)
+  sy = array_ops.shape(y)
+  rx, ry = gen_array_ops._broadcast_gradient_args(sx, sy)
+  if x.dtype.base_dtype == types.complex64:
+    return (array_ops.reshape(math_ops.reduce_sum(grad * math_ops.conj(y), rx), sx),
+            array_ops.reshape(math_ops.reduce_sum(math_ops.conj(x) * grad, ry), sy))
+  else:
+    return (array_ops.reshape(math_ops.reduce_sum(grad * y, rx), sx),
+            array_ops.reshape(math_ops.reduce_sum(x * grad, ry), sy))
+
+
+@ops.RegisterGradient("Div")
+def _DivGrad(op, grad):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   x = op.inputs[0]
   y = op.inputs[1]
   sx = array_ops.shape(x)
   sy = array_ops.shape(y)
+<<<<<<< HEAD
   rx, ry = gen_array_ops.broadcast_gradient_args(sx, sy)
   x = math_ops.conj(x)
   y = math_ops.conj(y)
@@ -1377,6 +1573,12 @@ def _DivNoNanGrad(op, grad):
                 math_ops.reduce_sum(
                     grad * math_ops.div_no_nan(math_ops.div_no_nan(-x, y), y),
                     ry), sy))
+=======
+  rx, ry = gen_array_ops._broadcast_gradient_args(sx, sy)
+  return (array_ops.reshape(math_ops.reduce_sum(grad / y, rx), sx),
+          array_ops.reshape(math_ops.reduce_sum(grad *
+                                         (-x / math_ops.square(y)), ry), sy))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Pow")
@@ -1384,6 +1586,7 @@ def _PowGrad(op, grad):
   """Returns grad * (y*x^(y-1), z*log(x))."""
   x = op.inputs[0]
   y = op.inputs[1]
+<<<<<<< HEAD
   use_mul_no_nan = compat.forward_compatible(2020, 3, 14)
   skip_input_indices = None
   try:
@@ -1467,12 +1670,29 @@ def _MaximumMinimumGrad(op, grad, selector_op):
     # No gradient skipping, so do the full gradient computation
     pass
   x = op.inputs[0]
+=======
+  z = op.outputs[0]
+  sx = array_ops.shape(x)
+  sy = array_ops.shape(y)
+  rx, ry = gen_array_ops._broadcast_gradient_args(sx, sy)
+  gx = array_ops.reshape(math_ops.reduce_sum(grad * y * math_ops.pow(x, y - 1), rx),
+                         sx)
+  gy = array_ops.reshape(math_ops.reduce_sum(grad * z * math_ops.log(x), ry), sy)
+  return gx, gy
+
+
+def _MaximumMinimumGrad(op, grad, selector_op):
+  """Factor out the code for the gradient of Maximum or Minimum."""
+  x = op.inputs[0]
+  y = op.inputs[1]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   gdtype = grad.dtype
   sx = array_ops.shape(x)
   sy = array_ops.shape(y)
   gradshape = array_ops.shape(grad)
   zeros = array_ops.zeros(gradshape, gdtype)
   xmask = selector_op(x, y)
+<<<<<<< HEAD
   rx, ry = gen_array_ops.broadcast_gradient_args(sx, sy)
   if skip_input_indices is not None and 0 in skip_input_indices:
     gx = None
@@ -1486,6 +1706,13 @@ def _MaximumMinimumGrad(op, grad, selector_op):
     ygrad = array_ops.where_v2(xmask, zeros, grad)
     gy = array_ops.reshape(math_ops.reduce_sum(ygrad, ry), sy)
 
+=======
+  rx, ry = gen_array_ops._broadcast_gradient_args(sx, sy)
+  xgrad = math_ops.select(xmask, grad, zeros)
+  ygrad = math_ops.select(math_ops.logical_not(xmask), grad, zeros)
+  gx = array_ops.reshape(math_ops.reduce_sum(xgrad, rx), sx)
+  gy = array_ops.reshape(math_ops.reduce_sum(ygrad, ry), sy)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return (gx, gy)
 
 
@@ -1501,6 +1728,7 @@ def _MinimumGrad(op, grad):
   return _MaximumMinimumGrad(op, grad, math_ops.less_equal)
 
 
+<<<<<<< HEAD
 @ops.RegisterGradient("SquaredDifference")
 def _SquaredDifferenceGrad(op, grad):
   """Returns the gradient for (x-y)^2."""
@@ -1552,12 +1780,25 @@ ops.NotDifferentiable("NotEqual")
 ops.NotDifferentiable("LogicalAnd")
 ops.NotDifferentiable("LogicalOr")
 ops.NotDifferentiable("LogicalNot")
+=======
+# Logical operations have no gradients.
+ops.NoGradient("Less")
+ops.NoGradient("LessEqual")
+ops.NoGradient("Greater")
+ops.NoGradient("GreaterEqual")
+ops.NoGradient("Equal")
+ops.NoGradient("NotEqual")
+ops.NoGradient("LogicalAnd")
+ops.NoGradient("LogicalOr")
+ops.NoGradient("LogicalNot")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Select")
 def _SelectGrad(op, grad):
   c = op.inputs[0]
   x = op.inputs[1]
+<<<<<<< HEAD
   zeros = array_ops.zeros_like(x)
   return (None, array_ops.where(c, grad, zeros), array_ops.where(
       c, zeros, grad))
@@ -1617,10 +1858,16 @@ def _MatMulGradAgainstSecondOnly(op, grad):
   elif t_a and t_b:
     grad_b = gen_math_ops.mat_mul(grad, a, transpose_a=True, transpose_b=True)
   return None, grad_b
+=======
+  zeros = array_ops.zeros(array_ops.shape(c), dtype=x.dtype)
+  return (None, math_ops.select(c, grad, zeros),
+          math_ops.select(c, zeros, grad))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("MatMul")
 def _MatMulGrad(op, grad):
+<<<<<<< HEAD
   """Gradient for MatMul."""
   try:
     skip_input_indices = op.skip_input_indices
@@ -1650,6 +1897,24 @@ def _MatMulGrad(op, grad):
     grad_a = gen_math_ops.mat_mul(b, grad, transpose_a=True, transpose_b=True)
     grad_b = gen_math_ops.mat_mul(grad, a, transpose_a=True, transpose_b=True)
   return grad_a, grad_b
+=======
+  t_a = op.get_attr("transpose_a")
+  t_b = op.get_attr("transpose_b")
+  if not t_a and not t_b:
+    return (math_ops.matmul(grad, op.inputs[1], transpose_b=True),
+            math_ops.matmul(op.inputs[0], grad, transpose_a=True))
+  elif not t_a and t_b:
+    return (math_ops.matmul(grad, op.inputs[1]),
+            math_ops.matmul(grad, op.inputs[0], transpose_a=True))
+  elif t_a and not t_b:
+    return (math_ops.matmul(op.inputs[1], grad, transpose_b=True),
+            math_ops.matmul(op.inputs[0], grad))
+  elif t_a and t_b:
+    return (math_ops.matmul(op.inputs[1], grad, transpose_a=True,
+                            transpose_b=True),
+            math_ops.matmul(grad, op.inputs[0], transpose_a=True,
+                            transpose_b=True))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("SparseMatMul")
@@ -1658,6 +1923,7 @@ def _SparseMatMulGrad(op, grad):
 
   t_a = op.get_attr("transpose_a")
   t_b = op.get_attr("transpose_b")
+<<<<<<< HEAD
   is_sparse = {}
   is_sparse[op.inputs[0].experimental_ref()] = op.get_attr("a_is_sparse")
   is_sparse[op.inputs[1].experimental_ref()] = op.get_attr("b_is_sparse")
@@ -1724,6 +1990,63 @@ def _RoundGrad(_, unused_grad):
 def _RintGrad(_, unused_grad):
   # the gradient of Rint is zero
   return [None]
+=======
+  is_sparse = {
+      op.inputs[0]: op.get_attr("a_is_sparse"),
+      op.inputs[1]: op.get_attr("b_is_sparse"),
+      # Use heuristic to figure out if grad might be sparse
+      grad: (grad.op.type == "ReluGrad")
+  }
+  def _SparseMatMul(t1, t2, transpose_a=False, transpose_b=False):
+    """Helper function to create SparseMatMul op."""
+
+    assert t1 in is_sparse and t2 in is_sparse
+    t1_sparse = is_sparse[t1]
+    t2_sparse = is_sparse[t2]
+    if not t1_sparse and not t2_sparse:
+      return math_ops.matmul(t1, t2,
+                             transpose_a=transpose_a,
+                             transpose_b=transpose_b)
+    transpose_out = False
+    if not t1_sparse:
+      transpose_out = True
+      t1, t2 = t2, t1
+      t1_sparse, t2_sparse = t2_sparse, t1_sparse
+      assert t1_sparse
+      transpose_a, transpose_b = not transpose_b, not transpose_a
+
+    if transpose_b:
+      t2 = array_ops.transpose(t2)
+      transpose_b = False
+    m = math_ops.matmul(t1, t2,
+                        transpose_a=transpose_a,
+                        transpose_b=transpose_b,
+                        a_is_sparse=t1_sparse,
+                        b_is_sparse=t2_sparse)
+    if transpose_out:
+      m = array_ops.transpose(m)
+    return m
+
+  if not t_a and not t_b:
+    return (_SparseMatMul(grad, op.inputs[1], transpose_b=True),
+            _SparseMatMul(op.inputs[0], grad, transpose_a=True))
+  elif not t_a and t_b:
+    return (_SparseMatMul(grad, op.inputs[1]),
+            _SparseMatMul(grad, op.inputs[0], transpose_a=True))
+  elif t_a and not t_b:
+    return (_SparseMatMul(op.inputs[1], grad, transpose_b=True),
+            _SparseMatMul(op.inputs[0], grad))
+  elif t_a and t_b:
+    return (_SparseMatMul(op.inputs[1], grad,
+                          transpose_a=True, transpose_b=True),
+            _SparseMatMul(grad, op.inputs[0],
+                          transpose_a=True, transpose_b=True))
+
+
+@ops.RegisterGradient("Floor")
+def _FloorGrad(_, grad):
+  return grad
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("BatchMatMul")
@@ -1736,6 +2059,7 @@ def _BatchMatMul(op, grad):
 
   if not adj_x:
     if not adj_y:
+<<<<<<< HEAD
       grad_x = math_ops.matmul(grad, y, adjoint_a=False, adjoint_b=True)
       grad_y = math_ops.matmul(x, grad, adjoint_a=True, adjoint_b=False)
     else:
@@ -1786,10 +2110,25 @@ def _BatchMatMulV2(op, grad):
     rx, ry = gen_array_ops.broadcast_gradient_args(sx[:-2], sy[:-2])
     grad_x = array_ops.reshape(math_ops.reduce_sum(grad_x, rx), sx)
     grad_y = array_ops.reshape(math_ops.reduce_sum(grad_y, ry), sy)
+=======
+      grad_x = math_ops.batch_matmul(grad, y, False, True)
+      grad_y = math_ops.batch_matmul(x, grad, True, False)
+    else:
+      grad_x = math_ops.batch_matmul(grad, y, False, False)
+      grad_y = math_ops.batch_matmul(grad, x, True, False)
+  else:
+    if not adj_y:
+      grad_x = math_ops.batch_matmul(y, grad, False, True)
+      grad_y = math_ops.batch_matmul(x, grad, False, False)
+    else:
+      grad_x = math_ops.batch_matmul(y, grad, True, True)
+      grad_y = math_ops.batch_matmul(grad, x, True, True)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   return grad_x, grad_y
 
 
+<<<<<<< HEAD
 ops.NotDifferentiable("Range")
 ops.NotDifferentiable("LinSpace")
 
@@ -1804,6 +2143,16 @@ def _ComplexGrad(op, grad):
   rx, ry = gen_array_ops.broadcast_gradient_args(sx, sy)
   return (array_ops.reshape(math_ops.reduce_sum(math_ops.real(grad), rx), sx),
           array_ops.reshape(math_ops.reduce_sum(math_ops.imag(grad), ry), sy))
+=======
+ops.NoGradient("Range")
+ops.NoGradient("LinSpace")
+
+
+@ops.RegisterGradient("Complex")
+def _ComplexGrad(_, grad):
+  """Returns the real and imaginary components of 'grad', respectively."""
+  return math_ops.real(grad), math_ops.imag(grad)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Real")
@@ -1820,6 +2169,7 @@ def _ImagGrad(_, grad):
   return math_ops.complex(zero, grad)
 
 
+<<<<<<< HEAD
 @ops.RegisterGradient("Angle")
 def _AngleGrad(op, grad):
   """Returns -grad / (Im(x) + iRe(x))"""
@@ -1833,12 +2183,15 @@ def _AngleGrad(op, grad):
     return -complex_grad * z
 
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 @ops.RegisterGradient("Conj")
 def _ConjGrad(_, grad):
   """Returns the complex conjugate of grad."""
   return math_ops.conj(grad)
 
 
+<<<<<<< HEAD
 @ops.RegisterGradient("ComplexAbs")
 def _ComplexAbsGrad(op, grad):
   """Returns the gradient of ComplexAbs."""
@@ -1855,12 +2208,18 @@ def _CastGrad(op, grad):
       dtypes.float16, dtypes.float32, dtypes.float64, dtypes.bfloat16,
       dtypes.complex64, dtypes.complex128
   ]
+=======
+@ops.RegisterGradient("Cast")
+def _CastGrad(op, grad):
+  t = [types.float32, types.float64, types.bfloat16]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   src_type = op.inputs[0].dtype.base_dtype
   dst_type = grad.dtype.base_dtype
   if src_type in t and dst_type in t:
     return math_ops.cast(grad, src_type)
   else:
     return None
+<<<<<<< HEAD
 
 
 @ops.RegisterGradient("Cross")
@@ -1944,3 +2303,5 @@ def _NextAfterGrad(op, grad):
         math_ops.reduce_sum(partial_x1 * grad, r_x1), s_x1),
             array_ops.reshape(
                 math_ops.reduce_sum(partial_x2 * grad, r_x2), s_x2))
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

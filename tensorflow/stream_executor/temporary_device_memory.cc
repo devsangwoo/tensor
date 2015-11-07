@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/temporary_device_memory.h"
 
 #include "tensorflow/stream_executor/stream.h"
 
+<<<<<<< HEAD
 namespace stream_executor {
+=======
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TemporaryDeviceMemoryBase::~TemporaryDeviceMemoryBase() {
   parent_->temporary_memory_manager()->MarkFinalized(device_memory_,
@@ -63,4 +71,9 @@ TemporaryDeviceMemoryBase::TemporaryDeviceMemoryBase(
   DCHECK(IsAllocated());
 }
 
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,10 +25,23 @@ limitations under the License.
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/lib/core/refcount.h"
 #include "tensorflow/core/lib/core/status.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_RENDEZVOUS_H_
+#define TENSORFLOW_FRAMEWORK_RENDEZVOUS_H_
+
+#include <string>
+
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/lib/core/refcount.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/framework/control_flow.h"
+#include "tensorflow/core/framework/device_base.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/device_name_utils.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 // A Rendezvous is an abstraction for passing tensors from producers
 // to consumers. A rendezvous is a table of channels. Each channel is
 // keyed by a rendezvous key. The key encodes a pair of <producer,
@@ -45,10 +59,24 @@ namespace tensorflow {
 // or providing a callback: in either case, the consumer receives the
 // Tensor as soon as it is available.  A producer never blocks.
 class RendezvousInterface {
+=======
+// A Rendezvous is an abstraction for passing a Tensor
+// from a producer to a consumer, where the consumer may safely
+// request the Tensor before or after it has been produced.  A
+// producer never blocks when using a Rendezvous.  A consumer has the
+// choice of making a blocking call or providing a callback: in either
+// case, the consumer receives the Tensor as soon as it is available.
+//
+// A Rendezvous key encodes a single <producer, consumer> pair.  It is
+// an error to call Send() or Recv*() more than once with the same
+// key.
+class Rendezvous : public core::RefCounted {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  public:
   struct Args {
     DeviceContext* device_context = nullptr;
     AllocatorAttributes alloc_attrs;
+<<<<<<< HEAD
     CancellationManager* cancellation_manager = nullptr;  // not owned.
   };
 
@@ -74,19 +102,49 @@ class RendezvousInterface {
     friend class RecvOp;
     string buf_;
   };
+=======
+  };
+
+  // Constructs a rendezvouz key for the tensor of "name" sent from
+  // "src_device" to "dst_device". The tensor is generated in the frame
+  // and iteration specified by "frame_iter".
+  static string CreateKey(const string& src_device, uint64 src_incarnation,
+                          const string& dst_device, const string& name,
+                          const FrameAndIter& frame_iter);
+
+  // Parses the key constructed by CreateKey and parse src/dst device
+  // names into structures respectively.
+  struct ParsedKey {
+    string src_device;
+    DeviceNameUtils::ParsedName src;
+    uint64 src_incarnation = 0;
+    string dst_device;
+    DeviceNameUtils::ParsedName dst;
+    string edge_name;
+  };
+  static Status ParseKey(const string& key, ParsedKey* out);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // The caller is a tensor producer and it sends a message (a tensor
   // "val" and a bool "is_dead") under the given "key".
   //
   // {val, is_dead} is bundled as a message sent and received.
   // Typically, is_dead is set by some control flow nodes
+<<<<<<< HEAD
   // (e.g., a not-taken branch).  args is passed by Send to the
+=======
+  // (e.g., a not-take branch).  args is passed by Send to the
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Recv function to communicate any information that the Recv
   // function might need.  This is typically only necessary for
   // Send/Recv on the same worker.
   //
   // Send() never blocks.
+<<<<<<< HEAD
   virtual Status Send(const ParsedKey& key, const Args& args, const Tensor& val,
+=======
+  virtual Status Send(const string& key, const Args& args, const Tensor& val,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                       const bool is_dead) = 0;
 
   // Callback provided by a tensor consumer waiting on the rendezvous.
@@ -96,6 +154,7 @@ class RendezvousInterface {
   // receiver, which may be needed when a non-CPU device is in use
   // by either side.
   typedef std::function<void(const Status&, const Args&, const Args&,
+<<<<<<< HEAD
                              const Tensor&, const bool)>
       DoneCallback;
 
@@ -107,6 +166,15 @@ class RendezvousInterface {
               bool* is_dead, int64 timeout_ms);
   Status Recv(const ParsedKey& key, const Args& args, Tensor* val,
               bool* is_dead);
+=======
+                             const Tensor&, const bool)> DoneCallback;
+
+  virtual void RecvAsync(const string& key, const Args& args,
+                         DoneCallback done) = 0;
+
+  // Synchronous wrapper for RecvAsync.
+  Status Recv(const string& key, const Args& args, Tensor* val, bool* is_dead);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Aborts all pending and future Send/Recv with the given "status".
   //
@@ -115,6 +183,7 @@ class RendezvousInterface {
   virtual void StartAbort(const Status& status) = 0;
 
  protected:
+<<<<<<< HEAD
   virtual ~RendezvousInterface();
 
   virtual bool is_cross_process() { return false; }
@@ -135,13 +204,29 @@ class Rendezvous : public RendezvousInterface, public core::RefCounted {
                           const FrameAndIter& frame_iter);
 
   static Status ParseKey(StringPiece key, ParsedKey* out);
+=======
+  ~Rendezvous() override;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // Returns a Rendezvous instance that is limited to use only by
 // producers and consumers in the local process.  The caller assumes
 // ownership of one Ref() on the returned object.
+<<<<<<< HEAD
 Rendezvous* NewLocalRendezvous();
 
 }  // end namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_RENDEZVOUS_H_
+=======
+//
+// If "tolerate_dup_recv" is true, then the Rendezvous will retain
+// already Recv'd values and make them available to duplicate Recv
+// calls.  This may be useful if the RPC layer is not reliable, but
+// comes at the cost of higher memory consumption.
+Rendezvous* NewLocalRendezvous(bool tolerate_dup_recv = false);
+
+}  // end namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_RENDEZVOUS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

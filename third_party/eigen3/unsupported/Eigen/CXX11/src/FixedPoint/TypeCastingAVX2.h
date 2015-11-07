@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 #ifndef CXX11_SRC_FIXEDPOINT_TYPECASTINGAVX2_H_
 #define CXX11_SRC_FIXEDPOINT_TYPECASTINGAVX2_H_
+=======
+#ifndef THIRD_PARTY_EIGEN3_UNSUPPORTED_EIGEN_CXX11_SRC_FIXEDPOINT_TYPECASTINGAVX2_H_
+#define THIRD_PARTY_EIGEN3_UNSUPPORTED_EIGEN_CXX11_SRC_FIXEDPOINT_TYPECASTINGAVX2_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace Eigen {
 namespace internal {
@@ -44,6 +49,7 @@ pcast<Packet8q32i, Packet32q8i>(const Packet8q32i& a, const Packet8q32i& b,
 }
 
 template <>
+<<<<<<< HEAD
 struct type_casting_traits<float, QInt8> {
   enum { VectorizedCast = 1, SrcCoeffRatio = 4, TgtCoeffRatio = 1 };
 };
@@ -63,6 +69,8 @@ pcast<Packet8f, Packet32q8i>(const Packet8f& a, const Packet8f& b,
 }
 
 template <>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 struct type_casting_traits<QInt32, QUInt8> {
   enum { VectorizedCast = 1, SrcCoeffRatio = 4, TgtCoeffRatio = 1 };
 };
@@ -71,6 +79,7 @@ template <>
 EIGEN_STRONG_INLINE Packet32q8u
 pcast<Packet8q32i, Packet32q8u>(const Packet8q32i& a, const Packet8q32i& b,
                                 const Packet8q32i& c, const Packet8q32i& d) {
+<<<<<<< HEAD
   // _mm256_packus_epi32 trims negative numbers to 0 but we can't allow numbers
   // that are too large because _mm256_packus_epi16 expects signed input
   // (example of problem input: 0x11111111, which saturates to 0xffff = -1,
@@ -81,6 +90,10 @@ pcast<Packet8q32i, Packet32q8u>(const Packet8q32i& a, const Packet8q32i& b,
   const __m256i d_clip = _mm256_min_epi32(d, _mm256_set1_epi32(255));
   const __m256i converted = _mm256_packus_epi16(
       _mm256_packus_epi32(a_clip, b_clip), _mm256_packus_epi32(c_clip, d_clip));
+=======
+  const __m256i converted = _mm256_packus_epi16(
+      _mm256_packs_epi32(a.val, b.val), _mm256_packs_epi32(c.val, d.val));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Since packus does not cross 128 bit lane boundaries,
   // we have to permute to properly order the final result.
   const __m256i permute_mask = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
@@ -90,4 +103,8 @@ pcast<Packet8q32i, Packet32q8u>(const Packet8q32i& a, const Packet8q32i& b,
 }  // end namespace internal
 }  // end namespace Eigen
 
+<<<<<<< HEAD
 #endif  // CXX11_SRC_FIXEDPOINT_TYPECASTINGAVX2_H_
+=======
+#endif  // THIRD_PARTY_EIGEN3_UNSUPPORTED_EIGEN_CXX11_SRC_FIXEDPOINT_TYPECASTINGAVX2_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

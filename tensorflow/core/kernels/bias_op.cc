@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/nn_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #include "tensorflow/core/kernels/bias_op.h"
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/bounds_check.h"
@@ -34,11 +38,20 @@ limitations under the License.
 #if GOOGLE_CUDA
 #include "tensorflow/stream_executor/cuda/cuda_stream.h"
 #endif  // GOOGLE_CUDA
+=======
+#include "tensorflow/core/framework/numeric_op.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/kernels/bias_op.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 typedef Eigen::SyclDevice SYCLDevice;
 #endif  // TENSORFLOW_USE_SYCL
@@ -85,10 +98,13 @@ struct AccumulatorType<Eigen::half> {
 };
 
 }  // namespace
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename Device, typename T>
 class BiasOp : public BinaryOp<T> {
  public:
+<<<<<<< HEAD
   explicit BiasOp(OpKernelConstruction* context) : BinaryOp<T>(context) {
     string data_format;
     if (context->GetAttr("data_format", &data_format).ok()) {
@@ -98,6 +114,9 @@ class BiasOp : public BinaryOp<T> {
       data_format_ = FORMAT_NHWC;
     }
   }
+=======
+  explicit BiasOp(OpKernelConstruction* context) : BinaryOp<T>(context) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void Compute(OpKernelContext* context) override {
     const Tensor& input = context->input(0);
@@ -109,6 +128,7 @@ class BiasOp : public BinaryOp<T> {
     OP_REQUIRES(context, TensorShapeUtils::IsVector(bias.shape()),
                 errors::InvalidArgument("Biases must be 1D: ",
                                         bias.shape().DebugString()));
+<<<<<<< HEAD
 
     // Added by intel_tf to support NCHW on CPU regardless of MKL used or not.
     size_t channel_dim;
@@ -122,12 +142,18 @@ class BiasOp : public BinaryOp<T> {
     OP_REQUIRES(
         context,
         bias.shape().dim_size(0) == input.shape().dim_size(channel_dim),
+=======
+    const auto last_dim = input.shape().dims() - 1;
+    OP_REQUIRES(
+        context, bias.shape().dim_size(0) == input.shape().dim_size(last_dim),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         errors::InvalidArgument(
             "Must provide as many biases as the last dimension "
             "of the input tensor: ",
             bias.shape().DebugString(), " vs. ", input.shape().DebugString()));
 
     Tensor* output = nullptr;
+<<<<<<< HEAD
     OP_REQUIRES_OK(context, context->forward_input_or_allocate_output(
                                 {0}, 0, input.shape(), &output));
     if (input.NumElements() == 0) return;
@@ -171,6 +197,10 @@ class BiasOp : public BinaryOp<T> {
       }
       return;
     }  // End of code by intel_tf.
+=======
+    OP_REQUIRES_OK(context,
+                   context->allocate_output(0, input.shape(), &output));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     switch (input.shape().dims()) {
       case 2:
@@ -200,6 +230,7 @@ class BiasOp : public BinaryOp<T> {
     functor(ctx->eigen_device<Device>(), input.tensor<T, Dims>(), bias.vec<T>(),
             output->tensor<T, Dims>());
   }
+<<<<<<< HEAD
 
  private:
   TensorFormat data_format_;
@@ -211,11 +242,19 @@ class BiasOp : public BinaryOp<T> {
       BiasOp<CPUDevice, type>);                                       \
   REGISTER_KERNEL_BUILDER(                                            \
       Name("BiasAddV1").Device(DEVICE_CPU).TypeConstraint<type>("T"), \
+=======
+};
+
+#define REGISTER_KERNEL(type)                                       \
+  REGISTER_KERNEL_BUILDER(                                          \
+      Name("BiasAdd").Device(DEVICE_CPU).TypeConstraint<type>("T"), \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       BiasOp<CPUDevice, type>);
 
 TF_CALL_NUMBER_TYPES(REGISTER_KERNEL);
 #undef REGISTER_KERNEL
 
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 #define REGISTER_KERNEL(type)                                          \
   REGISTER_KERNEL_BUILDER(                                             \
@@ -621,5 +660,36 @@ TF_CALL_GPU_NUMBER_TYPES(REGISTER_GPU_KERNEL);
 #undef REGISTER_GPU_KERNEL
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#if GOOGLE_CUDA
+// Forward declarations of the functor specializations for GPU.
+namespace functor {
+#define DECLARE_GPU_SPEC(T, Dims)                                      \
+  template <>                                                          \
+  void Bias<GPUDevice, T, Dims>::operator()(                           \
+      const GPUDevice& d, typename TTypes<T, Dims>::ConstTensor input, \
+      typename TTypes<T>::ConstVec bias,                               \
+      typename TTypes<T, Dims>::Tensor output);                        \
+  extern template struct Bias<GPUDevice, T, Dims>;
+
+#define DECLARE_GPU_SPECS(T) \
+  DECLARE_GPU_SPEC(T, 2);    \
+  DECLARE_GPU_SPEC(T, 3);    \
+  DECLARE_GPU_SPEC(T, 4);    \
+  DECLARE_GPU_SPEC(T, 5);
+
+TF_CALL_GPU_NUMBER_TYPES(DECLARE_GPU_SPECS);
+}  // namespace functor
+
+// Registration of the GPU implementations.
+#define REGISTER_GPU_KERNEL(type)                                   \
+  REGISTER_KERNEL_BUILDER(                                          \
+      Name("BiasAdd").Device(DEVICE_GPU).TypeConstraint<type>("T"), \
+      BiasOp<GPUDevice, type>);
+
+TF_CALL_GPU_NUMBER_TYPES(REGISTER_GPU_KERNEL);
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

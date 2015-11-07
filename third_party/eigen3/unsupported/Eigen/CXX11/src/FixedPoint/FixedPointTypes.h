@@ -7,8 +7,13 @@
 // Public License v. 2.0. If a copy of the MPL was not distributed
 // with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+<<<<<<< HEAD
 #ifndef CXX11_SRC_FIXEDPOINT_FIXEDPOINTTYPES_H_
 #define CXX11_SRC_FIXEDPOINT_FIXEDPOINTTYPES_H_
+=======
+#ifndef EIGEN_CXX11_FIXED_POINT_TYPES_H
+#define EIGEN_CXX11_FIXED_POINT_TYPES_H
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <cmath>
 #include <iostream>
@@ -90,7 +95,10 @@ struct QInt32 {
   QInt32() {}
   QInt32(const int8_t v) : value(v) {}
   QInt32(const int32_t v) : value(v) {}
+<<<<<<< HEAD
   QInt32(const uint32_t v) : value(static_cast<int32_t>(v)) {}
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   QInt32(const QInt8 v) : value(v.value) {}
   QInt32(const float v) : value(static_cast<int32_t>(lrint(v))) {}
 #ifdef EIGEN_MAKING_DOCS
@@ -249,7 +257,13 @@ EIGEN_STRONG_INLINE QInt32& operator/=(QInt32& a, const QInt32 b) {
   a.value /= b.value;
   return a;
 }
+<<<<<<< HEAD
 EIGEN_STRONG_INLINE QInt32 operator-(const QInt32 a) { return -a.value; }
+=======
+EIGEN_STRONG_INLINE QInt32 operator-(const QInt32 a) {
+  return -a.value;
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Scaling QInt32 by double. We do the arithmetic in double because
 // float only has 23 bits of mantissa, so casting QInt32 to float might reduce
@@ -337,4 +351,8 @@ EIGEN_STRONG_INLINE std::ostream& operator<<(std::ostream& os, QInt32 a) {
 
 }  // namespace Eigen
 
+<<<<<<< HEAD
 #endif  // CXX11_SRC_FIXEDPOINT_FIXEDPOINTTYPES_H_
+=======
+#endif  // EIGEN_CXX11_FIXED_POINT_TYPES_H
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

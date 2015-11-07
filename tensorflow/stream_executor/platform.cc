@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,31 +14,54 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/platform.h"
 
 #include "tensorflow/stream_executor/platform/port.h"
 
+<<<<<<< HEAD
 #include "absl/strings/str_cat.h"
 #include "tensorflow/stream_executor/lib/error.h"
 #include "tensorflow/stream_executor/platform/logging.h"
 #include "tensorflow/stream_executor/stream_executor_pimpl.h"
 
 namespace stream_executor {
+=======
+#include "tensorflow/stream_executor/lib/error.h"
+#include "tensorflow/stream_executor/lib/strcat.h"
+#include "tensorflow/stream_executor/platform/logging.h"
+#include "tensorflow/stream_executor/stream_executor_pimpl.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 string PlatformKindString(PlatformKind kind) {
   switch (kind) {
     case PlatformKind::kCuda:
       return "CUDA";
+<<<<<<< HEAD
     case PlatformKind::kROCm:
       return "ROCm";
     case PlatformKind::kOpenCL:
       return "OpenCL";
+=======
+    case PlatformKind::kOpenCL:
+      return "OpenCL";
+    case PlatformKind::kOpenCLAltera:
+      return "OpenCL+Altera";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     case PlatformKind::kHost:
       return "Host";
     case PlatformKind::kMock:
       return "Mock";
     default:
+<<<<<<< HEAD
       return absl::StrCat("InvalidPlatformKind(", static_cast<int>(kind), ")");
+=======
+      return port::StrCat("InvalidPlatformKind(", static_cast<int>(kind), ")");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
@@ -54,7 +78,10 @@ PlatformKind PlatformKindFromString(string kind) {
 bool PlatformIsRunnable(PlatformKind kind) {
   switch (kind) {
     case PlatformKind::kCuda:
+<<<<<<< HEAD
     case PlatformKind::kROCm:
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     case PlatformKind::kOpenCL:
     case PlatformKind::kHost:
       return true;
@@ -66,7 +93,10 @@ bool PlatformIsRunnable(PlatformKind kind) {
 bool PlatformIsRunnableOnDevice(PlatformKind kind) {
   switch (kind) {
     case PlatformKind::kCuda:
+<<<<<<< HEAD
     case PlatformKind::kROCm:
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     case PlatformKind::kOpenCL:
       return true;
     default:
@@ -88,6 +118,7 @@ StreamExecutorConfig::StreamExecutorConfig(int ordinal_in)
 
 Platform::~Platform() {}
 
+<<<<<<< HEAD
 bool Platform::Initialized() const { return true; }
 
 port::Status Platform::Initialize(
@@ -99,6 +130,8 @@ port::Status Platform::Initialize(
   return port::Status::OK();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 port::Status Platform::ForceExecutorShutdown() {
   return port::Status(port::error::UNIMPLEMENTED,
                       "executor shutdown is not supported on this platform");
@@ -138,4 +171,9 @@ port::Status Platform::EnablePeerAccess() {
   return port::Status::OK();
 }
 
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

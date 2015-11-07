@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,31 +14,49 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <functional>
 #include <memory>
 #include <vector>
 
+<<<<<<< HEAD
 #include "tensorflow/core/framework/allocator.h"
 #include "tensorflow/core/framework/fake_input.h"
 #include "tensorflow/core/framework/node_def_builder.h"
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/tensor.h"
+=======
+#include <gtest/gtest.h>
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/framework/fake_input.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/op_kernel.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/framework/types.pb.h"
 #include "tensorflow/core/kernels/ops_testutil.h"
 #include "tensorflow/core/kernels/ops_util.h"
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/lib/random/simple_philox.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
 
 class ScatterUpdateOpTest : public OpsTestBase {
  protected:
+<<<<<<< HEAD
   void MakeOp(DataType variable_ref_type, DataType index_type) {
     TF_ASSERT_OK(NodeDefBuilder("myop", "ScatterUpdate")
                      .Input(FakeInput(variable_ref_type))
@@ -87,6 +106,21 @@ TEST_F(ScatterUpdateOpTest, Simple_BoolType) {
 
 TEST_F(ScatterUpdateOpTest, Simple_TwoD32) {
   MakeOp(DT_FLOAT_REF, DT_INT32);
+=======
+  void MakeOp(DataType index_type) {
+    RequireDefaultOps();
+    ASSERT_OK(NodeDefBuilder("myop", "ScatterUpdate")
+                  .Input(FakeInput(DT_FLOAT_REF))
+                  .Input(FakeInput(index_type))
+                  .Input(FakeInput(DT_FLOAT))
+                  .Finalize(node_def()));
+    ASSERT_OK(InitOp());
+  }
+};
+
+TEST_F(ScatterUpdateOpTest, Simple_TwoD32) {
+  MakeOp(DT_INT32);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Feed and run
   AddInputFromArray<float>(TensorShape({5, 3}),
@@ -94,7 +128,11 @@ TEST_F(ScatterUpdateOpTest, Simple_TwoD32) {
   AddInputFromArray<int32>(TensorShape({3}), {0, 4, 2});
   AddInputFromArray<float>(TensorShape({3, 3}),
                            {100, 101, 102, 777, 778, 779, 10000, 10001, 10002});
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the new state of the input
   Tensor params_tensor = *mutable_input(0).tensor;
@@ -105,7 +143,11 @@ TEST_F(ScatterUpdateOpTest, Simple_TwoD32) {
 }
 
 TEST_F(ScatterUpdateOpTest, Simple_Two64) {
+<<<<<<< HEAD
   MakeOp(DT_FLOAT_REF, DT_INT64);
+=======
+  MakeOp(DT_INT64);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Feed and run
   AddInputFromArray<float>(TensorShape({5, 3}),
@@ -113,7 +155,11 @@ TEST_F(ScatterUpdateOpTest, Simple_Two64) {
   AddInputFromArray<int64>(TensorShape({3}), {0, 4, 2});
   AddInputFromArray<float>(TensorShape({3, 3}),
                            {100, 101, 102, 777, 778, 779, 10000, 10001, 10002});
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the new state of the input
   Tensor params_tensor = *mutable_input(0).tensor;
@@ -124,13 +170,21 @@ TEST_F(ScatterUpdateOpTest, Simple_Two64) {
 }
 
 TEST_F(ScatterUpdateOpTest, Simple_ZeroD) {
+<<<<<<< HEAD
   MakeOp(DT_FLOAT_REF, DT_INT32);
+=======
+  MakeOp(DT_INT32);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Feed and run
   AddInputFromArray<float>(TensorShape({5}), {0, 0, 0, 0, 0});
   AddInputFromArray<int32>(TensorShape({}), {3});
   AddInputFromArray<float>(TensorShape({}), {101});
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the new state of the input
   Tensor params_tensor = *mutable_input(0).tensor;
@@ -140,13 +194,21 @@ TEST_F(ScatterUpdateOpTest, Simple_ZeroD) {
 }
 
 TEST_F(ScatterUpdateOpTest, Simple_OneD) {
+<<<<<<< HEAD
   MakeOp(DT_FLOAT_REF, DT_INT32);
+=======
+  MakeOp(DT_INT32);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Feed and run
   AddInputFromArray<float>(TensorShape({5}), {0, 0, 0, 0, 0});
   AddInputFromArray<int32>(TensorShape({3}), {0, 4, 2});
   AddInputFromArray<float>(TensorShape({3}), {100, 101, 102});
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the new state of the input
   Tensor params_tensor = *mutable_input(0).tensor;
@@ -156,13 +218,21 @@ TEST_F(ScatterUpdateOpTest, Simple_OneD) {
 }
 
 TEST_F(ScatterUpdateOpTest, HigherRank) {
+<<<<<<< HEAD
   MakeOp(DT_FLOAT_REF, DT_INT32);
+=======
+  MakeOp(DT_INT32);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Feed and run
   AddInputFromArray<float>(TensorShape({8}), {0, 0, 0, 0, 0, 0, 0, 0});
   AddInputFromArray<int32>(TensorShape({2, 3}), {0, 4, 2, 1, 3, 6});
   AddInputFromArray<float>(TensorShape({2, 3}), {10, 20, 30, 40, 50, 60});
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the new state of the input
   Tensor params_tensor = *mutable_input(0).tensor;
@@ -172,7 +242,11 @@ TEST_F(ScatterUpdateOpTest, HigherRank) {
 }
 
 TEST_F(ScatterUpdateOpTest, Error_IndexOutOfRange) {
+<<<<<<< HEAD
   MakeOp(DT_FLOAT_REF, DT_INT32);
+=======
+  MakeOp(DT_INT32);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Feed and run
   AddInputFromArray<float>(TensorShape({5, 3}),
@@ -181,6 +255,7 @@ TEST_F(ScatterUpdateOpTest, Error_IndexOutOfRange) {
   AddInputFromArray<float>(TensorShape({3, 3}),
                            {100, 101, 102, 777, 778, 779, 10000, 10001, 10002});
   Status s = RunOpKernel();
+<<<<<<< HEAD
   EXPECT_TRUE(
       absl::StrContains(s.ToString(), "indices[2] = 99 is not in [0, 5)"))
       << s;
@@ -219,6 +294,15 @@ TEST_F(ScatterSubOpTest, StressIndexTest) {
 
 TEST_F(ScatterUpdateOpTest, Error_WrongDimsIndices) {
   MakeOp(DT_FLOAT_REF, DT_INT32);
+=======
+  EXPECT_TRUE(StringPiece(s.ToString())
+                  .contains("Index 99 at offset 2 in indices is out of range"))
+      << s;
+}
+
+TEST_F(ScatterUpdateOpTest, Error_WrongDimsIndices) {
+  MakeOp(DT_INT32);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Feed and run
   AddInputFromArray<float>(TensorShape({2, 3}), {0, 0, 0, 0, 0, 0});
@@ -226,14 +310,24 @@ TEST_F(ScatterUpdateOpTest, Error_WrongDimsIndices) {
   AddInputFromArray<float>(TensorShape({3, 3}),
                            {100, 101, 102, 777, 778, 779, 10000, 10001, 10002});
   Status s = RunOpKernel();
+<<<<<<< HEAD
   EXPECT_TRUE(absl::StrContains(s.ToString(),
                                 "Must have updates.shape = indices.shape + "
                                 "params.shape[1:] or updates.shape = [], got "))
+=======
+  EXPECT_TRUE(StringPiece(s.ToString())
+                  .contains("Must have updates.shape = indices.shape + "
+                            "params.shape[1:], got "))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       << s;
 }
 
 TEST_F(ScatterUpdateOpTest, Error_MismatchedParamsAndUpdateDimensions) {
+<<<<<<< HEAD
   MakeOp(DT_FLOAT_REF, DT_INT32);
+=======
+  MakeOp(DT_INT32);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Feed and run
   AddInputFromArray<float>(TensorShape({5, 3}),
@@ -243,15 +337,25 @@ TEST_F(ScatterUpdateOpTest, Error_MismatchedParamsAndUpdateDimensions) {
       TensorShape({3, 4}),
       {100, 101, 102, 103, 777, 778, 779, 780, 10000, 10001, 10002, 10004});
   Status s = RunOpKernel();
+<<<<<<< HEAD
   EXPECT_TRUE(absl::StrContains(s.ToString(),
                                 "Must have updates.shape = indices.shape + "
                                 "params.shape[1:] or updates.shape = [], got "))
+=======
+  EXPECT_TRUE(StringPiece(s.ToString())
+                  .contains("Must have updates.shape = indices.shape + "
+                            "params.shape[1:], got "))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       << s;
 }
 
 TEST_F(ScatterUpdateOpTest, Error_MismatchedIndicesAndUpdateDimensions) {
+<<<<<<< HEAD
   MakeOp(DT_FLOAT_REF, DT_INT32);
+=======
+  MakeOp(DT_INT32);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Feed and run
   AddInputFromArray<float>(TensorShape({5, 3}),
@@ -260,14 +364,21 @@ TEST_F(ScatterUpdateOpTest, Error_MismatchedIndicesAndUpdateDimensions) {
   AddInputFromArray<float>(TensorShape({2, 3}),
                            {100, 101, 102, 10000, 10001, 10002});
   Status s = RunOpKernel();
+<<<<<<< HEAD
   EXPECT_TRUE(absl::StrContains(s.ToString(),
                                 "Must have updates.shape = indices.shape + "
                                 "params.shape[1:] or updates.shape = [], got "))
+=======
+  EXPECT_TRUE(StringPiece(s.ToString())
+                  .contains("Must have updates.shape = indices.shape + "
+                            "params.shape[1:], got "))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       << s;
 }
 
 class ScatterUpdateBM : public ScatterUpdateOpTest {
  public:
+<<<<<<< HEAD
   void TestBody() override {}
   void MakeBenchmarkOp(const char* op, DataType index_type) {
     TF_ASSERT_OK(NodeDefBuilder("myop", op)
@@ -275,11 +386,21 @@ class ScatterUpdateBM : public ScatterUpdateOpTest {
                      .Input(FakeInput(index_type))
                      .Input(FakeInput(DT_FLOAT))
                      .Finalize(node_def()));
+=======
+  virtual void TestBody() {}
+  void MakeBenchmarkOp(const char* op, DataType index_type) {
+    ASSERT_OK(NodeDefBuilder("myop", op)
+                  .Input(FakeInput(DT_FLOAT_REF))
+                  .Input(FakeInput(index_type))
+                  .Input(FakeInput(DT_FLOAT))
+                  .Finalize(node_def()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     TF_CHECK_OK(InitOp());
   }
 };
 
 template <typename Index>
+<<<<<<< HEAD
 static void BM_ScatterHelper(int iters, int embedding_size, const char* op,
                              bool big_num_updates = false) {
   testing::StopTiming();
@@ -290,6 +411,16 @@ static void BM_ScatterHelper(int iters, int embedding_size, const char* op,
     values.push_back(i);
   }
   const int kNumUpdates = big_num_updates ? 1000000 : 1000;
+=======
+static void BM_ScatterHelper(int iters, int embedding_size, const char* op) {
+  testing::StopTiming();
+  const int kRows = 10000000 / embedding_size;
+  std::vector<float> values;
+  for (int i = 0; i < kRows * embedding_size; i++) {
+    values.push_back(i);
+  }
+  const int kNumUpdates = 1000;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   random::PhiloxRandom philox(301, 17);
   random::SimplePhilox rnd(&philox);
   std::vector<Index> indices;
@@ -313,7 +444,10 @@ static void BM_ScatterHelper(int iters, int embedding_size, const char* op,
   while (iters-- > 0) {
     Status s = bm.RunOpKernel();
   }
+<<<<<<< HEAD
   testing::StopTiming();
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 static void BM_ScatterUpdateInt32(int iters, int embedding_size) {
@@ -326,14 +460,18 @@ static void BM_ScatterUpdateInt64(int iters, int embedding_size) {
 static void BM_ScatterAddInt32(int iters, int embedding_size) {
   BM_ScatterHelper<int32>(iters, embedding_size, "ScatterAdd");
 }
+<<<<<<< HEAD
 
 static void BM_ScatterAddInt32Large(int iters, int embedding_size) {
   BM_ScatterHelper<int32>(iters, embedding_size, "ScatterAdd", true);
 }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static void BM_ScatterAddInt64(int iters, int embedding_size) {
   BM_ScatterHelper<int64>(iters, embedding_size, "ScatterAdd");
 }
 
+<<<<<<< HEAD
 static void BM_ScatterMulInt32(int iters, int embedding_size) {
   BM_ScatterHelper<int32>(iters, embedding_size, "ScatterMul");
 }
@@ -408,5 +546,13 @@ BENCHMARK(BM_ScatterMinInt64)->Arg(1)->Arg(10)->Arg(64)->Arg(256)->Arg(1024);
 BENCHMARK(BM_ScatterMaxInt32)->Arg(1)->Arg(10)->Arg(64)->Arg(256)->Arg(1024);
 BENCHMARK(BM_ScatterMaxInt64)->Arg(1)->Arg(10)->Arg(64)->Arg(256)->Arg(1024);
 
+=======
+BENCHMARK(BM_ScatterUpdateInt32)->Arg(1)->Arg(10)->Arg(64)->Arg(256)->Arg(1024);
+BENCHMARK(BM_ScatterUpdateInt64)->Arg(1)->Arg(10)->Arg(64)->Arg(256)->Arg(1024);
+
+BENCHMARK(BM_ScatterAddInt32)->Arg(1)->Arg(10)->Arg(64)->Arg(256)->Arg(1024);
+BENCHMARK(BM_ScatterAddInt64)->Arg(1)->Arg(10)->Arg(64)->Arg(256)->Arg(1024);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

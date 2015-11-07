@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/lib/demangle.h"
 
 #if (__GNUC__ >= 4 || (__GNUC__ >= 3 && __GNUC_MINOR__ >= 4)) && \
@@ -27,7 +30,12 @@ limitations under the License.
 #include <cxxabi.h>
 #endif
 
+<<<<<<< HEAD
 namespace stream_executor {
+=======
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace port {
 
 // The API reference of abi::__cxa_demangle() can be found in
@@ -36,11 +44,19 @@ namespace port {
 string Demangle(const char *mangled) {
   string demangled;
   int status = 0;
+<<<<<<< HEAD
   char *result = nullptr;
 #if HAS_CXA_DEMANGLE
   result = abi::__cxa_demangle(mangled, nullptr, nullptr, &status);
 #endif
   if (status == 0 && result != nullptr) {  // Demangling succeeded.
+=======
+  char *result = NULL;
+#if HAS_CXA_DEMANGLE
+  result = abi::__cxa_demangle(mangled, NULL, NULL, &status);
+#endif
+  if (status == 0 && result != NULL) {  // Demangling succeeeded.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     demangled.append(result);
     free(result);
   }
@@ -48,4 +64,9 @@ string Demangle(const char *mangled) {
 }
 
 }  // namespace port
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

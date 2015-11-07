@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +23,11 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/framework/attr_value_util.h"
+
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -40,13 +46,18 @@ AttrValue P(const string& p) {
 }
 
 AttrValue F(const string& name,
+<<<<<<< HEAD
             std::vector<std::pair<string, AttrValue>> pairs) {
+=======
+            std::vector<std::pair<string, AttrValue> > pairs) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   AttrValue ret;
   ret.mutable_func()->set_name(name);
   ret.mutable_func()->mutable_attr()->insert(pairs.begin(), pairs.end());
   return ret;
 }
 
+<<<<<<< HEAD
 AttrValue Fs(
     std::vector<std::pair<string, std::vector<std::pair<string, AttrValue>>>>
         funcs) {
@@ -59,13 +70,18 @@ AttrValue Fs(
   return ret;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(AttrValueUtil, HasType) {
   // OK
   EXPECT_TRUE(AttrValueHasType(V(123), "int").ok());
   EXPECT_TRUE(AttrValueHasType(V(1.2), "float").ok());
   EXPECT_TRUE(AttrValueHasType(V(DT_FLOAT), "type").ok());
   EXPECT_TRUE(AttrValueHasType(F("f", {}), "func").ok());
+<<<<<<< HEAD
   EXPECT_TRUE(AttrValueHasType(Fs({{"f", {}}, {"g", {}}}), "list(func)").ok());
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // not OK.
   EXPECT_FALSE(AttrValueHasType(V(123), "func").ok());
@@ -73,9 +89,12 @@ TEST(AttrValueUtil, HasType) {
   EXPECT_FALSE(AttrValueHasType(V(DT_FLOAT), "shape").ok());
   EXPECT_FALSE(AttrValueHasType(F("f", {}), "string").ok());
   EXPECT_FALSE(AttrValueHasType(P("T"), "float").ok());
+<<<<<<< HEAD
   EXPECT_FALSE(AttrValueHasType(V(static_cast<DataType>(1000)), "type").ok());
   std::vector<DataType> list_type({static_cast<DataType>(1000)});
   EXPECT_FALSE(AttrValueHasType(V(list_type), "list(type)").ok());
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 SubstituteFunc ReplaceTWith(const AttrValue& val) {
@@ -94,7 +113,11 @@ TEST(AttrValueUtil, Basic) {
                         {"transpose_a", V(false)},
                         {"transpose_b", V(true)},
                         {"use_cublas", V(true)}});
+<<<<<<< HEAD
   TF_EXPECT_OK(AttrValueHasType(v, "func"));
+=======
+  TF_CHECK_OK(AttrValueHasType(v, "func"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_TRUE(HasPlaceHolder(v));
 
   EXPECT_EQ(
@@ -108,6 +131,7 @@ TEST(AttrValueUtil, Basic) {
             "use_cublas=true]");
 }
 
+<<<<<<< HEAD
 TEST(AttrValueUtil, Shaped) {
   auto v =
       F("OpRequiresShape", {{"shape_full", V(TensorShape({1, 0}))},
@@ -122,18 +146,28 @@ TEST(AttrValueUtil, Shaped) {
 TEST(AttrValueUtil, DeepAttr) {
   auto v = Fs({{"f", {{"T", P("T")}}}, {"g", {{"T", P("T")}}}});
   TF_EXPECT_OK(AttrValueHasType(v, "list(func)"));
+=======
+TEST(AttrValueUtil, DeepAttr) {
+  auto v = F("f", {{"T", P("T")}});
+  TF_CHECK_OK(AttrValueHasType(v, "func"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_TRUE(HasPlaceHolder(v));
 
   for (int i = 0; i < 3; ++i) {
     v = F("f", {{"T", P("T")}, {"F", v}});
     EXPECT_TRUE(HasPlaceHolder(v));
   }
+<<<<<<< HEAD
   EXPECT_EQ(SummarizeAttrValue(v),
             "f[F=f[F=f[F=[f[T=$T], g[T=$T]], T=$T], T=$T], T=$T]");
+=======
+  EXPECT_EQ(SummarizeAttrValue(v), "f[F=f[F=f[F=f[T=$T], T=$T], T=$T], T=$T]");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   SubstitutePlaceholders(ReplaceTWith(F("x", {})), &v);
   EXPECT_TRUE(!HasPlaceHolder(v));
   EXPECT_EQ(SummarizeAttrValue(v),
+<<<<<<< HEAD
             "f[F=f[F=f[F=[f[T=x[]], g[T=x[]]], T=x[]], T=x[]], T=x[]]");
 }
 
@@ -224,6 +258,9 @@ TEST(AttrValueEquality, StringAndFuncTensors) {
   c2 = c1;
   c2.mutable_func()->mutable_attr()->erase("attr2");
   ExpectDifferent(c1, c2);
+=======
+            "f[F=f[F=f[F=f[T=x[]], T=x[]], T=x[]], T=x[]]");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

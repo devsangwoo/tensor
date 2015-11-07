@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,6 +79,19 @@ bool operator==(const Variant& a, const Variant& b) {
 
 namespace {
 
+=======
+#include "tensorflow/core/public/tensor.h"
+
+#include "tensorflow/core/framework/tensor_testutil.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include <gtest/gtest.h>
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(TensorTest, Default) {
   Tensor t;
   EXPECT_EQ(t.dtype(), DT_FLOAT);
@@ -90,18 +104,25 @@ TEST(TensorTest, DataType_Traits) {
   EXPECT_TRUE(std::is_trivial<double>::value);
   EXPECT_TRUE(std::is_trivial<int32>::value);
   EXPECT_TRUE(std::is_trivial<uint8>::value);
+<<<<<<< HEAD
   EXPECT_TRUE(std::is_trivial<uint16>::value);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_TRUE(std::is_trivial<int16>::value);
   EXPECT_TRUE(std::is_trivial<int8>::value);
   EXPECT_TRUE(std::is_trivial<int64>::value);
   EXPECT_TRUE(std::is_trivial<bool>::value);
+<<<<<<< HEAD
   EXPECT_FALSE(std::is_trivial<tstring>::value);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_FALSE(std::is_trivial<string>::value);
 
   EXPECT_EQ(sizeof(bool), 1);
 
   // Unfortunately. std::complex::complex() initializes (0, 0).
   EXPECT_FALSE(std::is_trivial<complex64>::value);
+<<<<<<< HEAD
   EXPECT_FALSE(std::is_trivial<complex128>::value);
   EXPECT_TRUE(std::is_trivial<float[2]>::value);
   EXPECT_TRUE(std::is_trivial<double[2]>::value);
@@ -113,6 +134,14 @@ TEST(TensorTest, DataType_Traits) {
     double re, im;
   };
   EXPECT_TRUE(std::is_trivial<MyComplex128>::value);
+=======
+  EXPECT_FALSE(std::is_trivial<std::complex<double>>::value);
+  EXPECT_TRUE(std::is_trivial<float[2]>::value);
+  struct MyComplex {
+    float re, im;
+  };
+  EXPECT_TRUE(std::is_trivial<MyComplex>::value);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 template <typename T>
@@ -162,6 +191,7 @@ void TestCopies(const Tensor& t) {
     Tensor t2 = test::AsTensor(values, t.shape());
     test::ExpectTensorEqual<T>(t, t2);
   }
+<<<<<<< HEAD
   {
     LOG(INFO) << "Move constructor";
     Tensor t2 = t;
@@ -202,6 +232,8 @@ TEST(Tensor_Bfloat16, Simple) {
     }
   }
   TestCopies<bfloat16>(t);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(Tensor_Float, Simple) {
@@ -215,6 +247,7 @@ TEST(Tensor_Float, Simple) {
   TestCopies<float>(t);
 }
 
+<<<<<<< HEAD
 TEST(Tensor_ResourceHandle, Simple) {
   Tensor t(DT_RESOURCE, TensorShape({}));
   ResourceHandle tmp;
@@ -307,6 +340,8 @@ TEST(Tensor_UInt16, Simple) {
   TestCopies<uint16>(t);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(Tensor_QInt8, Simple) {
   Tensor t(DT_QINT8, TensorShape({2, 2}));
   EXPECT_TRUE(t.shape().IsSameSize(TensorShape({2, 2})));
@@ -340,6 +375,7 @@ TEST(Tensor_QInt32, Simple) {
   TestCopies<qint32>(t);
 }
 
+<<<<<<< HEAD
 class TensorReshapeTest : public ::testing::Test {
  protected:
   Tensor t;
@@ -353,6 +389,13 @@ class TensorReshapeTest : public ::testing::Test {
     EXPECT_TRUE(t.shape().IsSameSize(TensorShape({2, 3, 4, 5})));
     EXPECT_TRUE(zero_t.shape().IsSameSize(TensorShape({3, 0, 2, 0, 5})));
 
+=======
+TEST(Tensor_Float, Reshape) {
+  Tensor t(DT_FLOAT, TensorShape({2, 3, 4, 5}));
+  EXPECT_TRUE(t.shape().IsSameSize(TensorShape({2, 3, 4, 5})));
+
+  {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     auto tensor = t.tensor<float, 4>();
     EXPECT_EQ(2, tensor.dimension(0));
     EXPECT_EQ(3, tensor.dimension(1));
@@ -363,6 +406,7 @@ class TensorReshapeTest : public ::testing::Test {
     tensor(0, 0, 0, 0) = 0.01f;
     tensor(1, 2, 3, 4) = 0.02f;
   }
+<<<<<<< HEAD
 
   template <typename T>
   using ReshapeFunc = T (Tensor::*)(gtl::ArraySlice<int64>);
@@ -487,6 +531,39 @@ TEST_F(TensorReshapeTest, ReshapeError) {
 
 TEST_F(TensorReshapeTest, Flat) {
   LOG(INFO) << "flat";
+=======
+  {
+    auto shaped = t.shaped<float, 1>({120});
+    EXPECT_EQ(120, shaped.dimension(0));
+    EXPECT_EQ(shaped(0), 0.01f);
+    EXPECT_EQ(shaped(119), 0.02f);
+  }
+  {
+    auto shaped = t.shaped<float, 2>({6, 20});
+    EXPECT_EQ(6, shaped.dimension(0));
+    EXPECT_EQ(20, shaped.dimension(1));
+    EXPECT_EQ(shaped(0, 0), 0.01f);
+    EXPECT_EQ(shaped(5, 19), 0.02f);
+  }
+  {
+    auto shaped = t.shaped<float, 3>({6, 4, 5});
+    EXPECT_EQ(6, shaped.dimension(0));
+    EXPECT_EQ(4, shaped.dimension(1));
+    EXPECT_EQ(5, shaped.dimension(2));
+    EXPECT_EQ(shaped(0, 0, 0), 0.01f);
+    EXPECT_EQ(shaped(5, 3, 4), 0.02f);
+  }
+  {
+    auto shaped = t.shaped<float, 4>({2, 3, 4, 5});
+    EXPECT_EQ(2, shaped.dimension(0));
+    EXPECT_EQ(3, shaped.dimension(1));
+    EXPECT_EQ(4, shaped.dimension(2));
+    EXPECT_EQ(5, shaped.dimension(3));
+
+    EXPECT_EQ(shaped(0, 0, 0, 0), 0.01f);
+    EXPECT_EQ(shaped(1, 2, 3, 4), 0.02f);
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   {
     auto flat = t.flat<float>();
     EXPECT_EQ(flat(0), 0.01f);
@@ -494,10 +571,13 @@ TEST_F(TensorReshapeTest, Flat) {
     EXPECT_EQ(flat(0), 0.01f);
     EXPECT_EQ(flat(119), 0.02f);
   }
+<<<<<<< HEAD
 }
 
 TEST_F(TensorReshapeTest, FlatInnerDims) {
   LOG(INFO) << "flat_inner_dims";
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   {
     auto flat_inner_dims = t.flat_inner_dims<float>();
     EXPECT_EQ(24, flat_inner_dims.dimension(0));
@@ -505,6 +585,7 @@ TEST_F(TensorReshapeTest, FlatInnerDims) {
     EXPECT_EQ(flat_inner_dims(0, 0), 0.01f);
     EXPECT_EQ(flat_inner_dims(23, 4), 0.02f);
   }
+<<<<<<< HEAD
   {
     auto flat_inner_dims = t.flat_inner_dims<float, 3>();
     EXPECT_EQ(6, flat_inner_dims.dimension(0));
@@ -756,10 +837,13 @@ TEST(ReinterpretLastDimension, Reinterpret_NCHW_VECT_C_as_NCHW) {
       }
     }
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(Tensor_Scalar, Basics) {
   {
+<<<<<<< HEAD
     Tensor t(DT_BOOL, TensorShape({}));
     EXPECT_EQ(1, t.NumElements());
     auto Tt = t.scalar<bool>();
@@ -769,6 +853,8 @@ TEST(Tensor_Scalar, Basics) {
     EXPECT_TRUE(Tt());
   }
   {
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Tensor t(DT_FLOAT, TensorShape({}));
     EXPECT_EQ(1, t.NumElements());
     auto Tt = t.scalar<float>();
@@ -797,27 +883,47 @@ TEST(Tensor_Scalar, Basics) {
   {
     Tensor t(DT_STRING, TensorShape({}));
     EXPECT_EQ(1, t.NumElements());
+<<<<<<< HEAD
     auto Tt = t.scalar<tstring>();
     EXPECT_EQ(1, Tt.size());
     EXPECT_EQ(0, Tt.rank());
     t.scalar<tstring>()() = "foo";
+=======
+    auto Tt = t.scalar<string>();
+    EXPECT_EQ(1, Tt.size());
+    EXPECT_EQ(0, Tt.rank());
+    t.scalar<string>()() = "foo";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_EQ("foo", Tt());
   }
   {
     Tensor t(DT_STRING, TensorShape({1}));
     EXPECT_EQ(1, t.NumElements());
+<<<<<<< HEAD
     auto Tt = t.vec<tstring>();
     EXPECT_EQ(1, Tt.size());
     t.flat<tstring>()(0) = "foo";
+=======
+    auto Tt = t.vec<string>();
+    EXPECT_EQ(1, Tt.size());
+    t.flat<string>()(0) = "foo";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_EQ("foo", Tt(0));
   }
   {
     Tensor t(DT_STRING, TensorShape({1, 1, 1}));
     EXPECT_EQ(1, t.NumElements());
+<<<<<<< HEAD
     auto Tt = t.scalar<tstring>();
     EXPECT_EQ(1, Tt.size());
     EXPECT_EQ(0, Tt.rank());
     t.flat<tstring>()(0) = "bar";
+=======
+    auto Tt = t.scalar<string>();
+    EXPECT_EQ(1, Tt.size());
+    EXPECT_EQ(0, Tt.rank());
+    t.flat<string>()(0) = "bar";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_EQ("bar", Tt());
   }
   {
@@ -832,6 +938,7 @@ TEST(Tensor_Scalar, Basics) {
   }
 }
 
+<<<<<<< HEAD
 TEST(Tensor_HostScalar, Basics) {
   {
     Tensor t(true);
@@ -871,6 +978,8 @@ TEST(Tensor_HostScalar, Basics) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(Tensor_Float, Reshape_And_Slice_Assignment) {
   // A test to experiment with a way to assign to a subset of a tensor
   Tensor t(DT_FLOAT, TensorShape({10, 4, 3, 2}));
@@ -905,15 +1014,24 @@ TEST(Tensor_Float, Reshape_And_Slice_Assignment) {
 }
 
 TEST(Tensor_String, Simple) {
+<<<<<<< HEAD
   Tensor t = test::AsTensor<tstring>(
+=======
+  Tensor t = test::AsTensor<string>(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       {"hello", "world", "machine", "learning", "new", "york"},
       TensorShape({3, 2}));
   auto s = t.shape();
   ASSERT_EQ(s.dims(), 2);
   ASSERT_EQ(s.dim_size(0), 3);
   ASSERT_EQ(s.dim_size(1), 2);
+<<<<<<< HEAD
   auto m = t.matrix<tstring>();
   EXPECT_EQ(t.TotalBytes(), 3 * 2 * sizeof(tstring) + 5 + 5 + 7 + 8 + 3 + 4);
+=======
+  auto m = t.matrix<string>();
+  EXPECT_EQ(t.TotalBytes(), 3 * 2 * sizeof(string) + 5 + 5 + 7 + 8 + 3 + 4);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   EXPECT_EQ(m(0, 0), "hello");
   EXPECT_EQ(m(0, 1), "world");
@@ -922,7 +1040,11 @@ TEST(Tensor_String, Simple) {
   EXPECT_EQ(m(2, 0), "new");
   EXPECT_EQ(m(2, 1), "york");
 
+<<<<<<< HEAD
   TestCopies<tstring>(t);
+=======
+  TestCopies<string>(t);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(Tensor_Float, SimpleWithHelper) {
@@ -941,6 +1063,7 @@ TEST(Tensor_Int32, SimpleWithHelper) {
   test::ExpectTensorEqual<int32>(t2, t3);
 }
 
+<<<<<<< HEAD
 TEST(Tensor_UInt16, SimpleWithHelper) {
   Tensor t1 = test::AsTensor<uint16>({0, 1, 2, 3, 4, 5}, {2, 3});
   Tensor t2(t1.dtype(), t1.shape());
@@ -949,6 +1072,8 @@ TEST(Tensor_UInt16, SimpleWithHelper) {
   test::ExpectTensorEqual<uint16>(t2, t3);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(Tensor_QInt8, SimpleWithHelper) {
   Tensor t1 = test::AsTensor<qint8>({0, 1, 2, 3, 4, 5}, {2, 3});
   Tensor t2(t1.dtype(), t1.shape());
@@ -978,16 +1103,28 @@ TEST(Tensor_Int64, SimpleWithHelper) {
 }
 
 TEST(Tensor_String, SimpleWithHelper) {
+<<<<<<< HEAD
   Tensor t1 = test::AsTensor<tstring>({"0", "1", "2", "3", "4", "5"}, {2, 3});
   Tensor t2(DT_STRING, {2, 3});
   for (int i = 0; i < 2; ++i) {
     for (int j = 0; j < 3; ++j) {
       t2.matrix<tstring>()(i, j) = strings::StrCat(i * 3 + j);
+=======
+  Tensor t1 = test::AsTensor<string>({"0", "1", "2", "3", "4", "5"}, {2, 3});
+  Tensor t2(DT_STRING, {2, 3});
+  for (int i = 0; i < 2; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      t2.matrix<string>()(i, j) = strings::StrCat(i * 3 + j);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
   // Test with helper.
+<<<<<<< HEAD
   test::ExpectTensorEqual<tstring>(t1, t2);
+=======
+  test::ExpectTensorEqual<string>(t1, t2);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(Tensor_Bool, SimpleWithHelper) {
@@ -1005,12 +1142,17 @@ TEST(Tensor_Bool, SimpleWithHelper) {
   test::ExpectTensorEqual<bool>(t1, t2);
 }
 
+<<<<<<< HEAD
 TEST(Tensor_Complex, Simple64) {
+=======
+TEST(Tensor_Complex, Simple) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Tensor t(DT_COMPLEX64, {4, 5, 3, 7});
   t.flat<complex64>().setRandom();
   TestCopies<complex64>(t);
 }
 
+<<<<<<< HEAD
 TEST(Tensor_Complex, Simple128) {
   Tensor t(DT_COMPLEX128, {4, 5, 3, 7});
   t.flat<complex128>().setRandom();
@@ -1018,6 +1160,9 @@ TEST(Tensor_Complex, Simple128) {
 }
 
 TEST(Tensor_Complex, SimpleWithHelper64) {
+=======
+TEST(Tensor_Complex, SimpleWithHelper) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   {
     Tensor t1 = test::AsTensor<complex64>({0,
                                            {1, 1},
@@ -1035,7 +1180,11 @@ TEST(Tensor_Complex, SimpleWithHelper64) {
     test::ExpectTensorEqual<complex64>(t2, t3);
   }
 
+<<<<<<< HEAD
   // Does some numeric operations for complex64 numbers.
+=======
+  // Does some numeric operations for complex numbers.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   {
     const float PI = std::acos(-1);
     const complex64 rotate_45 = std::polar(1.0f, PI / 4);
@@ -1043,7 +1192,11 @@ TEST(Tensor_Complex, SimpleWithHelper64) {
     // x contains all the 8-th root of unity.
     Tensor x(DT_COMPLEX64, TensorShape({8}));
     for (int i = 0; i < 8; ++i) {
+<<<<<<< HEAD
       x.vec<complex64>()(i) = MathUtil::IPow(rotate_45, i);
+=======
+      x.vec<complex64>()(i) = std::pow(rotate_45, i);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
 
     // Shift the roots by 45 degree.
@@ -1051,7 +1204,11 @@ TEST(Tensor_Complex, SimpleWithHelper64) {
     y.vec<complex64>() = x.vec<complex64>() * rotate_45;
     Tensor y_expected(DT_COMPLEX64, TensorShape({8}));
     for (int i = 0; i < 8; ++i) {
+<<<<<<< HEAD
       y_expected.vec<complex64>()(i) = MathUtil::IPow(rotate_45, i + 1);
+=======
+      y_expected.vec<complex64>()(i) = std::pow(rotate_45, i + 1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     test::ExpectTensorNear<complex64>(y, y_expected, 1e-5);
 
@@ -1066,6 +1223,7 @@ TEST(Tensor_Complex, SimpleWithHelper64) {
   }
 }
 
+<<<<<<< HEAD
 TEST(Tensor_Complex, SimpleWithHelper128) {
   {
     Tensor t1 = test::AsTensor<complex128>({0,
@@ -1200,18 +1358,41 @@ TEST(Tensor, Slice_Basic) {
   Tensor saved;
   {  // General
     Tensor x(DT_FLOAT, TensorShape({10, 4, 36}));
+=======
+// On the alignment.
+//
+// As of 2015/8, tensorflow::Tensor allocates its buffer with 32-byte
+// alignment. Tensor::tensor/flat/vec/matrix methods requires the the
+// buffer satisfies Eigen::Aligned (e.g., 16-bytes aligned usually,
+// and 32-bytes for AVX). Tensor::Slice requires the caller to ensure
+// its result is aligned if the caller intends to use those methods.
+// In this test case, we simply make sure each slice is 32-byte
+// aligned: sizeof(float) * 4 * 2 = 32.
+TEST(Tensor, Slice_Basic) {
+  Tensor saved;
+  {  // General
+    Tensor x(DT_FLOAT, TensorShape({10, 4, 34}));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Fills in known values.
     for (int i = 0; i < 10; ++i) {
       x.Slice(i, i + 1).flat<float>().setConstant(i * 1.f);
     }
     // A simple slice along dim0.
     Tensor y = x.Slice(4, 8);
+<<<<<<< HEAD
     EXPECT_TRUE(y.shape().IsSameSize(TensorShape({4, 4, 36})));
+=======
+    EXPECT_TRUE(y.shape().IsSameSize(TensorShape({4, 4, 34})));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     auto tx = x.tensor<float, 3>();
     auto ty = y.tensor<float, 3>();
     for (int i = 0; i < 4; ++i) {
       for (int j = 0; j < 4; ++j) {
+<<<<<<< HEAD
         for (int k = 0; k < 36; ++k) {
+=======
+        for (int k = 0; k < 34; ++k) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           EXPECT_EQ(ty(i, j, k), 4.0 + i);
           EXPECT_EQ(&tx(4 + i, j, k), &ty(i, j, k));
         }
@@ -1228,7 +1409,11 @@ TEST(Tensor, Slice_Basic) {
     auto tz = z.tensor<float, 3>();
     EXPECT_EQ(1, z.dim_size(0));
     for (int j = 0; j < 4; ++j) {
+<<<<<<< HEAD
       for (int k = 0; k < 36; ++k) {
+=======
+      for (int k = 0; k < 34; ++k) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         EXPECT_EQ(tz(0, j, k), 6.0);
       }
     }
@@ -1240,16 +1425,27 @@ TEST(Tensor, Slice_Basic) {
     EXPECT_EQ(1, saved.dim_size(0));
     auto tsaved = saved.tensor<float, 3>();
     for (int j = 0; j < 4; ++j) {
+<<<<<<< HEAD
       for (int k = 0; k < 36; ++k) {
+=======
+      for (int k = 0; k < 34; ++k) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         EXPECT_EQ(tsaved(0, j, k), 6.0);
       }
     }
   }
   {  // Empty
+<<<<<<< HEAD
     Tensor x(DT_FLOAT, TensorShape({10, 0, 36}));
     x.flat<float>().setRandom();
     Tensor y = x.Slice(4, 8);
     EXPECT_TRUE(y.shape().IsSameSize(TensorShape({4, 0, 36})));
+=======
+    Tensor x(DT_FLOAT, TensorShape({10, 0, 34}));
+    x.flat<float>().setRandom();
+    Tensor y = x.Slice(4, 8);
+    EXPECT_TRUE(y.shape().IsSameSize(TensorShape({4, 0, 34})));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   {
@@ -1259,6 +1455,7 @@ TEST(Tensor, Slice_Basic) {
 
     // Take an unaligned slice.
     Tensor y = x.Slice(1, 13);
+<<<<<<< HEAD
 #if EIGEN_MAX_ALIGN_BYTES > 0
     EXPECT_FALSE(y.IsAligned());
 #endif
@@ -1301,6 +1498,8 @@ TEST(Tensor, SubSlice_Basic) {
 #if EIGEN_MAX_ALIGN_BYTES > 0
     EXPECT_FALSE(y.IsAligned());
 #endif
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     y.unaligned_flat<float>().setConstant(1.0);
     for (int64 i = 0; i < y.NumElements(); ++i) {
       EXPECT_EQ(1.0, y.unaligned_flat<float>()(i));
@@ -1308,6 +1507,7 @@ TEST(Tensor, SubSlice_Basic) {
   }
 }
 
+<<<<<<< HEAD
 template <typename T>
 Tensor MkTensor(DataType dt, const TensorShape& shape,
                 std::vector<T> init_values) {
@@ -1438,6 +1638,9 @@ TEST(SummarizeValue, STRING_PRINT_V2) {
 }
 
 void BM_CreateAndDestroy(int iters) {
+=======
+static void BM_CreateAndDestroy(int iters) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TensorShape shape({10, 20});
   while (--iters) {
     Tensor t(DT_FLOAT, shape);
@@ -1445,7 +1648,11 @@ void BM_CreateAndDestroy(int iters) {
 }
 BENCHMARK(BM_CreateAndDestroy);
 
+<<<<<<< HEAD
 void BM_Assign(int iters) {
+=======
+static void BM_Assign(int iters) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Tensor a(DT_FLOAT, TensorShape({10, 20}));
   Tensor b(DT_FLOAT, TensorShape({10, 20}));
   bool a_to_b = true;
@@ -1466,6 +1673,7 @@ TEST(Tensor, EmptyTensorData) {
   EXPECT_EQ(empty.tensor_data().size(), 0);
 }
 
+<<<<<<< HEAD
 // Benchmark create and destroy a tensor, with an allocated buffer.
 void BM_CreateAndDestroyWithBuf(int iters) {
   TensorShape shape({10, 20});
@@ -1574,4 +1782,6 @@ static void BM_FromProtoCompressedZero(int iters, int size) {
 BENCHMARK(BM_FromProtoCompressedZero)->Range(1, 1 << 20);
 
 }  // namespace
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

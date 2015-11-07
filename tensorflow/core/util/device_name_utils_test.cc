@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/device_name_utils.h"
 
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/core/status_test_util.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
@@ -66,6 +70,13 @@ bool RoundTripPartialName(int parts_to_test, const std::vector<string>& parts,
 
 }  // namespace
 
+=======
+#include "tensorflow/core/platform/test_benchmark.h"
+#include <gtest/gtest.h>
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(DeviceNameUtilsTest, Basic) {
   EXPECT_EQ(DeviceNameUtils::FullName("hello", 1, 2, "CPU", 3),
             "/job:hello/replica:1/task:2/device:CPU:3");
@@ -73,12 +84,18 @@ TEST(DeviceNameUtilsTest, Basic) {
   {
     DeviceNameUtils::ParsedName p;
     EXPECT_FALSE(DeviceNameUtils::ParseFullName("foobar", &p));
+<<<<<<< HEAD
     EXPECT_FALSE(DeviceNameUtils::ParseFullName(
         "/job:123/replica:1/task:2/device:GPU:3", &p));
+=======
+    EXPECT_FALSE(
+        DeviceNameUtils::ParseFullName("/job:123/replica:1/task:2/gpu:3", &p));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_FALSE(
         DeviceNameUtils::ParseFullName("/job:123/replica:1/task:2/gpu:", &p));
     EXPECT_FALSE(DeviceNameUtils::ParseFullName(
         "/job:123/replica:1/task:2/device:gpu:", &p));
+<<<<<<< HEAD
     EXPECT_FALSE(DeviceNameUtils::ParseFullName(
         "/job:foo/replica:-1/task:2/device:GPU:3", &p));
     EXPECT_FALSE(DeviceNameUtils::ParseFullName(
@@ -89,6 +106,18 @@ TEST(DeviceNameUtilsTest, Basic) {
         "/job:foo/replica:1/task:2/device:GPU:3/extra", &p));
     EXPECT_TRUE(DeviceNameUtils::ParseFullName(
         "/job:foo/replica:1/task:2/device:GPU:3", &p));
+=======
+    EXPECT_FALSE(
+        DeviceNameUtils::ParseFullName("/job:foo/replica:-1/task:2/gpu:3", &p));
+    EXPECT_FALSE(
+        DeviceNameUtils::ParseFullName("/job:foo/replica:1/task:-2/gpu:3", &p));
+    EXPECT_FALSE(
+        DeviceNameUtils::ParseFullName("/job:foo/replica:1/task:2/bar:3", &p));
+    EXPECT_FALSE(DeviceNameUtils::ParseFullName(
+        "/job:foo/replica:1/task:2/gpu:3/extra", &p));
+    EXPECT_TRUE(
+        DeviceNameUtils::ParseFullName("/job:foo/replica:1/task:2/gpu:3", &p));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_TRUE(p.has_job);
     EXPECT_TRUE(p.has_replica);
     EXPECT_TRUE(p.has_task);
@@ -104,7 +133,11 @@ TEST(DeviceNameUtilsTest, Basic) {
     // Allow _ in job names.
     DeviceNameUtils::ParsedName p;
     EXPECT_TRUE(DeviceNameUtils::ParseFullName(
+<<<<<<< HEAD
         "/job:foo_bar/replica:1/task:2/device:GPU:3", &p));
+=======
+        "/job:foo_bar/replica:1/task:2/gpu:3", &p));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_TRUE(p.has_job);
     EXPECT_TRUE(p.has_replica);
     EXPECT_TRUE(p.has_task);
@@ -191,8 +224,12 @@ TEST(DeviceNameUtilsTest, Basic) {
   }
   {
     DeviceNameUtils::ParsedName p;
+<<<<<<< HEAD
     EXPECT_TRUE(
         DeviceNameUtils::ParseFullName("/job:*/replica:4/device:GPU:5", &p));
+=======
+    EXPECT_TRUE(DeviceNameUtils::ParseFullName("/job:*/replica:4/gpu:5", &p));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_FALSE(p.has_job);
     EXPECT_TRUE(p.has_replica);
     EXPECT_FALSE(p.has_task);
@@ -215,6 +252,7 @@ TEST(DeviceNameUtilsTest, Basic) {
   }
 
   EXPECT_TRUE(DeviceNameUtils::IsSameAddressSpace(
+<<<<<<< HEAD
       "/job:foo/replica:1/task:2/cpu:3",
       "/job:foo/replica:1/task:2/device:GPU:4"));
   EXPECT_FALSE(DeviceNameUtils::IsSameAddressSpace(
@@ -242,6 +280,31 @@ TEST(DeviceNameUtilsTest, Basic) {
   EXPECT_EQ(
       DeviceNameUtils::LocalName("/job:foo/replica:1/task:2/device:abc:73"),
       "/device:abc:73");
+=======
+      "/job:foo/replica:1/task:2/cpu:3", "/job:foo/replica:1/task:2/gpu:4"));
+  EXPECT_FALSE(DeviceNameUtils::IsSameAddressSpace(
+      "/job:foo/replica:1/task:2/cpu:3", "/job:foo/replica:1/task:3/gpu:4"));
+  EXPECT_FALSE(DeviceNameUtils::IsSameAddressSpace(
+      "/job:foo/replica:1/task:2/cpu:3", "/job:foo/replica:10/task:2/gpu:4"));
+  EXPECT_FALSE(DeviceNameUtils::IsSameAddressSpace(
+      "/job:foo/replica:1/task:2/cpu:3", "/job:bar/replica:1/task:2/gpu:4"));
+
+  EXPECT_EQ(DeviceNameUtils::LocalName("CPU", 1), "CPU:1");
+  EXPECT_EQ(DeviceNameUtils::LocalName("GPU", 2), "GPU:2");
+  EXPECT_EQ(DeviceNameUtils::LocalName("MySpecialDevice", 13),
+            "MySpecialDevice:13");
+
+  EXPECT_EQ(
+      DeviceNameUtils::LocalName("/job:foo/replica:1/task:2/device:CPU:3"),
+      "CPU:3");
+
+  EXPECT_EQ(DeviceNameUtils::LocalName("/job:foo/replica:1/task:2/cpu:3"),
+            "CPU:3");
+
+  EXPECT_EQ(
+      DeviceNameUtils::LocalName("/job:foo/replica:1/task:2/device:abc:73"),
+      "abc:73");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   {
     DeviceNameUtils::ParsedName p;
@@ -253,6 +316,7 @@ TEST(DeviceNameUtilsTest, Basic) {
     EXPECT_FALSE(DeviceNameUtils::ParseLocalName("abc", &p));
     EXPECT_FALSE(DeviceNameUtils::ParseLocalName("myspecialdevice", &p));
   }
+<<<<<<< HEAD
 
   // Test that all parts are round-tripped correctly.
   {
@@ -290,6 +354,8 @@ TEST(DeviceNameUtilsTest, Basic) {
     DeviceNameUtils::ParseFullName("/device:CPU:*", &y);
     EXPECT_TRUE(DeviceNameUtils::AreCompatibleDevNames(x, y));
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 static bool IsCSHelper(StringPiece pattern, StringPiece actual) {
@@ -300,6 +366,7 @@ static bool IsCSHelper(StringPiece pattern, StringPiece actual) {
 }
 
 TEST(DeviceNameUtilsTest, IsCompleteSpecification) {
+<<<<<<< HEAD
   EXPECT_TRUE(IsCSHelper("/job:*", "/job:work/replica:1/task:2/device:GPU:3"));
   EXPECT_TRUE(IsCSHelper("/job:*/replica:*",
                          "/job:work/replica:1/task:2/device:GPU:3"));
@@ -315,6 +382,19 @@ TEST(DeviceNameUtilsTest, IsCompleteSpecification) {
       IsCSHelper("/device:GPU:2", "/job:worker/replica:1/task:2/device:GPU:1"));
   EXPECT_TRUE(
       IsCSHelper("/gpu:*", "/job:worker/replica:1/task:2/device:GPU:3"));
+=======
+  EXPECT_TRUE(IsCSHelper("/job:*", "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(
+      IsCSHelper("/job:*/replica:*", "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(IsCSHelper("/job:*/task:*", "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(IsCSHelper("/job:*/replica:*/task:*",
+                         "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(
+      IsCSHelper("/job:*/replica:*/gpu:*", "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_FALSE(IsCSHelper("/cpu:*", "/job:worker/replica:1/task:2/gpu:3"));
+  EXPECT_FALSE(IsCSHelper("/gpu:2", "/job:worker/replica:1/task:2/gpu:1"));
+  EXPECT_TRUE(IsCSHelper("/gpu:*", "/job:worker/replica:1/task:2/gpu:3"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 static bool IsSpecHelper(StringPiece pattern, StringPiece actual) {
@@ -325,6 +405,7 @@ static bool IsSpecHelper(StringPiece pattern, StringPiece actual) {
 }
 
 TEST(DeviceNameUtilsTest, IsSpecification) {
+<<<<<<< HEAD
   EXPECT_TRUE(
       IsSpecHelper("/job:*", "/job:work/replica:1/task:2/device:GPU:3"));
   EXPECT_TRUE(IsSpecHelper("/job:*", "/job:work/replica:1/device:GPU:3"));
@@ -360,6 +441,38 @@ TEST(DeviceNameUtilsTest, IsSpecification) {
                             "/job:work/replica:1/task:2/device:GPU:3"));
   EXPECT_FALSE(IsSpecHelper("/job:work/replica:0/task:2",
                             "/job:work/replica:*/task:2/device:GPU:3"));
+=======
+  EXPECT_TRUE(IsSpecHelper("/job:*", "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(IsSpecHelper("/job:*", "/job:work/replica:1/gpu:3"));
+  EXPECT_TRUE(IsSpecHelper("/job:*", "/job:work/replica:1"));
+  EXPECT_TRUE(IsSpecHelper("/job:*", "/replica:1"));
+  EXPECT_TRUE(IsSpecHelper("/job:*", "/job:work"));
+  EXPECT_TRUE(
+      IsSpecHelper("/job:*/replica:*", "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(IsSpecHelper("/job:work/replica:1/gpu:*",
+                           "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(IsSpecHelper("/job:work/replica:1/gpu:3",
+                           "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(IsSpecHelper("/job:work/replica:1/task:2",
+                           "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(IsSpecHelper("/job:work/replica:*/task:2",
+                           "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(IsSpecHelper("/task:*", "/job:*/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(IsSpecHelper("/task:2", "/job:*/replica:1/task:2/gpu:3"));
+  EXPECT_TRUE(IsSpecHelper("/cpu:*", "/job:*/replica:1/task:2/cpu:1"));
+  EXPECT_TRUE(IsSpecHelper("/cpu:0", "/cpu:0"));
+  EXPECT_TRUE(IsSpecHelper("/gpu:*", "/job:worker/replica:1/task:2/gpu:3"));
+
+  EXPECT_FALSE(IsSpecHelper("/job:worker/replica:1/task:2/gpu:3", "/gpu:*"));
+  EXPECT_FALSE(IsSpecHelper("/cpu:*", "/job:*/replica:1/task:2"));
+  EXPECT_FALSE(IsSpecHelper("/cpu:*", "/job:*/replica:1/task:2/gpu:1"));
+  EXPECT_FALSE(IsSpecHelper("/cpu:*", "/job:worker/replica:1/task:2/gpu:3"));
+  EXPECT_FALSE(IsSpecHelper("/gpu:2", "/job:worker/replica:1/task:2/gpu:1"));
+  EXPECT_FALSE(IsSpecHelper("/job:work/replica:*/task:0",
+                            "/job:work/replica:1/task:2/gpu:3"));
+  EXPECT_FALSE(IsSpecHelper("/job:work/replica:0/task:2",
+                            "/job:work/replica:*/task:2/gpu:3"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(DeviceNameUtilsTest, SplitDeviceName) {
@@ -373,8 +486,12 @@ TEST(DeviceNameUtilsTest, SplitDeviceName) {
       "/job:foo/cpu:1/task:2/replica:1", &task, &device));
   EXPECT_EQ("/job:foo/replica:1/task:2", task);
   EXPECT_EQ("CPU:1", device);
+<<<<<<< HEAD
   EXPECT_TRUE(
       DeviceNameUtils::SplitDeviceName("/device:GPU:3", &task, &device));
+=======
+  EXPECT_TRUE(DeviceNameUtils::SplitDeviceName("/gpu:3", &task, &device));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ("", task);
   EXPECT_EQ("GPU:3", device);
   EXPECT_FALSE(DeviceNameUtils::SplitDeviceName("gpu:3", &task, &device));
@@ -396,11 +513,19 @@ static void MergeDevNamesHelperImpl(const string& name_a, const string& name_b,
                                     const string& expected_merge_name,
                                     bool allow_soft_placement) {
   DeviceNameUtils::ParsedName target_a = Name(name_a);
+<<<<<<< HEAD
   TF_EXPECT_OK(DeviceNameUtils::MergeDevNames(&target_a, Name(name_b),
                                               allow_soft_placement));
   DeviceNameUtils::ParsedName target_b = Name(name_b);
   TF_EXPECT_OK(DeviceNameUtils::MergeDevNames(&target_b, Name(name_a),
                                               allow_soft_placement));
+=======
+  EXPECT_OK(DeviceNameUtils::MergeDevNames(&target_a, Name(name_b),
+                                           allow_soft_placement));
+  DeviceNameUtils::ParsedName target_b = Name(name_b);
+  EXPECT_OK(DeviceNameUtils::MergeDevNames(&target_b, Name(name_a),
+                                           allow_soft_placement));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(target_a, target_b);
   EXPECT_EQ(target_a, Name(expected_merge_name));
   EXPECT_EQ(target_b, Name(expected_merge_name));
@@ -422,6 +547,7 @@ static void MergeDevNamesError(const string& name_a, const string& name_b,
   DeviceNameUtils::ParsedName target_a = Name(name_a);
   Status s = DeviceNameUtils::MergeDevNames(&target_a, Name(name_b));
   EXPECT_EQ(s.code(), error::INVALID_ARGUMENT);
+<<<<<<< HEAD
   EXPECT_TRUE(absl::StrContains(s.error_message(), expected_error_substr)) << s;
 }
 
@@ -439,6 +565,15 @@ static void MergeOverrideHelper(const string& target, const string& name,
 }
 
 TEST(DeviceNameUtilsTest, MergeDevNames) {
+=======
+  EXPECT_TRUE(StringPiece(s.error_message()).contains(expected_error_substr))
+      << s;
+}
+
+TEST(DeviceNameUtilsTest, MergeDevNames) {
+  DeviceNameUtils::ParsedName target;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Idempotence tests.
   MergeDevNamesHelper("", "", "");
   MergeDevNamesHelper("/job:foo/replica:1/task:2/cpu:1",
@@ -449,11 +584,19 @@ TEST(DeviceNameUtilsTest, MergeDevNames) {
   MergeDevNamesHelper("", "/job:foo", "/job:foo");
   MergeDevNamesHelper("", "/replica:2", "/replica:2");
   MergeDevNamesHelper("", "/task:7", "/task:7");
+<<<<<<< HEAD
   MergeDevNamesHelper("", "/device:GPU:1", "/device:GPU:1");
 
   // Combining disjoint names.
   MergeDevNamesHelper("/job:foo", "/task:7", "/job:foo/task:7");
   MergeDevNamesHelper("/job:foo", "/device:GPU:1", "/job:foo/device:GPU:1");
+=======
+  // MergeDevNamesHelper("", "/gpu:1", "/gpu:1");
+
+  // Combining disjoint names.
+  MergeDevNamesHelper("/job:foo", "/task:7", "/job:foo/task:7");
+  MergeDevNamesHelper("/job:foo", "/gpu:1", "/job:foo/gpu:1");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Combining overlapping names.
   MergeDevNamesHelper("/job:foo/replica:0", "/replica:0/task:1",
@@ -462,19 +605,28 @@ TEST(DeviceNameUtilsTest, MergeDevNames) {
   // Wildcard tests.
   MergeDevNamesHelper("", "/gpu:*", "/gpu:*");
   MergeDevNamesHelper("/gpu:*", "/gpu:*", "/gpu:*");
+<<<<<<< HEAD
   MergeDevNamesHelper("/device:GPU:1", "/gpu:*", "/device:GPU:1");
+=======
+  MergeDevNamesHelper("/gpu:1", "/gpu:*", "/gpu:1");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Incompatible components.
   MergeDevNamesError("/job:foo", "/job:bar", "incompatible jobs");
   MergeDevNamesError("/replica:0", "/replica:1", "incompatible replicas");
   MergeDevNamesError("/task:0", "/task:1", "incompatible tasks");
   MergeDevNamesError("/gpu:*", "/cpu:*", "incompatible types");
+<<<<<<< HEAD
   MergeDevNamesError("/device:GPU:0", "/device:GPU:1", "incompatible ids");
+=======
+  MergeDevNamesError("/gpu:0", "/gpu:1", "incompatible ids");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(DeviceNameUtilsTest, MergeDevNamesAllowSoftPlacement) {
   // Incompatible components with allow_soft_placement.
   MergeDevNamesHelperAllowSoftPlacement("/gpu:*", "/cpu:1", "");
+<<<<<<< HEAD
   MergeDevNamesHelperAllowSoftPlacement("/cpu:*", "/device:GPU:1", "");
   MergeDevNamesHelperAllowSoftPlacement("/device:GPU:1", "/device:GPU:2",
                                         "/device:GPU:*");
@@ -566,6 +718,10 @@ TEST(DeviceNameUtilsTest, CanonicalizeDeviceName) {
     EXPECT_EQ(s.code(), error::INVALID_ARGUMENT);
     EXPECT_EQ("", canonical_name);
   }
+=======
+  MergeDevNamesHelperAllowSoftPlacement("/cpu:*", "/gpu:1", "");
+  MergeDevNamesHelperAllowSoftPlacement("/gpu:1", "/gpu:2", "/gpu:*");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 static void BM_ParseFullName(int iters) {

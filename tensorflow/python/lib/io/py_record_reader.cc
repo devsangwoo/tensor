@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,14 @@ limitations under the License.
 #include "tensorflow/core/lib/io/zlib_compression_options.h"
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/python/lib/io/py_record_reader.h"
+
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/lib/io/record_reader.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/env.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -30,6 +39,7 @@ namespace io {
 
 PyRecordReader::PyRecordReader() {}
 
+<<<<<<< HEAD
 // NOTE(sethtroisi): At this time PyRecordReader doesn't benefit from taking
 // RecordReaderOptions, if this changes the API can be updated at that time.
 PyRecordReader* PyRecordReader::New(const string& filename, uint64 start_offset,
@@ -39,10 +49,18 @@ PyRecordReader* PyRecordReader::New(const string& filename, uint64 start_offset,
   Status s = Env::Default()->NewRandomAccessFile(filename, &file);
   if (!s.ok()) {
     Set_TF_Status_from_Status(out_status, s);
+=======
+PyRecordReader* PyRecordReader::New(const string& filename,
+                                    uint64 start_offset) {
+  RandomAccessFile* file;
+  Status s = Env::Default()->NewRandomAccessFile(filename, &file);
+  if (!s.ok()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return nullptr;
   }
   PyRecordReader* reader = new PyRecordReader;
   reader->offset_ = start_offset;
+<<<<<<< HEAD
   reader->file_ = file.release();
 
   static const uint64 kReaderBufferSize = 16 * 1024 * 1024;
@@ -50,6 +68,10 @@ PyRecordReader* PyRecordReader::New(const string& filename, uint64 start_offset,
       RecordReaderOptions::CreateRecordReaderOptions(compression_type_string);
   options.buffer_size = kReaderBufferSize;
   reader->reader_ = new RecordReader(reader->file_, options);
+=======
+  reader->file_ = file;
+  reader->reader_ = new RecordReader(reader->file_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return reader;
 }
 
@@ -58,6 +80,7 @@ PyRecordReader::~PyRecordReader() {
   delete file_;
 }
 
+<<<<<<< HEAD
 void PyRecordReader::GetNext(TF_Status* status) {
   if (reader_ == nullptr) {
     Set_TF_Status_from_Status(status,
@@ -66,6 +89,12 @@ void PyRecordReader::GetNext(TF_Status* status) {
   }
   Status s = reader_->ReadRecord(&offset_, &record_);
   Set_TF_Status_from_Status(status, s);
+=======
+bool PyRecordReader::GetNext() {
+  if (reader_ == nullptr) return false;
+  Status s = reader_->ReadRecord(&offset_, &record_);
+  return s.ok();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void PyRecordReader::Close() {

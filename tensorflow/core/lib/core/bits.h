@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,12 @@ limitations under the License.
 
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_LIB_CORE_BITS_H_
+#define TENSORFLOW_LIB_CORE_BITS_H_
+
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -36,7 +43,13 @@ int Log2Ceiling64(uint64 n);
 #if defined(__GNUC__)
 
 // Return floor(log2(n)) for positive integer n.  Returns -1 iff n == 0.
+<<<<<<< HEAD
 inline int Log2Floor(uint32 n) { return n == 0 ? -1 : 31 ^ __builtin_clz(n); }
+=======
+inline int Log2Floor(uint32 n) {
+  return n == 0 ? -1 : 31 ^ __builtin_clz(n);
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Return floor(log2(n)) for positive integer n.  Returns -1 iff n == 0.
 inline int Log2Floor64(uint64 n) {
@@ -47,7 +60,12 @@ inline int Log2Floor64(uint64 n) {
 
 // Return floor(log2(n)) for positive integer n.  Returns -1 iff n == 0.
 inline int Log2Floor(uint32 n) {
+<<<<<<< HEAD
   if (n == 0) return -1;
+=======
+  if (n == 0)
+    return -1;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int log = 0;
   uint32 value = n;
   for (int i = 4; i >= 0; --i) {
@@ -92,6 +110,7 @@ inline int Log2Ceiling64(uint64 n) {
     return floor + 1;
 }
 
+<<<<<<< HEAD
 inline uint32 NextPowerOfTwo(uint32 value) {
   int exponent = Log2Ceiling(value);
   DCHECK_LT(exponent, std::numeric_limits<uint32>::digits);
@@ -107,3 +126,8 @@ inline uint64 NextPowerOfTwo64(uint64 value) {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_LIB_CORE_BITS_H_
+=======
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_LIB_CORE_BITS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

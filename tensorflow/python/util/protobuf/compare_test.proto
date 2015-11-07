@@ -2,7 +2,11 @@
 syntax = "proto2";
 
 package compare_test;
+<<<<<<< HEAD
 option cc_enable_arenas = true;
+=======
+// option cc_enable_arenas = true;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 enum Enum {
   A = 0;

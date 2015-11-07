@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,10 @@ limitations under the License.
 
 #include "tensorflow/core/lib/io/path.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/lib/io/path.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace io {
@@ -31,7 +36,10 @@ TEST(PathTest, JoinPath) {
 
   EXPECT_EQ("/foo/bar/baz/blah/blink/biz",
             JoinPath("/foo/bar/baz/", "/blah/blink/biz"));
+<<<<<<< HEAD
   EXPECT_EQ("/foo/bar/baz/blah", JoinPath("/foo", "bar", "baz", "blah"));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(PathTest, IsAbsolutePath) {
@@ -45,8 +53,11 @@ TEST(PathTest, IsAbsolutePath) {
 }
 
 TEST(PathTest, Dirname) {
+<<<<<<< HEAD
   EXPECT_EQ("hdfs://127.0.0.1:9000/",
             Dirname("hdfs://127.0.0.1:9000/train.csv.tfrecords"));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ("/hello", Dirname("/hello/"));
   EXPECT_EQ("/", Dirname("/hello"));
   EXPECT_EQ("hello", Dirname("hello/world"));
@@ -79,6 +90,7 @@ TEST(PathTest, Extension) {
   EXPECT_EQ("baz", Extension("/a/path.bar/to/foo.bar.baz"));
 }
 
+<<<<<<< HEAD
 TEST(PathTest, CleanPath) {
   EXPECT_EQ(".", CleanPath(""));
   EXPECT_EQ("x", CleanPath("x"));
@@ -141,5 +153,7 @@ TEST(PathTest, CreateParseURI) {
 }
 #undef EXPECT_PARSE_URI
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace io
 }  // namespace tensorflow

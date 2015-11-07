@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2016 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -121,6 +122,23 @@ class ConjugateTransposeSyclOp : public TransposeOp {
   bool IsConjugate() const override { return true; }
 };
 #endif  // TENSORFLOW_USE_SYCL
+=======
+#ifndef TENSORFLOW_KERNELS_TRANSPOSE_OP_H_
+#define TENSORFLOW_KERNELS_TRANSPOSE_OP_H_
+
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/tensor_types.h"
+
+namespace tensorflow {
+
+template <typename Device, typename T>
+class TransposeOp : public OpKernel {
+ public:
+  explicit TransposeOp(OpKernelConstruction* context);
+  void Compute(OpKernelContext* context) override;
+};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow
 

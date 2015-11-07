@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +27,14 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/strcat.h"
 #include "tensorflow/core/platform/regexp.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/framework/resource_mgr.h"
+
+#include <gtest/gtest.h>
+#include "tensorflow/core/framework/node_def_util.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -34,7 +43,11 @@ class Resource : public ResourceBase {
   explicit Resource(const string& label) : label_(label) {}
   ~Resource() override {}
 
+<<<<<<< HEAD
   string DebugString() const override { return strings::StrCat("R/", label_); }
+=======
+  string DebugString() { return strings::StrCat("R/", label_); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   string label_;
@@ -45,7 +58,11 @@ class Other : public ResourceBase {
   explicit Other(const string& label) : label_(label) {}
   ~Other() override {}
 
+<<<<<<< HEAD
   string DebugString() const override { return strings::StrCat("O/", label_); }
+=======
+  string DebugString() { return strings::StrCat("O/", label_); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   string label_;
@@ -75,7 +92,11 @@ string LookupOrCreate(ResourceMgr* rm, const string& container,
 }
 
 static void HasError(const Status& s, const string& substr) {
+<<<<<<< HEAD
   EXPECT_TRUE(absl::StrContains(s.ToString(), substr))
+=======
+  EXPECT_TRUE(StringPiece(s.ToString()).contains(substr))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       << s << ", expected substring " << substr;
 }
 
@@ -118,6 +139,7 @@ TEST(ResourceMgrTest, Basic) {
   // Drop the whole container foo.
   TF_CHECK_OK(rm.Cleanup("foo"));
   HasError(FindErr<Resource>(rm, "foo", "bar"), "Not found: Container foo");
+<<<<<<< HEAD
 
   // Dropping it a second time is OK.
   TF_CHECK_OK(rm.Cleanup("foo"));
@@ -128,6 +150,11 @@ TEST(ResourceMgrTest, Basic) {
 }
 
 TEST(ResourceMgrTest, CreateOrLookup) {
+=======
+}
+
+TEST(ResourceMgr, CreateOrLookup) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ResourceMgr rm;
   EXPECT_EQ("R/cat", LookupOrCreate<Resource>(&rm, "foo", "bar", "cat"));
   EXPECT_EQ("R/cat", LookupOrCreate<Resource>(&rm, "foo", "bar", "dog"));
@@ -139,6 +166,7 @@ TEST(ResourceMgrTest, CreateOrLookup) {
   HasError(FindErr<Other>(rm, "foo", "bar"), "Not found: Resource foo/bar");
 }
 
+<<<<<<< HEAD
 TEST(ResourceMgrTest, CreateOrLookupRaceCondition) {
   ResourceMgr rm;
   std::atomic<int> atomic_int(0);
@@ -163,6 +191,8 @@ TEST(ResourceMgrTest, CreateOrLookupRaceCondition) {
   EXPECT_EQ(1, atomic_int);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Status ComputePolicy(const string& attr_container,
                      const string& attr_shared_name,
                      bool use_node_name_as_default, string* result) {
@@ -191,6 +221,7 @@ string Policy(const string& attr_container, const string& attr_shared_name,
 
 TEST(ContainerInfo, Basic) {
   // Correct cases.
+<<<<<<< HEAD
   EXPECT_TRUE(RE2::FullMatch(Policy("", "", false),
                              "\\[localhost,_\\d+_foo,private\\]"));
   EXPECT_EQ(Policy("", "", true), "[localhost,foo,public]");
@@ -203,6 +234,16 @@ TEST(ContainerInfo, Basic) {
   EXPECT_EQ(Policy("cat", "bar", true), "[cat,bar,public]");
   EXPECT_EQ(Policy("cat.0-dog", "bar", true), "[cat.0-dog,bar,public]");
   EXPECT_EQ(Policy(".cat", "bar", true), "[.cat,bar,public]");
+=======
+  EXPECT_EQ(Policy("", "", false), "[localhost,_0_foo,private]");
+  EXPECT_EQ(Policy("", "", true), "[localhost,foo,public]");
+  EXPECT_EQ(Policy("", "bar", false), "[localhost,bar,public]");
+  EXPECT_EQ(Policy("", "bar", true), "[localhost,bar,public]");
+  EXPECT_EQ(Policy("cat", "", false), "[cat,_1_foo,private]");
+  EXPECT_EQ(Policy("cat", "", true), "[cat,foo,public]");
+  EXPECT_EQ(Policy("cat", "bar", false), "[cat,bar,public]");
+  EXPECT_EQ(Policy("cat", "bar", true), "[cat,bar,public]");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Status WrongPolicy(const string& attr_container, const string& attr_shared_name,
@@ -222,12 +263,16 @@ TEST(ContainerInfo, Error) {
 
   // Invalid container.
   HasError(WrongPolicy("12$%", "", false), "container contains invalid char");
+<<<<<<< HEAD
   HasError(WrongPolicy("-cat", "", false), "container contains invalid char");
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Invalid shared name.
   HasError(WrongPolicy("", "_foo", false), "shared_name cannot start with '_'");
 }
 
+<<<<<<< HEAD
 // Stub DeviceBase subclass which only sets a device name, for testing resource
 // handles.
 class StubDevice : public DeviceBase {
@@ -350,4 +395,6 @@ TEST(ResourceHandleTest, DeleteUsingResourceHandle) {
   EXPECT_NE(LookupResource<StubResource>(&ctx, p, &lookup_r).ok(), true);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +28,20 @@ limitations under the License.
 #include "tensorflow/core/framework/tensor_util.h"
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/lib/gtl/inlined_vector.h"
+=======
+#define EIGEN_USE_THREADS
+
+#include <algorithm>
+#include <unordered_map>
+#include <utility>
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/tensor_util.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/gtl/inlined_vector.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/sparse/sparse_tensor.h"
 
 namespace tensorflow {
@@ -35,7 +50,11 @@ template <typename T>
 class SparseConcatOp : public OpKernel {
  public:
   explicit SparseConcatOp(OpKernelConstruction* context) : OpKernel(context) {
+<<<<<<< HEAD
     OP_REQUIRES_OK(context, context->GetAttr("concat_dim", &concat_dim_attr_));
+=======
+    OP_REQUIRES_OK(context, context->GetAttr("concat_dim", &concat_dim_));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void Compute(OpKernelContext* context) override {
@@ -74,6 +93,7 @@ class SparseConcatOp : public OpKernel {
     }
 
     const TensorShape input_shape(shapes[0].vec<int64>());
+<<<<<<< HEAD
     const int input_rank = input_shape.dims();
     const int concat_dim = (concat_dim_attr_ < 0)
                                ? input_rank + concat_dim_attr_
@@ -91,6 +111,21 @@ class SparseConcatOp : public OpKernel {
               " but got ", current_shape.dims(), " at position ", i));
       for (int j = 0; j < input_rank; ++j) {
         if (j != concat_dim) {
+=======
+    OP_REQUIRES(
+        context, concat_dim_ >= 0 && concat_dim_ < input_shape.dims(),
+        errors::InvalidArgument("Concat dimension must be between 0 and rank (",
+                                input_shape.dims(), "), got ", concat_dim_));
+    for (int i = 1; i < N; ++i) {
+      const TensorShape current_shape(shapes[i].vec<int64>());
+      OP_REQUIRES(context, current_shape.dims() == input_shape.dims(),
+                  errors::InvalidArgument(
+                      "Ranks of all input tensors must match: expected ",
+                      input_shape.dims(), " but got ", current_shape.dims(),
+                      " at position ", i));
+      for (int j = 0; j < input_shape.dims(); ++j) {
+        if (j != concat_dim_) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           OP_REQUIRES(
               context, input_shape.dim_size(j) == current_shape.dim_size(j),
               errors::InvalidArgument(
@@ -109,6 +144,7 @@ class SparseConcatOp : public OpKernel {
     // reorder doesn't create race conditions for other ops that may be
     // concurrently reading the indices and values tensors.
 
+<<<<<<< HEAD
     gtl::InlinedVector<int64, 8> std_order(input_rank);
     std::iota(std_order.begin(), std_order.end(), 0);
 
@@ -117,6 +153,16 @@ class SparseConcatOp : public OpKernel {
     concat_order.push_back(concat_dim);
     for (int j = 0; j < input_rank; ++j) {
       if (j != concat_dim) {
+=======
+    gtl::InlinedVector<int64, 8> std_order(input_shape.dims());
+    std::iota(std_order.begin(), std_order.end(), 0);
+
+    std::vector<int64> concat_order;
+    concat_order.reserve(input_shape.dims());
+    concat_order.push_back(concat_dim_);
+    for (int j = 0; j < input_shape.dims(); ++j) {
+      if (j != concat_dim_) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         concat_order.push_back(j);
       }
     }
@@ -124,12 +170,18 @@ class SparseConcatOp : public OpKernel {
     std::vector<sparse::SparseTensor> sp_inputs;
     for (int i = 0; i < N; ++i) {
       const TensorShape current_shape(shapes[i].vec<int64>());
+<<<<<<< HEAD
       sparse::SparseTensor tensor;
       OP_REQUIRES_OK(context,
                      sparse::SparseTensor::Create(
                          tensor::DeepCopy(inds[i]), tensor::DeepCopy(vals[i]),
                          current_shape, std_order, &tensor));
       sp_inputs.push_back(std::move(tensor));
+=======
+      sp_inputs.emplace_back(tensor::DeepCopy(inds[i]),
+                             tensor::DeepCopy(vals[i]), current_shape,
+                             std_order);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       sp_inputs[i].Reorder<T>(concat_order);
     }
 
@@ -140,6 +192,7 @@ class SparseConcatOp : public OpKernel {
     context->set_output(1, concat.values());
 
     Tensor* output_shape_out = nullptr;
+<<<<<<< HEAD
     OP_REQUIRES_OK(context,
                    context->allocate_output(2, TensorShape({concat.dims()}),
                                             &output_shape_out));
@@ -147,11 +200,23 @@ class SparseConcatOp : public OpKernel {
     auto concat_shape = concat.shape();
     for (int j = 0; j < concat.dims(); ++j) {
       output_shape(j) = concat_shape[j];
+=======
+    OP_REQUIRES_OK(context, context->allocate_output(
+                                2, TensorShape({concat.shape().dims()}),
+                                &output_shape_out));
+    auto output_shape = output_shape_out->vec<int64>();
+    for (int j = 0; j < concat.shape().dims(); ++j) {
+      output_shape(j) = concat.shape().dim_size(j);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
  private:
+<<<<<<< HEAD
   int concat_dim_attr_;
+=======
+  int concat_dim_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 #define REGISTER_KERNELS(type)                                           \

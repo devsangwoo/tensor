@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,19 +16,27 @@ limitations under the License.
 
 #if (defined(GOOGLE_CUDA) && GOOGLE_CUDA) || \
     (defined(TENSORFLOW_USE_ROCM) && TENSORFLOW_USE_ROCM)
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define EIGEN_USE_GPU
 
 #include "tensorflow/core/framework/bfloat16.h"
+<<<<<<< HEAD
 #define SPECIALIZE_FOR_GPUS
 #include "tensorflow/core/kernels/cast_op.h"
 #undef SPECIALIZE_FOR_GPUS
+=======
+#include "tensorflow/core/kernels/cast_op.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
 
 typedef Eigen::GpuDevice GPUDevice;
 
+<<<<<<< HEAD
 CAST_FUNCTORS(GPUDevice);
 
 #define DEFINE(O, I) template struct CastFunctor<GPUDevice, O, I>
@@ -95,9 +104,42 @@ DEFINE_ALL_TO_FLOAT(std::complex<float>);
 #undef DEFINE_ALL_TO_FLOAT
 #undef DEFINE_ALL_TO_HALF
 #undef DEFINE_ALL_FROM
+=======
+template <typename O, typename I>
+struct CastFunctor<GPUDevice, O, I> {
+  void operator()(const GPUDevice& d, typename TTypes<O>::Flat o,
+                  typename TTypes<I>::ConstFlat i) {
+    Cast<GPUDevice, O, I>(d, o, i);
+  }
+};
+
+#define DEFINE(O, I) template struct CastFunctor<GPUDevice, O, I>;
+DEFINE(float, double);
+DEFINE(float, int32);
+DEFINE(float, int64);
+DEFINE(double, float);
+DEFINE(double, int32);
+DEFINE(double, int64);
+DEFINE(int32, float);
+DEFINE(int32, double);
+DEFINE(int32, int64);
+DEFINE(int64, float);
+DEFINE(int64, double);
+DEFINE(int64, int32);
+DEFINE(int32, bool);
+DEFINE(float, bool);
+DEFINE(float, uint8);
+DEFINE(uint8, float);
+DEFINE(float, bfloat16);
+DEFINE(bfloat16, float);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef DEFINE
 
 }  // end namespace functor
 }  // end namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

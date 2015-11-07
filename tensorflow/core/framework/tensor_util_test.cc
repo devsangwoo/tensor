@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,13 @@ limitations under the License.
 #include "tensorflow/core/framework/variant_tensor_data.h"
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/framework/tensor_util.h"
+
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/public/tensor.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -65,6 +73,7 @@ TEST(TensorUtil, DeepCopy0d) {
   EXPECT_EQ(DT_FLOAT, z.dtype());
 }
 
+<<<<<<< HEAD
 TEST(TensorUtil, DeepCopyZeroElements) {
   Tensor x;
   Tensor y = tensor::DeepCopy(x);
@@ -73,6 +82,8 @@ TEST(TensorUtil, DeepCopyZeroElements) {
   EXPECT_EQ(0, y.NumElements());
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(TensorUtil, DeepCopy) {
   Tensor x(DT_FLOAT, TensorShape({1}));
   x.flat<float>()(0) = 10.0;
@@ -111,12 +122,21 @@ TEST(TensorUtil, DeepCopy) {
 
   // Test string deep copy
   Tensor str1(DT_STRING, TensorShape({2}));
+<<<<<<< HEAD
   str1.flat<tstring>()(0) = "foo1";
   str1.flat<tstring>()(1) = "foo2";
   Tensor str2 = tensor::DeepCopy(str1);
   str2.flat<tstring>()(0) = "bar1";
   str2.flat<tstring>()(1) = "bar2";
   EXPECT_NE(str2.flat<tstring>()(0), str1.flat<tstring>()(0));
+=======
+  str1.flat<string>()(0) = "foo1";
+  str1.flat<string>()(1) = "foo2";
+  Tensor str2 = tensor::DeepCopy(str1);
+  str2.flat<string>()(0) = "bar1";
+  str2.flat<string>()(1) = "bar2";
+  EXPECT_NE(str2.flat<string>()(0), str1.flat<string>()(0));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(TensorUtil, DeepCopySlice) {
@@ -149,6 +169,7 @@ TEST(TensorUtil, DeepCopySlice) {
   }
 }
 
+<<<<<<< HEAD
 TEST(TensorUtil, DeepCopySliceString) {
   Tensor x(DT_STRING, TensorShape({10}));
   x.flat<tstring>().setConstant("hello");
@@ -605,5 +626,7 @@ TEST(TensorProtoUtil, CompressTensorProtoConstantTail) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

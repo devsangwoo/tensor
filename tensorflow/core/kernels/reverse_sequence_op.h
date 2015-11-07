@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,11 +21,21 @@ limitations under the License.
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor_types.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_REVERSE_SEQUENCE_OP_H_
+#define TENSORFLOW_KERNELS_REVERSE_SEQUENCE_OP_H_
+// Generator definition for ReverseSequenceOp, must be compilable by nvcc.
+
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 namespace generator {
 
+<<<<<<< HEAD
 template <typename T, typename Tlen, size_t Dims>
 class ReverseGenerator {
  public:
@@ -35,13 +46,27 @@ class ReverseGenerator {
         batch_dim_(batch_dim),
         seq_dim_(seq_dim),
         seq_lengths_(seq_lengths) {}
+=======
+template <typename T, size_t Dims>
+class ReverseGenerator {
+ public:
+  EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE
+  ReverseGenerator(typename TTypes<T, Dims>::ConstTensor input, int32 seq_dim,
+                   TTypes<int64>::ConstVec seq_lengths)
+      : input_(input), seq_dim_(seq_dim), seq_lengths_(seq_lengths) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   EIGEN_DEVICE_FUNC EIGEN_ALWAYS_INLINE T
   operator()(const Eigen::array<Eigen::DenseIndex, Dims>& coords) const {
     Eigen::array<Eigen::DenseIndex, Dims> new_coords = coords;
+<<<<<<< HEAD
     if (coords[seq_dim_] < seq_lengths_(coords[batch_dim_])) {
       new_coords[seq_dim_] =
           seq_lengths_(coords[batch_dim_]) - coords[seq_dim_] - 1;
+=======
+    if (coords[seq_dim_] < seq_lengths_(coords[0])) {
+      new_coords[seq_dim_] = seq_lengths_(coords[0]) - coords[seq_dim_] - 1;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
 
     return input_(new_coords);
@@ -49,15 +74,21 @@ class ReverseGenerator {
 
  private:
   typename TTypes<T, Dims>::ConstTensor input_;
+<<<<<<< HEAD
   int32 batch_dim_;
   int32 seq_dim_;
   typename TTypes<Tlen>::ConstVec seq_lengths_;
+=======
+  int32 seq_dim_;
+  TTypes<int64>::ConstVec seq_lengths_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace generator
 
 namespace functor {
 
+<<<<<<< HEAD
 template <typename Device, typename T, typename Tlen, size_t Dims>
 struct ReverseSequence {
   EIGEN_ALWAYS_INLINE static void Compute(
@@ -67,6 +98,15 @@ struct ReverseSequence {
       typename TTypes<T, Dims>::Tensor output) {
     generator::ReverseGenerator<T, Tlen, Dims> generator(input, batch_dim,
                                                          seq_dim, seq_lengths);
+=======
+template <typename Device, typename T, size_t Dims>
+struct ReverseSequence {
+  EIGEN_ALWAYS_INLINE static void Compute(
+      const Device& d, typename TTypes<T, Dims>::ConstTensor input,
+      int32 seq_dim, TTypes<int64>::ConstVec seq_lengths,
+      typename TTypes<T, Dims>::Tensor output) {
+    generator::ReverseGenerator<T, Dims> generator(input, seq_dim, seq_lengths);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     output.device(d) = input.generate(generator);
   }
 };
@@ -75,4 +115,8 @@ struct ReverseSequence {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_REVERSE_SEQUENCE_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_REVERSE_SEQUENCE_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

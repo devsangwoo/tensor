@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,14 @@ limitations under the License.
 #include "absl/strings/str_cat.h"
 
 namespace stream_executor {
+=======
+#include "tensorflow/stream_executor/blas.h"
+
+#include "tensorflow/stream_executor/lib/strcat.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace blas {
 
 string TransposeString(Transpose t) {
@@ -66,6 +75,7 @@ string SideString(Side s) {
   }
 }
 
+<<<<<<< HEAD
 // -- AlgorithmConfig
 
 string AlgorithmConfig::ToString() const { return absl::StrCat(algorithm_); }
@@ -95,3 +105,8 @@ std::ostream& operator<<(std::ostream& os, ComputationType ty) {
 
 }  // namespace blas
 }  // namespace stream_executor
+=======
+}  // namespace blas
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

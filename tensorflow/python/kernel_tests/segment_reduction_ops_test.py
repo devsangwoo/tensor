@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,30 +64,79 @@ class SegmentReductionHelper(test.TestCase):
         for j in range(0, output[index].shape[0]):
           output[index][j] = op1([output[index][j], x_flat[i][j]])
       elif output[index] is not None:
+=======
+"""Functional tests for segment reduction ops."""
+import tensorflow.python.platform
+
+import numpy as np
+import tensorflow as tf
+
+from tensorflow.python.kernel_tests import gradient_checker
+
+
+class SegmentReductionHelper(tf.test.TestCase):
+
+  def _input(self, input_shape, dtype=tf.int32):
+    num_elem = 1
+    for x in input_shape:
+      num_elem *= x
+    values = range(1, num_elem + 1)
+    np_values = np.array(values).reshape(input_shape).astype(
+        dtype.as_numpy_dtype)
+    return tf.constant(values, shape=input_shape,
+                                dtype=dtype), np_values
+
+  def _segmentReduce(self, indices, x, op1, op2=None, num_out_rows=None):
+    if not x.size: return np.array([])
+    indices = np.asarray(indices)
+    if num_out_rows is None:
+      num_out_rows = indices[-1] + 1
+    output = [None] * num_out_rows
+    slice_shape = x.shape[indices.ndim:]
+    x_flat = x.reshape((indices.size,) + slice_shape)
+    for i, index in enumerate(indices.ravel()):
+      if output[index] is not None:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         output[index] = op1(output[index], x_flat[i])
       else:
         output[index] = x_flat[i]
     # zero initialize values that are still uncalcuated.
+<<<<<<< HEAD
     initial_value_slice = np.ones(slice_shape) * initial_value
     output = [o if o is not None else initial_value_slice for o in output]
+=======
+    output = [o if o is not None else np.zeros(slice_shape) for o in output]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if op2 is not None:
       output = [op2(o) for o in output]
     output = [o.reshape(slice_shape) for o in output]
     return np.array(output)
 
+<<<<<<< HEAD
+=======
+  def _assertAllClose(self, indices, np_x, tf_x):
+    for i in set(np.asarray(indices).ravel()):
+      self.assertAllClose(np_x[i], tf_x[i])
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def _mean_cum_op(self, x, y):
     return (x[0] + y, x[1] + 1) if isinstance(x, tuple) else (x + y, 2)
 
   def _mean_reduce_op(self, x):
+<<<<<<< HEAD
     return x[0] / x[1] if isinstance(x, tuple) else x
 
   def _sqrt_n_reduce_op(self, x):
     return x[0] / np.sqrt(x[1]) if isinstance(x, tuple) else x
+=======
+    return  x[0] / x[1] if isinstance(x, tuple) else x
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 class SegmentReductionOpTest(SegmentReductionHelper):
 
   def testValues(self):
+<<<<<<< HEAD
     dtypes = [
         dtypes_lib.float32, dtypes_lib.float64, dtypes_lib.int64,
         dtypes_lib.int32, dtypes_lib.complex64, dtypes_lib.complex128
@@ -316,11 +366,83 @@ class UnsortedSegmentTest(SegmentReductionHelper):
 
   def testNumSegmentsTypes(self):
     dtypes = [dtypes_lib.int32, dtypes_lib.int64]
+=======
+    dtypes = [tf.float32,
+              tf.float64,
+              tf.int64,
+              tf.int32]
+
+    # Each item is np_op1, np_op2, tf_op
+    ops_list = [(np.add, None, tf.segment_sum),
+                (self._mean_cum_op, self._mean_reduce_op,
+                 tf.segment_mean),
+                (np.ndarray.__mul__, None, tf.segment_prod),
+                (np.minimum, None, tf.segment_min),
+                (np.maximum, None, tf.segment_max)]
+
+    n = 10
+    shape = [n, 2]
+    indices = [int(i / 3) for i in range(n)]
+    for dtype in dtypes:
+      with self.test_session(use_gpu=False):
+        tf_x, np_x = self._input(shape, dtype=dtype)
+        for np_op1, np_op2, tf_op in ops_list:
+          np_ans = self._segmentReduce(indices, np_x, np_op1, np_op2)
+          s = tf_op(data=tf_x, segment_ids=indices)
+          tf_ans = s.eval()
+          self._assertAllClose(indices, np_ans, tf_ans)
+          # NOTE(mrry): The static shape inference that computes
+          # `tf_ans.shape` can only infer that sizes from dimension 1
+          # onwards, because the size of dimension 0 is data-dependent
+          # and may therefore vary dynamically.
+          self.assertAllEqual(np_ans.shape[1:], tf_ans.shape[1:])
+
+  def testSegmentIdsShape(self):
+    shape = [4, 4]
+    tf_x, _ = self._input(shape)
+    indices = tf.constant([0, 1, 2, 2], shape=[2, 2])
+    with self.assertRaises(ValueError):
+      tf.segment_sum(data=tf_x, segment_ids=indices)
+
+  def testSegmentIdsSize(self):
+    shape = [4, 4]
+    with self.test_session():
+      tf_x, _ = self._input(shape)
+      indices = [0, 1]
+      s = tf.segment_sum(data=tf_x, segment_ids=indices)
+      with self.assertRaisesOpError("segment_ids should be the same size"):
+        s.eval()
+
+  def testGradient(self):
+    shape = [4, 4]
+    indices = [0, 1, 2, 2]
+    for tf_op in [tf.segment_sum,
+                  tf.segment_mean,
+                  tf.segment_min,
+                  tf.segment_max]:
+      with self.test_session():
+        tf_x, np_x = self._input(shape, dtype=tf.float64)
+        s = tf_op(data=tf_x, segment_ids=indices)
+        jacob_t, jacob_n = gradient_checker.ComputeGradient(
+            tf_x, shape, s, [3, 4], x_init_value=np_x.astype(np.double),
+            delta=1)
+      self.assertAllClose(jacob_t, jacob_n, rtol=1e-3, atol=1e-3)
+
+
+class UnsortedSegmentSumTest(SegmentReductionHelper):
+
+  def testValues(self):
+    dtypes = [tf.float32,
+              tf.float64,
+              tf.int64,
+              tf.int32]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     indices_flat = np.array([0, 4, 0, 8, 3, 8, 4, 7, 7, 3])
     num_segments = 12
     for indices in indices_flat, indices_flat.reshape(5, 2):
       shape = indices.shape + (2,)
       for dtype in dtypes:
+<<<<<<< HEAD
         with self.cached_session(use_gpu=True):
           tf_x, np_x = self._input(shape)
           num_segments_constant = constant_op.constant(
@@ -409,6 +531,42 @@ class UnsortedSegmentTest(SegmentReductionHelper):
           self.assertAllClose(jacob_t, grad_gt)
 
   @test_util.run_deprecated_v1
+=======
+        with self.test_session(use_gpu=False):
+          tf_x, np_x = self._input(shape, dtype=dtype)
+          np_ans = self._segmentReduce(indices,
+                                       np_x,
+                                       np.add,
+                                       op2=None,
+                                       num_out_rows=num_segments)
+          s = tf.unsorted_segment_sum(data=tf_x,
+                                      segment_ids=indices,
+                                      num_segments=num_segments)
+          tf_ans = s.eval()
+        self._assertAllClose(indices, np_ans, tf_ans)
+        self.assertShapeEqual(np_ans, s)
+
+  def testGradient(self):
+    num_cols = 2
+    indices_flat = np.array([0, 4, 0, 8, 3, 8, 4, 7, 7, 3])
+    num_segments = max(indices_flat) + 3
+    for indices in indices_flat, indices_flat.reshape(5, 2):
+      shape = indices.shape + (num_cols,)
+      with self.test_session():
+        tf_x, np_x = self._input(shape, dtype=tf.float64)
+        s = tf.unsorted_segment_sum(data=tf_x,
+                                    segment_ids=indices,
+                                    num_segments=num_segments)
+        jacob_t, jacob_n = gradient_checker.ComputeGradient(
+            tf_x,
+            shape,
+            s,
+            [num_segments, num_cols],
+            x_init_value=np_x.astype(np.double),
+            delta=1)
+      self.assertAllClose(jacob_t, jacob_n, rtol=1e-3, atol=1e-3)
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testGradientMatchesSegmentSum(self):
     # Strategy: compute the gradient for UnsortedSegmentSum and SegmentSum
     # and compare the outputs, which should be identical.
@@ -420,6 +578,7 @@ class UnsortedSegmentTest(SegmentReductionHelper):
     num_cols = 2
     shape = [n, num_cols]
     num_segments = max(indices) + 1
+<<<<<<< HEAD
     for dtype in self.differentiable_dtypes:
       with self.cached_session(use_gpu=True):
         tf_x, np_x = self._input(shape, dtype=dtype)
@@ -487,10 +646,31 @@ class UnsortedSegmentTest(SegmentReductionHelper):
           tf_ans = self.evaluate(s)
         self.assertAllClose(np_ans, tf_ans)
         self.assertShapeEqual(np_ans, s)
+=======
+    with self.test_session():
+      tf_x, np_x = self._input(shape, dtype=tf.float64)
+      # Results from UnsortedSegmentSum
+      unsorted_s = tf.unsorted_segment_sum(data=tf_x,
+                                                 segment_ids=indices,
+                                                 num_segments=num_segments)
+      unsorted_jacob_t, unsorted_jacob_n = gradient_checker.ComputeGradient(
+          tf_x, shape, unsorted_s, [num_segments, num_cols],
+          x_init_value=np_x.astype(np.double),
+          delta=1)
+      # Results from SegmentSum
+      sorted_s = tf.segment_sum(data=tf_x, segment_ids=indices)
+      sorted_jacob_t, sorted_jacob_n = gradient_checker.ComputeGradient(
+          tf_x, shape, sorted_s, [num_segments, num_cols],
+          x_init_value=np_x.astype(np.double),
+          delta=1)
+    self.assertAllClose(unsorted_jacob_t, sorted_jacob_t, rtol=1e-3, atol=1e-3)
+    self.assertAllClose(unsorted_jacob_n, sorted_jacob_n, rtol=1e-3, atol=1e-3)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 class SparseSegmentReductionHelper(SegmentReductionHelper):
 
+<<<<<<< HEAD
   def _sparse_input(self, input_shape, num_indices, dtype=dtypes_lib.int32):
     a, b = super(SparseSegmentReductionHelper, self)._input(input_shape, dtype)
     indices = np.random.randint(0, input_shape[0], num_indices).astype(np.int32)
@@ -506,11 +686,24 @@ class SparseSegmentReductionHelper(SegmentReductionHelper):
                            num_segments=None):
     return self._segmentReduce(
         segment_indices, x[indices], op1, op2, num_segments=num_segments)
+=======
+  def _sparse_input(self, input_shape, num_indices,
+                    dtype=tf.int32):
+    a, b = super(SparseSegmentReductionHelper, self)._input(input_shape,
+                                                            dtype)
+    indices = np.random.randint(0, input_shape[0], num_indices).astype(np.int32)
+    return (tf.constant(indices, dtype=tf.int32),
+            indices, a, b)
+
+  def _sparseSegmentReduce(self, x, indices, segment_indices, op1, op2=None):
+    return self._segmentReduce(segment_indices, x[indices], op1, op2)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 class SparseSegmentReductionOpTest(SparseSegmentReductionHelper):
 
   def testValues(self):
+<<<<<<< HEAD
     dtypes = [
         dtypes_lib.float32, dtypes_lib.float64, dtypes_lib.int64,
         dtypes_lib.int32
@@ -522,6 +715,20 @@ class SparseSegmentReductionOpTest(SparseSegmentReductionHelper):
     ops_list = [(np.add, None, math_ops.sparse_segment_sum),
                 (self._mean_cum_op, self._mean_reduce_op,
                  math_ops.sparse_segment_mean)]
+=======
+    dtypes = [tf.float32,
+              tf.float64,
+              tf.int64,
+              tf.int32]
+
+    mean_dtypes = [tf.float32,
+                   tf.float64]
+
+    # Each item is np_op1, np_op2, tf_op
+    ops_list = [(np.add, None, tf.sparse_segment_sum),
+                (self._mean_cum_op, self._mean_reduce_op,
+                 tf.sparse_segment_mean)]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     n = 400
     shape = [n, 2]
@@ -531,23 +738,38 @@ class SparseSegmentReductionOpTest(SparseSegmentReductionHelper):
         segment_indices.append(i)
     num_indices = len(segment_indices)
     for dtype in dtypes:
+<<<<<<< HEAD
       with self.cached_session(use_gpu=False):
         tf_indices, np_indices, tf_x, np_x = self._sparse_input(
             shape, num_indices, dtype=dtype)
         for np_op1, np_op2, tf_op in ops_list:
           if tf_op == math_ops.sparse_segment_mean and dtype not in mean_dtypes:
+=======
+      with self.test_session(use_gpu=False):
+        tf_indices, np_indices, tf_x, np_x = self._sparse_input(shape,
+                                                                num_indices,
+                                                                dtype=dtype)
+        for np_op1, np_op2, tf_op in ops_list:
+          if tf_op == tf.sparse_segment_mean and dtype not in mean_dtypes:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             continue
           np_ans = self._sparseSegmentReduce(np_x, np_indices, segment_indices,
                                              np_op1, np_op2)
           s = tf_op(data=tf_x, indices=tf_indices, segment_ids=segment_indices)
+<<<<<<< HEAD
           tf_ans = self.evaluate(s)
           self.assertAllClose(np_ans, tf_ans)
+=======
+          tf_ans = s.eval()
+          self._assertAllClose(segment_indices, np_ans, tf_ans)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           # NOTE(mrry): The static shape inference that computes
           # `tf_ans.shape` can only infer that sizes from dimension 1
           # onwards, because the size of dimension 0 is data-dependent
           # and may therefore vary dynamically.
           self.assertAllEqual(np_ans.shape[1:], tf_ans.shape[1:])
 
+<<<<<<< HEAD
   def testSegmentIdsHole(self):
     tf_x, np_x = self._input([10, 4], dtype=dtypes_lib.float32)
     ops_list = [(np.add, None, math_ops.sparse_segment_sum), (
@@ -781,11 +1003,14 @@ class SparseSegmentReductionOpTest(SparseSegmentReductionHelper):
               num_segments=num_segments)
 
   @test_util.run_deprecated_v1
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testGradient(self):
     shape = [10, 4]
 
     segment_indices = [0, 1, 2, 2]
     num_indices = len(segment_indices)
+<<<<<<< HEAD
     for tf_op in [math_ops.sparse_segment_sum, math_ops.sparse_segment_mean]:
       with self.cached_session():
         tf_indices, _, tf_x, np_x = self._sparse_input(
@@ -989,3 +1214,19 @@ class SegmentReductionOpBenchmark(test.Benchmark):
 
 if __name__ == "__main__":
   test.main()
+=======
+    for tf_op in [tf.sparse_segment_sum,
+                  tf.sparse_segment_mean]:
+      with self.test_session():
+        tf_indices, _, tf_x, np_x = self._sparse_input(
+            shape, num_indices, dtype=tf.float64)
+        s = tf_op(data=tf_x, indices=tf_indices, segment_ids=segment_indices)
+        jacob_t, jacob_n = gradient_checker.ComputeGradient(
+            tf_x, shape, s, [3, 4], x_init_value=np_x.astype(np.double),
+            delta=1)
+      self.assertAllClose(jacob_t, jacob_n, rtol=1e-3, atol=1e-3)
+
+
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

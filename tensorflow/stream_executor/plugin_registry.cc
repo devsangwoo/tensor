@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,16 @@ limitations under the License.
 #include "tensorflow/stream_executor/multi_platform_manager.h"
 
 namespace stream_executor {
+=======
+#include "tensorflow/stream_executor/plugin_registry.h"
+
+#include "tensorflow/stream_executor/lib/error.h"
+#include "tensorflow/stream_executor/lib/stringprintf.h"
+#include "tensorflow/stream_executor/multi_platform_manager.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 const PluginId kNullPlugin = nullptr;
 
@@ -46,17 +57,25 @@ string PluginKindString(PluginKind plugin_kind) {
 PluginRegistry::DefaultFactories::DefaultFactories() :
     blas(kNullPlugin), dnn(kNullPlugin), fft(kNullPlugin), rng(kNullPlugin) { }
 
+<<<<<<< HEAD
 static absl::Mutex& GetPluginRegistryMutex() {
   static absl::Mutex mu(absl::kConstInit);
   return mu;
 }
 
+=======
+/* static */ mutex PluginRegistry::mu_(LINKER_INITIALIZED);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 /* static */ PluginRegistry* PluginRegistry::instance_ = nullptr;
 
 PluginRegistry::PluginRegistry() {}
 
 /* static */ PluginRegistry* PluginRegistry::Instance() {
+<<<<<<< HEAD
   absl::MutexLock lock{&GetPluginRegistryMutex()};
+=======
+  mutex_lock lock{mu_};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (instance_ == nullptr) {
     instance_ = new PluginRegistry();
   }
@@ -72,6 +91,7 @@ template <typename FACTORY_TYPE>
 port::Status PluginRegistry::RegisterFactoryInternal(
     PluginId plugin_id, const string& plugin_name, FACTORY_TYPE factory,
     std::map<PluginId, FACTORY_TYPE>* factories) {
+<<<<<<< HEAD
   absl::MutexLock lock{&GetPluginRegistryMutex()};
 
   if (factories->find(plugin_id) != factories->end()) {
@@ -80,6 +100,16 @@ port::Status PluginRegistry::RegisterFactoryInternal(
         absl::StrFormat("Attempting to register factory for plugin %s when "
                         "one has already been registered",
                         plugin_name));
+=======
+  mutex_lock lock{mu_};
+
+  if (factories->find(plugin_id) != factories->end()) {
+    return port::Status{
+        port::error::ALREADY_EXISTS,
+        port::Printf("Attempting to register factory for plugin %s when "
+                     "one has already been registered",
+                     plugin_name.c_str())};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   (*factories)[plugin_id] = factory;
@@ -95,9 +125,15 @@ port::StatusOr<FACTORY_TYPE> PluginRegistry::GetFactoryInternal(
   if (iter == factories.end()) {
     iter = generic_factories.find(plugin_id);
     if (iter == generic_factories.end()) {
+<<<<<<< HEAD
       return port::Status(
           port::error::NOT_FOUND,
           absl::StrFormat("Plugin ID %p not registered.", plugin_id));
+=======
+      return port::Status{
+          port::error::NOT_FOUND,
+          port::Printf("Plugin ID %p not registered.", plugin_id)};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
@@ -215,11 +251,17 @@ bool PluginRegistry::HasFactory(Platform::Id platform_id,
       plugin_id = default_factories_[platform_id].FACTORY_VAR;                \
                                                                               \
       if (plugin_id == kNullPlugin) {                                         \
+<<<<<<< HEAD
         return port::Status(                                                  \
             port::error::FAILED_PRECONDITION,                                 \
             "No suitable " PLUGIN_STRING                                      \
             " plugin registered. Have you linked in a " PLUGIN_STRING         \
             "-providing plugin?");                                            \
+=======
+        return port::Status{port::error::FAILED_PRECONDITION,                 \
+                            "No suitable " PLUGIN_STRING                      \
+                            " plugin registered, default or otherwise."};     \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       } else {                                                                \
         VLOG(2) << "Selecting default " PLUGIN_STRING " plugin, "             \
                 << plugin_names_[plugin_id];                                  \
@@ -235,9 +277,15 @@ bool PluginRegistry::HasFactory(Platform::Id platform_id,
       PlatformKind platform_kind, PluginId plugin_id) {                       \
     auto iter = platform_id_by_kind_.find(platform_kind);                     \
     if (iter == platform_id_by_kind_.end()) {                                 \
+<<<<<<< HEAD
       return port::Status(port::error::FAILED_PRECONDITION,                   \
                           absl::StrFormat("Platform kind %d not registered.", \
                                           static_cast<int>(platform_kind)));  \
+=======
+      return port::Status{port::error::FAILED_PRECONDITION,                   \
+                          port::Printf("Platform kind %d not registered.",    \
+                                       static_cast<int>(platform_kind))};     \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }                                                                         \
     return GetFactory<PluginRegistry::FACTORY_TYPE>(iter->second, plugin_id); \
   }
@@ -247,4 +295,9 @@ EMIT_PLUGIN_SPECIALIZATIONS(DnnFactory, dnn, "DNN");
 EMIT_PLUGIN_SPECIALIZATIONS(FftFactory, fft, "FFT");
 EMIT_PLUGIN_SPECIALIZATIONS(RngFactory, rng, "RNG");
 
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

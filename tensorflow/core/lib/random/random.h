@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,5 +18,21 @@ limitations under the License.
 #define TENSORFLOW_LIB_RANDOM_RANDOM_H_
 
 #include "tensorflow/core/platform/random.h"
+=======
+#ifndef TENSORFLOW_LIB_RANDOM_RANDOM_H_
+#define TENSORFLOW_LIB_RANDOM_RANDOM_H_
+
+#include "tensorflow/core/platform/port.h"
+
+namespace tensorflow {
+namespace random {
+
+// Return a 64-bit random value.  Different sequences are generated
+// in different processes.
+uint64 New64();
+
+}  // namespace random
+}  // namespace tensorflow
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_LIB_RANDOM_RANDOM_H_

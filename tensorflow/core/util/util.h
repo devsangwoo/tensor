@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,11 @@ limitations under the License.
 #define TENSORFLOW_CORE_UTIL_UTIL_H_
 
 #include "tensorflow/core/framework/tensor_shape.h"
+=======
+#ifndef TENSORFLOW_UTIL_UTIL_H_
+#define TENSORFLOW_UTIL_UTIL_H_
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/core/stringpiece.h"
 
 namespace tensorflow {
@@ -49,6 +55,7 @@ class MovingAverage {
 
 // Returns a string printing bytes in ptr[0..n).  The output looks
 // like "00 01 ef cd cd ef".
+<<<<<<< HEAD
 string PrintMemory(const char* ptr, size_t n);
 
 // Given a flattened index into a tensor, computes a string s so that
@@ -64,3 +71,10 @@ bool DisableMKL();
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_UTIL_UTIL_H_
+=======
+string PrintMemory(const char* ptr, int n);
+
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_UTIL_UTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

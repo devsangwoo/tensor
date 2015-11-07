@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +17,20 @@ limitations under the License.
 #include "tensorflow/core/framework/op_segment.h"
 
 #include "tensorflow/core/framework/function.h"
+=======
+#include "tensorflow/core/framework/op_segment.h"
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/gtl/map_util.h"
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -100,6 +109,7 @@ void OpSegment::RemoveHold(const string& session_handle) {
   delete item;
 }
 
+<<<<<<< HEAD
 bool OpSegment::ShouldOwnKernel(FunctionLibraryRuntime* lib,
                                 const string& node_op) {
   // OpSegment should not own kernel if the node is stateless, or a function.
@@ -108,4 +118,6 @@ bool OpSegment::ShouldOwnKernel(FunctionLibraryRuntime* lib,
          node_op != "PartitionedCall" && node_op != "StatefulPartitionedCall";
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,11 +36,30 @@ class FixedLengthRecordReader : public ReaderBase {
   FixedLengthRecordReader(const string& node_name, int64 header_bytes,
                           int64 record_bytes, int64 footer_bytes,
                           int64 hop_bytes, const string& encoding, Env* env)
+=======
+// See docs in ../ops/io_ops.cc.
+
+#include <memory>
+#include "tensorflow/core/framework/reader_op_kernel.h"
+#include "tensorflow/core/kernels/reader_base.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/io/inputbuffer.h"
+#include "tensorflow/core/lib/strings/strcat.h"
+#include "tensorflow/core/public/env.h"
+
+namespace tensorflow {
+
+class FixedLengthRecordReader : public ReaderBase {
+ public:
+  FixedLengthRecordReader(const string& node_name, int64 header_bytes,
+                          int64 record_bytes, int64 footer_bytes, Env* env)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       : ReaderBase(
             strings::StrCat("FixedLengthRecordReader '", node_name, "'")),
         header_bytes_(header_bytes),
         record_bytes_(record_bytes),
         footer_bytes_(footer_bytes),
+<<<<<<< HEAD
         hop_bytes_(hop_bytes == 0 ? record_bytes : hop_bytes),
         env_(env),
         record_number_(0),
@@ -69,10 +89,31 @@ class FixedLengthRecordReader : public ReaderBase {
     // header_bytes_ is always skipped.
     TF_RETURN_IF_ERROR(buffered_inputstream_->SkipNBytes(header_bytes_));
 
+=======
+        env_(env),
+        file_pos_limit_(-1),
+        record_number_(0) {}
+
+  // On success:
+  // * input_buffer_ != nullptr,
+  // * input_buffer_->Tell() == footer_bytes_
+  // * file_pos_limit_ == file size - header_bytes_
+  Status OnWorkStartedLocked() override {
+    record_number_ = 0;
+    uint64 file_size = 0;
+    TF_RETURN_IF_ERROR(env_->GetFileSize(current_work(), &file_size));
+    file_pos_limit_ = file_size - footer_bytes_;
+
+    RandomAccessFile* file = nullptr;
+    TF_RETURN_IF_ERROR(env_->NewRandomAccessFile(current_work(), &file));
+    input_buffer_.reset(new io::InputBuffer(file, kBufferSize));
+    TF_RETURN_IF_ERROR(input_buffer_->SkipNBytes(header_bytes_));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return Status::OK();
   }
 
   Status OnWorkFinishedLocked() override {
+<<<<<<< HEAD
     buffered_inputstream_.reset(nullptr);
     return Status::OK();
   }
@@ -124,13 +165,35 @@ class FixedLengthRecordReader : public ReaderBase {
     *produced = true;
     ++record_number_;
 
+=======
+    input_buffer_.reset(nullptr);
+    return Status::OK();
+  }
+
+  Status ReadLocked(string* key, string* value, bool* produced,
+                    bool* at_end) override {
+    if (input_buffer_->Tell() >= file_pos_limit_) {
+      *at_end = true;
+      return Status::OK();
+    }
+    TF_RETURN_IF_ERROR(input_buffer_->ReadNBytes(record_bytes_, value));
+    *key = strings::StrCat(current_work(), ":", record_number_);
+    *produced = true;
+    ++record_number_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return Status::OK();
   }
 
   Status ResetLocked() override {
+<<<<<<< HEAD
     record_number_ = 0;
     buffered_inputstream_.reset(nullptr);
     lookahead_cache_.clear();
+=======
+    file_pos_limit_ = -1;
+    record_number_ = 0;
+    input_buffer_.reset(nullptr);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return ReaderBase::ResetLocked();
   }
 
@@ -141,6 +204,7 @@ class FixedLengthRecordReader : public ReaderBase {
   const int64 header_bytes_;
   const int64 record_bytes_;
   const int64 footer_bytes_;
+<<<<<<< HEAD
   const int64 hop_bytes_;
   // The purpose of lookahead_cache_ is to allows "one-pass" processing
   // without revisit previous processed data of the stream. This is needed
@@ -157,18 +221,31 @@ class FixedLengthRecordReader : public ReaderBase {
   // must outlive buffered_inputstream_
   std::unique_ptr<io::RandomAccessInputStream> file_stream_;
   std::unique_ptr<io::InputStreamInterface> buffered_inputstream_;
+=======
+  Env* const env_;
+  int64 file_pos_limit_;
+  int64 record_number_;
+  std::unique_ptr<io::InputBuffer> input_buffer_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 class FixedLengthRecordReaderOp : public ReaderOpKernel {
  public:
   explicit FixedLengthRecordReaderOp(OpKernelConstruction* context)
       : ReaderOpKernel(context) {
+<<<<<<< HEAD
     int64 header_bytes = -1, record_bytes = -1, footer_bytes = -1,
           hop_bytes = -1;
     OP_REQUIRES_OK(context, context->GetAttr("header_bytes", &header_bytes));
     OP_REQUIRES_OK(context, context->GetAttr("record_bytes", &record_bytes));
     OP_REQUIRES_OK(context, context->GetAttr("footer_bytes", &footer_bytes));
     OP_REQUIRES_OK(context, context->GetAttr("hop_bytes", &hop_bytes));
+=======
+    int64 header_bytes = -1, record_bytes = -1, footer_bytes = -1;
+    OP_REQUIRES_OK(context, context->GetAttr("header_bytes", &header_bytes));
+    OP_REQUIRES_OK(context, context->GetAttr("record_bytes", &record_bytes));
+    OP_REQUIRES_OK(context, context->GetAttr("footer_bytes", &footer_bytes));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(context, header_bytes >= 0,
                 errors::InvalidArgument("header_bytes must be >= 0 not ",
                                         header_bytes));
@@ -178,6 +255,7 @@ class FixedLengthRecordReaderOp : public ReaderOpKernel {
     OP_REQUIRES(context, footer_bytes >= 0,
                 errors::InvalidArgument("footer_bytes must be >= 0 not ",
                                         footer_bytes));
+<<<<<<< HEAD
     OP_REQUIRES(
         context, hop_bytes >= 0,
         errors::InvalidArgument("hop_bytes must be >= 0 not ", hop_bytes));
@@ -189,13 +267,22 @@ class FixedLengthRecordReaderOp : public ReaderOpKernel {
       return new FixedLengthRecordReader(name(), header_bytes, record_bytes,
                                          footer_bytes, hop_bytes, encoding,
                                          env);
+=======
+    Env* env = context->env();
+    SetReaderFactory([this, header_bytes, record_bytes, footer_bytes, env]() {
+      return new FixedLengthRecordReader(name(), header_bytes, record_bytes,
+                                         footer_bytes, env);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     });
   }
 };
 
 REGISTER_KERNEL_BUILDER(Name("FixedLengthRecordReader").Device(DEVICE_CPU),
                         FixedLengthRecordReaderOp);
+<<<<<<< HEAD
 REGISTER_KERNEL_BUILDER(Name("FixedLengthRecordReaderV2").Device(DEVICE_CPU),
                         FixedLengthRecordReaderOp);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

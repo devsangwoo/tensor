@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -124,3 +125,15 @@ DEFINE_integer = _wrap_define_function(DEFINE_integer)
 # pylint: enable=invalid-name,used-before-assignment
 
 FLAGS = _FlagValuesWrapper(FLAGS)  # pylint: disable=used-before-assignment
+=======
+"""Switch between depending on pyglib.flags or open-source gflags."""
+# pylint: disable=unused-import
+# pylint: disable=g-import-not-at-top
+# pylint: disable=wildcard-import
+import tensorflow.python.platform
+import control_imports
+if control_imports.USE_OSS and control_imports.OSS_FLAGS:
+  from tensorflow.python.platform.default._flags import *
+else:
+  from tensorflow.python.platform.google._flags import *
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

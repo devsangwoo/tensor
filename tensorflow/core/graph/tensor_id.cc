@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/graph/tensor_id.h"
 
 #include <string>
 
 #include "tensorflow/core/lib/core/stringpiece.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/strings/str_util.h"
 
 namespace tensorflow {
@@ -27,11 +31,17 @@ TensorId::TensorId(const SafeTensorId& id) : TensorId(id.first, id.second) {}
 SafeTensorId::SafeTensorId(const TensorId& id)
     : SafeTensorId(string(id.first), id.second) {}
 
+=======
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TensorId ParseTensorName(const string& name) {
   return ParseTensorName(StringPiece(name.data(), name.size()));
 }
 
 TensorId ParseTensorName(StringPiece name) {
+<<<<<<< HEAD
   // Parse either a name, ^name, or name:digits.  To do so, we go backwards from
   // the end of the string, skipping over a run of digits.  If we hit a ':'
   // character, then we know we are in the 'name:digits' regime.  Otherwise, we
@@ -42,6 +52,19 @@ TensorId ParseTensorName(StringPiece name) {
   const char* p = base + name.size() - 1;
   unsigned int index = 0;
   unsigned int mul = 1;
+=======
+  // Parse either a name, or a name:digits.  To do so, we go backwards
+  // from the end of the string, skipping over a run of digits.  If
+  // we hit a ':' character, then we know we are in the 'name:digits'
+  // regime.  Otherwise, the output index is implicitly 0, and the whole
+  // name string forms the first part of the tensor name.
+  //
+  // Equivalent to matching with this regexp: ([^:]+):(\\d+)
+  const char* base = name.data();
+  const char* p = base + name.size() - 1;
+  int index = 0;
+  int mul = 1;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   while (p > base && (*p >= '0' && *p <= '9')) {
     index += ((*p - '0') * mul);
     mul *= 10;
@@ -51,10 +74,13 @@ TensorId ParseTensorName(StringPiece name) {
   if (p > base && *p == ':' && mul > 1) {
     id.first = StringPiece(base, p - base);
     id.second = index;
+<<<<<<< HEAD
   } else if (absl::StartsWith(name, "^")) {
     // Control edge
     id.first = StringPiece(base + 1);
     id.second = Graph::kControlSlot;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   } else {
     id.first = name;
     id.second = 0;
@@ -62,8 +88,11 @@ TensorId ParseTensorName(StringPiece name) {
   return id;
 }
 
+<<<<<<< HEAD
 bool IsTensorIdControl(const TensorId& tensor_id) {
   return tensor_id.index() == Graph::kControlSlot;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

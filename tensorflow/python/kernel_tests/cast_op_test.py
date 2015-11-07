@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,10 +35,24 @@ from tensorflow.python.platform import test
 
 
 class CastOpTest(test.TestCase):
+=======
+"""Tests for tensorflow.ops.tf.cast."""
+
+import tensorflow.python.platform
+
+import numpy as np
+import tensorflow as tf
+
+from tensorflow.python.kernel_tests import gradient_checker as gc
+
+
+class CastOpTest(tf.test.TestCase):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _toDataType(self, dtype):
     """Returns TensorFlow data type for numpy type."""
     if dtype == np.float32:
+<<<<<<< HEAD
       return dtypes.float32
     elif dtype == np.float64:
       return dtypes.float64
@@ -51,13 +66,30 @@ class CastOpTest(test.TestCase):
       return dtypes.complex64
     elif dtype == np.complex128:
       return dtypes.complex128
+=======
+      return tf.float32
+    elif dtype == np.float64:
+      return tf.float64
+    elif dtype == np.int32:
+      return tf.int32
+    elif dtype == np.int64:
+      return tf.int64
+    elif dtype == np.bool:
+      return tf.bool
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     else:
       return None
 
   def _cast(self, x, dtype, use_gpu=False):
+<<<<<<< HEAD
     with self.cached_session(use_gpu=use_gpu):
       val = constant_op.constant(x, self._toDataType(np.array([x]).dtype))
       return math_ops.cast(val, self._toDataType(dtype), name="cast").eval()
+=======
+    with self.test_session(use_gpu=use_gpu):
+      val = tf.constant(x, self._toDataType(np.array([x]).dtype))
+      return tf.cast(val, self._toDataType(dtype), name="cast").eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _test(self, x, dtype, use_gpu=False):
     """Tests cast(x) to dtype behaves the same as numpy.astype."""
@@ -68,6 +100,7 @@ class CastOpTest(test.TestCase):
   def _testTypes(self, x, use_gpu=False):
     """Tests cast(x) to different tf."""
     if use_gpu:
+<<<<<<< HEAD
       type_list = [
           np.float32, np.float64, np.int64, np.complex64, np.complex128
       ]
@@ -76,6 +109,11 @@ class CastOpTest(test.TestCase):
           np.float32, np.float64, np.int32, np.int64, np.complex64,
           np.complex128
       ]
+=======
+      type_list = [np.float32, np.float64, np.int64]
+    else:
+      type_list = [np.float32, np.float64, np.int32, np.int64]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for from_type in type_list:
       for to_type in type_list:
         self._test(x.astype(from_type), to_type, use_gpu)
@@ -91,11 +129,15 @@ class CastOpTest(test.TestCase):
     if x.dtype == np.float32 or x.dtype == np.float64:
       self._testTypes(x, use_gpu=True)
 
+<<<<<<< HEAD
   @test_util.run_deprecated_v1
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testBasic(self):
     self._testAll(np.arange(-10, 10).reshape(2, 10))
     self._testAll(np.linspace(-10, 10, 17))
 
+<<<<<<< HEAD
   @test_util.run_deprecated_v1
   def testSmallValues(self):
     f4 = np.finfo(np.float32)
@@ -116,6 +158,23 @@ class CastOpTest(test.TestCase):
       self.assertAllClose(a, self.evaluate(b), rtol=1 / 128.)
 
   @test_util.run_deprecated_v1
+=======
+  def testSmallValues(self):
+    f4 = np.finfo(np.float32)
+    f8 = np.finfo(np.float64)
+    self._testAll(np.array([0, -1, 1, -f4.resolution, f4.resolution,
+                            f8.resolution, -f8.resolution]))
+
+  def testBfloat16(self):
+    a = np.random.uniform(-100, 100, 100).astype(np.float32)
+    with self.test_session(use_gpu=False):
+      b = tf.cast(tf.cast(a, tf.bfloat16), tf.float32)
+      self.assertAllClose(a, b.eval(), rtol=1/128.)
+    with self.test_session(use_gpu=True):
+      b = tf.cast(tf.cast(a, tf.bfloat16), tf.float32)
+      self.assertAllClose(a, b.eval(), rtol=1/128.)
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testRandom(self):
     self._testAll(np.random.normal(0, 10, 210).reshape([2, 3, 5, 7]))
     self._testAll(np.random.normal(0, 1e6, 210).reshape([2, 3, 5, 7]))
@@ -124,11 +183,17 @@ class CastOpTest(test.TestCase):
   # integer values in somewhat unexpected ways. And they behave
   # differently on CPU and GPU.
   def _compare(self, x, dst_dtype, expected, use_gpu=False):
+<<<<<<< HEAD
     np.testing.assert_equal(
         self._cast(
             x, dst_dtype, use_gpu=use_gpu), dst_dtype(expected))
 
   @test_util.run_deprecated_v1
+=======
+    np.testing.assert_equal(self._cast(x, dst_dtype, use_gpu=use_gpu),
+                            dst_dtype(expected))
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testIntToFloatBoundary(self):
     i4 = np.iinfo(np.int32)
     i8 = np.iinfo(np.int64)
@@ -143,13 +208,17 @@ class CastOpTest(test.TestCase):
     self._compare(i8.max, np.float64, i8.max, False)
     # NOTE: GPU does not support int32/int64 for casting.
 
+<<<<<<< HEAD
   @test_util.run_deprecated_v1
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def testInfNan(self):
     i4 = np.iinfo(np.int32)
     i8 = np.iinfo(np.int64)
 
     self._compare(np.inf, np.float32, np.inf, False)
     self._compare(np.inf, np.float64, np.inf, False)
+<<<<<<< HEAD
     if sys.byteorder == "big":
       self._compare(np.inf, np.int32, i4.max, False)
       self._compare(np.inf, np.int64, i8.max, False)
@@ -163,12 +232,17 @@ class CastOpTest(test.TestCase):
       else:
         self._compare(np.inf, np.int32, i4.min, False)
         self._compare(np.inf, np.int64, i8.min, False)
+=======
+    self._compare(np.inf, np.int32, i4.min, False)
+    self._compare(np.inf, np.int64, i8.min, False)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     self._compare(-np.inf, np.float32, -np.inf, False)
     self._compare(-np.inf, np.float64, -np.inf, False)
     self._compare(-np.inf, np.int32, i4.min, False)
     self._compare(-np.inf, np.int64, i8.min, False)
     self.assertAllEqual(np.isnan(self._cast(np.nan, np.float32, False)), True)
     self.assertAllEqual(np.isnan(self._cast(np.nan, np.float64, False)), True)
+<<<<<<< HEAD
     # np.float64(np.nan).astype(np.int32) is 0 on ARM
     if platform.machine() == "aarch64":
       self._compare(np.nan, np.int32, 0, False)
@@ -176,6 +250,10 @@ class CastOpTest(test.TestCase):
     else:
       self._compare(np.nan, np.int32, i4.min, False)
       self._compare(np.nan, np.int64, i8.min, False)
+=======
+    self._compare(np.nan, np.int32, i4.min, False)
+    self._compare(np.nan, np.int64, i8.min, False)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     self._compare(np.inf, np.float32, np.inf, True)
     self._compare(np.inf, np.float64, np.inf, True)
@@ -185,6 +263,7 @@ class CastOpTest(test.TestCase):
     self.assertAllEqual(np.isnan(self._cast(np.nan, np.float64, True)), True)
 
   def _OpError(self, x, dtype, err):
+<<<<<<< HEAD
     with self.cached_session():
       with self.assertRaisesOpError(err):
         math_ops.cast(x, dtype).eval()
@@ -250,3 +329,42 @@ class SaturateCastTest(test.TestCase):
 
 if __name__ == "__main__":
   test.main()
+=======
+    with self.test_session():
+      with self.assertRaisesOpError(err):
+        tf.cast(x, dtype).eval()
+
+  def testNotImplemented(self):
+    self._OpError(np.arange(0, 10), tf.string,
+                  "Cast.*int64.*string.*")
+
+  def testGradients(self):
+    t = [tf.float32, tf.float64]
+    for src_t in t:
+      for dst_t in t:
+        with self.test_session():
+          x = tf.constant(1.0, src_t)
+          z = tf.identity(x)
+          y = tf.cast(z, dst_t)
+          err = gc.ComputeGradientError(x, [1], y, [1])
+          self.assertLess(err, 1e-3)
+
+
+class SparseTensorCastTest(tf.test.TestCase):
+
+  def testCast(self):
+    indices = tf.constant([[0L], [1L], [2L]])
+    values = tf.constant(np.array([1, 2, 3], np.int64))
+    shape = tf.constant([3L])
+    st = tf.SparseTensor(indices, values, shape)
+    st_cast = tf.cast(st, tf.float32)
+    with self.test_session():
+      self.assertAllEqual(st_cast.indices.eval(), [[0L], [1L], [2L]])
+      self.assertAllEqual(st_cast.values.eval(),
+                          np.array([1, 2, 3], np.float32))
+      self.assertAllEqual(st_cast.shape.eval(), [3L])
+
+
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

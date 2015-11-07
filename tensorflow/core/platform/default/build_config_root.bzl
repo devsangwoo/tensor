@@ -2,6 +2,7 @@
 # The functions in this file might be referred by tensorflow.bzl. They have to
 # be separate to avoid cyclic references.
 
+<<<<<<< HEAD
 load("@local_config_remote_execution//:remote_execution.bzl", "gpu_test_tags")
 
 def tf_gpu_tests_tags():
@@ -67,3 +68,7 @@ def if_dynamic_kernels(extra_deps, otherwise = []):
 
 def register_extension_info(**kwargs):
     pass
+=======
+def tf_cuda_tests_tags():
+  return ["local"]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

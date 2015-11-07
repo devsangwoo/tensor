@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifndef TENSORFLOW_STREAM_EXECUTOR_LIB_HUMAN_READABLE_H_
 #define TENSORFLOW_STREAM_EXECUTOR_LIB_HUMAN_READABLE_H_
 
 #include <assert.h>
+<<<<<<< HEAD
 
 #include <limits>
 
@@ -24,6 +28,15 @@ limitations under the License.
 #include "tensorflow/stream_executor/platform/port.h"
 
 namespace stream_executor {
+=======
+#include <limits>
+
+#include "tensorflow/stream_executor/lib/stringprintf.h"
+#include "tensorflow/stream_executor/platform/port.h"
+
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace port {
 
 class HumanReadableNumBytes {
@@ -39,7 +52,11 @@ class HumanReadableNumBytes {
     // Special case for bytes.
     if (num_bytes < 1024LL) {
       // No fractions for bytes.
+<<<<<<< HEAD
       return absl::StrFormat("%s%dB", neg_str, num_bytes);
+=======
+      return port::Printf("%s%lldB", neg_str, num_bytes);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
 
     static const char units[] = "KMGTPE";  // int64 only goes up to E.
@@ -50,10 +67,15 @@ class HumanReadableNumBytes {
       assert(unit < units + sizeof(units));
     }
 
+<<<<<<< HEAD
     if (*unit == 'K') {
       return absl::StrFormat("%s%.1f%c", neg_str, num_bytes / 1024.0, *unit);
     }
     return absl::StrFormat("%s%.2f%c", neg_str, num_bytes / 1024.0, *unit);
+=======
+    return port::Printf(((*unit == 'K') ? "%s%.1f%c" : "%s%.2f%c"), neg_str,
+                        num_bytes / 1024.0, *unit);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
@@ -69,6 +91,11 @@ class HumanReadableNumBytes {
 };
 
 }  // namespace port
+<<<<<<< HEAD
 }  // namespace stream_executor
+=======
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_LIB_HUMAN_READABLE_H_

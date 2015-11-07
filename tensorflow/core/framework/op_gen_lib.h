@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +30,16 @@ namespace tensorflow {
 // Forward declare protos so their symbols can be removed from .so exports
 class OpDef;
 
+=======
+#ifndef TENSORFLOW_FRAMEWORK_OP_GEN_LIB_H_
+#define TENSORFLOW_FRAMEWORK_OP_GEN_LIB_H_
+
+#include <string>
+#include "tensorflow/core/lib/core/stringpiece.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 inline string Spaces(int n) { return string(n, ' '); }
 
 // Wrap prefix + str to be at most width characters, indenting every line
@@ -42,6 +53,7 @@ string WordWrap(StringPiece prefix, StringPiece str, int width);
 // returns false.
 bool ConsumeEquals(StringPiece* description);
 
+<<<<<<< HEAD
 // Convert text-serialized protobufs to/from multiline format.
 string PBTxtToMultiline(StringPiece pbtxt,
                         const std::vector<string>& multi_line_fields);
@@ -98,3 +110,8 @@ class ApiDefMap {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_OP_GEN_LIB_H_
+=======
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_OP_GEN_LIB_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

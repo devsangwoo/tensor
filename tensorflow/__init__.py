@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,3 +44,9 @@ del print_function
 del python
 del core
 # pylint: enable=undefined-variable
+=======
+# Bring in all of the public TensorFlow interface into this
+# module.
+# pylint: disable=wildcard-import
+from tensorflow.python import *
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 """One-line documentation for rmsprop module.
 
 rmsprop algorithm [tieleman2012rmsprop]
@@ -25,6 +28,7 @@ mean_square = decay * mean_square{t-1} + (1-decay) * gradient ** 2
 mom = momentum * mom{t-1} + learning_rate * g_t / sqrt(mean_square + epsilon)
 delta = - mom
 
+<<<<<<< HEAD
 This implementation of RMSProp uses plain momentum, not Nesterov momentum.
 
 The centered version additionally maintains a moving (discounted) average of the
@@ -103,13 +107,44 @@ class RMSPropOptimizer(optimizer.Optimizer):
     actual value to use. This can be useful for changing these values across
     different invocations of optimizer functions.
     @end_compatibility
+=======
+"""
+
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import constant_op
+from tensorflow.python.training import optimizer
+from tensorflow.python.training import training_ops
+
+
+class RMSPropOptimizer(optimizer.Optimizer):
+  """Optimizer that implements the RMSProp algorithm.
+
+  @@__init__
+  """
+
+  def __init__(self, learning_rate, decay, momentum=0.0, epsilon=1e-10,
+               use_locking=False, name="RMSProp"):
+    """Construct a new RMSProp optimizer.
+
+    Args:
+      learning_rate: A Tensor or a floating point value.  The learning rate.
+      decay: discounting factor for the history/coming gradient
+      momentum: a scalar tensor.
+      epsilon: small value to avoid zero denominator.
+      use_locking: If True use locks for update operation.
+      name: Optional name prefic for the operations created when applying
+        gradients. Defaults to "RMSProp".
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """
     super(RMSPropOptimizer, self).__init__(use_locking, name)
     self._learning_rate = learning_rate
     self._decay = decay
     self._momentum = momentum
     self._epsilon = epsilon
+<<<<<<< HEAD
     self._centered = centered
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     # Tensors for learning rate and momentum.  Created in _prepare.
     self._learning_rate_tensor = None
@@ -119,6 +154,7 @@ class RMSPropOptimizer(optimizer.Optimizer):
 
   def _create_slots(self, var_list):
     for v in var_list:
+<<<<<<< HEAD
       if v.get_shape().is_fully_defined():
         init_rms = init_ops.ones_initializer(dtype=v.dtype.base_dtype)
       else:
@@ -140,10 +176,26 @@ class RMSPropOptimizer(optimizer.Optimizer):
     self._decay_tensor = ops.convert_to_tensor(decay, name="decay")
     self._momentum_tensor = ops.convert_to_tensor(momentum, name="momentum")
     self._epsilon_tensor = ops.convert_to_tensor(epsilon, name="epsilon")
+=======
+      self._get_or_make_slot(
+          v, constant_op.constant(1.0, dtype=v.dtype, shape=v.get_shape()),
+          "rms", self._name)
+      self._zeros_slot(v, "momentum", self._name)
+
+  def _prepare(self):
+    self._learning_rate_tensor = ops.convert_to_tensor(self._learning_rate,
+                                                       name="learning_rate")
+    self._decay_tensor = ops.convert_to_tensor(self._decay, name="decay")
+    self._momentum_tensor = ops.convert_to_tensor(self._momentum,
+                                                  name="momentum")
+    self._epsilon_tensor = ops.convert_to_tensor(self._epsilon,
+                                                 name="epsilon")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _apply_dense(self, grad, var):
     rms = self.get_slot(var, "rms")
     mom = self.get_slot(var, "momentum")
+<<<<<<< HEAD
     if self._centered:
       mg = self.get_slot(var, "mg")
       return training_ops.apply_centered_rms_prop(
@@ -256,3 +308,15 @@ class RMSPropOptimizer(optimizer.Optimizer):
           grad,
           indices,
           use_locking=self._use_locking)
+=======
+    return training_ops.apply_rms_prop(
+        var, rms, mom,
+        self._learning_rate_tensor,
+        self._decay_tensor,
+        self._momentum_tensor,
+        self._epsilon_tensor,
+        grad, use_locking=self._use_locking).op
+
+  def _apply_sparse(self, grad, var):
+    raise NotImplementedError()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

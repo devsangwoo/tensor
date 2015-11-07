@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,22 +27,45 @@ limitations under the License.
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/platform/logging.h"
+=======
+// See docs in ../ops/image_ops.cc
+#define EIGEN_USE_THREADS
+
+#include <memory>
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/kernels/adjust_contrast_op.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 typedef Eigen::SyclDevice SYCLDevice;
 #endif
 
 // AdjustContrastOp is deprecated as of GraphDef version >= 2
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename Device, typename T>
 class AdjustContrastOp : public OpKernel {
  public:
+<<<<<<< HEAD
   explicit AdjustContrastOp(OpKernelConstruction* context)
       : OpKernel(context) {}
+=======
+  explicit AdjustContrastOp(OpKernelConstruction* context) : OpKernel(context) {
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void Compute(OpKernelContext* context) override {
     const Tensor& input = context->input(0);
@@ -50,13 +74,18 @@ class AdjustContrastOp : public OpKernel {
     const Tensor& max_value = context->input(3);
     OP_REQUIRES(context, input.dims() >= 3,
                 errors::InvalidArgument("input must be at least 3-D, got shape",
+<<<<<<< HEAD
                                         input.shape().DebugString()));
+=======
+                                        input.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     const int64 height = input.dim_size(input.dims() - 3);
     const int64 width = input.dim_size(input.dims() - 2);
     const int64 channels = input.dim_size(input.dims() - 1);
 
     OP_REQUIRES(context, TensorShapeUtils::IsScalar(factor.shape()),
                 errors::InvalidArgument("contrast_factor must be scalar: ",
+<<<<<<< HEAD
                                         factor.shape().DebugString()));
     OP_REQUIRES(context, TensorShapeUtils::IsScalar(min_value.shape()),
                 errors::InvalidArgument("min_value must be scalar: ",
@@ -64,6 +93,15 @@ class AdjustContrastOp : public OpKernel {
     OP_REQUIRES(context, TensorShapeUtils::IsScalar(max_value.shape()),
                 errors::InvalidArgument("max_value must be scalar: ",
                                         max_value.shape().DebugString()));
+=======
+                                        factor.shape().ShortDebugString()));
+    OP_REQUIRES(context, TensorShapeUtils::IsScalar(min_value.shape()),
+                errors::InvalidArgument("min_value must be scalar: ",
+                                        min_value.shape().ShortDebugString()));
+    OP_REQUIRES(context, TensorShapeUtils::IsScalar(max_value.shape()),
+                errors::InvalidArgument("max_value must be scalar: ",
+                                        max_value.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Tensor* output = nullptr;
     OP_REQUIRES_OK(context,
@@ -99,8 +137,12 @@ REGISTER_KERNEL(float);
 REGISTER_KERNEL(double);
 #undef REGISTER_KERNEL
 
+<<<<<<< HEAD
 #if (defined(GOOGLE_CUDA) && GOOGLE_CUDA) || \
     (defined(TENSORFLOW_USE_ROCM) && TENSORFLOW_USE_ROCM)
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Forward declarations of the function specializations for GPU (to prevent
 // building the GPU versions here, they will be built compiling _gpu.cu.cc).
 namespace functor {
@@ -137,6 +179,7 @@ REGISTER_GPU_KERNEL(float);
 REGISTER_GPU_KERNEL(double);
 #undef REGISTER_GPU_KERNEL
 
+<<<<<<< HEAD
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 
 class AdjustContrastOpV2Base : public OpKernel {
@@ -453,5 +496,8 @@ REGISTER_KERNEL_BUILDER(
     Name("AdjustContrastv2").Device(DEVICE_SYCL).TypeConstraint<float>("T"),
     AdjustContrastOpv2<SYCLDevice, float>);
 #endif  // TENSORFLOW_USE_SYCL
+=======
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

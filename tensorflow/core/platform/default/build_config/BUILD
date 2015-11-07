@@ -1,23 +1,36 @@
 # Description:
 # Platform-specific build configurations.
 
+<<<<<<< HEAD
 load("//tensorflow:tensorflow.bzl", "tf_copts", "tf_cuda_library")
 load("//tensorflow/core/platform:build_config_root.bzl", "if_static")
 load("@local_config_sycl//sycl:platform.bzl", "sycl_library_path")
 load("@local_config_sycl//sycl:build_defs.bzl", "if_ccpp")
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 package(default_visibility = ["//tensorflow:internal"])
 
 licenses(["notice"])  # Apache 2.0
 
 exports_files(["LICENSE"])
 
+<<<<<<< HEAD
+=======
+load("/tensorflow/tensorflow", "tf_copts")
+load("/tensorflow/tensorflow", "tf_cuda_library")
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 cc_library(
     name = "gtest",
     testonly = 1,
     copts = tf_copts(),
     deps = [
+<<<<<<< HEAD
         "@com_google_googletest//:gtest",
+=======
+        "//external:gtest",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ],
 )
 
@@ -30,6 +43,7 @@ cc_library(
 
 tf_cuda_library(
     name = "stream_executor",
+<<<<<<< HEAD
     cuda_deps = [
         "//tensorflow/stream_executor/cuda:cuda_activation",
         "//tensorflow/stream_executor/rocm:rocm_activation",
@@ -142,10 +156,18 @@ cc_library(
     copts = tf_copts(),
 )
 
+=======
+    deps = [
+        "//tensorflow/stream_executor",
+    ],
+)
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 cc_library(
     name = "platformlib",
     copts = tf_copts(),
     deps = [
+<<<<<<< HEAD
         ":gif",
         ":jpeg",
         "//tensorflow/core:protos_all_cc",
@@ -162,18 +184,32 @@ cc_library(
     copts = tf_copts(),
     deps = [
         "@gif",
+=======
+        "@jpeg_archive//:jpeg",
+        "@png_archive//:png",
+        "@re2//:re2",
+        "//tensorflow/core:protos_cc",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ],
 )
 
 cc_library(
+<<<<<<< HEAD
     name = "jpeg",
     copts = tf_copts(),
     deps = [
         "@libjpeg_turbo//:jpeg",
+=======
+    name = "protos_cc",
+    copts = tf_copts(),
+    deps = [
+        "//tensorflow/core:protos_all_cc",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ],
 )
 
 cc_library(
+<<<<<<< HEAD
     name = "png",
     copts = tf_copts(),
     deps = [
@@ -185,10 +221,21 @@ cc_library(
 cc_library(
     name = "test_main",
     testonly = 1,
+=======
+    name = "test_main",
+    testonly = 1,
     linkstatic = 1,
     deps = [],
 )
 
+cc_library(
+    name = "cuda_runtime_extra",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
+    linkstatic = 1,
+    deps = [],
+)
+
+<<<<<<< HEAD
 cc_library(
     name = "cuda",
     data = [
@@ -233,3 +280,23 @@ cc_library(
         ["@local_config_sycl//sycl:sycl_headers"],
     ),
 )
+=======
+filegroup(
+    name = "android_proto_lib_portable_proto",
+    srcs = [],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "cuda",
+    data = [
+        "//third_party/gpus/cuda:lib64/libcudart.so.7.0",
+    ],
+    linkopts = [
+        "-Wl,-rpath,third_party/gpus/cuda/lib64",
+    ],
+    deps = [
+        "//third_party/gpus/cuda:cudart",
+    ],
+)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

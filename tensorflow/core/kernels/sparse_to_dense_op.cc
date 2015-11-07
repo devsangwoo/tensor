@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See core/ops/sparse_ops.cc for documentation.
 //
 // NOTE: the operations in this file only are suitable for execution
@@ -20,21 +23,35 @@ limitations under the License.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 
 #include <numeric>
 #include <sstream>
 #include <string>
+=======
+#include <string>
+#include <sstream>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <unordered_map>
 #include <utility>
 
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/register_types.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/gtl/inlined_vector.h"
 #include "tensorflow/core/lib/strings/stringprintf.h"
+=======
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/strings/stringprintf.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+#include "tensorflow/core/lib/gtl/inlined_vector.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/sparse/sparse_tensor.h"
 
 namespace tensorflow {
@@ -43,10 +60,14 @@ namespace tensorflow {
 template <typename T, typename Index>
 class SparseToDense : public OpKernel {
  public:
+<<<<<<< HEAD
   explicit SparseToDense(OpKernelConstruction* context) : OpKernel(context) {
     OP_REQUIRES_OK(context,
                    context->GetAttr("validate_indices", &validate_indices_));
   }
+=======
+  explicit SparseToDense(OpKernelConstruction* context) : OpKernel(context) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void Compute(OpKernelContext* c) override {
     // sparse_indices
@@ -55,16 +76,26 @@ class SparseToDense : public OpKernel {
                 errors::InvalidArgument(
                     "sparse_indices should be a scalar, vector, or matrix, "
                     "got shape ",
+<<<<<<< HEAD
                     indices.shape().DebugString()));
+=======
+                    indices.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     const int64 num_elems = indices.dims() > 0 ? indices.dim_size(0) : 1;
     const int64 num_dims = indices.dims() > 1 ? indices.dim_size(1) : 1;
 
     // output_shape
     const Tensor& output_shape = c->input(1);
     OP_REQUIRES(
+<<<<<<< HEAD
         c, IsLegacyVector(output_shape.shape()),
         errors::InvalidArgument("output_shape should be a vector, got shape ",
                                 output_shape.shape().DebugString()));
+=======
+        c, TensorShapeUtils::IsLegacyVector(output_shape.shape()),
+        errors::InvalidArgument("output_shape should be a vector, got shape ",
+                                output_shape.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(c, output_shape.NumElements() == num_dims,
                 errors::InvalidArgument(
                     "output_shape has incorrect number of elements: ",
@@ -73,12 +104,21 @@ class SparseToDense : public OpKernel {
     // sparse_values
     const Tensor& sparse_values = c->input(2);
     const int64 num_values = sparse_values.NumElements();
+<<<<<<< HEAD
     OP_REQUIRES(c,
                 sparse_values.dims() == 0 ||
                     (sparse_values.dims() == 1 && num_values == num_elems),
                 errors::InvalidArgument("sparse_values has incorrect shape ",
                                         sparse_values.shape().DebugString(),
                                         ", should be [] or [", num_elems, "]"));
+=======
+    OP_REQUIRES(
+        c, sparse_values.dims() == 0 ||
+               (sparse_values.dims() == 1 && num_values == num_elems),
+        errors::InvalidArgument("sparse_values has incorrect shape ",
+                                sparse_values.shape().ShortDebugString(),
+                                ", should be [] or [", num_elems, "]"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // default_value
     const Tensor& default_value = c->input(3);
@@ -86,12 +126,20 @@ class SparseToDense : public OpKernel {
                 errors::InvalidArgument("default_value should be a scalar."));
 
     auto output_shape_vec = output_shape.flat<Index>();
+<<<<<<< HEAD
     TensorShape output_tensor_shape;
     OP_REQUIRES_OK(c, TensorShapeUtils::MakeShape(output_shape_vec.data(),
                                                   output_shape_vec.size(),
                                                   &output_tensor_shape));
     Tensor* output = nullptr;
     OP_REQUIRES_OK(c, c->allocate_output(0, output_tensor_shape, &output));
+=======
+    Tensor* output = nullptr;
+    OP_REQUIRES_OK(c, c->allocate_output(0, TensorShapeUtils::MakeShape(
+                                                output_shape_vec.data(),
+                                                output_shape_vec.size()),
+                                         &output));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     TensorShape ix_shape({num_elems, num_dims});
     Tensor indices_shaped(DT_INT64, ix_shape);
@@ -116,6 +164,7 @@ class SparseToDense : public OpKernel {
       sparse_values_b = sparse_values;
     }
 
+<<<<<<< HEAD
     // Assume SparseTensor is lexicographically sorted.
     gtl::InlinedVector<int64, 8> order(output->shape().dims());
     std::iota(order.begin(), order.end(), 0);
@@ -127,6 +176,12 @@ class SparseToDense : public OpKernel {
     if (validate_indices_) {
       OP_REQUIRES_OK(c, st.IndicesValid());
     }
+=======
+    gtl::InlinedVector<int64, 8> order(output->shape().dims());
+    std::iota(order.begin(), order.end(), 0);  // Assume order is correct
+    sparse::SparseTensor st(indices_shaped, sparse_values_b, output->shape(),
+                            order);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     output->flat<T>().setConstant(default_value.scalar<T>()());
     OP_REQUIRES(c, st.template ToDense<T>(output, false /* initialize */),
@@ -134,9 +189,12 @@ class SparseToDense : public OpKernel {
                     "Indices are not valid (out of bounds).  Shape: ",
                     output->shape().DebugString()));
   }
+<<<<<<< HEAD
 
  private:
   bool validate_indices_;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 #define REGISTER_KERNELS(type, index_type)                             \
@@ -152,7 +210,11 @@ class SparseToDense : public OpKernel {
 
 TF_CALL_REAL_NUMBER_TYPES(REGISTER_KERNELS_ALL);
 REGISTER_KERNELS_ALL(bool);
+<<<<<<< HEAD
 REGISTER_KERNELS_ALL(tstring);
+=======
+REGISTER_KERNELS_ALL(string);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #undef REGISTER_KERNELS_ALL
 #undef REGISTER_KERNELS

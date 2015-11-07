@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +13,26 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #ifndef TENSORFLOW_LIB_IO_FORMAT_H_
 #define TENSORFLOW_LIB_IO_FORMAT_H_
 
+<<<<<<< HEAD
 #include <stdint.h>
 #include <string>
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/core/stringpiece.h"
+=======
+#include <string>
+#include <stdint.h>
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/io/table_builder.h"
 
 namespace tensorflow {
@@ -97,7 +110,11 @@ struct BlockContents {
 // Read the block identified by "handle" from "file".  On failure
 // return non-OK.  On success fill *result and return OK.
 extern Status ReadBlock(RandomAccessFile* file, const BlockHandle& handle,
+<<<<<<< HEAD
                         BlockContents* result);
+=======
+                             BlockContents* result);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Implementation details follow.  Clients should ignore,
 

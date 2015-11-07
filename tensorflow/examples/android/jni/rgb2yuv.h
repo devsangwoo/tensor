@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,19 +18,39 @@ limitations under the License.
 #define TENSORFLOW_EXAMPLES_ANDROID_JNI_RGB2YUV_H_
 
 #include <stdint.h>
+=======
+#ifndef ORG_TENSORFLOW_JNI_IMAGEUTILS_RGB2YUV_H_
+#define ORG_TENSORFLOW_JNI_IMAGEUTILS_RGB2YUV_H_
+
+#include "tensorflow/core/platform/port.h"
+
+using namespace tensorflow;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 void ConvertARGB8888ToYUV420SP(const uint32_t* const input,
                                uint8_t* const output, int width, int height);
 
 void ConvertRGB565ToYUV420SP(const uint16_t* const input, uint8_t* const output,
+=======
+void ConvertARGB8888ToYUV420SP(const uint32* const input, uint8* const output,
+                               int width, int height);
+
+void ConvertRGB565ToYUV420SP(const uint16* const input,
+                             uint8* const output,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                              const int width, const int height);
 
 #ifdef __cplusplus
 }
 #endif
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_EXAMPLES_ANDROID_JNI_RGB2YUV_H_
+=======
+#endif  // ORG_TENSORFLOW_JNI_IMAGEUTILS_RGB2YUV_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

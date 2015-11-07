@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +26,19 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/png/png_io.h"
 #include "tensorflow/core/platform/logging.h"
+=======
+// See docs in ../ops/image_ops.cc
+
+#include <memory>
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "tensorflow/core/lib/png/png_io.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -36,6 +50,7 @@ class EncodePngOp : public OpKernel {
     OP_REQUIRES(context, -1 <= compression_ && compression_ <= 9,
                 errors::InvalidArgument("compression should be in [-1,9], got ",
                                         compression_));
+<<<<<<< HEAD
 
     DataType dt = context->input_type(0);
     OP_REQUIRES(context, dt == DataType::DT_UINT8 || dt == DataType::DT_UINT16,
@@ -47,12 +62,15 @@ class EncodePngOp : public OpKernel {
     } else {
       desired_channel_bits_ = 16;
     }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void Compute(OpKernelContext* context) override {
     const Tensor& image = context->input(0);
     OP_REQUIRES(context, image.dims() == 3,
                 errors::InvalidArgument("image must be 3-dimensional",
+<<<<<<< HEAD
                                         image.shape().DebugString()));
     OP_REQUIRES(
         context,
@@ -91,11 +109,32 @@ class EncodePngOp : public OpKernel {
                       compression_, &output->scalar<tstring>()(), nullptr),
                   errors::Internal("PNG encoding failed"));
     }
+=======
+                                        image.shape().ShortDebugString()));
+    const int64 channels = image.dim_size(2);
+    OP_REQUIRES(context, channels == 1 || channels == 3 || channels == 4,
+                errors::InvalidArgument(
+                    "image must have 1, 3, or 4 channels, got ", channels));
+
+    // Encode image to png string
+    Tensor* output = NULL;
+    OP_REQUIRES_OK(context,
+                   context->allocate_output(0, TensorShape({}), &output));
+    OP_REQUIRES(context,
+                png::WriteImageToBuffer(
+                    image.flat<uint8>().data(), image.dim_size(1),
+                    image.dim_size(0), image.dim_size(1) * channels, channels,
+                    8, compression_, &output->scalar<string>()(), nullptr),
+                errors::Internal("PNG encoding failed"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
   int compression_;
+<<<<<<< HEAD
   int desired_channel_bits_;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 REGISTER_KERNEL_BUILDER(Name("EncodePng").Device(DEVICE_CPU), EncodePngOp);
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,17 +33,41 @@ class InTopKTest(test.TestCase):
     with self.cached_session(use_gpu=True):
       precision = nn_ops.in_top_k(predictions, target, k)
       out = self.evaluate(precision)
+=======
+"""Tests for PrecisionOp."""
+import tensorflow.python.platform
+
+import numpy as np
+import tensorflow as tf
+
+
+class InTopKTest(tf.test.TestCase):
+
+  def _validateInTopK(self, predictions, target, k, expected):
+    np_ans = np.array(expected)
+    with self.test_session():
+      precision = tf.nn.in_top_k(predictions, target, k)
+      out = precision.eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       self.assertAllClose(np_ans, out)
       self.assertShapeEqual(np_ans, precision)
 
   def testInTop1(self):
     predictions = [[0.1, 0.3, 0.2, 0.4], [0.1, 0.2, 0.3, 0.4]]
+<<<<<<< HEAD
     target = [3, 2]
+=======
+    target = [3, 1]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     self._validateInTopK(predictions, target, 1, [True, False])
 
   def testInTop2(self):
     predictions = [[0.1, 0.3, 0.2, 0.4], [0.1, 0.2, 0.3, 0.4]]
+<<<<<<< HEAD
     target = [2, 2]
+=======
+    target = [0, 2]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     self._validateInTopK(predictions, target, 2, [False, True])
 
   def testInTop2Tie(self):
@@ -51,6 +76,7 @@ class InTopKTest(test.TestCase):
     target = [2, 3]
     self._validateInTopK(predictions, target, 2, [True, True])
 
+<<<<<<< HEAD
   def testInTop2_int64Target(self):
     predictions = [[0.1, 0.3, 0.2, 0.4], [0.1, 0.2, 0.3, 0.4]]
     target = np.asarray([0, 2]).astype(np.int64)
@@ -80,3 +106,8 @@ class InTopKTest(test.TestCase):
 
 if __name__ == "__main__":
   test.main()
+=======
+
+if __name__ == "__main__":
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

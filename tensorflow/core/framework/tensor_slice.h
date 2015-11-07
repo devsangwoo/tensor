@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,19 @@ limitations under the License.
 #include "tensorflow/core/lib/core/stringpiece.h"
 #include "tensorflow/core/lib/gtl/inlined_vector.h"
 #include "tensorflow/core/platform/logging.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_TENSOR_SLICE_H_
+#define TENSORFLOW_FRAMEWORK_TENSOR_SLICE_H_
+
+#include <string>
+#include "tensorflow/core/framework/tensor_slice.pb.h"
+#include "tensorflow/core/lib/gtl/inlined_vector.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -38,14 +52,22 @@ class TensorSlice {
   // -- from just a dimension (in this case it will create a full slice)
   // -- from an array of pairs of integers.
   // -- from a TensorSliceProto protocol buffer
+<<<<<<< HEAD
   // -- from a string format of "start,length:start,length..." where each
+=======
+  // -- from a string format of "start,lenth:start,length..." where each
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //    "start,length" pair represents the slice on one dimension. We allow a
   //    special "-" that means "everything for this dimension". One such example
   //    is:  0,10:-:14,1:-:-
   TensorSlice() {}
   explicit TensorSlice(int dim);
   explicit TensorSlice(const TensorSliceProto& proto);
+<<<<<<< HEAD
   explicit TensorSlice(std::initializer_list<std::pair<int64, int64>> extents);
+=======
+  explicit TensorSlice(std::initializer_list<std::pair<int, int>> extents);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   static Status Parse(const string& str, TensorSlice* output);
   static TensorSlice ParseOrDie(const string& str) {
@@ -62,44 +84,68 @@ class TensorSlice {
   // Accessors
   int dims() const { return starts_.size(); }
 
+<<<<<<< HEAD
   int64 start(int d) const {
+=======
+  int start(int d) const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     DCHECK_GE(d, 0);
     DCHECK_LT(d, dims());
     return starts_[d];
   }
 
+<<<<<<< HEAD
   int64 length(int d) const {
+=======
+  int length(int d) const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     DCHECK_GE(d, 0);
     DCHECK_LT(d, dims());
     return lengths_[d];
   }
 
+<<<<<<< HEAD
   int64 end(int d) const {
+=======
+  int end(int d) const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     DCHECK_GE(d, 0);
     DCHECK_LT(d, dims());
     return start(d) + length(d);
   }
 
+<<<<<<< HEAD
   void set_start(int d, int64 x) {
+=======
+  void set_start(int d, int x) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     DCHECK_GE(d, 0);
     DCHECK_LT(d, dims());
     DCHECK_GE(x, 0);
     starts_[d] = x;
   }
 
+<<<<<<< HEAD
   void set_length(int d, int64 x) {
+=======
+  void set_length(int d, int x) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     DCHECK_GE(d, 0);
     DCHECK_LT(d, dims());
     lengths_[d] = x;
   }
 
   // If we have a full slice along dimension "d".
+<<<<<<< HEAD
   bool IsFullAt(int d) const {
     return lengths_[d] == kFullExtent && starts_[d] == 0;
   }
 
   // If this is a full slice, i.e. IsFullAt(d) for every d.
   bool IsFull() const;
+=======
+  bool IsFullAt(int d) const { return lengths_[d] < 0; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Set the slice to be a full slice of "dim" dimensions
   void SetFullSlice(int dim);
@@ -118,15 +164,25 @@ class TensorSlice {
   // We allow NDIMS to be greater than dims(), in which case we will pad the
   // higher dimensions with trivial dimensions.
   template <int NDIMS>
+<<<<<<< HEAD
   void FillIndicesAndSizes(
       const TensorShape& shape,
       Eigen::DSizes<Eigen::DenseIndex, NDIMS>* indices,
       Eigen::DSizes<Eigen::DenseIndex, NDIMS>* sizes) const;
+=======
+  void FillIndicesAndSizes(const TensorShape& shape,
+                           Eigen::DSizes<ptrdiff_t, NDIMS>* indices,
+                           Eigen::DSizes<ptrdiff_t, NDIMS>* sizes) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Interaction with other TensorSlices.
 
   // Compute the intersection with another slice and if "result" is not
+<<<<<<< HEAD
   // nullptr, store the results in *result; returns true if there is any real
+=======
+  // nullptr, store the results in *result; returns true is there is any real
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // intersection.
   bool Intersect(const TensorSlice& other, TensorSlice* result) const;
   // A short hand.
@@ -134,10 +190,13 @@ class TensorSlice {
     return Intersect(other, nullptr);
   }
 
+<<<<<<< HEAD
   // Equals iff "*this" and "other" are logically equivalent.
   bool operator==(const TensorSlice& other) const;
   bool operator!=(const TensorSlice& other) const { return !(*this == other); }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Interaction with TensorShape.
 
   // Slices a shape and stores the result into *result_shape.
@@ -145,7 +204,11 @@ class TensorSlice {
   // For example, given a tensor shape of {3, 4, 5}, and a slice of
   // 1,2:-:0,2, the result shape is {2, 4, 2}.
   Status SliceTensorShape(const TensorShape& shape,
+<<<<<<< HEAD
                           TensorShape* result_shape) const;
+=======
+                               TensorShape* result_shape) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Given slice "sub" where "sub" is fully contained in *this,
   // (meaning that the intersection of "sub" and *this equals "sub"), computes
@@ -167,6 +230,7 @@ class TensorSlice {
   // otherwise the result is undefined.
   void ComputeRelative(const TensorSlice& sub, TensorSlice* relative) const;
 
+<<<<<<< HEAD
   // Updates the slice in such a way that it fully covers "other" slice.
   // Note, "other" slice should refer to the same tensor shape.
   // Example:
@@ -177,6 +241,8 @@ class TensorSlice {
   //   dim 2: "3:"   U  "2:4"  ->  "2:"
   void UpdateToCover(const TensorSlice& other);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Returns true if the length field was specified in an Extent.
   static bool HasExtentLength(const TensorSliceProto::Extent& extent);
 
@@ -187,18 +253,32 @@ class TensorSlice {
  private:
   // a length value of kFullExtent (-1) means we have a full slice at this
   // dimension. It's defined in tensor_slice.cc.
+<<<<<<< HEAD
   static const int64 kFullExtent;
 
   // TODO(yangke): switch to Eigen once it supports variable size arrays.
   // A value of
   gtl::InlinedVector<int64, 4> starts_;
   gtl::InlinedVector<int64, 4> lengths_;
+=======
+  static const int kFullExtent;
+
+  // TODO(yangke): switch to Eigen once it supports variable size arrays.
+  // A value of
+  gtl::InlinedVector<int, 4> starts_;
+  gtl::InlinedVector<int, 4> lengths_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 template <int NDIMS>
 void TensorSlice::FillIndicesAndSizes(
+<<<<<<< HEAD
     const TensorShape& shape, Eigen::DSizes<Eigen::DenseIndex, NDIMS>* indices,
     Eigen::DSizes<Eigen::DenseIndex, NDIMS>* sizes) const {
+=======
+    const TensorShape& shape, Eigen::DSizes<ptrdiff_t, NDIMS>* indices,
+    Eigen::DSizes<ptrdiff_t, NDIMS>* sizes) const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   CHECK_EQ(shape.dims(), dims()) << "Incompatible dimensions between shape "
                                  << "slices: shape = " << shape.DebugString()
                                  << ", slice = " << DebugString();
@@ -221,4 +301,8 @@ void TensorSlice::FillIndicesAndSizes(
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_TENSOR_SLICE_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_TENSOR_SLICE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

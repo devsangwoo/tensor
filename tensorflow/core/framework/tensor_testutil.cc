@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +16,16 @@ limitations under the License.
 
 #include "tensorflow/core/framework/tensor_testutil.h"
 #include <cmath>
+=======
+#include <cmath>
+#include "tensorflow/core/framework/tensor_testutil.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace test {
 
 template <typename T>
+<<<<<<< HEAD
 void ExpectClose(const Tensor& x, const Tensor& y, double atol, double rtol) {
   const T* Tx = x.flat<T>().data();
   const T* Ty = y.flat<T>().data();
@@ -47,27 +53,52 @@ void ExpectClose(const Tensor& x, const Tensor& y, double atol, double rtol) {
         internal::Helper<T>::IsClose(Tx[i], Ty[i], typed_atol, typed_rtol))
         << "index = " << i << " x = " << Tx[i] << " y = " << Ty[i]
         << " typed_atol = " << typed_atol << " typed_rtol = " << typed_rtol;
+=======
+bool IsClose(const T& x, const T& y, double atol, double rtol) {
+  return fabs(x - y) < atol + rtol * fabs(x);
+}
+
+template <typename T>
+void ExpectClose(const Tensor& x, const Tensor& y, double atol, double rtol) {
+  auto Tx = x.flat<T>();
+  auto Ty = y.flat<T>();
+  for (int i = 0; i < Tx.size(); ++i) {
+    if (!IsClose(Tx(i), Ty(i), atol, rtol)) {
+      LOG(ERROR) << "x = " << x.DebugString();
+      LOG(ERROR) << "y = " << y.DebugString();
+      LOG(ERROR) << "atol = " << atol << " rtol = " << rtol
+                 << " tol = " << atol + rtol * std::fabs(Tx(i));
+      EXPECT_TRUE(false) << i << "-th element is not close " << Tx(i) << " vs. "
+                         << Ty(i);
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
 void ExpectClose(const Tensor& x, const Tensor& y, double atol, double rtol) {
   internal::AssertSameTypeDims(x, y);
   switch (x.dtype()) {
+<<<<<<< HEAD
     case DT_HALF:
       ExpectClose<Eigen::half>(x, y, atol, rtol);
       break;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     case DT_FLOAT:
       ExpectClose<float>(x, y, atol, rtol);
       break;
     case DT_DOUBLE:
       ExpectClose<double>(x, y, atol, rtol);
       break;
+<<<<<<< HEAD
     case DT_COMPLEX64:
       ExpectClose<complex64>(x, y, atol, rtol);
       break;
     case DT_COMPLEX128:
       ExpectClose<complex128>(x, y, atol, rtol);
       break;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     default:
       LOG(FATAL) << "Unexpected type : " << DataTypeString(x.dtype());
   }

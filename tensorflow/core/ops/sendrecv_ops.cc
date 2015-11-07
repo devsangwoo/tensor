@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +15,8 @@ limitations under the License.
 ==============================================================================*/
 
 #include "tensorflow/core/framework/common_shape_fns.h"
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/op.h"
 
 namespace tensorflow {
@@ -26,8 +29,11 @@ REGISTER_OP("_Send")
     .Attr("send_device_incarnation: int")
     .Attr("recv_device: string")
     .Attr("client_terminated: bool = false")
+<<<<<<< HEAD
     .SetIsStateful()
     .SetShapeFn(shape_inference::UnknownShape)
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     .Doc(R"doc(
 Sends the named tensor from send_device to recv_device.
 
@@ -42,6 +48,7 @@ client_terminated: If set to true, this indicates that the node was added
   locally by the caller.
 )doc");
 
+<<<<<<< HEAD
 REGISTER_OP("Send")
     .Input("tensor: T")
     .Attr("T: type")
@@ -53,6 +60,8 @@ REGISTER_OP("Send")
     .SetIsStateful()
     .SetShapeFn(shape_inference::UnknownShape);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 REGISTER_OP("_Recv")
     .Output("tensor: tensor_type")
     .Attr("tensor_type: type")
@@ -61,8 +70,11 @@ REGISTER_OP("_Recv")
     .Attr("send_device_incarnation: int")
     .Attr("recv_device: string")
     .Attr("client_terminated: bool = false")
+<<<<<<< HEAD
     .SetIsStateful()
     .SetShapeFn(shape_inference::UnknownShape)
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     .Doc(R"doc(
 Receives the named tensor from send_device on recv_device.
 
@@ -77,6 +89,7 @@ client_terminated: If set to true, this indicates that the node was added
   locally by the caller.
 )doc");
 
+<<<<<<< HEAD
 REGISTER_OP("Recv")
     .Output("tensor: tensor_type")
     .Attr("tensor_type: type")
@@ -88,6 +101,8 @@ REGISTER_OP("Recv")
     .SetIsStateful()
     .SetShapeFn(shape_inference::UnknownShape);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 REGISTER_OP("_HostSend")
     .Input("tensor: T")
     .Attr("T: type")
@@ -96,8 +111,11 @@ REGISTER_OP("_HostSend")
     .Attr("send_device_incarnation: int")
     .Attr("recv_device: string")
     .Attr("client_terminated: bool = false")
+<<<<<<< HEAD
     .SetIsStateful()
     .SetShapeFn(shape_inference::UnknownShape)
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     .Doc(R"doc(
 Sends the named tensor from send_device to recv_device.
 
@@ -123,6 +141,7 @@ REGISTER_OP("_HostRecv")
     .Attr("send_device_incarnation: int")
     .Attr("recv_device: string")
     .Attr("client_terminated: bool = false")
+<<<<<<< HEAD
     .SetIsStateful()
     .SetShapeFn(shape_inference::UnknownShape)
     .Doc(R"doc(
@@ -130,6 +149,13 @@ Receives the named tensor from send_device on recv_device.
 
 _HostRecv produces its output on host memory whereas _Recv produces its
 output on device memory.
+=======
+    .Doc(R"doc(
+Receives the named tensor from send_device on recv_device.
+
+_HostRecv requires its input on host memory whereas _Recv requires its
+input on device memory.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 tensor: The tensor to receive.
 tensor_name: The name of the tensor to receive.

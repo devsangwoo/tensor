@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,14 @@ limitations under the License.
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/lib/gtl/edit_distance.h"
+
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace gtl {
@@ -38,8 +47,11 @@ class LevenshteinDistanceTest : public ::testing::Test {
   std::string grandmother_;
   std::string lower_;
   std::string upper_;
+<<<<<<< HEAD
   std::vector<char> ebab_;
   std::vector<char> abcd_;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void SetUp() override {
     s1_ = "1";
@@ -51,8 +63,11 @@ class LevenshteinDistanceTest : public ::testing::Test {
     grandmother_ = "grandmother";
     lower_ = "lower case";
     upper_ = "UPPER case";
+<<<<<<< HEAD
     ebab_ = {'e', 'b', 'a', 'b'};
     abcd_ = {'a', 'b', 'c', 'd'};
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -60,11 +75,14 @@ TEST_F(LevenshteinDistanceTest, BothEmpty) {
   ASSERT_EQ(LevenshteinDistance(empty_, empty_, std::equal_to<char>()), 0);
 }
 
+<<<<<<< HEAD
 TEST_F(LevenshteinDistanceTest, Symmetry) {
   ASSERT_EQ(LevenshteinDistance(ebab_, abcd_, std::equal_to<char>()), 3);
   ASSERT_EQ(LevenshteinDistance(abcd_, ebab_, std::equal_to<char>()), 3);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST_F(LevenshteinDistanceTest, OneEmpty) {
   ASSERT_EQ(LevenshteinDistance(s1234_, empty_, std::equal_to<char>()), 4);
   ASSERT_EQ(LevenshteinDistance(empty_, s567_, std::equal_to<char>()), 3);

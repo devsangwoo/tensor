@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2016 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -148,6 +149,32 @@ struct ApplyAdagradDA<CPUDevice, T> {
           (var.constant(l2()) *
                var.constant(static_cast<float>(global_step) * lr()) +
            gradient_squared_accum.sqrt());
+=======
+#define EIGEN_USE_THREADS
+
+#include "tensorflow/core/kernels/training_ops.h"
+
+#include "tensorflow/core/framework/op_kernel.h"
+
+namespace tensorflow {
+
+typedef Eigen::ThreadPoolDevice CPUDevice;
+typedef Eigen::GpuDevice GPUDevice;
+
+namespace functor {
+
+static inline bool DoInline(int64 size) { return size <= (256ll << 10); }
+
+template <typename T>
+struct ApplyGradientDescent<CPUDevice, T> {
+  void operator()(const CPUDevice& d, typename TTypes<T>::Flat var,
+                  typename TTypes<T>::ConstScalar lr,
+                  typename TTypes<T>::ConstFlat grad) {
+    if (DoInline(var.size())) {
+      var -= grad * lr();
+    } else {
+      var.device(d) -= grad * lr();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 };
@@ -157,6 +184,7 @@ struct ApplyAdagrad<CPUDevice, T> {
   void operator()(const CPUDevice& d, typename TTypes<T>::Flat var,
                   typename TTypes<T>::Flat accum,
                   typename TTypes<T>::ConstScalar lr,
+<<<<<<< HEAD
                   typename TTypes<T>::ConstFlat grad, bool update_slots) {
     if (update_slots) {
       accum.device(d) += grad.square();
@@ -283,6 +311,16 @@ struct ApplyFtrl<CPUDevice, T> {
                           .select(pre_shrink, var.constant(static_cast<T>(0)));
     }
     accum.device(d) += grad.square();
+=======
+                  typename TTypes<T>::ConstFlat grad) {
+    if (DoInline(var.size())) {
+      accum += grad.square();
+      var -= grad * lr() * accum.rsqrt();
+    } else {
+      accum.device(d) += grad.square();
+      var.device(d) -= grad * lr() * accum.rsqrt();
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -292,17 +330,27 @@ struct ApplyMomentum<CPUDevice, T> {
                   typename TTypes<T>::Flat accum,
                   typename TTypes<T>::ConstScalar lr,
                   typename TTypes<T>::ConstFlat grad,
+<<<<<<< HEAD
                   typename TTypes<T>::ConstScalar momentum, bool use_nesterov) {
     accum.device(d) = accum * momentum() + grad;
     if (use_nesterov) {
       var.device(d) -= grad * lr() + accum * momentum() * lr();
     } else {
+=======
+                  typename TTypes<T>::ConstScalar momentum) {
+    if (DoInline(var.size())) {
+      accum = accum * momentum() + grad;
+      var -= accum * lr();
+    } else {
+      accum.device(d) = accum * momentum() + grad;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       var.device(d) -= accum * lr();
     }
   }
 };
 
 template <typename T>
+<<<<<<< HEAD
 struct ApplyKerasMomentum<CPUDevice, T> {
   void operator()(const CPUDevice& d, typename TTypes<T>::Flat var,
                   typename TTypes<T>::Flat accum,
@@ -349,6 +397,10 @@ struct SparseApplyKerasMomentum<CPUDevice, T, Tindex> {
 template <typename Device, typename T>
 struct ApplyAdamNonCuda {
   void operator()(const Device& d, typename TTypes<T>::Flat var,
+=======
+struct ApplyAdam<CPUDevice, T> {
+  void operator()(const CPUDevice& d, typename TTypes<T>::Flat var,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   typename TTypes<T>::Flat m, typename TTypes<T>::Flat v,
                   typename TTypes<T>::ConstScalar beta1_power,
                   typename TTypes<T>::ConstScalar beta2_power,
@@ -356,6 +408,7 @@ struct ApplyAdamNonCuda {
                   typename TTypes<T>::ConstScalar beta1,
                   typename TTypes<T>::ConstScalar beta2,
                   typename TTypes<T>::ConstScalar epsilon,
+<<<<<<< HEAD
                   typename TTypes<T>::ConstFlat grad, bool use_nesterov) {
     // Get params length and check if they can be vectorized by packet size.
     Index length = var.size();
@@ -475,13 +528,29 @@ struct ApplyAdaMaxNonCuda {
     v.device(d) = (beta2() * v).cwiseMax(grad.abs());
     // var is θ in section 7.1
     var.device(d) -= lr() / (T(1) - beta1_power()) * (m / (v + epsilon()));
+=======
+                  typename TTypes<T>::ConstFlat grad) {
+    const T alpha = lr() * std::sqrt(1 - beta2_power()) / (1 - beta1_power());
+    if (DoInline(var.size())) {
+      m += (grad - m) * (1 - beta1());
+      v += (grad.square() - v) * (1 - beta2());
+      var -= (m * alpha) / (v.sqrt() + epsilon());
+    } else {
+      m.device(d) += (grad - m) * (1 - beta1());
+      v.device(d) += (grad.square() - v) * (1 - beta2());
+      var.device(d) -= (m * alpha) / (v.sqrt() + epsilon());
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 template <typename T>
+<<<<<<< HEAD
 struct ApplyAdaMax<CPUDevice, T> : ApplyAdaMaxNonCuda<CPUDevice, T> {};
 
 template <typename T>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 struct ApplyRMSProp<CPUDevice, T> {
   void operator()(const CPUDevice& d, typename TTypes<T>::Flat var,
                   typename TTypes<T>::Flat ms, typename TTypes<T>::Flat mom,
@@ -490,6 +559,7 @@ struct ApplyRMSProp<CPUDevice, T> {
                   typename TTypes<T>::ConstScalar momentum,
                   typename TTypes<T>::ConstScalar epsilon,
                   typename TTypes<T>::ConstFlat grad) {
+<<<<<<< HEAD
     ms.device(d) += (grad.square() - ms) * (static_cast<T>(1) - rho());
     mom.device(d) =
         mom * momentum() + (grad * lr()) / ((ms + epsilon()).sqrt());
@@ -543,6 +613,18 @@ struct ApplyPowerSign<CPUDevice, T> {
     auto sign_gm = grad.sign() * m.sign();
     auto grad_scale = (logbase() * sign_decay() * sign_gm).exp();
     var.device(d) -= lr() * grad_scale * grad;
+=======
+    if (DoInline(var.size())) {
+      ms += (grad.square() - ms) * (1 - rho());
+      mom = mom * momentum() + (grad * lr()) / ((ms + epsilon()).sqrt());
+      var -= mom;
+    } else {
+      ms.device(d) += (grad.square() - ms) * (1 - rho());
+      mom.device(d) =
+          mom * momentum() + (grad * lr()) / ((ms + epsilon()).sqrt());
+      var.device(d) -= mom;
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -556,6 +638,7 @@ class ApplyGradientDescentOp : public OpKernel {
   }
 
   void Compute(OpKernelContext* ctx) override {
+<<<<<<< HEAD
     const bool sparse = false;
     auto locks = MaybeLockVariableInputMutexesInOrder<Device, T>(
         ctx, use_exclusive_lock_, sparse, {0});
@@ -569,6 +652,32 @@ class ApplyGradientDescentOp : public OpKernel {
             "Attempting to use uninitialized variables: ", requested_input(0)));
     const Tensor& alpha = ctx->input(1);
     OP_REQUIRES(ctx, IsLegacyScalar(alpha.shape()),
+=======
+    if (use_exclusive_lock_) {
+      mutex_lock l(*ctx->input_ref_mutex(0));
+      DoValidate(ctx);
+      if (!ctx->status().ok()) return;
+      DoCompute(ctx);
+    } else {
+      DoValidate(ctx);
+      if (!ctx->status().ok()) return;
+      DoCompute(ctx);
+    }
+    ctx->forward_ref_input_to_ref_output(0, 0);
+  }
+
+ private:
+  bool use_exclusive_lock_;
+
+  void DoValidate(OpKernelContext* ctx) {
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    OP_REQUIRES(
+        ctx, var.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(0)));
+    const Tensor& alpha = ctx->input(1);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsLegacyScalar(alpha.shape()),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                 errors::InvalidArgument("alpha is not a scalar: ",
                                         alpha.shape().DebugString()));
     const Tensor& delta = ctx->input(2);
@@ -577,6 +686,7 @@ class ApplyGradientDescentOp : public OpKernel {
         errors::InvalidArgument("var and delta do not have the same shape",
                                 var.shape().DebugString(), " ",
                                 delta.shape().DebugString()));
+<<<<<<< HEAD
 
     const Device& device = ctx->template eigen_device<Device>();
     functor::ApplyGradientDescent<Device, T>()(
@@ -636,10 +746,24 @@ class ApplyGradientDescentOp<SYCLDevice, T> : public OpKernel {
   bool use_exclusive_lock_;
 };
 #endif  // TENSORFLOW_USE_SYCL
+=======
+  }
+
+  void DoCompute(OpKernelContext* ctx) {
+    const Device& device = ctx->template eigen_device<Device>();
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    const Tensor& alpha = ctx->input(1);
+    const Tensor& delta = ctx->input(2);
+    functor::ApplyGradientDescent<Device, T>()(
+        device, var.flat<T>(), alpha.scalar<T>(), delta.flat<T>());
+  }
+};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define REGISTER_KERNELS(D, T)                                                \
   REGISTER_KERNEL_BUILDER(                                                    \
       Name("ApplyGradientDescent").Device(DEVICE_##D).TypeConstraint<T>("T"), \
+<<<<<<< HEAD
       ApplyGradientDescentOp<D##Device, T>);                                  \
   REGISTER_KERNEL_BUILDER(Name("ResourceApplyGradientDescent")                \
                               .Device(DEVICE_##D)                             \
@@ -658,6 +782,14 @@ TF_CALL_complex128(REGISTER_CPU_KERNELS);
 #endif
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+      ApplyGradientDescentOp<D##Device, T>);
+
+REGISTER_KERNELS(CPU, float);
+REGISTER_KERNELS(CPU, double);
+
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Forward declarations of the functor specializations for GPU.
 namespace functor {
 #define DECLARE_GPU_SPEC(T)                             \
@@ -667,6 +799,7 @@ namespace functor {
       typename TTypes<T>::ConstScalar alpha,            \
       typename TTypes<T>::ConstFlat delta);             \
   extern template struct ApplyGradientDescent<GPUDevice, T>;
+<<<<<<< HEAD
 DECLARE_GPU_SPEC(Eigen::half);
 DECLARE_GPU_SPEC(float);
 DECLARE_GPU_SPEC(double);
@@ -708,16 +841,37 @@ template <typename Device, typename T>
 class ApplyAdadeltaOp : public OpKernel {
  public:
   explicit ApplyAdadeltaOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+=======
+DECLARE_GPU_SPEC(float);
+DECLARE_GPU_SPEC(double);
+#undef DECLARE_GPU_SPEC
+}  // namespace functor
+
+REGISTER_KERNELS(GPU, float);
+REGISTER_KERNELS(GPU, double);
+#endif
+#undef REGISTER_KERNELS
+
+template <typename Device, typename T>
+class ApplyAdagradOp : public OpKernel {
+ public:
+  explicit ApplyAdagradOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES_OK(ctx, ctx->GetAttr("use_locking", &use_exclusive_lock_));
   }
 
   void Compute(OpKernelContext* ctx) override {
+<<<<<<< HEAD
     Var* resource;
     const bool sparse = false;
     mutex* mu = GetTrainingVariableMutex<Device, T>(ctx, 0, sparse, &resource);
     core::ScopedUnref scoped_unref(resource);
     if (use_exclusive_lock_ && mu != nullptr) {
       mutex_lock l1(*mu);
+=======
+    if (use_exclusive_lock_) {
+      mutex_lock l1(*ctx->input_ref_mutex(0));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // Don't try to acquire a lock on the second ref as they share the same
       // mutex.
       //
@@ -730,13 +884,18 @@ class ApplyAdadeltaOp : public OpKernel {
       if (!ctx->status().ok()) return;
       DoCompute(ctx);
     }
+<<<<<<< HEAD
     MaybeForwardRefInputToRefOutput(ctx, 0, 0);
+=======
+    ctx->forward_ref_input_to_ref_output(0, 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
   bool use_exclusive_lock_;
 
   void DoValidate(OpKernelContext* ctx) {
+<<<<<<< HEAD
     Tensor var;
     const bool sparse = false;
     OP_REQUIRES_OK(ctx, GetInputTensorFromVariable<Device, T>(
@@ -779,6 +938,23 @@ class ApplyAdadeltaOp : public OpKernel {
                 errors::InvalidArgument("epsilon is not a scalar: ",
                                         epsilon.shape().DebugString()));
 
+=======
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    Tensor accum = ctx->mutable_input(1, use_exclusive_lock_);
+    OP_REQUIRES(
+        ctx, var.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(0)));
+    OP_REQUIRES(
+        ctx, accum.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(1)));
+    const Tensor& lr = ctx->input(2);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsLegacyScalar(lr.shape()),
+                errors::InvalidArgument("lr is not a scalar: ",
+                                        lr.shape().DebugString()));
+    const Tensor& grad = ctx->input(3);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(
         ctx, var.shape().IsSameSize(accum.shape()),
         errors::InvalidArgument("var and accum do not have the same shape",
@@ -786,13 +962,18 @@ class ApplyAdadeltaOp : public OpKernel {
                                 accum.shape().DebugString()));
     OP_REQUIRES(
         ctx, var.shape().IsSameSize(grad.shape()),
+<<<<<<< HEAD
         errors::InvalidArgument("var and grad do not have the same shape",
+=======
+        errors::InvalidArgument("var and delta do not have the same shape",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                 var.shape().DebugString(), " ",
                                 grad.shape().DebugString()));
   }
 
   void DoCompute(OpKernelContext* ctx) {
     const Device& device = ctx->template eigen_device<Device>();
+<<<<<<< HEAD
     Tensor var;
     const bool sparse = false;
     OP_REQUIRES_OK(ctx, GetInputTensorFromVariable<Device, T>(
@@ -877,10 +1058,51 @@ REGISTER_KERNELS(GPU, complex128);
 #endif
 #endif
 #undef REGISTER_CPU_KERNELS
+=======
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    Tensor accum = ctx->mutable_input(1, use_exclusive_lock_);
+    const Tensor& lr = ctx->input(2);
+    const Tensor& grad = ctx->input(3);
+    functor::ApplyAdagrad<Device, T>()(device, var.flat<T>(), accum.flat<T>(),
+                                       lr.scalar<T>(), grad.flat<T>());
+  }
+};
+
+typedef Eigen::ThreadPoolDevice CPUDevice;
+typedef Eigen::GpuDevice GPUDevice;
+
+#define REGISTER_KERNELS(D, T)                                        \
+  REGISTER_KERNEL_BUILDER(                                            \
+      Name("ApplyAdagrad").Device(DEVICE_##D).TypeConstraint<T>("T"), \
+      ApplyAdagradOp<D##Device, T>);
+
+REGISTER_KERNELS(CPU, float);
+REGISTER_KERNELS(CPU, double);
+
+#if GOOGLE_CUDA
+// Forward declarations of the functor specializations for GPU.
+namespace functor {
+#define DECLARE_GPU_SPEC(T)                                               \
+  template <>                                                             \
+  void ApplyAdagrad<GPUDevice, T>::operator()(                            \
+      const GPUDevice& d, typename TTypes<T>::Flat var,                   \
+      typename TTypes<T>::Flat accum, typename TTypes<T>::ConstScalar lr, \
+      typename TTypes<T>::ConstFlat grad);                                \
+  extern template struct ApplyAdagrad<GPUDevice, T>;
+DECLARE_GPU_SPEC(float);
+DECLARE_GPU_SPEC(double);
+#undef DECLARE_GPU_SPEC
+}  // namespace functor
+
+REGISTER_KERNELS(GPU, float);
+REGISTER_KERNELS(GPU, double);
+#endif
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef REGISTER_KERNELS
 
 // Note, this op works on cpu only.
 template <typename T, typename Tindex>
+<<<<<<< HEAD
 class SparseApplyAdadeltaOp : public OpKernel {
  public:
   explicit SparseApplyAdadeltaOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
@@ -892,10 +1114,21 @@ class SparseApplyAdadeltaOp : public OpKernel {
     const bool sparse = true;
     mutex* mu = GetTrainingVariableMutex<CPUDevice, T>(ctx, 0, sparse, &var);
     core::ScopedUnref scoped_unref(var);
+=======
+class SparseApplyAdagradOp : public OpKernel {
+ public:
+  explicit SparseApplyAdagradOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+    OP_REQUIRES_OK(ctx, ctx->GetAttr("use_locking", &use_exclusive_lock_));
+  }
+
+  void Compute(OpKernelContext* ctx) override NO_THREAD_SAFETY_ANALYSIS {
+    mutex* mu_var = ctx->input_ref_mutex(0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // mu_accum is actually the same mutex as mu_var since currently we use a
     // global mutex.
     //
     // mutex* mu_accum = ctx->input_ref_mutex(1);
+<<<<<<< HEAD
     if (use_exclusive_lock_ && mu != nullptr) {
       mutex_lock ml(*mu);
       DoCompute(ctx);
@@ -955,6 +1188,35 @@ class SparseApplyAdadeltaOp : public OpKernel {
                                         epsilon.shape().DebugString()));
     const Tensor& grad = ctx->input(6);
     const Tensor& indices = ctx->input(7);
+=======
+    if (use_exclusive_lock_) {
+      mu_var->lock();
+    }
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    Tensor accum = ctx->mutable_input(1, use_exclusive_lock_);
+    OP_REQUIRES(
+        ctx, var.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(0)));
+    OP_REQUIRES(
+        ctx, accum.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(1)));
+    OP_REQUIRES(
+        ctx, var.shape().IsSameSize(accum.shape()),
+        errors::InvalidArgument("var and accum do not have the same shape",
+                                var.shape().DebugString(), " ",
+                                accum.shape().DebugString()));
+    OP_REQUIRES(ctx, TensorShapeUtils::IsVectorOrHigher(var.shape()),
+                errors::InvalidArgument("var must be at least 1 dimensional"));
+
+    const Tensor& lr = ctx->input(2);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsLegacyScalar(lr.shape()),
+                errors::InvalidArgument("lr is not a scalar: ",
+                                        lr.shape().DebugString()));
+    const Tensor& grad = ctx->input(3);
+    const Tensor& indices = ctx->input(4);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(ctx, TensorShapeUtils::IsVector(indices.shape()),
                 errors::InvalidArgument("indices must be one-dimensional"));
 
@@ -982,6 +1244,7 @@ class SparseApplyAdadeltaOp : public OpKernel {
       }
 
       auto var_flat = var.flat_outer_dims<T>();
+<<<<<<< HEAD
       auto accum_grad_flat = accum_grad.flat_outer_dims<T>();
       auto accum_update_flat = accum_update.flat_outer_dims<T>();
       auto grad_flat = grad.flat_outer_dims<T>();
@@ -1009,6 +1272,27 @@ class SparseApplyAdadeltaOp : public OpKernel {
     }
 
     MaybeForwardRefInputToRefOutput(ctx, 0, 0);
+=======
+      auto accum_flat = accum.flat_outer_dims<T>();
+      auto grad_flat = grad.flat_outer_dims<T>();
+      T lr_scalar = lr.scalar<T>()();
+
+      // Note(yonghui): It might be worth multi-threading square() and rsqrt().
+      for (Tindex i = 0; i < N; i++) {
+        const Tindex index = indices_vec(i);
+        auto a = accum_flat.template chip<0>(index);
+        auto g = grad_flat.template chip<0>(i);
+        auto v = var_flat.template chip<0>(index);
+        a += g.square();
+        v -= g.constant(lr_scalar) * g * a.rsqrt();
+      }
+    }
+    if (use_exclusive_lock_) {
+      mu_var->unlock();
+    }
+
+    ctx->forward_ref_input_to_ref_output(0, 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
@@ -1016,6 +1300,7 @@ class SparseApplyAdadeltaOp : public OpKernel {
 };
 
 #define REGISTER_KERNELS(T, Tindices)                                \
+<<<<<<< HEAD
   REGISTER_KERNEL_BUILDER(Name("SparseApplyAdadelta")                \
                               .Device(DEVICE_CPU)                    \
                               .TypeConstraint<T>("T")                \
@@ -1048,10 +1333,29 @@ class ApplyProximalGradientDescentOp : public OpKernel {
  public:
   explicit ApplyProximalGradientDescentOp(OpKernelConstruction* ctx)
       : OpKernel(ctx) {
+=======
+  REGISTER_KERNEL_BUILDER(Name("SparseApplyAdagrad")                 \
+                              .Device(DEVICE_CPU)                    \
+                              .TypeConstraint<T>("T")                \
+                              .TypeConstraint<Tindices>("Tindices"), \
+                          SparseApplyAdagradOp<T, Tindices>);
+
+REGISTER_KERNELS(float, int32);
+REGISTER_KERNELS(float, int64);
+REGISTER_KERNELS(double, int32);
+REGISTER_KERNELS(double, int64);
+#undef REGISTER_KERNELS
+
+template <typename Device, typename T>
+class ApplyMomentumOp : public OpKernel {
+ public:
+  explicit ApplyMomentumOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES_OK(ctx, ctx->GetAttr("use_locking", &use_exclusive_lock_));
   }
 
   void Compute(OpKernelContext* ctx) override {
+<<<<<<< HEAD
     const bool sparse = false;
     auto locks = MaybeLockVariableInputMutexesInOrder<Device, T>(
         ctx, use_exclusive_lock_, sparse, {0});
@@ -1110,18 +1414,123 @@ class ApplyProximalGradientDescentOp : public OpKernel {
 
 REGISTER_KERNELS(CPU, float);
 REGISTER_KERNELS(CPU, double);
+=======
+    if (use_exclusive_lock_) {
+      mutex_lock l1(*ctx->input_ref_mutex(0));
+      // Don't try to acquire a lock on the second ref as they share the same
+      // mutex.
+      //
+      // mutex_lock l2(*ctx->input_ref_mutex(1));
+      DoValidate(ctx);
+      if (!ctx->status().ok()) return;
+      DoCompute(ctx);
+    } else {
+      DoValidate(ctx);
+      if (!ctx->status().ok()) return;
+      DoCompute(ctx);
+    }
+    ctx->forward_ref_input_to_ref_output(0, 0);
+  }
+
+ private:
+  bool use_exclusive_lock_;
+
+  void DoValidate(OpKernelContext* ctx) {
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    Tensor accum = ctx->mutable_input(1, use_exclusive_lock_);
+    OP_REQUIRES(
+        ctx, var.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(0)));
+    OP_REQUIRES(
+        ctx, accum.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(1)));
+    const Tensor& lr = ctx->input(2);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(lr.shape()),
+                errors::InvalidArgument("lr is not a scalar: ",
+                                        lr.shape().DebugString()));
+    const Tensor& grad = ctx->input(3);
+    OP_REQUIRES(
+        ctx, var.shape().IsSameSize(accum.shape()),
+        errors::InvalidArgument("var and accum do not have the same shape",
+                                var.shape().DebugString(), " ",
+                                accum.shape().DebugString()));
+    OP_REQUIRES(
+        ctx, var.shape().IsSameSize(grad.shape()),
+        errors::InvalidArgument("var and delta do not have the same shape",
+                                var.shape().DebugString(), " ",
+                                grad.shape().DebugString()));
+
+    const Tensor& momentum = ctx->input(4);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(momentum.shape()),
+                errors::InvalidArgument("momentum is not a scalar: ",
+                                        momentum.shape().DebugString()));
+  }
+
+  void DoCompute(OpKernelContext* ctx) {
+    const Device& device = ctx->template eigen_device<Device>();
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    Tensor accum = ctx->mutable_input(1, use_exclusive_lock_);
+    const Tensor& lr = ctx->input(2);
+    const Tensor& grad = ctx->input(3);
+    const Tensor& momentum = ctx->input(4);
+    functor::ApplyMomentum<Device, T>()(device, var.flat<T>(), accum.flat<T>(),
+                                        lr.scalar<T>(), grad.flat<T>(),
+                                        momentum.scalar<T>());
+  }
+};
+
+typedef Eigen::ThreadPoolDevice CPUDevice;
+typedef Eigen::GpuDevice GPUDevice;
+
+#define REGISTER_KERNELS(D, T)                                         \
+  REGISTER_KERNEL_BUILDER(                                             \
+      Name("ApplyMomentum").Device(DEVICE_##D).TypeConstraint<T>("T"), \
+      ApplyMomentumOp<D##Device, T>);
+
+REGISTER_KERNELS(CPU, float);
+REGISTER_KERNELS(CPU, double);
+
+#if GOOGLE_CUDA
+// Forward declarations of the functor specializations for GPU.
+namespace functor {
+#define DECLARE_GPU_SPEC(T)                                               \
+  template <>                                                             \
+  void ApplyMomentum<GPUDevice, T>::operator()(                           \
+      const GPUDevice& d, typename TTypes<T>::Flat var,                   \
+      typename TTypes<T>::Flat accum, typename TTypes<T>::ConstScalar lr, \
+      typename TTypes<T>::ConstFlat grad,                                 \
+      typename TTypes<T>::ConstScalar momentum);                          \
+  extern template struct ApplyMomentum<GPUDevice, T>;
+DECLARE_GPU_SPEC(float);
+DECLARE_GPU_SPEC(double);
+#undef DECLARE_GPU_SPEC
+}  // namespace functor
+
+REGISTER_KERNELS(GPU, float);
+REGISTER_KERNELS(GPU, double);
+#endif
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef REGISTER_KERNELS
 
 // Note, this op works on cpu only.
 template <typename T, typename Tindex>
+<<<<<<< HEAD
 class SparseApplyProximalGradientDescentOp : public OpKernel {
  public:
   explicit SparseApplyProximalGradientDescentOp(OpKernelConstruction* ctx)
       : OpKernel(ctx) {
+=======
+class SparseApplyMomentumOp : public OpKernel {
+ public:
+  explicit SparseApplyMomentumOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES_OK(ctx, ctx->GetAttr("use_locking", &use_exclusive_lock_));
   }
 
   void Compute(OpKernelContext* ctx) override NO_THREAD_SAFETY_ANALYSIS {
+<<<<<<< HEAD
     const bool sparse = true;
     auto locks = MaybeLockVariableInputMutexesInOrder<CPUDevice, T>(
         ctx, use_exclusive_lock_, sparse, {0});
@@ -1152,17 +1561,58 @@ class SparseApplyProximalGradientDescentOp : public OpKernel {
                 errors::InvalidArgument("indices must be one-dimensional"));
 
     int64 inner_dim = 1;
+=======
+    mutex* mu_var = ctx->input_ref_mutex(0);
+    // mu_accum is actually the same mutex as mu_var since currently we use a
+    // global mutex.
+    //
+    // mutex* mu_accum = ctx->input_ref_mutex(1);
+    if (use_exclusive_lock_) {
+      mu_var->lock();
+    }
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    Tensor accum = ctx->mutable_input(1, use_exclusive_lock_);
+    OP_REQUIRES(
+        ctx, var.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(0)));
+    OP_REQUIRES(
+        ctx, accum.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(1)));
+    OP_REQUIRES(
+        ctx, var.shape().IsSameSize(accum.shape()),
+        errors::InvalidArgument("var and accum do not have the same shape",
+                                var.shape().DebugString(), " ",
+                                accum.shape().DebugString()));
+    OP_REQUIRES(ctx, TensorShapeUtils::IsVectorOrHigher(var.shape()),
+                errors::InvalidArgument("var must be at least 1 dimensional"));
+
+    const Tensor& lr = ctx->input(2);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(lr.shape()),
+                errors::InvalidArgument("lr is not a scalar: ",
+                                        lr.shape().DebugString()));
+    const Tensor& grad = ctx->input(3);
+    const Tensor& indices = ctx->input(4);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsVector(indices.shape()),
+                errors::InvalidArgument("indices must be one-dimensional"));
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (int d = 1; d < var.dims(); d++) {
       OP_REQUIRES(ctx, var.dim_size(d) == grad.dim_size(d),
                   errors::InvalidArgument(strings::StrCat(
                       "var and grad must match in dimension ", d)));
+<<<<<<< HEAD
       inner_dim *= grad.dim_size(d);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     const Tindex N = indices.dim_size(0);
     OP_REQUIRES(
         ctx, grad.dim_size(0) == N,
         errors::InvalidArgument(
             "grad must be the same size as indices in the first dimension."));
+<<<<<<< HEAD
     OP_REQUIRES(ctx, inner_dim > 0,
                 errors::InvalidArgument(
                     "Inner dimension should be greater than zero."));
@@ -1235,12 +1685,53 @@ class SparseApplyProximalGradientDescentOp : public OpKernel {
     }
 
     MaybeForwardRefInputToRefOutput(ctx, 0, 0);
+=======
+
+    const Tensor& momentum = ctx->input(5);
+    OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(momentum.shape()),
+                errors::InvalidArgument("momentum is not a scalar: ",
+                                        momentum.shape().DebugString()));
+
+    if (N > 0) {
+      const Tindex first_dim_size = var.dim_size(0);
+      // Validate all the indices are in range
+      auto indices_vec = indices.vec<Tindex>();
+      for (Tindex i = 0; i < N; i++) {
+        const Tindex index = indices_vec(i);
+        OP_REQUIRES(ctx, index >= 0 && index < first_dim_size,
+                    errors::InvalidArgument(
+                        strings::StrCat("Index ", index, " at offset ", i,
+                                        " in indices is out of range")));
+      }
+
+      auto var_flat = var.flat_outer_dims<T>();
+      auto accum_flat = accum.flat_outer_dims<T>();
+      auto grad_flat = grad.flat_outer_dims<T>();
+      T lr_scalar = lr.scalar<T>()();
+      T momentum_scalar = momentum.scalar<T>()();
+
+      for (Tindex i = 0; i < N; i++) {
+        const Tindex index = indices_vec(i);
+        auto a = accum_flat.template chip<0>(index);
+        auto g = grad_flat.template chip<0>(i);
+        auto v = var_flat.template chip<0>(index);
+        a = a * a.constant(momentum_scalar) + g;
+        v -= a.constant(lr_scalar) * a;
+      }
+    }
+    if (use_exclusive_lock_) {
+      mu_var->unlock();
+    }
+
+    ctx->forward_ref_input_to_ref_output(0, 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
   bool use_exclusive_lock_;
 };
 
+<<<<<<< HEAD
 #define REGISTER_KERNELS(T, Tindices)                                         \
   REGISTER_KERNEL_BUILDER(Name("SparseApplyProximalGradientDescent")          \
                               .Device(DEVICE_CPU)                             \
@@ -1252,6 +1743,14 @@ class SparseApplyProximalGradientDescentOp : public OpKernel {
                               .TypeConstraint<T>("T")                         \
                               .TypeConstraint<Tindices>("Tindices"),          \
                           SparseApplyProximalGradientDescentOp<T, Tindices>);
+=======
+#define REGISTER_KERNELS(T, Tindices)                                \
+  REGISTER_KERNEL_BUILDER(Name("SparseApplyMomentum")                \
+                              .Device(DEVICE_CPU)                    \
+                              .TypeConstraint<T>("T")                \
+                              .TypeConstraint<Tindices>("Tindices"), \
+                          SparseApplyMomentumOp<T, Tindices>);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 REGISTER_KERNELS(float, int32);
 REGISTER_KERNELS(float, int64);
@@ -1260,6 +1759,7 @@ REGISTER_KERNELS(double, int64);
 #undef REGISTER_KERNELS
 
 template <typename Device, typename T>
+<<<<<<< HEAD
 class ApplyAdagradOp : public OpKernel {
  public:
   explicit ApplyAdagradOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
@@ -3857,12 +4357,69 @@ class ApplyAdaMaxOp : public OpKernel {
     const Tensor& beta1 = ctx->input(5);
     const Tensor& beta2 = ctx->input(6);
     const Tensor& epsilon = ctx->input(7);
+=======
+class ApplyAdamOp : public OpKernel {
+ public:
+  explicit ApplyAdamOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+    OP_REQUIRES_OK(ctx, ctx->GetAttr("use_locking", &use_exclusive_lock_));
+  }
+
+  void Compute(OpKernelContext* ctx) override {
+    if (use_exclusive_lock_) {
+      // all input refs share the same mutex
+      mutex_lock l1(*ctx->input_ref_mutex(0));
+      DoValidate(ctx);
+      if (!ctx->status().ok()) return;
+      DoCompute(ctx);
+    } else {
+      DoValidate(ctx);
+      if (!ctx->status().ok()) return;
+      DoCompute(ctx);
+    }
+    ctx->forward_ref_input_to_ref_output(0, 0);
+  }
+
+ private:
+  bool use_exclusive_lock_;
+
+  void DoValidate(OpKernelContext* ctx) {
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    Tensor m = ctx->mutable_input(1, use_exclusive_lock_);
+    Tensor v = ctx->mutable_input(2, use_exclusive_lock_);
+    OP_REQUIRES(
+        ctx, var.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(0)));
+    OP_REQUIRES(
+        ctx, m.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(1)));
+    OP_REQUIRES(
+        ctx, v.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(2)));
+
+    const Tensor& beta1_power = ctx->input(3);
+    const Tensor& beta2_power = ctx->input(4);
+    const Tensor& lr = ctx->input(5);
+    const Tensor& beta1 = ctx->input(6);
+    const Tensor& beta2 = ctx->input(7);
+    const Tensor& epsilon = ctx->input(8);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(beta1_power.shape()),
                 errors::InvalidArgument("beta1_power is not a scalar: ",
                                         beta1_power.shape().DebugString()));
+<<<<<<< HEAD
     OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(lr.shape()),
                 errors::InvalidArgument("lr is not a scalar : ",
+=======
+    OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(beta2_power.shape()),
+                errors::InvalidArgument("beta2_power is not a scalar: ",
+                                        beta2_power.shape().DebugString()));
+    OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(lr.shape()),
+                errors::InvalidArgument("lr is not a scalar: ",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                         lr.shape().DebugString()));
     OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(beta1.shape()),
                 errors::InvalidArgument("beta1 is not a scalar: ",
@@ -3874,7 +4431,11 @@ class ApplyAdaMaxOp : public OpKernel {
                 errors::InvalidArgument("epsilon is not a scalar: ",
                                         epsilon.shape().DebugString()));
 
+<<<<<<< HEAD
     const Tensor& grad = ctx->input(8);
+=======
+    const Tensor& grad = ctx->input(9);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(ctx, var.shape().IsSameSize(m.shape()),
                 errors::InvalidArgument("var and m do not have the same shape",
                                         var.shape().DebugString(), " ",
@@ -3882,6 +4443,7 @@ class ApplyAdaMaxOp : public OpKernel {
     OP_REQUIRES(ctx, var.shape().IsSameSize(v.shape()),
                 errors::InvalidArgument("var and v do not have the same shape",
                                         var.shape().DebugString(), " ",
+<<<<<<< HEAD
                                         v.shape().DebugString()));
     OP_REQUIRES(
         ctx, var.shape().IsSameSize(grad.shape()),
@@ -4332,10 +4894,99 @@ class SparseApplyRMSPropOp : public OpKernel {
     }
 
     MaybeForwardRefInputToRefOutput(ctx, 0, 0);
+=======
+                                        v.shape().DebugString()));
+    OP_REQUIRES(
+        ctx, var.shape().IsSameSize(grad.shape()),
+        errors::InvalidArgument("var and grad do not have the same shape",
+                                var.shape().DebugString(), " ",
+                                grad.shape().DebugString()));
+  }
+
+  void DoCompute(OpKernelContext* ctx) {
+    const Device& device = ctx->template eigen_device<Device>();
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    Tensor m = ctx->mutable_input(1, use_exclusive_lock_);
+    Tensor v = ctx->mutable_input(2, use_exclusive_lock_);
+    const Tensor& beta1_power = ctx->input(3);
+    const Tensor& beta2_power = ctx->input(4);
+    const Tensor& lr = ctx->input(5);
+    const Tensor& beta1 = ctx->input(6);
+    const Tensor& beta2 = ctx->input(7);
+    const Tensor& epsilon = ctx->input(8);
+    const Tensor& grad = ctx->input(9);
+
+    functor::ApplyAdam<Device, T>()(device, var.flat<T>(), m.flat<T>(),
+                                    v.flat<T>(), beta1_power.scalar<T>(),
+                                    beta2_power.scalar<T>(), lr.scalar<T>(),
+                                    beta1.scalar<T>(), beta2.scalar<T>(),
+                                    epsilon.scalar<T>(), grad.flat<T>());
+  }
+};
+
+typedef Eigen::ThreadPoolDevice CPUDevice;
+typedef Eigen::GpuDevice GPUDevice;
+
+#define REGISTER_KERNELS(D, T)                                     \
+  REGISTER_KERNEL_BUILDER(                                         \
+      Name("ApplyAdam").Device(DEVICE_##D).TypeConstraint<T>("T"), \
+      ApplyAdamOp<D##Device, T>);
+
+REGISTER_KERNELS(CPU, float);
+REGISTER_KERNELS(CPU, double);
+
+#if GOOGLE_CUDA
+// Forward declarations of the functor specializations for GPU.
+namespace functor {
+#define DECLARE_GPU_SPEC(T)                                   \
+  template <>                                                 \
+  void ApplyAdam<GPUDevice, T>::operator()(                   \
+      const GPUDevice& d, typename TTypes<T>::Flat var,       \
+      typename TTypes<T>::Flat m, typename TTypes<T>::Flat v, \
+      typename TTypes<T>::ConstScalar beta1_power,            \
+      typename TTypes<T>::ConstScalar beta2_power,            \
+      typename TTypes<T>::ConstScalar lr,                     \
+      typename TTypes<T>::ConstScalar beta1,                  \
+      typename TTypes<T>::ConstScalar beta2,                  \
+      typename TTypes<T>::ConstScalar epsilon,                \
+      typename TTypes<T>::ConstFlat grad);                    \
+  extern template struct ApplyAdam<GPUDevice, T>;
+DECLARE_GPU_SPEC(float);
+DECLARE_GPU_SPEC(double);
+#undef DECLARE_GPU_SPEC
+}  // namespace functor
+
+REGISTER_KERNELS(GPU, float);
+REGISTER_KERNELS(GPU, double);
+#endif
+#undef REGISTER_KERNELS
+
+template <typename Device, typename T>
+class ApplyRMSPropOp : public OpKernel {
+ public:
+  explicit ApplyRMSPropOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+    OP_REQUIRES_OK(ctx, ctx->GetAttr("use_locking", &use_exclusive_lock_));
+  }
+
+  void Compute(OpKernelContext* ctx) override {
+    if (use_exclusive_lock_) {
+      // all input refs share the same mutex
+      mutex_lock l1(*ctx->input_ref_mutex(0));
+      DoValidate(ctx);
+      if (!ctx->status().ok()) return;
+      DoCompute(ctx);
+    } else {
+      DoValidate(ctx);
+      if (!ctx->status().ok()) return;
+      DoCompute(ctx);
+    }
+    ctx->forward_ref_input_to_ref_output(0, 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
   bool use_exclusive_lock_;
+<<<<<<< HEAD
 };
 
 // Note, this op works on cpu only.
@@ -4364,10 +5015,18 @@ class SparseApplyCenteredRMSPropOp : public OpKernel {
     Tensor mom;
     OP_REQUIRES_OK(ctx, GetInputTensorFromVariable<CPUDevice, T>(
                             ctx, 3, use_exclusive_lock_, sparse, &mom));
+=======
+
+  void DoValidate(OpKernelContext* ctx) {
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    Tensor ms = ctx->mutable_input(1, use_exclusive_lock_);
+    Tensor mom = ctx->mutable_input(2, use_exclusive_lock_);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     OP_REQUIRES(
         ctx, var.IsInitialized(),
         errors::FailedPrecondition(
+<<<<<<< HEAD
             "Attempting to use uninitialized variables: ", requested_input(0)));
     OP_REQUIRES(
         ctx, ms.IsInitialized(),
@@ -4384,6 +5043,23 @@ class SparseApplyCenteredRMSPropOp : public OpKernel {
     const Tensor& epsilon = ctx->input(7);
     const Tensor& grad = ctx->input(8);
     const Tensor& indices = ctx->input(9);
+=======
+            "Attempting to use uninitialized variables: ", def().input(0)));
+    OP_REQUIRES(
+        ctx, ms.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(1)));
+    OP_REQUIRES(
+        ctx, mom.IsInitialized(),
+        errors::FailedPrecondition(
+            "Attempting to use uninitialized variables: ", def().input(2)));
+
+    const Tensor& lr = ctx->input(3);
+    const Tensor& rho = ctx->input(4);
+    const Tensor& momentum = ctx->input(5);
+    const Tensor& epsilon = ctx->input(6);
+    const Tensor& grad = ctx->input(7);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     OP_REQUIRES(ctx, TensorShapeUtils::IsScalar(lr.shape()),
                 errors::InvalidArgument("lr is not a scalar: ",
@@ -4398,11 +5074,14 @@ class SparseApplyCenteredRMSPropOp : public OpKernel {
                 errors::InvalidArgument("epsilon is not a scalar: ",
                                         epsilon.shape().DebugString()));
 
+<<<<<<< HEAD
     OP_REQUIRES(ctx, var.shape().IsSameSize(mg.shape()),
                 errors::InvalidArgument("var and mg do not have the same shape",
                                         var.shape().DebugString(), " ",
                                         mg.shape().DebugString()));
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(ctx, var.shape().IsSameSize(ms.shape()),
                 errors::InvalidArgument("var and ms do not have the same shape",
                                         var.shape().DebugString(), " ",
@@ -4413,6 +5092,7 @@ class SparseApplyCenteredRMSPropOp : public OpKernel {
                     "var and mom do not have the same shape",
                     var.shape().DebugString(), " ", mom.shape().DebugString()));
 
+<<<<<<< HEAD
     OP_REQUIRES(ctx, TensorShapeUtils::IsVectorOrHigher(var.shape()),
                 errors::InvalidArgument("var must be at least 1 dimensional"));
 
@@ -4562,11 +5242,14 @@ class ApplyAddSignOp : public OpKernel {
                 errors::InvalidArgument("var and m do not have the same shape",
                                         var.shape().DebugString(), " ",
                                         m.shape().DebugString()));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES(
         ctx, var.shape().IsSameSize(grad.shape()),
         errors::InvalidArgument("var and grad do not have the same shape",
                                 var.shape().DebugString(), " ",
                                 grad.shape().DebugString()));
+<<<<<<< HEAD
 
     const Device& device = ctx->template eigen_device<Device>();
     functor::ApplyAddSign<Device, T>()(
@@ -4717,16 +5400,68 @@ namespace functor {
       typename TTypes<T>::ConstFlat grad);                            \
   extern template struct ApplyPowerSign<GPUDevice, T>;
 DECLARE_GPU_SPEC(Eigen::half);
+=======
+  }
+
+  void DoCompute(OpKernelContext* ctx) {
+    const Device& device = ctx->template eigen_device<Device>();
+    Tensor var = ctx->mutable_input(0, use_exclusive_lock_);
+    Tensor ms = ctx->mutable_input(1, use_exclusive_lock_);
+    Tensor mom = ctx->mutable_input(2, use_exclusive_lock_);
+    const Tensor& lr = ctx->input(3);
+    const Tensor& rho = ctx->input(4);
+    const Tensor& momentum = ctx->input(5);
+    const Tensor& epsilon = ctx->input(6);
+    const Tensor& grad = ctx->input(7);
+
+    functor::ApplyRMSProp<Device, T>()(device, var.flat<T>(), ms.flat<T>(),
+                                       mom.flat<T>(), lr.scalar<T>(),
+                                       rho.scalar<T>(), momentum.scalar<T>(),
+                                       epsilon.scalar<T>(), grad.flat<T>());
+  }
+};
+
+typedef Eigen::ThreadPoolDevice CPUDevice;
+typedef Eigen::GpuDevice GPUDevice;
+
+#define REGISTER_KERNELS(D, T)                                        \
+  REGISTER_KERNEL_BUILDER(                                            \
+      Name("ApplyRMSProp").Device(DEVICE_##D).TypeConstraint<T>("T"), \
+      ApplyRMSPropOp<D##Device, T>);
+
+REGISTER_KERNELS(CPU, float);
+REGISTER_KERNELS(CPU, double);
+
+#if GOOGLE_CUDA
+// Forward declarations of the functor specializations for GPU.
+namespace functor {
+#define DECLARE_GPU_SPEC(T)                                                    \
+  template <>                                                                  \
+  void ApplyRMSProp<GPUDevice, T>::operator()(                                 \
+      const GPUDevice& d, typename TTypes<T>::Flat var,                        \
+      typename TTypes<T>::Flat ms, typename TTypes<T>::Flat mom,               \
+      typename TTypes<T>::ConstScalar lr, typename TTypes<T>::ConstScalar rho, \
+      typename TTypes<T>::ConstScalar momentum,                                \
+      typename TTypes<T>::ConstScalar epsilon,                                 \
+      typename TTypes<T>::ConstFlat grad);                                     \
+  extern template struct ApplyRMSProp<GPUDevice, T>;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 DECLARE_GPU_SPEC(float);
 DECLARE_GPU_SPEC(double);
 #undef DECLARE_GPU_SPEC
 }  // namespace functor
 
+<<<<<<< HEAD
 REGISTER_KERNELS(GPU, Eigen::half);
 REGISTER_KERNELS(GPU, float);
 REGISTER_KERNELS(GPU, double);
 #endif
 #undef REGISTER_CPU_KERNELS
+=======
+REGISTER_KERNELS(GPU, float);
+REGISTER_KERNELS(GPU, double);
+#endif
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef REGISTER_KERNELS
 
 }  // namespace tensorflow

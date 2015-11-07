@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +15,25 @@ limitations under the License.
 ==============================================================================*/
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define EIGEN_USE_GPU
 
 #include "tensorflow/core/framework/register_types.h"
 #include "tensorflow/core/kernels/training_ops.h"
+<<<<<<< HEAD
 #include "tensorflow/core/util/gpu_kernel_helper.h"
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::GpuDevice GPUDevice;
 
 namespace functor {
+<<<<<<< HEAD
 
 template <typename T>
 __global__ void ApplyAdamKernel(int32 data_dim, T* var, T* m, T* v,
@@ -115,6 +123,17 @@ struct ApplyGradientDescent<GPUDevice, T> {
     bcast[0] = grad.dimension(0);
     Eigen::Sizes<1> single;
     var.device(d) -= lr.reshape(single).broadcast(bcast) * grad;
+=======
+template <typename T>
+struct ApplyGradientDescent<GPUDevice, T> {
+  void operator()(const GPUDevice& d, typename TTypes<T>::Flat var,
+                  typename TTypes<T>::ConstScalar alpha,
+                  typename TTypes<T>::ConstFlat delta) {
+    Eigen::array<typename TTypes<T>::Tensor::Index, 1> bcast;
+    bcast[0] = delta.dimension(0);
+    Eigen::Sizes<1> single;
+    var.device(d) -= alpha.reshape(single).broadcast(bcast) * delta;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -123,6 +142,7 @@ struct ApplyAdagrad<GPUDevice, T> {
   void operator()(const GPUDevice& d, typename TTypes<T>::Flat var,
                   typename TTypes<T>::Flat accum,
                   typename TTypes<T>::ConstScalar lr,
+<<<<<<< HEAD
                   typename TTypes<T>::ConstFlat grad, bool update_slots) {
     if (update_slots) {
       accum.device(d) += grad.square();
@@ -252,6 +272,14 @@ struct ApplyFtrlV2<GPUDevice, T> {
     var.device(d) = (linear.abs() > l1_bcast)
                         .select(pre_shrink, var.constant(static_cast<T>(0)));
     accum.device(d) += grad.square();
+=======
+                  typename TTypes<T>::ConstFlat grad) {
+    accum.device(d) += grad.square();
+    Eigen::array<typename TTypes<T>::Tensor::Index, 1> bcast;
+    bcast[0] = grad.dimension(0);
+    Eigen::Sizes<1> single;
+    var.device(d) -= lr.reshape(single).broadcast(bcast) * grad * accum.rsqrt();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -261,11 +289,16 @@ struct ApplyMomentum<GPUDevice, T> {
                   typename TTypes<T>::Flat accum,
                   typename TTypes<T>::ConstScalar lr,
                   typename TTypes<T>::ConstFlat grad,
+<<<<<<< HEAD
                   typename TTypes<T>::ConstScalar momentum, bool use_nesterov) {
+=======
+                  typename TTypes<T>::ConstScalar momentum) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Eigen::array<typename TTypes<T>::Tensor::Index, 1> bcast;
     bcast[0] = grad.dimension(0);
     Eigen::Sizes<1> single;
     accum.device(d) = accum * momentum.reshape(single).broadcast(bcast) + grad;
+<<<<<<< HEAD
     if (use_nesterov) {
       var.device(d) -= grad * lr.reshape(single).broadcast(bcast) +
                        accum * momentum.reshape(single).broadcast(bcast) *
@@ -316,6 +349,9 @@ struct SparseApplyKerasMomentum<GPUDevice, T, Tindex> {
         lr.data(), grad.data(), indices.data(), momentum.data(), use_nesterov,
         first_dim_size, grad_size, indices_size));
     return static_cast<Tindex>(-1);
+=======
+    var.device(d) -= lr.reshape(single).broadcast(bcast) * accum;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -329,6 +365,7 @@ struct ApplyAdam<GPUDevice, T> {
                   typename TTypes<T>::ConstScalar beta1,
                   typename TTypes<T>::ConstScalar beta2,
                   typename TTypes<T>::ConstScalar epsilon,
+<<<<<<< HEAD
                   typename TTypes<T>::ConstFlat grad, bool use_nesterov) {
     int32 data_dim = grad.dimension(0);
     GpuLaunchConfig config = GetGpuLaunchConfig(data_dim, d);
@@ -356,12 +393,15 @@ struct ApplyAdamWithAmsgrad<GPUDevice, T> {
                   typename TTypes<T>::ConstScalar beta1,
                   typename TTypes<T>::ConstScalar beta2,
                   typename TTypes<T>::ConstScalar epsilon,
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   typename TTypes<T>::ConstFlat grad) {
     Eigen::array<typename TTypes<T>::Tensor::Index, 1> bcast;
     bcast[0] = grad.dimension(0);
     Eigen::Sizes<1> single;
     const auto one = static_cast<T>(1.0);
     m.device(d) =
+<<<<<<< HEAD
         m + (beta1.constant(one) - beta1).reshape(single).broadcast(bcast) *
                 (grad - m);
     v.device(d) =
@@ -369,10 +409,20 @@ struct ApplyAdamWithAmsgrad<GPUDevice, T> {
                 (grad.square() - v);
     vhat.device(d) = vhat.cwiseMax(v);
 
+=======
+        m +
+        (beta1.constant(one) - beta1).reshape(single).broadcast(bcast) *
+            (grad - m);
+    v.device(d) =
+        v +
+        (beta2.constant(one) - beta2).reshape(single).broadcast(bcast) *
+            (grad.square() - v);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     var.device(d) -= (lr * (beta2_power.constant(one) - beta2_power).sqrt() /
                       (beta1_power.constant(one) - beta1_power))
                          .reshape(single)
                          .broadcast(bcast) *
+<<<<<<< HEAD
                      m /
                      (epsilon.reshape(single).broadcast(bcast) + vhat.sqrt());
   }
@@ -402,6 +452,9 @@ struct ApplyAdaMax<GPUDevice, T> {
                          .reshape(single)
                          .broadcast(bcast) *
                      (m / (v + epsilon.reshape(single).broadcast(bcast)));
+=======
+                     m / (epsilon.reshape(single).broadcast(bcast) + v.sqrt());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -418,9 +471,15 @@ struct ApplyRMSProp<GPUDevice, T> {
     bcast[0] = grad.dimension(0);
     Eigen::Sizes<1> single;
     const auto one = static_cast<T>(1.0);
+<<<<<<< HEAD
     ms.device(d) =
         ms + (rho.constant(one) - rho).reshape(single).broadcast(bcast) *
                  (grad.square() - ms);
+=======
+    ms.device(d) = ms +
+                   (rho.constant(one) - rho).reshape(single).broadcast(bcast) *
+                       (grad.square() - ms);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     mom.device(d) =
         mom * momentum.reshape(single).broadcast(bcast) +
         lr.reshape(single).broadcast(bcast) * grad /
@@ -429,6 +488,7 @@ struct ApplyRMSProp<GPUDevice, T> {
   }
 };
 
+<<<<<<< HEAD
 template <typename T>
 struct ApplyCenteredRMSProp<GPUDevice, T> {
   void operator()(const GPUDevice& d, typename TTypes<T>::Flat var,
@@ -675,3 +735,24 @@ template struct functor::ApplyPowerSign<GPUDevice, double>;
 }  // end namespace tensorflow
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+}  // namespace functor
+
+template struct functor::ApplyGradientDescent<GPUDevice, float>;
+template struct functor::ApplyGradientDescent<GPUDevice, double>;
+
+template struct functor::ApplyAdagrad<GPUDevice, float>;
+template struct functor::ApplyAdagrad<GPUDevice, double>;
+
+template struct functor::ApplyMomentum<GPUDevice, float>;
+template struct functor::ApplyMomentum<GPUDevice, double>;
+
+template struct functor::ApplyAdam<GPUDevice, float>;
+template struct functor::ApplyAdam<GPUDevice, double>;
+
+template struct functor::ApplyRMSProp<GPUDevice, float>;
+template struct functor::ApplyRMSProp<GPUDevice, double>;
+}  // end namespace tensorflow
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,22 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifndef TENSORFLOW_GRAPH_EDGESET_H_
 #define TENSORFLOW_GRAPH_EDGESET_H_
 
 #include <stddef.h>
+<<<<<<< HEAD
 
 #include "tensorflow/core/lib/gtl/flatset.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include <set>
+#include "tensorflow/core/platform/port.h"
+
+#include "tensorflow/core/platform/logging.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace tensorflow {
 
 class Edge;
 
 // An unordered set of edges.  Uses very little memory for small sets.
+<<<<<<< HEAD
 // Unlike gtl::FlatSet, EdgeSet does NOT allow mutations during
 // iteration.
+=======
+// Unlike std::set, EdgeSet does NOT allow mutations during iteration.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class EdgeSet {
  public:
   EdgeSet();
@@ -55,6 +69,7 @@ class EdgeSet {
  private:
   // Up to kInline elements are stored directly in ptrs_ (nullptr means none).
   // If ptrs_[0] == this then ptrs_[1] points to a set<const Edge*>.
+<<<<<<< HEAD
   // kInline must be >= 2, and is chosen such that ptrs_ fills a 64 byte
   // cacheline.
   static constexpr int kInline = 64 / sizeof(const void*);
@@ -64,6 +79,14 @@ class EdgeSet {
     if (ptrs_[0] == this) {
       return static_cast<gtl::FlatSet<const Edge*>*>(
           const_cast<void*>(ptrs_[1]));
+=======
+  static const int kInline = 2;  // Must be >= 2.
+  const void* ptrs_[kInline];
+
+  std::set<const Edge*>* get_set() const {
+    if (ptrs_[0] == this) {
+      return static_cast<std::set<const Edge*>*>(const_cast<void*>(ptrs_[1]));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     } else {
       return nullptr;
     }
@@ -103,7 +126,11 @@ class EdgeSet::const_iterator {
   friend class EdgeSet;
 
   void const* const* array_iter_ = nullptr;
+<<<<<<< HEAD
   typename gtl::FlatSet<const Edge*>::const_iterator tree_iter_;
+=======
+  typename std::set<const Edge*>::const_iterator tree_iter_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #ifdef NDEBUG
   inline void Init(const EdgeSet* e) {}

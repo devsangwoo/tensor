@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,14 +18,25 @@ limitations under the License.
 
 #include <memory>
 #include <vector>
+=======
+#include "tensorflow/core/framework/node_def_builder.h"
+
+#include <memory>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/fake_input.h"
 #include "tensorflow/core/framework/node_def_util.h"
 #include "tensorflow/core/framework/op_def_builder.h"
 #include "tensorflow/core/framework/op_def_util.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/lib/core/status_test_util.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -33,9 +45,13 @@ class NodeDefBuilderTest : public ::testing::Test {
  protected:
   // Specify an OpDef via an OpDefBuilder.
   void Op(const OpDefBuilder& op_def_builder) {
+<<<<<<< HEAD
     OpRegistrationData op_reg_data;
     TF_EXPECT_OK(op_def_builder.Finalize(&op_reg_data));
     op_def_ = op_reg_data.op_def;
+=======
+    EXPECT_OK(op_def_builder.Finalize(&op_def_));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Resets builder_ with a new NodeDefBuilder using the Op from the last call
@@ -48,12 +64,20 @@ class NodeDefBuilderTest : public ::testing::Test {
 
   // Calls Finalize() and verifies it returns success and the result matches
   // expectations.
+<<<<<<< HEAD
   void ExpectSuccess(NodeDefBuilder& builder,  // NOLINT
+=======
+  void ExpectSuccess(const NodeDefBuilder& builder,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                      DataTypeSlice expected_in_types,
                      DataTypeSlice expected_out_types, StringPiece proto) {
     NodeDef node_def;
     Status status = builder.Finalize(&node_def);
+<<<<<<< HEAD
     TF_EXPECT_OK(status);
+=======
+    EXPECT_OK(status);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!status.ok()) return;
     NodeDef expected;
     protobuf::TextFormat::ParseFromString(strings::StrCat("name: 'n' ", proto),
@@ -63,7 +87,11 @@ class NodeDefBuilderTest : public ::testing::Test {
     DataTypeVector in_types, out_types;
     status =
         InOutTypesForNode(node_def, builder.op_def(), &in_types, &out_types);
+<<<<<<< HEAD
     TF_EXPECT_OK(status);
+=======
+    EXPECT_OK(status);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!status.ok()) return;
     EXPECT_EQ(DataTypeSliceString(expected_in_types),
               DataTypeVectorString(in_types));
@@ -71,34 +99,54 @@ class NodeDefBuilderTest : public ::testing::Test {
               DataTypeVectorString(out_types));
 
     status = ValidateNodeDef(node_def, op_def_);
+<<<<<<< HEAD
     TF_EXPECT_OK(status);
+=======
+    EXPECT_OK(status);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Calls Finalize() and verifies it returns an error.
   // Each message must appear as a substring of the error.
+<<<<<<< HEAD
   void ExpectFailures(NodeDefBuilder& builder,  // NOLINT
+=======
+  void ExpectFailures(const NodeDefBuilder& builder,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                       const std::vector<string>& messages) {
     NodeDef node_def;
     Status status = builder.Finalize(&node_def);
     EXPECT_FALSE(status.ok()) << SummarizeNodeDef(node_def);
     if (status.ok()) return;
     for (const string& message : messages) {
+<<<<<<< HEAD
       EXPECT_TRUE(absl::StrContains(status.error_message(), message))
+=======
+      EXPECT_TRUE(StringPiece(status.error_message()).contains(message))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           << status << ", " << message;
     }
   }
 
   // Calls Finalize() and verifies it returns an error.
   // Message must appear as a substring of the error.
+<<<<<<< HEAD
   void ExpectFailure(NodeDefBuilder& builder,  // NOLINT
                      const string& message) {
+=======
+  void ExpectFailure(const NodeDefBuilder& builder, const string& message) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ExpectFailures(builder, {message});
   }
 
   // Like ExpectFailure(), except that the error can come from
   // ValidateNodeDef().
+<<<<<<< HEAD
   void ExpectInvalid(NodeDefBuilder& builder,  // NOLINT
                      const string& message) {
+=======
+  void ExpectInvalid(const NodeDefBuilder& builder, const string& message) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     NodeDef node_def;
     Status status = builder.Finalize(&node_def);
     if (status.ok()) {
@@ -106,7 +154,11 @@ class NodeDefBuilderTest : public ::testing::Test {
     }
     EXPECT_FALSE(status.ok()) << SummarizeNodeDef(node_def);
     if (status.ok()) return;
+<<<<<<< HEAD
     EXPECT_TRUE(absl::StrContains(status.error_message(), message))
+=======
+    EXPECT_TRUE(StringPiece(status.error_message()).contains(message))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         << "Actual error: " << status.error_message()
         << "\nDoes not contain: " << message;
   }
@@ -158,8 +210,12 @@ TEST_F(NodeDefBuilderTest, Simple) {
 
   {  // Finalize() twice.
     NodeDefBuilder& builder = Builder();
+<<<<<<< HEAD
     // First call to Finalize()
     TF_EXPECT_OK(builder.Input(FakeInput()).Finalize(nullptr));
+=======
+    builder.Input(FakeInput()).Finalize(nullptr);  // First call to Finalize()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // ExpectSuccess() also calls Finalize().
     ExpectSuccess(builder, {DT_INT32}, {DT_FLOAT}, R"proto(
         op: "Simple" input: "a" )proto");
@@ -211,8 +267,14 @@ TEST_F(NodeDefBuilderTest, OpDoesNotExist) {
       .ControlInput("y")
       .Attr("foo", 12)
       .Device("device");
+<<<<<<< HEAD
   ExpectFailures(builder, {"Op type not registered 'Op Does Not Exist'",
                            "while building NodeDef 'n'"});
+=======
+  ExpectFailure(
+      builder,
+      "Op type not registered 'Op Does Not Exist' while building NodeDef 'n'");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(NodeDefBuilderTest, Polymorphic) {
@@ -237,7 +299,11 @@ TEST_F(NodeDefBuilderTest, Polymorphic) {
       op: "Polymorphic" input: "a"
       attr { key: "T" value { type: DT_BOOL } } )proto");
 
+<<<<<<< HEAD
   // Conflicting Attr()
+=======
+  // Conficting Attr()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ExpectFailure(Builder().Input(FakeInput(DT_BOOL)).Attr("T", DT_STRING),
                 "Inconsistent values for attr 'T' DT_BOOL vs. DT_STRING while");
 
@@ -273,12 +339,20 @@ TEST_F(NodeDefBuilderTest, PolymorphicOut) {
   ExpectInvalid(Builder(), "NodeDef missing attr 'T' from");
 
   // Attr has the wrong type
+<<<<<<< HEAD
   ExpectInvalid(
       Builder().Attr("T", {DT_INT32, DT_BOOL}),
       "AttrValue had value with type 'list(type)' when 'type' expected");
 
   ExpectInvalid(Builder().Attr("T", 12),
                 "AttrValue had value with type 'int' when 'type' expected");
+=======
+  ExpectInvalid(Builder().Attr("T", {DT_INT32, DT_BOOL}),
+                "AttrValue had value with type list(type) when type expected");
+
+  ExpectInvalid(Builder().Attr("T", 12),
+                "AttrValue had value with type int when type expected");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(NodeDefBuilderTest, PolymorphicDefaultOut) {
@@ -427,9 +501,14 @@ TEST_F(NodeDefBuilderTest, OutTypeList) {
       op: "OutTypeList"
       attr { key: "T" value { list { } } } )proto");
 
+<<<<<<< HEAD
   ExpectInvalid(
       Builder().Attr("T", DT_FLOAT),
       "AttrValue had value with type 'type' when 'list(type)' expected");
+=======
+  ExpectInvalid(Builder().Attr("T", DT_FLOAT),
+                "AttrValue had value with type type when list(type) expected");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(NodeDefBuilderTest, TypeListRestrict) {
@@ -470,11 +549,18 @@ TEST_F(NodeDefBuilderTest, Attr) {
 
   // Attr has wrong type
   ExpectInvalid(Builder().Attr("a", "bad"),
+<<<<<<< HEAD
                 "AttrValue had value with type 'string' when 'int' expected");
 
   ExpectInvalid(
       Builder().Attr("a", {12}),
       "AttrValue had value with type 'list(int)' when 'int' expected");
+=======
+                "AttrValue had value with type string when int expected");
+
+  ExpectInvalid(Builder().Attr("a", {12}),
+                "AttrValue had value with type list(int) when int expected");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Missing attr
   ExpectInvalid(Builder(), "NodeDef missing attr 'a' from Op<");
@@ -501,7 +587,11 @@ TEST_F(NodeDefBuilderTest, AttrFloat) {
 
   // Won't automatically cast int to float
   ExpectInvalid(Builder().Attr("a", 12),
+<<<<<<< HEAD
                 "AttrValue had value with type 'int' when 'float' expected");
+=======
+                "AttrValue had value with type int when float expected");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(NodeDefBuilderTest, AttrBoolList) {
@@ -518,7 +608,11 @@ TEST_F(NodeDefBuilderTest, AttrBoolList) {
 
   // Won't cast int -> bool.
   ExpectInvalid(Builder().Attr("a", {0}),
+<<<<<<< HEAD
                 "AttrValue had value with type 'list(int)' when 'list(bool)' "
+=======
+                "AttrValue had value with type list(int) when list(bool) "
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                 "expected");
 }
 
@@ -916,9 +1010,14 @@ TEST_F(NodeDefBuilderTest, NIntsOut) {
   ExpectInvalid(Builder().Attr("N", 1),
                 "Value for attr 'N' of 1 must be at least minimum 2");
 
+<<<<<<< HEAD
   ExpectInvalid(
       Builder().Attr("N", {3}),
       "AttrValue had value with type 'list(int)' when 'int' expected");
+=======
+  ExpectInvalid(Builder().Attr("N", {3}),
+                "AttrValue had value with type list(int) when int expected");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ExpectInvalid(Builder(), "NodeDef missing attr 'N' from");
 }
@@ -958,9 +1057,14 @@ TEST_F(NodeDefBuilderTest, NPolymorphicOut) {
   ExpectInvalid(Builder().Attr("N", 1).Attr("T", DT_STRING),
                 "Value for attr 'N' of 1 must be at least minimum 2");
 
+<<<<<<< HEAD
   ExpectInvalid(
       Builder().Attr("N", 3).Attr("T", {DT_STRING}),
       "AttrValue had value with type 'list(type)' when 'type' expected");
+=======
+  ExpectInvalid(Builder().Attr("N", 3).Attr("T", {DT_STRING}),
+                "AttrValue had value with type list(type) when type expected");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST_F(NodeDefBuilderTest, NPolymorphicOutDefault) {

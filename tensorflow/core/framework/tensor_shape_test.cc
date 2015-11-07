@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +31,13 @@ class TensorShapeTestHelper {
   static uint8 data_type(const TensorShape* s) { return s->data_type(); }
 };
 
+=======
+#include "tensorflow/core/public/tensor_shape.h"
+
+#include <gtest/gtest.h>
+
+namespace tensorflow {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace {
 
 TEST(TensorShapeTest, Default) {
@@ -70,6 +78,7 @@ TEST(TensorShapeTest, RemoveAndAddDim) {
   ASSERT_EQ(3, s.dims());
 }
 
+<<<<<<< HEAD
 TEST(TensorShapeTest, RemoveLastDims) {
   TensorShape s({2, 3, 5, 7});
   s.RemoveLastDims(1);
@@ -117,6 +126,8 @@ TEST(TensorShapeTest, RemoveDimRange) {
   ASSERT_EQ(42, s3.num_elements());
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(TensorShapeTest, InvalidShapeProto) {
   TensorShapeProto proto;
   EXPECT_TRUE(TensorShape::IsValid(proto));
@@ -131,6 +142,7 @@ TEST(TensorShapeTest, InvalidShapeProto) {
   EXPECT_FALSE(TensorShape::IsValid(proto));
 
   proto.Clear();
+<<<<<<< HEAD
   proto.add_dim()->set_size(1LL << 35);
   proto.add_dim()->set_size((1LL << 35) + 1);
   EXPECT_FALSE(TensorShape::IsValid(proto));
@@ -149,6 +161,11 @@ TEST(TensorShapeTest, TooManyDimsProto) {
   proto.add_dim()->set_size(1);
   EXPECT_FALSE(TensorShape::IsValid(proto));
   EXPECT_FALSE(TensorShape::IsValidShape(proto).ok());
+=======
+  proto.add_dim()->set_size(1LL << 20);
+  proto.add_dim()->set_size((1LL << 20) + 1);
+  EXPECT_FALSE(TensorShape::IsValid(proto));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(TensorShapeTest, SetDimForEmptyTensor) {
@@ -160,6 +177,7 @@ TEST(TensorShapeTest, SetDimForEmptyTensor) {
   EXPECT_EQ(1400, s.num_elements());
 }
 
+<<<<<<< HEAD
 TEST(TensorShapeTest, AppendShape64BitIndices) {
   TensorShape s({10, 2147483648});
 
@@ -701,5 +719,7 @@ static void BM_TensorShape_Assign(int iters, int arg) {
 }
 BENCHMARK(BM_TensorShape_Assign)->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

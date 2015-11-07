@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,41 @@ from __future__ import division
 from __future__ import print_function
 
 # pylint: disable=unused-import
+=======
+# pylint: disable=wildcard-import,unused-import,g-bad-import-order,line-too-long
+"""This library contains classes for launching graphs and executing operations.
+
+The [basic usage](../../get_started/index.md#basic-usage) guide has
+examples of how a graph is launched in a [`tf.Session`](#Session).
+
+## Session management
+
+@@Session
+
+@@get_default_session
+
+## Error classes
+
+@@OpError
+@@CancelledError
+@@UnknownError
+@@InvalidArgumentError
+@@DeadlineExceededError
+@@NotFoundError
+@@AlreadyExistsError
+@@PermissionDeniedError
+@@UnauthenticatedError
+@@ResourceExhaustedError
+@@FailedPreconditionError
+@@AbortedError
+@@OutOfRangeError
+@@UnimplementedError
+@@InternalError
+@@UnavailableError
+@@DataLossError
+"""
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 from tensorflow.python.client.session import InteractiveSession
 from tensorflow.python.client.session import Session
 

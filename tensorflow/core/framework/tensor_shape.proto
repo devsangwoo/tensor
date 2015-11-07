@@ -1,6 +1,7 @@
 // Protocol buffer representing the shape of tensors.
 
 syntax = "proto3";
+<<<<<<< HEAD
 option cc_enable_arenas = true;
 option java_outer_classname = "TensorShapeProtos";
 option java_multiple_files = true;
@@ -10,24 +11,39 @@ option go_package = "github.com/tensorflow/tensorflow/tensorflow/go/core/framewo
 package tensorflow;
 
 // Dimensions of a tensor.
+=======
+// option cc_enable_arenas = true;
+
+package tensorflow;
+
+// Dimensions of a tensor and the type of data it contains.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 message TensorShapeProto {
   // One dimension of the tensor.
   message Dim {
     // Size of the tensor in that dimension.
+<<<<<<< HEAD
     // This value must be >= -1, but values of -1 are reserved for "unknown"
     // shapes (values of -1 mean "unknown" dimension).  Certain wrappers
     // that work with TensorShapeProto may fail at runtime when deserializing
     // a TensorShapeProto containing a dim value of -1.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     int64 size = 1;
 
     // Optional name of the tensor dimension.
     string name = 2;
   };
 
+<<<<<<< HEAD
   // Dimensions of the tensor, such as {"input", 30}, {"output", 40}
   // for a 30 x 40 2D tensor.  If an entry has size -1, this
   // corresponds to a dimension of unknown size. The names are
   // optional.
+=======
+  // Dimensions of the tensor, such as {"input", 30}, {"output", 40} for a 30 x
+  // 40 2D tensor.  The names are optional.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //
   // The order of entries in "dim" matters: It indicates the layout of the
   // values in the tensor in-memory representation.
@@ -35,6 +51,7 @@ message TensorShapeProto {
   // The first entry in "dim" is the outermost dimension used to layout the
   // values, the last entry is the innermost dimension.  This matches the
   // in-memory layout of RowMajor Eigen tensors.
+<<<<<<< HEAD
   //
   // If "dim.size()" > 0, "unknown_rank" must be false.
   repeated Dim dim = 2;
@@ -43,4 +60,7 @@ message TensorShapeProto {
   //
   // If true, "dim.size()" must be 0.
   bool unknown_rank = 3;
+=======
+  repeated Dim dim = 2;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };

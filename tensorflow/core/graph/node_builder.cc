@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,10 +19,16 @@ limitations under the License.
 #include <vector>
 #include "tensorflow/core/framework/node_def_util.h"
 #include "tensorflow/core/framework/versions.pb.h"
+=======
+#include "tensorflow/core/graph/node_builder.h"
+
+#include "tensorflow/core/framework/node_def_util.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/core/errors.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 NodeBuilder::NodeOut::NodeOut(Node* n, int32 i)  // NOLINT(runtime/explicit)
     : node(n),
       error(false),
@@ -48,6 +55,15 @@ NodeBuilder::NodeBuilder(StringPiece name, const OpDef* op_def)
 NodeBuilder::NodeBuilder(const NodeDefBuilder& def_builder)
     : def_builder_(def_builder) {}
 
+=======
+NodeBuilder::NodeBuilder(const string& name, const string& op_name,
+                         const OpRegistryInterface* op_registry)
+    : def_builder_(name, op_name, op_registry) {}
+
+NodeBuilder::NodeBuilder(const string& name, const OpDef* op_def)
+    : def_builder_(name, op_def) {}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 NodeBuilder& NodeBuilder::Input(Node* src_node, int src_index) {
   inputs_.emplace_back(src_node, src_index);
   DataType dt;
@@ -78,7 +94,11 @@ NodeBuilder& NodeBuilder::Input(gtl::ArraySlice<NodeOut> src_list) {
       inputs_.emplace_back(node_out.node, node_out.index);
     }
   }
+<<<<<<< HEAD
   def_builder_.Input(gtl::ArraySlice<NodeDefBuilder::NodeOut>(srcs));
+=======
+  def_builder_.Input(srcs);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return *this;
 }
 
@@ -91,17 +111,26 @@ NodeBuilder& NodeBuilder::ControlInput(Node* src_node) {
 NodeBuilder& NodeBuilder::ControlInputs(gtl::ArraySlice<Node*> src_nodes) {
   control_inputs_.insert(control_inputs_.end(), src_nodes.begin(),
                          src_nodes.end());
+<<<<<<< HEAD
   for (const Node* src_node : src_nodes) {
+=======
+  for (Node* src_node : src_nodes) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     def_builder_.ControlInput(src_node->name());
   }
   return *this;
 }
 
+<<<<<<< HEAD
 NodeBuilder& NodeBuilder::Device(StringPiece device_spec) {
+=======
+NodeBuilder& NodeBuilder::Device(const string& device_spec) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def_builder_.Device(device_spec);
   return *this;
 }
 
+<<<<<<< HEAD
 NodeBuilder& NodeBuilder::AssignedDevice(StringPiece device) {
   assigned_device_ = string(device);
   return *this;
@@ -130,6 +159,22 @@ Status NodeBuilder::Finalize(Graph* graph, Node** created_node, bool consume) {
 
   node->set_assigned_device_name(assigned_device_);
 
+=======
+Status NodeBuilder::Finalize(Graph* graph, Node** created_node) const {
+  // In case of error, set *created_node to nullptr.
+  if (created_node != nullptr) *created_node = nullptr;
+  if (!errors_.empty()) {
+    return errors::InvalidArgument(str_util::Join(errors_, "\n"));
+  }
+
+  NodeDef node_def;
+  TF_RETURN_IF_ERROR(def_builder_.Finalize(&node_def));
+  TF_RETURN_IF_ERROR(ValidateNodeDef(node_def, def_builder_.op_def()));
+  Status status;
+  Node* node = graph->AddNode(node_def, &status);
+  if (!status.ok()) return status;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (size_t i = 0; i < inputs_.size(); ++i) {
     if (inputs_[i].node != nullptr) {  // Skip back edges.
       graph->AddEdge(inputs_[i].node, inputs_[i].index, node, i);
@@ -142,6 +187,7 @@ Status NodeBuilder::Finalize(Graph* graph, Node** created_node, bool consume) {
   return Status::OK();
 }
 
+<<<<<<< HEAD
 void NodeBuilder::AddIndexError(const Node* node, int i) {
   if (node == nullptr) {
     errors_.emplace_back(
@@ -156,6 +202,22 @@ void NodeBuilder::AddIndexError(const Node* node, int i) {
 }
 
 bool NodeBuilder::GetOutputType(const Node* node, int i, DataType* dt) {
+=======
+void NodeBuilder::AddIndexError(Node* node, int i) {
+  if (node == nullptr) {
+    errors_.emplace_back(
+        strings::StrCat("Attempt to add nullptr Node to node with type",
+                        def_builder_.op_def().name()));
+  } else {
+    errors_.emplace_back(
+        strings::StrCat("Attempt to add output ", i, " of ", node->name(),
+                        " not in range [0, ", node->num_outputs(),
+                        ") to node with type ", def_builder_.op_def().name()));
+  }
+}
+
+bool NodeBuilder::GetOutputType(Node* node, int i, DataType* dt) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool error;
   *dt = SafeGetOutput(node, i, &error);
   if (error) AddIndexError(node, i);

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +23,17 @@ limitations under the License.
 #include "tensorflow/core/framework/types.pb.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/core/status.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_NUMERIC_OP_H_
+#define TENSORFLOW_FRAMEWORK_NUMERIC_OP_H_
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -56,9 +68,15 @@ class UnaryElementWiseOp : public UnaryOp<T> {
   void Compute(OpKernelContext* context) override {
     // Output shape is the same as input shape.
     const Tensor& input = context->input(0);
+<<<<<<< HEAD
     Tensor* output = nullptr;
     OP_REQUIRES_OK(context, context->forward_input_or_allocate_output(
                                 {0}, 0, input.shape(), &output));
+=======
+    Tensor* output;
+    OP_REQUIRES_OK(context,
+                   context->allocate_output(0, input.shape(), &output));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     static_cast<CHILD*>(this)->Operate(context, input, output);
   }
 };
@@ -77,9 +95,14 @@ class BinaryElementWiseOp : public BinaryOp<T> {
       return;
     }
 
+<<<<<<< HEAD
     Tensor* output = nullptr;
     OP_REQUIRES_OK(context, context->forward_input_or_allocate_output(
                                 {0, 1}, 0, a.shape(), &output));
+=======
+    Tensor* output;
+    OP_REQUIRES_OK(context, context->allocate_output(0, a.shape(), &output));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Dispatch to the descendant's Operate() function.
     switch (a.dims()) {
@@ -89,7 +112,10 @@ class BinaryElementWiseOp : public BinaryOp<T> {
     break;                                                                     \
   }
 
+<<<<<<< HEAD
       NDIM_CASE(0);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       NDIM_CASE(1);
       NDIM_CASE(2);
       NDIM_CASE(3);
@@ -101,7 +127,11 @@ class BinaryElementWiseOp : public BinaryOp<T> {
 #undef NDIM_CASE
 
       default:
+<<<<<<< HEAD
         context->SetStatus(errors::InvalidArgument(
+=======
+        context->SetStatus(errors::OutOfRange(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             "We only handle up to Tensor::dims() up to 8, not ", a.dims()));
         break;
     }
@@ -110,4 +140,8 @@ class BinaryElementWiseOp : public BinaryOp<T> {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_NUMERIC_OP_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_NUMERIC_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

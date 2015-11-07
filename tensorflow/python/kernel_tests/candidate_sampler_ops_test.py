@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +31,16 @@ from tensorflow.python.platform import test
 
 
 class RangeSamplerOpsTest(test.TestCase):
+=======
+"""Tests for CandidateSamplerOp."""
+import tensorflow.python.platform
+
+import numpy as np
+import tensorflow as tf
+
+
+class RangeSamplerOpsTest(tf.test.TestCase):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   BATCH_SIZE = 3
   NUM_TRUE = 2
@@ -38,12 +49,20 @@ class RangeSamplerOpsTest(test.TestCase):
 
   TRUE_LABELS = [[1, 2], [0, 4], [3, 3]]
 
+<<<<<<< HEAD
   @test_util.run_deprecated_v1
   def testTrueCandidates(self):
     with self.cached_session() as sess:
       indices = constant_op.constant([0, 0, 1, 1, 2, 2])
       true_candidates_vec = constant_op.constant([1, 2, 0, 4, 3, 3])
       true_candidates_matrix = array_ops.reshape(
+=======
+  def testTrueCandidates(self):
+    with self.test_session() as sess:
+      indices = tf.constant([0, 0, 1, 1, 2, 2])
+      true_candidates_vec = tf.constant([1, 2, 0, 4, 3, 3])
+      true_candidates_matrix = tf.reshape(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           true_candidates_vec, [self.BATCH_SIZE, self.NUM_TRUE])
       indices_val, true_candidates_val = sess.run(
           [indices, true_candidates_matrix])
@@ -52,18 +71,28 @@ class RangeSamplerOpsTest(test.TestCase):
     self.assertAllEqual(true_candidates_val, self.TRUE_LABELS)
 
   def testSampledCandidates(self):
+<<<<<<< HEAD
     with self.cached_session():
       true_classes = constant_op.constant(
           [[1, 2], [0, 4], [3, 3]], dtype=dtypes.int64)
       sampled_candidates, _, _ = candidate_sampling_ops.all_candidate_sampler(
           true_classes, self.NUM_TRUE, self.NUM_SAMPLED, True)
       result = self.evaluate(sampled_candidates)
+=======
+    with self.test_session():
+      true_classes = tf.constant([[1, 2], [0, 4], [3, 3]],
+                                 dtype=tf.int64)
+      sampled_candidates, _, _ = tf.nn.all_candidate_sampler(
+          true_classes, self.NUM_TRUE, self.NUM_SAMPLED, True)
+      result = sampled_candidates.eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     expected_ids = [0, 1, 2, 3, 4]
     self.assertAllEqual(result, expected_ids)
     self.assertEqual(sampled_candidates.get_shape(), [self.NUM_SAMPLED])
 
   def testTrueLogExpectedCount(self):
+<<<<<<< HEAD
     with self.cached_session():
       true_classes = constant_op.constant(
           [[1, 2], [0, 4], [3, 3]], dtype=dtypes.int64)
@@ -86,12 +115,37 @@ class RangeSamplerOpsTest(test.TestCase):
           true_classes, self.NUM_TRUE, self.NUM_SAMPLED, True)
       sampled_log_expected_count = math_ops.log(sampled_expected_count)
       result = self.evaluate(sampled_log_expected_count)
+=======
+    with self.test_session():
+      true_classes = tf.constant([[1, 2], [0, 4], [3, 3]],
+                                 dtype=tf.int64)
+      _, true_expected_count, _ = tf.nn.all_candidate_sampler(
+          true_classes, self.NUM_TRUE, self.NUM_SAMPLED, True)
+      true_log_expected_count = tf.log(true_expected_count)
+      result = true_log_expected_count.eval()
+
+    self.assertAllEqual(result, [[0.0] * self.NUM_TRUE] * self.BATCH_SIZE)
+    self.assertEqual(true_expected_count.get_shape(), [self.BATCH_SIZE,
+                                                       self.NUM_TRUE])
+    self.assertEqual(true_log_expected_count.get_shape(), [self.BATCH_SIZE,
+                                                           self.NUM_TRUE])
+
+  def testSampledLogExpectedCount(self):
+    with self.test_session():
+      true_classes = tf.constant([[1, 2], [0, 4], [3, 3]],
+                                 dtype=tf.int64)
+      _, _, sampled_expected_count = tf.nn.all_candidate_sampler(
+          true_classes, self.NUM_TRUE, self.NUM_SAMPLED, True)
+      sampled_log_expected_count = tf.log(sampled_expected_count)
+      result = sampled_log_expected_count.eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     self.assertAllEqual(result, [0.0] * self.NUM_SAMPLED)
     self.assertEqual(sampled_expected_count.get_shape(), [self.NUM_SAMPLED])
     self.assertEqual(sampled_log_expected_count.get_shape(), [self.NUM_SAMPLED])
 
   def testAccidentalHits(self):
+<<<<<<< HEAD
     with self.cached_session() as sess:
       true_classes = constant_op.constant(
           [[1, 2], [0, 4], [3, 3]], dtype=dtypes.int64)
@@ -100,6 +154,16 @@ class RangeSamplerOpsTest(test.TestCase):
       accidental_hits = candidate_sampling_ops.compute_accidental_hits(
           true_classes, sampled_candidates, self.NUM_TRUE)
       indices, ids, weights = self.evaluate(accidental_hits)
+=======
+    with self.test_session() as sess:
+      true_classes = tf.constant([[1, 2], [0, 4], [3, 3]],
+                                          dtype=tf.int64)
+      sampled_candidates, _, _ = tf.nn.all_candidate_sampler(
+          true_classes, self.NUM_TRUE, self.NUM_SAMPLED, True)
+      accidental_hits = tf.nn.compute_accidental_hits(
+          true_classes, sampled_candidates, self.NUM_TRUE)
+      indices, ids, weights = sess.run(accidental_hits)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     self.assertEqual(1, accidental_hits[0].get_shape().ndims)
     self.assertEqual(1, accidental_hits[1].get_shape().ndims)
@@ -108,6 +172,7 @@ class RangeSamplerOpsTest(test.TestCase):
       self.assertTrue(id_ in self.TRUE_LABELS[index])
       self.assertLess(weight, -1.0e37)
 
+<<<<<<< HEAD
   @test_util.run_deprecated_v1
   def testSeed(self):
 
@@ -119,6 +184,22 @@ class RangeSamplerOpsTest(test.TestCase):
             true_classes, self.NUM_TRUE, self.NUM_SAMPLED, True, 5, seed=seed)
         return self.evaluate(sampled)
 
+=======
+  def testSeed(self):
+
+    def draw(seed):
+      with self.test_session():
+        true_classes = tf.constant([[1, 2], [0, 4], [3, 3]],
+                                   dtype=tf.int64)
+        sampled, _, _ = tf.nn.log_uniform_candidate_sampler(
+            true_classes,
+            self.NUM_TRUE,
+            self.NUM_SAMPLED,
+            True,
+            5,
+            seed=seed)
+        return sampled.eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     # Non-zero seed. Repeatable.
     for seed in [1, 12, 123, 1234]:
       self.assertAllEqual(draw(seed), draw(seed))
@@ -133,4 +214,8 @@ class RangeSamplerOpsTest(test.TestCase):
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
   test.main()
+=======
+  tf.test.main()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

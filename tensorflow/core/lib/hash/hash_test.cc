@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +16,19 @@ limitations under the License.
 
 #include <map>
 #include <unordered_map>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <vector>
 
 #include "tensorflow/core/lib/hash/hash.h"
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include "tensorflow/core/platform/test_benchmark.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -67,11 +75,14 @@ TEST(Hash, SignedUnsignedIssue) {
   }
 }
 
+<<<<<<< HEAD
 TEST(Hash, HashPtrIsNotIdentityFunction) {
   int* ptr = reinterpret_cast<int*>(0xcafe0000);
   EXPECT_NE(hash<int*>()(ptr), size_t{0xcafe0000});
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static void BM_Hash32(int iters, int len) {
   std::string input(len, 'x');
   uint32 h = 0;
@@ -83,6 +94,7 @@ static void BM_Hash32(int iters, int len) {
 }
 BENCHMARK(BM_Hash32)->Range(1, 1024);
 
+<<<<<<< HEAD
 TEST(StringPieceHasher, Equality) {
   StringPieceHasher hasher;
 
@@ -154,4 +166,6 @@ TEST(StringPieceHasher, HashMap) {
   EXPECT_EQ(found[2], true);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

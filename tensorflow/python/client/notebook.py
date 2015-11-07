@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 """Notebook front-end to TensorFlow.
 
 When you run this binary, you'll see something like below, which indicates
@@ -26,23 +29,46 @@ Press "a" in command mode to insert cell above or "b" to insert cell below.
 
 Your root notebooks directory is FLAGS.notebook_dir
 """
+<<<<<<< HEAD
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import argparse
+=======
+
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import os
 import socket
 import sys
 
+<<<<<<< HEAD
 from tensorflow.python.platform import app
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 # pylint: disable=g-import-not-at-top
 # Official recommended way of turning on fast protocol buffers as of 10/21/14
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "cpp"
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION_VERSION"] = "2"
 
+<<<<<<< HEAD
 FLAGS = None
+=======
+from tensorflow.python.platform import app
+from tensorflow.python.platform import flags
+
+FLAGS = flags.FLAGS
+
+flags.DEFINE_string(
+    "password", None,
+    "Password to require. If set, the server will allow public access."
+    " Only used if notebook config file does not exist.")
+
+flags.DEFINE_string("notebook_dir", "experimental/brain/notebooks",
+                    "root location where to store notebooks")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 ORIG_ARGV = sys.argv
 # Main notebook process calls itself with argv[1]="kernel" to start kernel
@@ -70,15 +96,24 @@ def main(unused_argv):
       notebookapp.ip = "0.0.0.0"
       notebookapp.password = passwd(FLAGS.password)
     else:
+<<<<<<< HEAD
       print("\nNo password specified; Notebook server will only be available"
             " on the local machine.\n")
+=======
+      print ("\nNo password specified; Notebook server will only be available"
+             " on the local machine.\n")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     notebookapp.initialize(argv=["--notebook-dir", FLAGS.notebook_dir])
 
     if notebookapp.ip == "0.0.0.0":
       proto = "https" if notebookapp.certfile else "http"
       url = "%s://%s:%d%s" % (proto, socket.gethostname(), notebookapp.port,
                               notebookapp.base_project_url)
+<<<<<<< HEAD
       print("\nNotebook server will be publicly available at: %s\n" % url)
+=======
+      print "\nNotebook server will be publicly available at: %s\n" % url
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     notebookapp.start()
     return
@@ -99,6 +134,7 @@ def main(unused_argv):
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
   parser = argparse.ArgumentParser()
   parser.add_argument(
       "--password",
@@ -114,6 +150,8 @@ if __name__ == "__main__":
       default="experimental/brain/notebooks",
       help="root location where to store notebooks")
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   # When the user starts the main notebook process, we don't touch sys.argv.
   # When the main process launches kernel subprocesses, it writes all flags
   # to a tmpfile and sets --flagfile to that tmpfile, so for kernel
@@ -122,8 +160,14 @@ if __name__ == "__main__":
   # kernel app.
   if IS_KERNEL:
     # Drop everything except --flagfile.
+<<<<<<< HEAD
     sys.argv = (
         [sys.argv[0]] + [x for x in sys.argv[1:] if x.startswith("--flagfile")])
 
   FLAGS, unparsed = parser.parse_known_args()
   app.run(main=main, argv=[sys.argv[0]] + unparsed)
+=======
+    sys.argv = ([sys.argv[0]] +
+                [x for x in sys.argv[1:] if x.startswith("--flagfile")])
+  app.run()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

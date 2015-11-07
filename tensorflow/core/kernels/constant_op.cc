@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/array_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #if (defined(GOOGLE_CUDA) && GOOGLE_CUDA) || \
     (defined(TENSORFLOW_USE_ROCM) && TENSORFLOW_USE_ROCM)
 #define EIGEN_USE_GPU
@@ -75,6 +79,23 @@ ConstantOp::ConstantOp(OpKernelConstruction* ctx)
       tensor_(ctx->output_type(0)) {
   const TensorProto* proto = nullptr;
   MEMDEBUG_CACHE_OP(ctx->def().name().c_str());
+=======
+#include "tensorflow/core/kernels/constant_op.h"
+
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/tensor.pb.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/kernels/fill_functor.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+
+namespace tensorflow {
+
+ConstantOp::ConstantOp(OpKernelConstruction* ctx)
+    : OpKernel(ctx), tensor_(ctx->output_type(0)) {
+  const TensorProto* proto = nullptr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   OP_REQUIRES_OK(ctx, ctx->GetAttr("value", &proto));
   OP_REQUIRES_OK(ctx, ctx->device()->MakeTensorFromProto(
                           *proto, AllocatorAttributes(), &tensor_));
@@ -85,29 +106,41 @@ ConstantOp::ConstantOp(OpKernelConstruction* ctx)
                               DataTypeString(ctx->output_type(0)), ")"));
 }
 
+<<<<<<< HEAD
 void ConstantOp::Compute(OpKernelContext* ctx) {
   ctx->set_output(0, tensor_);
   if (TF_PREDICT_FALSE(ctx->track_allocations())) {
     ctx->record_persistent_memory_allocation(tensor_.AllocatedBytes());
   }
 }
+=======
+void ConstantOp::Compute(OpKernelContext* ctx) { ctx->set_output(0, tensor_); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 ConstantOp::~ConstantOp() {}
 
 REGISTER_KERNEL_BUILDER(Name("Const").Device(DEVICE_CPU), ConstantOp);
 
+<<<<<<< HEAD
 #if (defined(GOOGLE_CUDA) && GOOGLE_CUDA) || \
     (defined(TENSORFLOW_USE_ROCM) && TENSORFLOW_USE_ROCM)
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #define REGISTER_KERNEL(D, TYPE)                                      \
   REGISTER_KERNEL_BUILDER(                                            \
       Name("Const").Device(DEVICE_##D).TypeConstraint<TYPE>("dtype"), \
       ConstantOp);
+<<<<<<< HEAD
 REGISTER_KERNEL(GPU, Eigen::half);
 REGISTER_KERNEL(GPU, bfloat16);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 REGISTER_KERNEL(GPU, float);
 REGISTER_KERNEL(GPU, double);
 REGISTER_KERNEL(GPU, uint8);
 REGISTER_KERNEL(GPU, int8);
+<<<<<<< HEAD
 REGISTER_KERNEL(GPU, qint8);
 REGISTER_KERNEL(GPU, uint16);
 REGISTER_KERNEL(GPU, int16);
@@ -153,12 +186,94 @@ typedef Eigen::SyclDevice SYCLDevice;
 #endif  // TENSORFLOW_USE_SYCL
 
 template <typename Device, typename T, typename Index>
+=======
+REGISTER_KERNEL(GPU, int16);
+REGISTER_KERNEL(GPU, int64);
+REGISTER_KERNEL(GPU, complex64);
+REGISTER_KERNEL(GPU, bool);
+// Currently we do not support string constants on GPU
+#undef REGISTER_KERNEL
+#endif
+
+// HostConstantOp differs from ConstantOp in that its output is always
+// in host memory.
+class HostConstantOp : public OpKernel {
+ public:
+  explicit HostConstantOp(OpKernelConstruction* ctx)
+      : OpKernel(ctx), tensor_(ctx->output_type(0)) {
+    const TensorProto* proto = nullptr;
+    AllocatorAttributes alloc_attr;
+    alloc_attr.set_on_host(true);
+    OP_REQUIRES_OK(ctx, ctx->GetAttr("value", &proto));
+    OP_REQUIRES_OK(
+        ctx, ctx->device()->MakeTensorFromProto(*proto, alloc_attr, &tensor_));
+    OP_REQUIRES(
+        ctx, ctx->output_type(0) == tensor_.dtype(),
+        errors::InvalidArgument(
+            "Type mismatch between value (", DataTypeString(tensor_.dtype()),
+            ") and dtype (", DataTypeString(ctx->output_type(0)), ")"));
+  }
+
+  void Compute(OpKernelContext* ctx) override { ctx->set_output(0, tensor_); }
+
+  bool IsExpensive() override { return false; }
+
+  ~HostConstantOp() override {}
+
+ private:
+  Tensor tensor_;
+  TF_DISALLOW_COPY_AND_ASSIGN(HostConstantOp);
+};
+
+// A special GPU kernel for int32.
+// TODO(b/25387198): Also enable int32 in device memory. This kernel
+// registration requires all int32 inputs and outputs to be in host memory.
+REGISTER_KERNEL_BUILDER(Name("Const")
+                            .Device(DEVICE_GPU)
+                            .HostMemory("output")
+                            .TypeConstraint<int32>("dtype"),
+                        HostConstantOp);
+
+typedef Eigen::ThreadPoolDevice CPUDevice;
+typedef Eigen::GpuDevice GPUDevice;
+
+namespace functor {
+
+// Partial specialization of FillFunctor<Device=CPUDevice, T>.
+template <typename T>
+struct FillFunctor<CPUDevice, T> {
+  void operator()(const CPUDevice& d, typename TTypes<T>::Flat out,
+                  typename TTypes<T>::ConstScalar in) {
+    out.device(d) = out.constant(in());
+  }
+};
+
+// Partial specialization of SetZeroFunctor<Device=CPUDevice, T>.
+template <typename T>
+struct SetZeroFunctor<CPUDevice, T> {
+  void operator()(const CPUDevice& d, typename TTypes<T>::Flat out) {
+    out.device(d) = out.constant(0);
+  }
+};
+
+#define DEFINE_SETZERO_CPU(T) template struct SetZeroFunctor<CPUDevice, T>
+DEFINE_SETZERO_CPU(float);
+DEFINE_SETZERO_CPU(double);
+DEFINE_SETZERO_CPU(int32);
+DEFINE_SETZERO_CPU(complex64);
+#undef DEFINE_SETZERO_CPU
+
+}  // end namespace functor
+
+template <typename Device, typename T>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class FillOp : public OpKernel {
  public:
   explicit FillOp(OpKernelConstruction* context) : OpKernel(context) {}
 
   void Compute(OpKernelContext* context) override {
     const Tensor& Tdims = context->input(0);
+<<<<<<< HEAD
     OP_REQUIRES(context, IsLegacyVector(Tdims.shape()),
                 errors::InvalidArgument("dims must be a vector, got shape ",
                                         Tdims.shape().DebugString()));
@@ -173,12 +288,33 @@ class FillOp : public OpKernel {
                                 dims.size(), &shape));
     Tensor* out = nullptr;
     OP_REQUIRES_OK(context, context->allocate_output(0, shape, &out));
+=======
+    OP_REQUIRES(context, TensorShapeUtils::IsLegacyVector(Tdims.shape()),
+                errors::InvalidArgument("dims must be a vector of int32."));
+    const Tensor& Tvalue = context->input(1);
+    OP_REQUIRES(context, TensorShapeUtils::IsLegacyScalar(Tvalue.shape()),
+                errors::InvalidArgument("value must be a scalar."));
+    auto dims = Tdims.flat<int32>();
+    for (int i = 0; i < dims.size(); i++) {
+      OP_REQUIRES(context, dims(i) >= 0,
+                  errors::InvalidArgument("dims[", i, "] = ", dims(i),
+                                          " must be nonnegative."));
+    }
+    Tensor* out = nullptr;
+    OP_REQUIRES_OK(
+        context,
+        context->allocate_output(
+            0, TensorShapeUtils::MakeShape(
+                   reinterpret_cast<const int32*>(dims.data()), dims.size()),
+            &out));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     functor::FillFunctor<Device, T> functor;
     functor(context->eigen_device<Device>(), out->flat<T>(),
             Tvalue.scalar<T>());
   }
 };
 
+<<<<<<< HEAD
 #define REGISTER_KERNEL(D, TYPE)                                   \
   REGISTER_KERNEL_BUILDER(Name("Fill")                             \
                               .Device(DEVICE_##D)                  \
@@ -237,6 +373,31 @@ REGISTER_KERNEL(GPU, int16);
 REGISTER_KERNEL(GPU, int64);
 REGISTER_KERNEL(GPU, bool);
 // Currently we do not support filling strings on GPU
+=======
+#define REGISTER_KERNEL(D, TYPE)                         \
+  REGISTER_KERNEL_BUILDER(Name("Fill")                   \
+                              .Device(DEVICE_##D)        \
+                              .TypeConstraint<TYPE>("T") \
+                              .HostMemory("dims"),       \
+                          FillOp<D##Device, TYPE>);
+
+#define REGISTER_CPU_KERNEL(TYPE) REGISTER_KERNEL(CPU, TYPE)
+TF_CALL_ALL_TYPES(REGISTER_CPU_KERNEL);
+#undef REGISTER_CPU_KERNEL
+
+#if GOOGLE_CUDA
+REGISTER_KERNEL(GPU, float);
+REGISTER_KERNEL(GPU, double);
+REGISTER_KERNEL(GPU, uint8);
+REGISTER_KERNEL(GPU, int8);
+REGISTER_KERNEL(GPU, int16);
+REGISTER_KERNEL(GPU, int64);
+// Currently we do not support filling strings and complex64 on GPU
+
+#endif  // GOOGLE_CUDA
+
+#undef REGISTER_KERNEL
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // A special GPU kernel for int32.
 // TODO(b/25387198): Also enable int32 in device memory. This kernel
@@ -244,6 +405,7 @@ REGISTER_KERNEL(GPU, bool);
 REGISTER_KERNEL_BUILDER(Name("Fill")
                             .Device(DEVICE_GPU)
                             .TypeConstraint<int32>("T")
+<<<<<<< HEAD
                             .TypeConstraint<int32>("index_type")
                             .HostMemory("dims")
                             .HostMemory("value")
@@ -252,6 +414,12 @@ REGISTER_KERNEL_BUILDER(Name("Fill")
 #endif
 
 #undef REGISTER_KERNEL
+=======
+                            .HostMemory("dims")
+                            .HostMemory("value")
+                            .HostMemory("output"),
+                        FillOp<CPUDevice, int32>);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename Device, typename T>
 class ZerosLikeOp : public OpKernel {
@@ -260,6 +428,7 @@ class ZerosLikeOp : public OpKernel {
 
   void Compute(OpKernelContext* ctx) override {
     const Tensor& input = ctx->input(0);
+<<<<<<< HEAD
     const Device& d = ctx->eigen_device<Device>();
     if (std::is_same<T, Variant>::value) {
       OP_REQUIRES(
@@ -282,6 +451,15 @@ class ZerosLikeOp : public OpKernel {
       functor::SetZeroFunctor<Device, T> f;
       f(d, out->flat<T>());
     }
+=======
+    Tensor* out = nullptr;
+    OP_REQUIRES_OK(ctx, ctx->allocate_output(0, input.shape(), &out));
+    Tensor zero(DataTypeToEnum<T>::value, {1});
+    zero.scalar<T>().setZero();
+    const Tensor& zero_cref = zero;
+    functor::FillFunctor<Device, T> functor;
+    functor(ctx->eigen_device<Device>(), out->flat<T>(), zero_cref.scalar<T>());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -291,6 +469,7 @@ class ZerosLikeOp : public OpKernel {
       ZerosLikeOp<dev##Device, type>)
 
 #define REGISTER_CPU(type) REGISTER_KERNEL(type, CPU)
+<<<<<<< HEAD
 TF_CALL_POD_STRING_TYPES(REGISTER_CPU);
 REGISTER_CPU(Variant);
 #undef REGISTER_CPU
@@ -410,4 +589,43 @@ REGISTER_KERNEL_BUILDER(Name("Placeholder").Device(DEVICE_DEFAULT),
                         PlaceholderOp);
 REGISTER_KERNEL_BUILDER(Name("PlaceholderV2").Device(DEVICE_DEFAULT),
                         PlaceholderOp);
+=======
+TF_CALL_ALL_TYPES(REGISTER_CPU);
+#undef REGISTER_CPU
+
+#if GOOGLE_CUDA
+REGISTER_KERNEL(float, GPU);
+REGISTER_KERNEL(double, GPU);
+#endif  // GOOGLE_CUDA
+
+#undef REGISTER_KERNEL
+
+class PlaceholderOp : public OpKernel {
+ public:
+  explicit PlaceholderOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+    OP_REQUIRES_OK(ctx, ctx->GetAttr("shape", &expected_shape_));
+  }
+
+  void Compute(OpKernelContext* ctx) override {
+    if (expected_shape_.dims() > 0) {
+      OP_REQUIRES(ctx, false,
+                  errors::InvalidArgument(
+                      "You must feed a value for placeholder tensor '", name(),
+                      "' with dtype ", DataTypeString(output_type(0)),
+                      " and shape ", expected_shape_.DebugString()));
+    } else {
+      OP_REQUIRES(ctx, false,
+                  errors::InvalidArgument(
+                      "You must feed a value for placeholder tensor '", name(),
+                      "' with dtype ", DataTypeString(output_type(0))));
+    }
+  }
+
+ private:
+  TensorShape expected_shape_;
+};
+
+REGISTER_KERNEL_BUILDER(Name("Placeholder").Device(DEVICE_CPU), PlaceholderOp);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

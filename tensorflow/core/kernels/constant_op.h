@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,14 @@ limitations under the License.
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/tensor_types.h"
 #include "tensorflow/core/platform/macros.h"
+=======
+#ifndef TENSORFLOW_KERNELS_CONSTANT_OP_H_
+#define TENSORFLOW_KERNELS_CONSTANT_OP_H_
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -36,6 +45,7 @@ class ConstantOp : public OpKernel {
   TF_DISALLOW_COPY_AND_ASSIGN(ConstantOp);
 };
 
+<<<<<<< HEAD
 class PlaceholderOp : public OpKernel {
  public:
   explicit PlaceholderOp(OpKernelConstruction* ctx);
@@ -48,3 +58,8 @@ class PlaceholderOp : public OpKernel {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_CONSTANT_OP_H_
+=======
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_KERNELS_CONSTANT_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

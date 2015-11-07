@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/math_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #if (defined(GOOGLE_CUDA) && GOOGLE_CUDA) || \
     (defined(TENSORFLOW_USE_ROCM) && TENSORFLOW_USE_ROCM)
 #define EIGEN_USE_GPU
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#if GOOGLE_CUDA
+#define EIGEN_USE_GPU
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/kernels/argmax_op.h"
 
 #include <memory>
+<<<<<<< HEAD
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/bounds_check.h"
 #include "tensorflow/core/framework/op_kernel.h"
@@ -35,13 +45,27 @@ limitations under the License.
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/macros.h"
+=======
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
 
+<<<<<<< HEAD
 template <typename Device, typename T, typename Tout, typename ArgFunctor>
+=======
+template <typename Device, typename T, typename ArgFunctor>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class ArgOp : public OpKernel {
  public:
   explicit ArgOp(OpKernelConstruction* context) : OpKernel(context) {}
@@ -55,6 +79,7 @@ class ArgOp : public OpKernel {
                     "dim must be a scalar, but received tensor of shape: ",
                     dimension.shape().DebugString()));
 
+<<<<<<< HEAD
     const int32 dim = internal::SubtleMustCopy(dimension.scalar<int32>()());
     const int input_dims = input.dims();
 
@@ -73,10 +98,25 @@ class ArgOp : public OpKernel {
     const TensorShape& input_shape = input.shape();
     for (int d = 0; d < input_dims - 1; ++d) {
       output_shape.AddDim(input_shape.dim_size((d < axis) ? d : d + 1));
+=======
+    const int32 dim = dimension.scalar<int32>()();
+    const int input_dims = input.dims();
+
+    OP_REQUIRES(context, dim >= 0, errors::InvalidArgument("dim must be >= 0"));
+    OP_REQUIRES(context, dim < input_dims,
+                errors::InvalidArgument("Minimum tensor rank: ", dim,
+                                        " but got: ", input_dims));
+
+    TensorShape output_shape;
+    TensorShape input_shape = input.shape();
+    for (int d = 0; d < input_dims - 1; ++d) {
+      output_shape.AddDim(input_shape.dim_size((d < dim) ? d : d + 1));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     Tensor* output = nullptr;
     OP_REQUIRES_OK(context, context->allocate_output(0, output_shape, &output));
 
+<<<<<<< HEAD
     if (output_shape.num_elements() == 0) {
       return;
     }
@@ -86,6 +126,13 @@ class ArgOp : public OpKernel {
     ArgFunctor::Reduce##NDIM(context->eigen_device<Device>(),   \
                              input.tensor<T, NDIM>(), axis,     \
                              output->tensor<Tout, NDIM - 1>()); \
+=======
+#define HANDLE_DIM(NDIM)                                         \
+  case NDIM:                                                     \
+    ArgFunctor::Reduce##NDIM(context->eigen_device<Device>(),    \
+                             input.tensor<T, NDIM>(), dim,       \
+                             output->tensor<int64, NDIM - 1>()); \
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     break;
 
     switch (input_dims) {
@@ -94,6 +141,7 @@ class ArgOp : public OpKernel {
       HANDLE_DIM(3);
       HANDLE_DIM(4);
       HANDLE_DIM(5);
+<<<<<<< HEAD
       HANDLE_DIM(6);
       HANDLE_DIM(7);
 
@@ -103,6 +151,13 @@ class ArgOp : public OpKernel {
                                             "to 7 input dimensions, but got ",
                                             input_dims, ". Inputs shape: ",
                                             input.shape().DebugString()));
+=======
+
+      default:
+        OP_REQUIRES(context, false,
+                    errors::InvalidArgument(
+                        "ArgOp : Unhandled input dimensions: ", input_dims));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 #undef HANDLE_DIM
@@ -111,6 +166,7 @@ class ArgOp : public OpKernel {
   TF_DISALLOW_COPY_AND_ASSIGN(ArgOp);
 };
 
+<<<<<<< HEAD
 template <typename Device, typename T, typename Tout>
 class ArgMaxOp
     : public ArgOp<Device, T, Tout, functor::ArgMax<Device, T, Tout> > {
@@ -157,10 +213,42 @@ TF_CALL_REAL_NUMBER_TYPES(REGISTER_ARGMAX);
 
 #if (defined(GOOGLE_CUDA) && GOOGLE_CUDA) || \
     (defined(TENSORFLOW_USE_ROCM) && TENSORFLOW_USE_ROCM)
+=======
+template <typename Device, typename T>
+class ArgMaxOp : public ArgOp<Device, T, functor::ArgMax<Device, T> > {
+ public:
+  explicit ArgMaxOp(OpKernelConstruction* context)
+      : ArgOp<Device, T, functor::ArgMax<Device, T> >(context) {}
+};
+
+template <typename Device, typename T>
+class ArgMinOp : public ArgOp<Device, T, functor::ArgMin<Device, T> > {
+ public:
+  explicit ArgMinOp(OpKernelConstruction* context)
+      : ArgOp<Device, T, functor::ArgMin<Device, T> >(context) {}
+};
+
+#define REGISTER_ARGMAX(type)                            \
+  REGISTER_KERNEL_BUILDER(Name("ArgMax")                 \
+                              .Device(DEVICE_CPU)        \
+                              .TypeConstraint<type>("T") \
+                              .HostMemory("dimension"),  \
+                          ArgMaxOp<CPUDevice, type>);    \
+  REGISTER_KERNEL_BUILDER(Name("ArgMin")                 \
+                              .Device(DEVICE_CPU)        \
+                              .TypeConstraint<type>("T") \
+                              .HostMemory("dimension"),  \
+                          ArgMinOp<CPUDevice, type>);
+
+TF_CALL_REAL_NUMBER_TYPES(REGISTER_ARGMAX);
+
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Forward declarations of the functor specializations for GPU.
 namespace functor {
 
+<<<<<<< HEAD
 #define DECLARE_GPU_SPEC(T, Tout, Dims)                                       \
   template <>                                                                 \
   void ArgMax<GPUDevice, T, Tout>::Reduce##Dims(                              \
@@ -192,6 +280,28 @@ namespace functor {
   extern template struct ArgMin<GPUDevice, T, int64>; \
   extern template struct ArgMax<GPUDevice, T, int32>; \
   extern template struct ArgMin<GPUDevice, T, int32>;
+=======
+#define DECLARE_GPU_SPEC(T, Dims)                                              \
+  template <>                                                                  \
+  void ArgMax<GPUDevice, T>::Reduce##Dims(                                     \
+      const GPUDevice& d, typename TTypes<T, Dims>::ConstTensor input,         \
+      const int32 dimension, typename TTypes<int64, Dims - 1>::Tensor output); \
+  template <>                                                                  \
+  void ArgMin<GPUDevice, T>::Reduce##Dims(                                     \
+      const GPUDevice& d, typename TTypes<T, Dims>::ConstTensor input,         \
+      const int32 dimension, typename TTypes<int64, Dims - 1>::Tensor output);
+
+#define DECLARE_GPU_SPECS(T) \
+  DECLARE_GPU_SPEC(T, 1);    \
+  DECLARE_GPU_SPEC(T, 2);    \
+  DECLARE_GPU_SPEC(T, 3);    \
+  DECLARE_GPU_SPEC(T, 4);    \
+  DECLARE_GPU_SPEC(T, 5);
+
+#define DECLARE_GPU_CLASS(T)                   \
+  extern template struct ArgMax<GPUDevice, T>; \
+  extern template struct ArgMin<GPUDevice, T>;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TF_CALL_GPU_NUMBER_TYPES(DECLARE_GPU_SPECS);
 TF_CALL_GPU_NUMBER_TYPES(DECLARE_GPU_CLASS);
@@ -202,6 +312,7 @@ TF_CALL_GPU_NUMBER_TYPES(DECLARE_GPU_CLASS);
 }  // namespace functor
 
 // Registration of the GPU implementations.
+<<<<<<< HEAD
 #define REGISTER_ARGMAX_GPU(type)                                   \
   REGISTER_KERNEL_BUILDER(Name("ArgMax")                            \
                               .Device(DEVICE_GPU)                   \
@@ -231,11 +342,28 @@ TF_CALL_GPU_NUMBER_TYPES(DECLARE_GPU_CLASS);
                               .TypeConstraint<int32>("Tidx")        \
                               .HostMemory("dimension"),             \
                           ArgMinOp<GPUDevice, type, int32>);
+=======
+#define REGISTER_ARGMAX_GPU(type)                        \
+  REGISTER_KERNEL_BUILDER(Name("ArgMax")                 \
+                              .Device(DEVICE_GPU)        \
+                              .TypeConstraint<type>("T") \
+                              .HostMemory("dimension"),  \
+                          ArgMaxOp<GPUDevice, type>);    \
+  REGISTER_KERNEL_BUILDER(Name("ArgMin")                 \
+                              .Device(DEVICE_GPU)        \
+                              .TypeConstraint<type>("T") \
+                              .HostMemory("dimension"),  \
+                          ArgMinOp<GPUDevice, type>);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 TF_CALL_GPU_NUMBER_TYPES(REGISTER_ARGMAX_GPU);
 
 #undef REGISTER_ARGMAX_GPU
 
+<<<<<<< HEAD
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

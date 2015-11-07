@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,17 +36,37 @@ limitations under the License.
 #elif TENSORFLOW_USE_ROCM
 #include "tensorflow/core/platform/rocm.h"
 #endif
+=======
+// See docs in ../ops/array_ops.cc.
+
+#include <math.h>
+#include <algorithm>
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/public/tensor.h"
+
+#if GOOGLE_CUDA
+#include "tensorflow/core/common_runtime/gpu_device_context.h"
+#include "tensorflow/stream_executor/stream.h"
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
 
+<<<<<<< HEAD
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <typename T>
 struct CheckNumericsLaunch {
   void Run(const GPUDevice& d, const T* data, int size,
            int abnormal_detected[2]);
 };
+<<<<<<< HEAD
 
 extern template struct CheckNumericsLaunch<Eigen::half>;
 extern template struct CheckNumericsLaunch<float>;
@@ -60,21 +81,29 @@ struct CheckNumericsLaunchV2 {
 extern template struct CheckNumericsLaunchV2<Eigen::half>;
 extern template struct CheckNumericsLaunchV2<float>;
 extern template struct CheckNumericsLaunchV2<double>;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #endif
 
 namespace {
 
+<<<<<<< HEAD
 const int kInfBit = 0x01;
 const int kNaNBit = 0x02;
 const int kNegativeInfBit = 0x04;
 const int kPositiveInfBit = 0x08;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <typename Device, typename T>
 class CheckNumericsOp;
 
 // Partial specialization for CPU
+<<<<<<< HEAD
 // TODO(jeff,rmlarsen): We should make this variant be an AsyncOpKernel, as
 // was done for the GPU case below.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <typename T>
 class CheckNumericsOp<CPUDevice, T> : public OpKernel {
  public:
@@ -90,6 +119,7 @@ class CheckNumericsOp<CPUDevice, T> : public OpKernel {
 
     auto in = context->input(0).flat<T>();
     const T* data = in.data();
+<<<<<<< HEAD
     const int64 size = in.size();
     // Check to see if any element of the tensor is NaN or Inf.
     int fp_props = std::accumulate(
@@ -120,6 +150,21 @@ class CheckNumericsOp<CPUDevice, T> : public OpKernel {
   }
 
   virtual const string getErrorString(const int fp_props) {
+=======
+    const int size = in.size();
+    // Check to see if any element of the tensor is NaN or Inf.
+    int fp_props =
+        std::accumulate(data, data + size, 0, [](const int& x, const T& y) {
+          int prop = std::fpclassify(y);
+          int result = x;
+          if (prop == FP_INFINITE) {
+            result |= kInfBit;
+          } else if (prop == FP_NAN) {
+            result |= kNaNBit;
+          }
+          return result;
+        });
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     string status;
     if ((fp_props & kInfBit) && (fp_props & kNaNBit)) {
       status = "Inf and NaN";
@@ -131,11 +176,19 @@ class CheckNumericsOp<CPUDevice, T> : public OpKernel {
         status = "NaN";
       }
     }
+<<<<<<< HEAD
     return status;
+=======
+    if (!status.empty()) {
+      context->SetStatus(errors::InvalidArgument(message_, " : Tensor had ",
+                                                 status, " values"));
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
   string message_;
+<<<<<<< HEAD
 };
 
 template <typename Device, typename T>
@@ -195,11 +248,26 @@ class CheckNumericsOp<GPUDevice, T> : public AsyncOpKernel {
 
   explicit CheckNumericsOp(OpKernelConstruction* context)
       : AsyncOpKernel(context) {
+=======
+  static const int kInfBit = 0x01;
+  static const int kNaNBit = 0x02;
+};
+
+#if GOOGLE_CUDA
+// Partial specialization for GPU
+template <typename T>
+class CheckNumericsOp<GPUDevice, T> : public OpKernel {
+ public:
+  typedef GPUDevice Device;
+
+  explicit CheckNumericsOp(OpKernelConstruction* context) : OpKernel(context) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // message_ is used as the prefix for the assertion error message. For
     // instance, this can be the name of the input op that produced the tensor.
     OP_REQUIRES_OK(context, context->GetAttr("message", &message_));
   }
 
+<<<<<<< HEAD
   void ComputeAsync(OpKernelContext* context, DoneCallback done) override {
     // pass along the input to the output
     context->set_output(0, context->input(0));
@@ -212,29 +280,54 @@ class CheckNumericsOp<GPUDevice, T> : public AsyncOpKernel {
     // Allocate and initialize the elements to hold the check results
     Tensor abnormal_detected;
     const int abnormal_detected_size = getAnomalyIndicatorSize();
+=======
+  void Compute(OpKernelContext* context) override {
+    // pass along the input to the output
+    context->set_output(0, context->input(0));
+    auto input = context->input(0).flat<T>();
+
+    // Allocate and initialize the elements to hold the check results
+    const int abnormal_detected_size = 2;
+    Tensor abnormal_detected;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     OP_REQUIRES_OK(context, context->allocate_temp(
                                 DT_INT32, TensorShape({abnormal_detected_size}),
                                 &abnormal_detected));
 
+<<<<<<< HEAD
     auto* stream = context->op_device_context()->stream();
     OP_REQUIRES_ASYNC(context, stream != nullptr,
                       errors::Internal("No GPU stream available."), done);
 
     se::DeviceMemoryBase abnormal_detected_ptr(
+=======
+    auto* stream = context->op_device_context<GPUDeviceContext>()->stream();
+    OP_REQUIRES(context, stream, errors::Internal("No GPU stream available."));
+
+    perftools::gputools::DeviceMemoryBase abnormal_detected_ptr(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         abnormal_detected.flat<int>().data(),
         abnormal_detected.flat<int>().size());
     stream->ThenMemset32(&abnormal_detected_ptr, 0,
                          abnormal_detected.flat<int>().size() * sizeof(int));
 
+<<<<<<< HEAD
     // Call the GPU kernels for the numerical checks
     const Device& d = context->eigen_device<Device>();
     RunKernel(d, input.data(), input.size(),
               abnormal_detected.flat<int>().data());
+=======
+    // Call the Cuda kernels for the numerical checks
+    const Device& d = context->eigen_device<Device>();
+    CheckNumericsLaunch<T>().Run(d, input.data(), input.size(),
+                                 abnormal_detected.flat<int>().data());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Copy the results from device to host
     AllocatorAttributes attr;
     attr.set_on_host(true);
     attr.set_gpu_compatible(true);
+<<<<<<< HEAD
     Tensor abnormal_detected_host;
     OP_REQUIRES_OK_ASYNC(
         context,
@@ -396,5 +489,69 @@ REGISTER_KERNEL_BUILDER(
     Name("CheckNumericsV2").Device(DEVICE_GPU).TypeConstraint<double>("T"),
     CheckNumericsV2Op<GPUDevice, double>);
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+    Tensor abnormal_detected_out;
+    OP_REQUIRES_OK(context, context->allocate_temp(
+                                DT_INT32, TensorShape({abnormal_detected_size}),
+                                &abnormal_detected_out, attr));
+    int* abnormal_detected_host = abnormal_detected_out.flat<int>().data();
+    stream->ThenMemcpy(abnormal_detected_host, abnormal_detected_ptr,
+                       abnormal_detected_size * sizeof(int));
+    stream->BlockHostUntilDone();
+    OP_REQUIRES(context, stream->ok(),
+                errors::Internal("cudaMemcpy from device to host failed"));
+
+    int is_nan = abnormal_detected_host[0];
+    int is_inf = abnormal_detected_host[1];
+    if (is_nan || is_inf) {
+      string status;
+      LOG(ERROR) << "abnormal_detected_host @" << abnormal_detected_host
+                 << " = {" << is_nan << ", " << is_inf << "} " << message_;
+
+      // Results should always be 1 or 0.  If we see anything else then
+      // there has been some GPU memory corruption.
+      CHECK_GE(is_nan, 0);
+      CHECK_GE(is_inf, 0);
+      CHECK_LE(is_nan, 1);
+      CHECK_LE(is_inf, 1);
+
+      if (is_nan && is_inf) {
+        status = "Inf and NaN";
+      } else if (is_nan) {
+        status = "NaN";
+      } else if (is_inf) {
+        status = "Inf";
+      }
+      context->SetStatus(errors::InvalidArgument(message_, " : Tensor had ",
+                                                 status, " values"));
+    }
+  }
+
+ private:
+  string message_;
+};
+#endif  // GOOGLE_CUDA
+
+}  // namespace
+
+REGISTER_KERNEL_BUILDER(Name("CheckNumerics")
+                            .Device(DEVICE_CPU)
+                            .TypeConstraint<float>("T"),
+                        CheckNumericsOp<CPUDevice, float>);
+REGISTER_KERNEL_BUILDER(Name("CheckNumerics")
+                            .Device(DEVICE_CPU)
+                            .TypeConstraint<double>("T"),
+                        CheckNumericsOp<CPUDevice, double>);
+#if GOOGLE_CUDA
+REGISTER_KERNEL_BUILDER(Name("CheckNumerics")
+                            .Device(DEVICE_GPU)
+                            .TypeConstraint<float>("T"),
+                        CheckNumericsOp<GPUDevice, float>);
+REGISTER_KERNEL_BUILDER(Name("CheckNumerics")
+                            .Device(DEVICE_GPU)
+                            .TypeConstraint<double>("T"),
+                        CheckNumericsOp<GPUDevice, double>);
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

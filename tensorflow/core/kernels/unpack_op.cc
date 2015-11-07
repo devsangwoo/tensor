@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/array_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/bounds_check.h"
 #include "tensorflow/core/framework/op_kernel.h"
@@ -26,12 +30,25 @@ limitations under the License.
 #include "tensorflow/core/kernels/split_lib.h"
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/gtl/array_slice.h"
+=======
+#include <vector>
+
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/kernels/split_op.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/lib/gtl/array_slice.h"
+#include "tensorflow/core/public/tensor.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
 
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 typedef Eigen::SyclDevice SYCLDevice;
 #endif  // TENSORFLOW_USE_SYCL
@@ -42,12 +59,19 @@ class UnpackOp : public OpKernel {
   explicit UnpackOp(OpKernelConstruction* context) : OpKernel(context) {
     OP_REQUIRES_OK(context, context->GetAttr("axis", &axis_));
   }
+=======
+template <typename Device, typename T>
+class UnpackOp : public OpKernel {
+ public:
+  explicit UnpackOp(OpKernelConstruction* c) : OpKernel(c) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   void Compute(OpKernelContext* context) override {
     const int32 num = num_outputs();
     const Tensor& input = context->input(0);
     const TensorShape& input_shape = input.shape();
 
+<<<<<<< HEAD
     int axis = axis_;
     if (axis < 0) axis += input_shape.dims();
 
@@ -72,6 +96,17 @@ class UnpackOp : public OpKernel {
 
 // This optimization is currently not applicable for SYCL devices
 #ifndef TENSORFLOW_USE_SYCL
+=======
+    OP_REQUIRES(
+        context, input_shape.dims() > 0 && input_shape.dim_size(0) == num,
+        errors::InvalidArgument("Input shape must start with ", num, ", got ",
+                                input_shape.ShortDebugString()));
+
+    auto output_shape = input_shape;
+    output_shape.RemoveDim(0);
+    const int32 output_size = output_shape.num_elements();
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Special case: Aligned, so we can share the underlying buffer.
     //
     // Apply this optimization conservatively: if input is aligned,
@@ -79,8 +114,12 @@ class UnpackOp : public OpKernel {
     // because if the immediate consumer of the resulting tensors are
     // not using eigen for computation, its perfectly fine to avoid
     // the copying.
+<<<<<<< HEAD
     if (axis == 0 &&
         (output_size == 0 || IsInnerDimsSizeAligned<T>(input_shape))) {
+=======
+    if (output_size == 0 || IsInnerDimsSizeAligned<T>(input_shape)) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       for (int i = 0; i < num; ++i) {
         Tensor output;
         CHECK(output.CopyFrom(input.Slice(i, i + 1), output_shape));
@@ -88,6 +127,7 @@ class UnpackOp : public OpKernel {
       }
       return;
     }
+<<<<<<< HEAD
 #endif  // TENSORFLOW_USE_SYCL
 
     Eigen::DenseIndex before_dim = 1;
@@ -105,11 +145,18 @@ class UnpackOp : public OpKernel {
     // same computational kernels.
     auto input_reshaped =
         input.shaped<T, 2>({before_dim, axis_dim * after_dim});
+=======
+
+    // Except for shape, unpack is a special case of split, so we reuse the
+    // same computational kernels.
+    auto input_reshaped = input.shaped<T, 3>({1, num, output_size});
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     for (int i = 0; i < num; ++i) {
       Tensor* output;
       OP_REQUIRES_OK(context,
                      context->allocate_output(i, output_shape, &output));
+<<<<<<< HEAD
 
       if (output_shape.num_elements() > 0) {
         auto output_shaped = output->shaped<T, 2>({before_dim, after_dim});
@@ -124,6 +171,17 @@ class UnpackOp : public OpKernel {
 
  private:
   int axis_;
+=======
+      auto output_shaped = output->shaped<T, 3>({1, 1, output_size});
+
+      Eigen::DSizes<ptrdiff_t, 3> indices{0, i, 0};
+      Eigen::DSizes<ptrdiff_t, 3> sizes{1, 1, output_size};
+      functor::Split<Device, T>()(context->eigen_device<Device>(),
+                                  output_shaped, input_reshaped, indices,
+                                  sizes);
+    }
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 #define REGISTER_UNPACK(type)                                      \
@@ -135,7 +193,11 @@ TF_CALL_ALL_TYPES(REGISTER_UNPACK);
 
 #undef REGISTER_UNPACK
 
+<<<<<<< HEAD
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define REGISTER_GPU(type)                                         \
   REGISTER_KERNEL_BUILDER(                                         \
@@ -143,6 +205,7 @@ TF_CALL_ALL_TYPES(REGISTER_UNPACK);
       UnpackOp<GPUDevice, type>)
 
 TF_CALL_GPU_NUMBER_TYPES(REGISTER_GPU);
+<<<<<<< HEAD
 TF_CALL_bfloat16(REGISTER_GPU);
 TF_CALL_uint8(REGISTER_GPU);
 TF_CALL_bool(REGISTER_GPU);
@@ -191,5 +254,10 @@ REGISTER_KERNEL_BUILDER(Name("Unpack")
                         UnpackOp<CPUDevice, int64>);
 #undef REGISTER_SYCL
 #endif  // TENSORFLOW_USE_SYCL
+=======
+#undef REGISTER_GPU
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // end namespace tensorflow

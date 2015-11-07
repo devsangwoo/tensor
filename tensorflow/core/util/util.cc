@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,11 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/strcat.h"
 #include "tensorflow/core/platform/logging.h"
 
+=======
+#include "tensorflow/core/util/util.h"
+
+#include "tensorflow/core/platform/logging.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace tensorflow {
 
 StringPiece NodeNamePrefix(const StringPiece& op_name) {
@@ -85,7 +91,11 @@ void MovingAverage::AddValue(double v) {
 
 static char hex_char[] = "0123456789abcdef";
 
+<<<<<<< HEAD
 string PrintMemory(const char* ptr, size_t n) {
+=======
+string PrintMemory(const char* ptr, int n) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string ret;
   ret.resize(n * 3);
   for (int i = 0; i < n; ++i) {
@@ -96,6 +106,7 @@ string PrintMemory(const char* ptr, size_t n) {
   return ret;
 }
 
+<<<<<<< HEAD
 string SliceDebugString(const TensorShape& shape, const int64 flat) {
   // Special case rank 0 and 1
   const int dims = shape.dims();
@@ -136,4 +147,6 @@ bool DisableMKL() {
   return status == MKL_OFF ? true : false;
 }
 #endif  // INTEL_MKL
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

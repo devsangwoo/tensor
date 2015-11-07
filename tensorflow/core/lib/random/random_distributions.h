@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,20 +26,33 @@ limitations under the License.
 
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/lib/bfloat16/bfloat16.h"
+=======
+#ifndef TENSORFLOW_LIB_RANDOM_RANDOM_DISTRIBUTIONS_H_
+#define TENSORFLOW_LIB_RANDOM_RANDOM_DISTRIBUTIONS_H_
+
+#include <math.h>
+#include <string.h>
+#include <algorithm>
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/random/philox_random.h"
 
 namespace tensorflow {
 namespace random {
 
+<<<<<<< HEAD
 // Helper function to convert a 16-bit integer to a half between [0..1).
 PHILOX_DEVICE_INLINE Eigen::half Uint16ToHalf(uint16 x);
 // Helper function to convert a 16-bit integer to a bfloat16 between [0..1).
 PHILOX_DEVICE_INLINE bfloat16 Uint16ToGfloat16(uint16 x);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Helper function to convert a 32-bit integer to a float between [0..1).
 PHILOX_DEVICE_INLINE float Uint32ToFloat(uint32 x);
 // Helper function to convert two 32-bit integers to a double between [0..1).
 PHILOX_DEVICE_INLINE double Uint64ToDouble(uint32 x0, uint32 x1);
 
+<<<<<<< HEAD
 // Computes a + b. Requires that the result is representable in the destination
 // type and that b is not maximal (i.e. b + 1 is not 0). Notably, the addend b
 // need *not* be representable in that type. (The condition on b excludes the
@@ -53,14 +67,23 @@ PHILOX_DEVICE_INLINE Int SignedAdd(Int a,
   return a + static_cast<Int>(b_div_2) + static_cast<Int>(b - b_div_2);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // A class that generates uniform distribution random numbers from the
 // underlying random integer generator.
 // Arguments:
 //   Generator: a generator type that returns a number of uint32 upon each
+<<<<<<< HEAD
 //              invocation. It needs to define kResultElementCount for the
 //              sample count for each invocation, and ResultType for the
 //              actual returned sample type.
 //   RealType: the data type of the real numbers that will be returned by the
+=======
+//              each invocation. It needs to define kResultElementCount for the
+//              sample count for each invocation, and ResultType for actual
+//              returned sample type.
+//   RealType: the data type of the real numberes that will be returned by the
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //             distribution. This could be either float or double for now.
 // This class is meant to be implemented through specialization. The default
 // is not defined by design.
@@ -68,6 +91,7 @@ template <class Generator, typename RealType>
 class UniformDistribution;
 
 template <class Generator>
+<<<<<<< HEAD
 class UniformDistribution<Generator, Eigen::half> {
  public:
   // The number of elements that will be returned.
@@ -116,12 +140,17 @@ class UniformDistribution<Generator, bfloat16> {
 };
 
 template <class Generator>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class UniformDistribution<Generator, float> {
  public:
   // The number of elements that will be returned.
   static const int kResultElementCount = Generator::kResultElementCount;
+<<<<<<< HEAD
   // Cost of generation of a single element (in cycles).
   static const int kElementCost = 3;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Indicate that this distribution may take variable number of samples
   // during the runtime.
   static const bool kVariableSamplesPerOutput = false;
@@ -144,8 +173,11 @@ class UniformDistribution<Generator, double> {
  public:
   // The number of elements that will be returned.
   static const int kResultElementCount = Generator::kResultElementCount / 2;
+<<<<<<< HEAD
   // Cost of generation of a single element (in cycles).
   static const int kElementCost = 3;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Indicate that this distribution may take variable number of samples
   // during the runtime.
   static const bool kVariableSamplesPerOutput = false;
@@ -163,6 +195,7 @@ class UniformDistribution<Generator, double> {
   }
 };
 
+<<<<<<< HEAD
 template <class Generator>
 class UniformDistribution<Generator, int32> {
  public:
@@ -301,6 +334,8 @@ template <typename Generator>
 class UniformFullIntDistribution<Generator, uint64>
     : public UniformFullIntDistribution64<Generator, uint64> {};
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // A class that adapts the underlying native multiple samples to return a single
 // sample at a time.
 template <class Generator>
@@ -327,6 +362,7 @@ class SingleSampleAdapter {
     return unused_results_[used_result_index_++];
   }
 
+<<<<<<< HEAD
   PHILOX_DEVICE_INLINE
   void Skip(uint64 num_skips) {
     if (!num_skips) {
@@ -358,6 +394,9 @@ class SingleSampleAdapter {
     }
   }
 
+=======
+ private:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Generator* generator_;
   typename Generator::ResultType unused_results_;
   int used_result_index_;
@@ -370,7 +409,11 @@ class SingleSampleAdapter {
 //              each invocation. It needs to define kResultElementCount for the
 //              sample count for each invocation, and ResultType for actual
 //              returned sample type.
+<<<<<<< HEAD
 //   RealType: the data type of the real numbers that will be returned by the
+=======
+//   RealType: the data type of the real numberes that will be returned by the
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //             distribution. This could be either float or double for now.
 // This class is meant to be implemented through specialization. The default
 // is not defined by design.
@@ -384,6 +427,7 @@ PHILOX_DEVICE_INLINE
 void BoxMullerDouble(uint32 x0, uint32 x1, uint32 x2, uint32 x3, double* d0,
                      double* d1);
 
+<<<<<<< HEAD
 // Exactly like the float version, except that we convert to half afterwards;
 // since we don't have half-precision sin/cos even on GPUs, there's nothing to
 // gain from working in half internally.
@@ -444,13 +488,18 @@ class NormalDistribution<Generator, bfloat16> {
   }
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <class Generator>
 class NormalDistribution<Generator, float> {
  public:
   // The number of elements that will be returned.
   static const int kResultElementCount = Generator::kResultElementCount;
+<<<<<<< HEAD
   // Cost of generation of a single element (in cycles).
   static const int kElementCost = 70;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Indicate that this distribution may take variable number of samples
   // during the runtime.
   static const bool kVariableSamplesPerOutput = false;
@@ -473,8 +522,11 @@ class NormalDistribution<Generator, double> {
  public:
   // The number of elements that will be returned.
   static const int kResultElementCount = Generator::kResultElementCount / 2;
+<<<<<<< HEAD
   // Cost of generation of a single element (in cycles).
   static const int kElementCost = 70;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Indicate that this distribution may take variable number of samples
   // during the runtime.
   static const bool kVariableSamplesPerOutput = false;
@@ -501,13 +553,18 @@ class NormalDistribution<Generator, double> {
 //              each invocation. It needs to define kResultElementCount for the
 //              sample count for each invocation, and ResultType for actual
 //              returned sample type.
+<<<<<<< HEAD
 //   RealType: the data type of the real numbers that will be returned by the
+=======
+//   RealType: the data type of the real numberes that will be returned by the
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //             distribution. This could be either float or double for now.
 // This class is meant to be implemented through specialization. The default
 // is not defined by design.
 template <class SingleSampleGenerator, typename RealType>
 class TruncatedNormalDistribution;
 
+<<<<<<< HEAD
 // Exactly like the float version, except that we convert to half afterwards;
 // since we don't have half-precision sin/cos even on GPUs, there's nothing to
 // gain from working in half internally.
@@ -603,6 +660,8 @@ class TruncatedNormalDistribution<SingleSampleGenerator, bfloat16> {
   }
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Partial specialization for float.
 template <class SingleSampleGenerator>
 class TruncatedNormalDistribution<SingleSampleGenerator, float> {
@@ -610,8 +669,11 @@ class TruncatedNormalDistribution<SingleSampleGenerator, float> {
   // The number of elements that will be returned.
   static const int kResultElementCount =
       SingleSampleGenerator::kNativeElementCount;
+<<<<<<< HEAD
   // Cost of generation of a single element (in cycles).
   static const int kElementCost = 90;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Indicate that this distribution may take variable number of samples
   // during the runtime.
   static const bool kVariableSamplesPerOutput = true;
@@ -634,6 +696,7 @@ class TruncatedNormalDistribution<SingleSampleGenerator, float> {
       float f[2];
       BoxMullerFloat(x0, x1, &f[0], &f[1]);
 
+<<<<<<< HEAD
       if (Eigen::numext::abs(f[0]) < kTruncateValue) {
         results[index++] = f[0];
         if (index >= kResultElementCount) {
@@ -644,6 +707,14 @@ class TruncatedNormalDistribution<SingleSampleGenerator, float> {
         results[index++] = f[1];
         if (index >= kResultElementCount) {
           return results;
+=======
+      for (int i = 0; i < 2; ++i) {
+        if (fabs(f[i]) < kTruncateValue) {
+          results[index++] = f[i];
+          if (index >= kResultElementCount) {
+            return results;
+          }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         }
       }
     }
@@ -659,8 +730,11 @@ class TruncatedNormalDistribution<SingleSampleGenerator, double> {
       (SingleSampleGenerator::kNativeElementCount > 1)
           ? SingleSampleGenerator::kNativeElementCount / 2
           : 1;
+<<<<<<< HEAD
   // Cost of generation of a single element (in cycles).
   static const int kElementCost = 90;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Indicate that this distribution may take variable number of samples
   // during the runtime.
   static const bool kVariableSamplesPerOutput = true;
@@ -680,6 +754,7 @@ class TruncatedNormalDistribution<SingleSampleGenerator, double> {
       double d[2];
       BoxMullerDouble(x0, x1, x2, x3, &d[0], &d[1]);
 
+<<<<<<< HEAD
       if (Eigen::numext::abs(d[0]) < kTruncateValue) {
         results[index++] = d[0];
         if (index >= kResultElementCount) {
@@ -690,6 +765,14 @@ class TruncatedNormalDistribution<SingleSampleGenerator, double> {
         results[index++] = d[1];
         if (index >= kResultElementCount) {
           return results;
+=======
+      for (int i = 0; i < 2; ++i) {
+        if (fabs(d[i]) < kTruncateValue) {
+          results[index++] = d[i];
+          if (index >= kResultElementCount) {
+            return results;
+          }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         }
       }
     }
@@ -710,12 +793,21 @@ void BoxMullerFloat(uint32 x0, uint32 x1, float* f0, float* f1) {
     u1 = epsilon;
   }
   const float v1 = 2.0f * M_PI * Uint32ToFloat(x1);
+<<<<<<< HEAD
   const float u2 = Eigen::numext::sqrt(-2.0f * Eigen::numext::log(u1));
 #if defined(TENSORFLOW_USE_SYCL) || !defined(__linux__)
   *f0 = Eigen::numext::sin(v1);
   *f1 = Eigen::numext::cos(v1);
 #else
   sincosf(v1, f0, f1);
+=======
+  const float u2 = sqrt(-2.0f * log(u1));
+#if defined(__linux)
+  sincosf(v1, f0, f1);
+#else
+  *f0 = sinf(v1);
+  *f1 = cosf(v1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #endif
   *f0 *= u2;
   *f1 *= u2;
@@ -736,17 +828,27 @@ void BoxMullerDouble(uint32 x0, uint32 x1, uint32 x2, uint32 x3, double* d0,
     u1 = epsilon;
   }
   const double v1 = 2 * M_PI * Uint64ToDouble(x2, x3);
+<<<<<<< HEAD
   const double u2 = Eigen::numext::sqrt(-2.0 * Eigen::numext::log(u1));
 #if defined(TENSORFLOW_USE_SYCL) || !defined(__linux__)
   *d0 = Eigen::numext::sin(v1);
   *d1 = Eigen::numext::cos(v1);
 #else
   sincos(v1, d0, d1);
+=======
+  const double u2 = sqrt(-2.0 * log(u1));
+#if defined(__linux)
+  sincos(v1, d0, d1);
+#else
+  *d0 = sin(v1);
+  *d1 = cos(v1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #endif
   *d0 *= u2;
   *d1 *= u2;
 }
 
+<<<<<<< HEAD
 // Helper function to convert an 16-bit integer to a half between [0..1).
 PHILOX_DEVICE_INLINE Eigen::half Uint16ToHalf(uint16 x) {
   // IEEE754 halfs are formatted as follows (MSB first):
@@ -785,6 +887,8 @@ PHILOX_DEVICE_INLINE bfloat16 Uint16ToGfloat16(uint16 x) {
   return result - bfloat16(1.0);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Helper function to convert an 32-bit integer to a float between [0..1).
 PHILOX_DEVICE_INLINE float Uint32ToFloat(uint32 x) {
   // IEEE754 floats are formatted as follows (MSB first):
@@ -825,4 +929,8 @@ PHILOX_DEVICE_INLINE double Uint64ToDouble(uint32 x0, uint32 x1) {
 }  // namespace random
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_LIB_RANDOM_RANDOM_DISTRIBUTIONS_H_
+=======
+#endif  // TENSORFLOW_LIB_RANDOM_RANDOM_DISTRIBUTIONS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

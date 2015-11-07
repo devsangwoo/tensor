@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +26,12 @@ limitations under the License.
 #if defined(TENSORFLOW_PROTOBUF_USES_CORD)
 #include "strings/cord_varint.h"
 #endif  // defined(TENSORFLOW_PROTOBUF_USES_CORD)
+=======
+#include "tensorflow/core/platform/tensor_coding.h"
+
+#include "tensorflow/core/lib/core/coding.h"
+#include "tensorflow/core/lib/core/stringpiece.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace port {
@@ -33,7 +40,11 @@ void AssignRefCounted(StringPiece src, core::RefCounted* obj, string* out) {
   out->assign(src.data(), src.size());
 }
 
+<<<<<<< HEAD
 void EncodeStringList(const tstring* strings, int64 n, string* out) {
+=======
+void EncodeStringList(const string* strings, int64 n, string* out) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   out->clear();
   for (int i = 0; i < n; ++i) {
     core::PutVarint32(out, strings[i].size());
@@ -43,7 +54,11 @@ void EncodeStringList(const tstring* strings, int64 n, string* out) {
   }
 }
 
+<<<<<<< HEAD
 bool DecodeStringList(const string& src, tstring* strings, int64 n) {
+=======
+bool DecodeStringList(const string& src, string* strings, int64 n) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   std::vector<uint32> sizes(n);
   StringPiece reader(src);
   int64 tot = 0;
@@ -55,7 +70,11 @@ bool DecodeStringList(const string& src, tstring* strings, int64 n) {
     return false;
   }
 
+<<<<<<< HEAD
   tstring* data = strings;
+=======
+  string* data = strings;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (int64 i = 0; i < n; ++i, ++data) {
     auto size = sizes[i];
     if (size > reader.size()) {
@@ -72,6 +91,7 @@ void CopyFromArray(string* s, const char* base, size_t bytes) {
   s->assign(base, bytes);
 }
 
+<<<<<<< HEAD
 class StringListEncoderImpl : public StringListEncoder {
  public:
   explicit StringListEncoderImpl(string* out) : out_(out) {}
@@ -266,5 +286,7 @@ std::unique_ptr<StringListDecoder> NewStringListDecoder(const Cord& in) {
 
 #endif  // defined(TENSORFLOW_PROTOBUF_USES_CORD)
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace port
 }  // namespace tensorflow

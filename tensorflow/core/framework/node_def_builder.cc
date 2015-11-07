@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,12 +19,17 @@ limitations under the License.
 #include <vector>
 #include "tensorflow/core/framework/attr_value.pb.h"
 #include "tensorflow/core/framework/op.h"
+=======
+#include "tensorflow/core/framework/node_def_builder.h"
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/op_def_util.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/strings/str_util.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 NodeDefBuilder::NodeOut::NodeOut(StringPiece n, int i, DataType dt)
     : node(n), index(i), data_type(dt) {}
 
@@ -60,6 +66,24 @@ NodeDefBuilder::NodeDefBuilder(StringPiece name, StringPiece op_name,
 NodeDefBuilder::NodeDefBuilder(StringPiece name, const OpDef* op_def)
     : op_def_(op_def) {
   node_def_.set_name(string(name));
+=======
+NodeDefBuilder::NodeDefBuilder(const string& name, const string& op_name,
+                               const OpRegistryInterface* op_registry) {
+  node_def_.set_name(name);
+  Status status;
+  op_def_ = op_registry->LookUp(op_name, &status);
+  if (op_def_ == nullptr) {
+    errors_.push_back(status.error_message());
+    inputs_specified_ = 0;
+  } else {
+    Initialize();
+  }
+}
+
+NodeDefBuilder::NodeDefBuilder(const string& name, const OpDef* op_def)
+    : op_def_(op_def) {
+  node_def_.set_name(name);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Initialize();
 }
 
@@ -87,12 +111,18 @@ bool NodeDefBuilder::NextArgAvailable() {
 
 NodeDefBuilder& NodeDefBuilder::Input(FakeInputFunctor fake_input) {
   if (NextArgAvailable()) {
+<<<<<<< HEAD
     Status status = fake_input(*op_def_, inputs_specified_, node_def_, this);
+=======
+    Status status =
+        fake_input(*op_def_, inputs_specified_, node_def_, this);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!status.ok()) errors_.push_back(status.error_message());
   }
   return *this;
 }
 
+<<<<<<< HEAD
 NodeDefBuilder& NodeDefBuilder::Input(StringPiece src_node, int src_index,
                                       DataType dt) {
   const OpDef::ArgDef* arg = NextArgDef();
@@ -114,6 +144,10 @@ NodeDefBuilder& NodeDefBuilder::Input(gtl::ArraySlice<NodeOut> src_list) {
 
 void NodeDefBuilder::SingleInput(const OpDef::ArgDef* input_arg,
                                  StringPiece src_node, int src_index,
+=======
+void NodeDefBuilder::SingleInput(const OpDef::ArgDef* input_arg,
+                                 const string& src_node, int src_index,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                  DataType dt) {
   AddInput(src_node, src_index);
 
@@ -170,7 +204,11 @@ void NodeDefBuilder::ListInput(const OpDef::ArgDef* input_arg,
   }
 }
 
+<<<<<<< HEAD
 void NodeDefBuilder::AddInput(StringPiece src_node, int src_index) {
+=======
+void NodeDefBuilder::AddInput(const string& src_node, int src_index) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (src_node.empty()) {
     errors_.push_back("Empty input node name");
   } else if (src_node[0] == '^') {
@@ -179,7 +217,11 @@ void NodeDefBuilder::AddInput(StringPiece src_node, int src_index) {
   } else if (src_index > 0) {
     node_def_.add_input(strings::StrCat(src_node, ":", src_index));
   } else {
+<<<<<<< HEAD
     node_def_.add_input(string(src_node));
+=======
+    node_def_.add_input(src_node);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
@@ -201,6 +243,7 @@ void NodeDefBuilder::VerifyInputRef(const OpDef::ArgDef* input_arg,
   }
 }
 
+<<<<<<< HEAD
 NodeDefBuilder& NodeDefBuilder::ControlInput(StringPiece src_node) {
   control_inputs_.emplace_back(src_node);
   return *this;
@@ -212,6 +255,9 @@ NodeDefBuilder& NodeDefBuilder::Device(StringPiece device_spec) {
 }
 
 Status NodeDefBuilder::Finalize(NodeDef* node_def, bool consume) {
+=======
+Status NodeDefBuilder::Finalize(NodeDef* node_def) const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const std::vector<string>* errors_ptr = &errors_;
   std::vector<string> errors_storage;
   if (op_def_ != nullptr && inputs_specified_ < op_def_->input_arg_size()) {
@@ -238,16 +284,24 @@ Status NodeDefBuilder::Finalize(NodeDef* node_def, bool consume) {
       return errors::InvalidArgument(
           errors_ptr->size(), " errors while building NodeDef '",
           node_def_.name(), "' using ", SummarizeOpDef(*op_def_), ":\n",
+<<<<<<< HEAD
           absl::StrJoin(*errors_ptr, "\n"));
+=======
+          str_util::Join(*errors_ptr, "\n"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   } else {
     NodeDef node_def_backup;
     if (node_def == nullptr) node_def = &node_def_backup;
+<<<<<<< HEAD
     if (consume) {
       *node_def = std::move(node_def_);
     } else {
       *node_def = node_def_;
     }
+=======
+    *node_def = node_def_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Add control inputs after the regular inputs.
     for (const auto& control_input : control_inputs_) {
@@ -261,6 +315,7 @@ Status NodeDefBuilder::Finalize(NodeDef* node_def, bool consume) {
   }
 }
 
+<<<<<<< HEAD
 bool NodeDefBuilder::AttrValueAlreadyPresent(StringPiece name,
                                              const AttrValue& value) {
   if (const AttrValue* found = AttrSlice(node_def_).Find(name)) {
@@ -325,4 +380,6 @@ ATTR(gtl::ArraySlice<Tensor>)
 ATTR(gtl::ArraySlice<NameAttrList>)
 #undef ATTR
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

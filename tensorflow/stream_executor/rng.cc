@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/stream_executor/rng.h"
 
 #include "tensorflow/stream_executor/platform/logging.h"
 
+<<<<<<< HEAD
 namespace stream_executor {
+=======
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace rng {
 
 bool RngSupport::CheckSeed(const uint8 *seed, uint64 seed_bytes) {
@@ -40,8 +48,19 @@ bool RngSupport::CheckSeed(const uint8 *seed, uint64 seed_bytes) {
   return true;
 }
 
+<<<<<<< HEAD
 const int RngSupport::kMinSeedBytes;
 const int RngSupport::kMaxSeedBytes;
 
 }  // namespace rng
 }  // namespace stream_executor
+=======
+#if defined(__APPLE__)
+const int RngSupport::kMinSeedBytes;
+const int RngSupport::kMaxSeedBytes;
+#endif
+
+}  // namespace rng
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

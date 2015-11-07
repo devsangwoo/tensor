@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,14 @@ limitations under the License.
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/str_util.h"
 #include "tensorflow/core/util/reporter.h"
+=======
+#include "tensorflow/core/platform/test_benchmark.h"
+
+#include "tensorflow/core/lib/strings/str_util.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/regexp.h"
+#include "tensorflow/core/public/env.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace testing {
@@ -38,7 +47,11 @@ static Env* env;
 
 Benchmark::Benchmark(const char* name, void (*fn)(int))
     : name_(name), num_args_(0), fn0_(fn) {
+<<<<<<< HEAD
   args_.push_back(std::make_pair(-1, -1));
+=======
+  args_.push_back(-1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Register();
 }
 
@@ -47,6 +60,7 @@ Benchmark::Benchmark(const char* name, void (*fn)(int, int))
   Register();
 }
 
+<<<<<<< HEAD
 Benchmark::Benchmark(const char* name, void (*fn)(int, int, int))
     : name_(name), num_args_(2), fn2_(fn) {
   Register();
@@ -107,16 +121,33 @@ Benchmark* Benchmark::RangePair(int lo1, int hi1, int lo2, int hi2) {
       ArgPair(arg1, arg2);
     }
   }
+=======
+Benchmark* Benchmark::Arg(int x) {
+  CHECK_EQ(num_args_, 1);
+  args_.push_back(x);
+  return this;
+}
+
+Benchmark* Benchmark::Range(int lo, int hi) {
+  Arg(lo);
+  for (int32 i = 1; i < kint32max / 8 && i < hi; i *= 8) {
+    Arg(i);
+  }
+  if (lo != hi) Arg(hi);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return this;
 }
 
 void Benchmark::Run(const char* pattern) {
   if (!all_benchmarks) return;
 
+<<<<<<< HEAD
   // Converts "all" into the wildcard '.*'.  Currently pattern isn't
   // specified by clients, but we keep this here to match the internal
   // Google implementation, should we ever enable user-specified
   // pattern specification.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (StringPiece(pattern) == "all") {
     pattern = ".*";
   }
@@ -128,6 +159,7 @@ void Benchmark::Run(const char* pattern) {
     name = b->name_;
     for (auto arg : b->args_) {
       name.resize(b->name_.size());
+<<<<<<< HEAD
       if (arg.first >= 0) {
         strings::StrAppend(&name, "/", arg.first);
         if (arg.second >= 0) {
@@ -139,6 +171,14 @@ void Benchmark::Run(const char* pattern) {
       // computing the width, if we start allowing clients to pass in
       // a custom pattern.
       width = std::max<int>(width, name.size());
+=======
+      if (arg >= 0) {
+        strings::StrAppend(&name, "/", arg);
+      }
+      if (RE2::PartialMatch(name, pattern)) {
+        width = std::max<int>(width, name.size());
+      }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
@@ -148,6 +188,7 @@ void Benchmark::Run(const char* pattern) {
     name = b->name_;
     for (auto arg : b->args_) {
       name.resize(b->name_.size());
+<<<<<<< HEAD
       if (arg.first >= 0) {
         strings::StrAppend(&name, "/", arg.first);
         if (arg.second >= 0) {
@@ -162,6 +203,18 @@ void Benchmark::Run(const char* pattern) {
       int iters;
       double seconds;
       b->Run(arg.first, arg.second, &iters, &seconds);
+=======
+      if (arg >= 0) {
+        strings::StrAppend(&name, "/", arg);
+      }
+      if (!RE2::PartialMatch(name, pattern)) {
+        continue;
+      }
+
+      int iters;
+      double seconds;
+      b->Run(arg, &iters, &seconds);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       char buf[100];
       std::string full_label = label;
@@ -177,6 +230,7 @@ void Benchmark::Run(const char* pattern) {
       }
       printf("%-*s %10.0f %10d\t%s\n", width, name.c_str(),
              seconds * 1e9 / iters, iters, full_label.c_str());
+<<<<<<< HEAD
 
       TestReporter reporter(name);
       Status s = reporter.Initialize();
@@ -195,6 +249,8 @@ void Benchmark::Run(const char* pattern) {
         LOG(ERROR) << s.ToString();
         exit(EXIT_FAILURE);
       }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 }
@@ -204,7 +260,11 @@ void Benchmark::Register() {
   all_benchmarks->push_back(this);
 }
 
+<<<<<<< HEAD
 void Benchmark::Run(int arg1, int arg2, int* run_count, double* run_seconds) {
+=======
+void Benchmark::Run(int arg, int* run_count, double* run_seconds) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   env = Env::Default();
   static const int64 kMinIters = 100;
   static const int64 kMaxIters = 1000000000;
@@ -218,10 +278,15 @@ void Benchmark::Run(int arg1, int arg2, int* run_count, double* run_seconds) {
     label.clear();
     if (fn0_) {
       (*fn0_)(iters);
+<<<<<<< HEAD
     } else if (fn1_) {
       (*fn1_)(iters, arg1);
     } else {
       (*fn2_)(iters, arg1, arg2);
+=======
+    } else {
+      (*fn1_)(iters, arg);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
     StopTiming();
     const double seconds = accum_time * 1e-6;

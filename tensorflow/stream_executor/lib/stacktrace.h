@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,5 +27,23 @@ using tensorflow::CurrentStackTrace;
 
 }  // namespace port
 }  // namespace stream_executor
+=======
+#ifndef TENSORFLOW_STREAM_EXECUTOR_LIB_STACKTRACE_H_
+#define TENSORFLOW_STREAM_EXECUTOR_LIB_STACKTRACE_H_
+
+#include "tensorflow/stream_executor/platform/port.h"
+
+namespace perftools {
+namespace gputools {
+namespace port {
+
+#if !defined(PLATFORM_GOOGLE)
+inline string CurrentStackTrace() { return "No stack trace available"; }
+#endif
+
+}  // namespace port
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_LIB_STACKTRACE_H_

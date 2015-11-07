@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,15 @@ limitations under the License.
 #include "tensorflow/core/framework/tensor_types.h"
 #include "tensorflow/core/kernels/eigen_pooling.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_AVGPOOLING_OP_H_
+#define TENSORFLOW_KERNELS_AVGPOOLING_OP_H_
+// Functor definition for AvgPoolingOp, must be compilable by nvcc.
+
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/NeuralNetworks"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -30,6 +40,7 @@ struct SpatialAvgPooling {
                   typename TTypes<T, 4>::ConstTensor input, int window_rows,
                   int window_cols, int row_stride, int col_stride,
                   const Eigen::PaddingType& padding) {
+<<<<<<< HEAD
     if (Eigen::internal::is_same<Device, Eigen::GpuDevice>::value) {
       // Use 32bit indexing to speed up the computations
       To32Bit(output).swap_layout().device(d) = Eigen::SpatialAvgPooling(
@@ -41,6 +52,12 @@ struct SpatialAvgPooling {
           input.swap_layout(), window_cols, window_rows, col_stride, row_stride,
           padding);
     }
+=======
+    // Because we swap the layout, we swap the row/cols as well
+    output.swap_layout().device(d) =
+        Eigen::SpatialAvgPooling(input.swap_layout(), window_cols, window_rows,
+                                 col_stride, row_stride, padding);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -48,8 +65,14 @@ struct SpatialAvgPooling {
 
 typedef Eigen::GpuDevice GPUDevice;
 
+<<<<<<< HEAD
 // Launch a custom GPU kernels from Yanqing for the avgpooling backward
 // operation that works NHWC data formats. Arguments:
+=======
+// Lauch a custom GPU kernels from Yanqing for the avgpooling backward operation
+// that works NHWC data formats.
+// Arguments:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 //   top_diff: backprop to the output of the pooling layer
 //   num: number of input batches
 //   height: input height
@@ -76,4 +99,8 @@ bool RunAvePoolBackwardNHWC(const T* const top_diff, const int num,
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_AVGPOOLING_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_AVGPOOLING_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +30,10 @@ limitations under the License.
 // that lead to cumbersome class hierarchies and tests that might end up not
 // testing real code in important ways.
 #include <gtest/gtest.h>
+=======
+#ifndef TENSORFLOW_PLATFORM_TEST_H_
+#define TENSORFLOW_PLATFORM_TEST_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace testing {
@@ -36,14 +41,18 @@ namespace testing {
 // Return a temporary directory suitable for temporary testing files.
 string TmpDir();
 
+<<<<<<< HEAD
 // Returns the path to TensorFlow in the directory containing data
 // dependencies.
 string TensorFlowSrcRoot();
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Return a random number generator seed to use in randomized tests.
 // Returns the same value for the lifetime of the process.
 int RandomSeed();
 
+<<<<<<< HEAD
 // Returns an unused port number, for use in multi-process testing.
 // NOTE: This function is not thread-safe.
 int PickUnusedPortOrDie();
@@ -52,3 +61,9 @@ int PickUnusedPortOrDie();
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_PLATFORM_TEST_H_
+=======
+}  // namespace testing
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_PLATFORM_TEST_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

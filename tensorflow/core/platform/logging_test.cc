@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,10 @@ limitations under the License.
 
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/platform/logging.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -24,8 +29,11 @@ TEST(Logging, Log) {
   LOG(ERROR) << "Error message";
   VLOG(1) << "A VLOG message";
   VLOG(2) << "A higher VLOG message";
+<<<<<<< HEAD
   DVLOG(1) << "A DVLOG message";
   DVLOG(2) << "A higher DVLOG message";
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(Logging, CheckChecks) {
@@ -90,10 +98,13 @@ TEST(LoggingDeathTest, FailedChecks) {
 #endif
 }
 
+<<<<<<< HEAD
 TEST(InternalLogString, Basic) {
   // Just make sure that this code compiles (we don't actually verify
   // the output)
   internal::LogString(__FILE__, __LINE__, INFO, "Hello there");
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

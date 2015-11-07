@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/kernels/sendrecv_ops.h"
 
 #include "tensorflow/core/framework/op.h"
@@ -32,6 +35,7 @@ static string GetRendezvousKeyPrefix(const string& send_device,
                          recv_device, ";", tensor_name);
 }
 
+<<<<<<< HEAD
 static void GetRendezvousKey(const string& key_prefix,
                              const FrameAndIter& frame_iter, string* key) {
   key->clear();
@@ -50,6 +54,12 @@ static FrameAndIter GetFrameAndIter(OpKernelContext* ctx,
   } else {
     return ctx->frame_iter();
   }
+=======
+static string GetRendezvousKey(const string& key_prefix,
+                               const FrameAndIter& frame_iter) {
+  return strings::StrCat(key_prefix, ";", frame_iter.frame_id, ":",
+                         frame_iter.iter_id);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 SendOp::SendOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
@@ -65,6 +75,7 @@ SendOp::SendOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
   OP_REQUIRES_OK(ctx, ctx->GetAttr("tensor_name", &tensor_name));
   key_prefix_ = GetRendezvousKeyPrefix(send_device, recv_device,
                                        send_device_incarnation, tensor_name);
+<<<<<<< HEAD
   // The vast majority of Send nodes are outside any loop context, so
   // proactively cache the rendezvous key for the top-level.
   GetRendezvousKey(key_prefix_, {0, 0}, &parsed_key_.buf_);
@@ -72,12 +83,19 @@ SendOp::SendOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
   if (!ctx->GetAttr("_hostmem_sendrecv", &hostmem_sendrecv_).ok()) {
     hostmem_sendrecv_ = false;
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void SendOp::Compute(OpKernelContext* ctx) {
   OP_REQUIRES(
       ctx, ctx->rendezvous() != nullptr,
       errors::Internal("Op kernel context needs to provide a rendezvous."));
+<<<<<<< HEAD
+=======
+  const string key = GetRendezvousKey(key_prefix_, ctx->frame_iter());
+  VLOG(2) << "Send " << key;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // The device context may be passed between the Send/Recv
   // boundary, so that the device context used to produce the Tensor
@@ -86,6 +104,7 @@ void SendOp::Compute(OpKernelContext* ctx) {
   Rendezvous::Args args;
   args.device_context = ctx->op_device_context();
   args.alloc_attrs = ctx->input_alloc_attr(0);
+<<<<<<< HEAD
 
   FrameAndIter frame_iter = GetFrameAndIter(ctx, hostmem_sendrecv_);
   if (frame_iter == FrameAndIter(0, 0)) {
@@ -116,6 +135,19 @@ REGISTER_KERNEL_BUILDER(Name("Send").Device(DEVICE_DEFAULT), SendOp);
 
 REGISTER_KERNEL_BUILDER(
     Name("_HostSend").Device(DEVICE_DEFAULT).HostMemory("tensor"), SendOp);
+=======
+  Status s =
+      ctx->rendezvous()->Send(key, args, ctx->input(0), ctx->is_input_dead());
+  ctx->SetStatus(s);
+}
+
+REGISTER_KERNEL_BUILDER(Name("_Send").Device(DEVICE_CPU), SendOp);
+REGISTER_KERNEL_BUILDER(Name("_Send").Device(DEVICE_GPU), SendOp);
+
+REGISTER_KERNEL_BUILDER(Name("_HostSend").Device(DEVICE_CPU), SendOp);
+REGISTER_KERNEL_BUILDER(
+    Name("_HostSend").Device(DEVICE_GPU).HostMemory("tensor"), SendOp);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 RecvOp::RecvOp(OpKernelConstruction* ctx) : AsyncOpKernel(ctx) {
   string send_device;
@@ -130,6 +162,7 @@ RecvOp::RecvOp(OpKernelConstruction* ctx) : AsyncOpKernel(ctx) {
   OP_REQUIRES_OK(ctx, ctx->GetAttr("tensor_name", &tensor_name));
   key_prefix_ = GetRendezvousKeyPrefix(send_device, recv_device,
                                        send_device_incarnation, tensor_name);
+<<<<<<< HEAD
   // The vast majority of Recv nodes are outside any loop context, so
   // proactively cache the rendezvous key for the top-level.
   GetRendezvousKey(key_prefix_, {0, 0}, &parsed_key_.buf_);
@@ -165,10 +198,21 @@ void RecvOp::ComputeAsync(OpKernelContext* ctx, DoneCallback done) {
       ctx, ctx->rendezvous() != nullptr,
       errors::Internal("Op kernel context needs to provide a rendezvous."),
       done);
+=======
+}
+
+void RecvOp::ComputeAsync(OpKernelContext* ctx, DoneCallback done) {
+  OP_REQUIRES(
+      ctx, ctx->rendezvous() != nullptr,
+      errors::Internal("Op kernel context needs to provide a rendezvous."));
+  const string key = GetRendezvousKey(key_prefix_, ctx->frame_iter());
+  VLOG(2) << "Recv " << key;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Rendezvous::Args args;
   args.device_context = ctx->op_device_context();
   args.alloc_attrs = ctx->output_alloc_attr(0);
+<<<<<<< HEAD
   if (ctx->is_eager()) {
     // NOTE(fishx): Only set cancellation_manager in eager mode. Because in
     // Tensorflow 1.x, session (or graph_mgr) will abort the underlying
@@ -213,5 +257,30 @@ static bool InitModule() {
 }
 
 static bool module_initialized = InitModule();
+=======
+  ctx->rendezvous()->RecvAsync(
+      key, args, [ctx, done](const Status& s, const Rendezvous::Args& send_args,
+                             const Rendezvous::Args& recv_args,
+                             const Tensor& val, bool is_dead) {
+        ctx->SetStatus(s);
+        if (s.ok()) {
+          // 'ctx' allocates the output tensor of the expected type.  The
+          // runtime checks whether the tensor received here is the same type.
+          if (!is_dead) {
+            ctx->set_output(0, val);
+          }
+          *ctx->is_output_dead() = is_dead;
+        }
+        done();
+      });
+}
+
+REGISTER_KERNEL_BUILDER(Name("_Recv").Device(DEVICE_CPU), RecvOp);
+REGISTER_KERNEL_BUILDER(Name("_Recv").Device(DEVICE_GPU), RecvOp);
+
+REGISTER_KERNEL_BUILDER(Name("_HostRecv").Device(DEVICE_CPU), RecvOp);
+REGISTER_KERNEL_BUILDER(
+    Name("_HostRecv").Device(DEVICE_GPU).HostMemory("tensor"), RecvOp);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // end namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,14 @@ from tensorflow.python.eager import context
 from tensorflow.python.framework import test_util
 # Import resource_variable_ops for the variables-to-tensor implicit conversion.
 from tensorflow.python.ops import resource_variable_ops  # pylint: disable=unused-import
+=======
+"""Functional test for learning rate decay."""
+import tensorflow.python.platform
+
+from tensorflow.python.framework import test_util
+from tensorflow.python.framework import types
+from tensorflow.python.ops import state_ops
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 from tensorflow.python.ops import variables
 from tensorflow.python.platform import googletest
 from tensorflow.python.training import learning_rate_decay
@@ -31,6 +40,7 @@ from tensorflow.python.training import learning_rate_decay
 
 class LRDecayTest(test_util.TensorFlowTestCase):
 
+<<<<<<< HEAD
   @test_util.run_in_graph_and_eager_modes
   def testContinuous(self):
     self.evaluate(variables.global_variables_initializer())
@@ -494,6 +504,51 @@ class NoisyLinearCosineDecayTest(test_util.TensorFlowTestCase):
           num_periods=5)
       # Cannot be deterministically tested
       self.evaluate(decayed_lr)
+=======
+  def testContinuous(self):
+    with self.test_session():
+      step = 5
+      decayed_lr = learning_rate_decay.exponential_decay(0.05, step, 10, 0.96)
+      expected = .05 * 0.96 ** (5.0 / 10.0)
+      self.assertAllClose(decayed_lr.eval(), expected, 1e-6)
+
+  def testStaircase(self):
+    with self.test_session():
+      step = state_ops.variable_op([], types.int32)
+      assign_100 = state_ops.assign(step, 100)
+      assign_1 = state_ops.assign(step, 1)
+      assign_2 = state_ops.assign(step, 2)
+      decayed_lr = learning_rate_decay.exponential_decay(.1, step, 3, 0.96,
+                                                         staircase=True)
+      # No change to learning rate
+      assign_1.op.run()
+      self.assertAllClose(decayed_lr.eval(), .1, 1e-6)
+      assign_2.op.run()
+      self.assertAllClose(decayed_lr.eval(), .1, 1e-6)
+      # Decayed learning rate
+      assign_100.op.run()
+      expected = .1 * 0.96 ** (100 / 3)
+      self.assertAllClose(decayed_lr.eval(), expected, 1e-6)
+
+  def testVariables(self):
+    with self.test_session():
+      step = variables.Variable(1)
+      assign_1 = step.assign(1)
+      assign_2 = step.assign(2)
+      assign_100 = step.assign(100)
+      decayed_lr = learning_rate_decay.exponential_decay(.1, step, 3, 0.96,
+                                                         staircase=True)
+      variables.initialize_all_variables().run()
+      # No change to learning rate
+      assign_1.op.run()
+      self.assertAllClose(decayed_lr.eval(), .1, 1e-6)
+      assign_2.op.run()
+      self.assertAllClose(decayed_lr.eval(), .1, 1e-6)
+      # Decayed learning rate
+      assign_100.op.run()
+      expected = .1 * 0.96 ** (100 / 3)
+      self.assertAllClose(decayed_lr.eval(), expected, 1e-6)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 if __name__ == "__main__":

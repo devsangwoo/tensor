@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // This file binds the native image utility code to the Java class
 // which exposes them.
 
@@ -20,12 +23,21 @@ limitations under the License.
 #include <stdio.h>
 #include <stdlib.h>
 
+<<<<<<< HEAD
+=======
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/examples/android/jni/rgb2yuv.h"
 #include "tensorflow/examples/android/jni/yuv2rgb.h"
 
 #define IMAGEUTILS_METHOD(METHOD_NAME) \
   Java_org_tensorflow_demo_env_ImageUtils_##METHOD_NAME  // NOLINT
 
+<<<<<<< HEAD
+=======
+using namespace tensorflow;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,6 +47,7 @@ IMAGEUTILS_METHOD(convertYUV420SPToARGB8888)(
     JNIEnv* env, jclass clazz, jbyteArray input, jintArray output,
     jint width, jint height, jboolean halfSize);
 
+<<<<<<< HEAD
 JNIEXPORT void JNICALL IMAGEUTILS_METHOD(convertYUV420ToARGB8888)(
     JNIEnv* env, jclass clazz, jbyteArray y, jbyteArray u, jbyteArray v,
     jintArray output, jint width, jint height, jint y_row_stride,
@@ -43,6 +56,12 @@ JNIEXPORT void JNICALL IMAGEUTILS_METHOD(convertYUV420ToARGB8888)(
 JNIEXPORT void JNICALL IMAGEUTILS_METHOD(convertYUV420SPToRGB565)(
     JNIEnv* env, jclass clazz, jbyteArray input, jbyteArray output, jint width,
     jint height);
+=======
+JNIEXPORT void JNICALL
+IMAGEUTILS_METHOD(convertYUV420SPToRGB565)(
+    JNIEnv* env, jclass clazz, jbyteArray input, jbyteArray output,
+    jint width, jint height);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 JNIEXPORT void JNICALL
 IMAGEUTILS_METHOD(convertARGB8888ToYUV420SP)(
@@ -69,6 +88,7 @@ IMAGEUTILS_METHOD(convertYUV420SPToARGB8888)(
   jint* const o = env->GetIntArrayElements(output, &outputCopy);
 
   if (halfSize) {
+<<<<<<< HEAD
     ConvertYUV420SPToARGB8888HalfSize(reinterpret_cast<uint8_t*>(i),
                                       reinterpret_cast<uint32_t*>(o), width,
                                       height);
@@ -76,12 +96,23 @@ IMAGEUTILS_METHOD(convertYUV420SPToARGB8888)(
     ConvertYUV420SPToARGB8888(reinterpret_cast<uint8_t*>(i),
                               reinterpret_cast<uint8_t*>(i) + width * height,
                               reinterpret_cast<uint32_t*>(o), width, height);
+=======
+    ConvertYUV420SPToARGB8888HalfSize(reinterpret_cast<uint8*>(i),
+                                      reinterpret_cast<uint32*>(o),
+                                      width, height);
+  } else {
+    ConvertYUV420SPToARGB8888(reinterpret_cast<uint8*>(i),
+                              reinterpret_cast<uint8*>(i) + width * height,
+                              reinterpret_cast<uint32*>(o),
+                              width, height);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   env->ReleaseByteArrayElements(input, i, JNI_ABORT);
   env->ReleaseIntArrayElements(output, o, 0);
 }
 
+<<<<<<< HEAD
 JNIEXPORT void JNICALL IMAGEUTILS_METHOD(convertYUV420ToARGB8888)(
     JNIEnv* env, jclass clazz, jbyteArray y, jbyteArray u, jbyteArray v,
     jintArray output, jint width, jint height, jint y_row_stride,
@@ -115,14 +146,26 @@ JNIEXPORT void JNICALL IMAGEUTILS_METHOD(convertYUV420ToARGB8888)(
 JNIEXPORT void JNICALL IMAGEUTILS_METHOD(convertYUV420SPToRGB565)(
     JNIEnv* env, jclass clazz, jbyteArray input, jbyteArray output, jint width,
     jint height) {
+=======
+JNIEXPORT void JNICALL
+IMAGEUTILS_METHOD(convertYUV420SPToRGB565)(
+    JNIEnv* env, jclass clazz, jbyteArray input, jbyteArray output,
+    jint width, jint height) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   jboolean inputCopy = JNI_FALSE;
   jbyte* const i = env->GetByteArrayElements(input, &inputCopy);
 
   jboolean outputCopy = JNI_FALSE;
   jbyte* const o = env->GetByteArrayElements(output, &outputCopy);
 
+<<<<<<< HEAD
   ConvertYUV420SPToRGB565(reinterpret_cast<uint8_t*>(i),
                           reinterpret_cast<uint16_t*>(o), width, height);
+=======
+  ConvertYUV420SPToRGB565(reinterpret_cast<uint8*>(i),
+                          reinterpret_cast<uint16*>(o),
+                          width, height);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   env->ReleaseByteArrayElements(input, i, JNI_ABORT);
   env->ReleaseByteArrayElements(output, o, 0);
@@ -138,8 +181,14 @@ IMAGEUTILS_METHOD(convertARGB8888ToYUV420SP)(
   jboolean outputCopy = JNI_FALSE;
   jbyte* const o = env->GetByteArrayElements(output, &outputCopy);
 
+<<<<<<< HEAD
   ConvertARGB8888ToYUV420SP(reinterpret_cast<uint32_t*>(i),
                             reinterpret_cast<uint8_t*>(o), width, height);
+=======
+  ConvertARGB8888ToYUV420SP(reinterpret_cast<uint32*>(i),
+                            reinterpret_cast<uint8*>(o),
+                            width, height);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   env->ReleaseIntArrayElements(input, i, JNI_ABORT);
   env->ReleaseByteArrayElements(output, o, 0);
@@ -155,8 +204,14 @@ IMAGEUTILS_METHOD(convertRGB565ToYUV420SP)(
   jboolean outputCopy = JNI_FALSE;
   jbyte* const o = env->GetByteArrayElements(output, &outputCopy);
 
+<<<<<<< HEAD
   ConvertRGB565ToYUV420SP(reinterpret_cast<uint16_t*>(i),
                           reinterpret_cast<uint8_t*>(o), width, height);
+=======
+  ConvertRGB565ToYUV420SP(reinterpret_cast<uint16*>(i),
+                          reinterpret_cast<uint8*>(o),
+                          width, height);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   env->ReleaseByteArrayElements(input, i, JNI_ABORT);
   env->ReleaseByteArrayElements(output, o, 0);

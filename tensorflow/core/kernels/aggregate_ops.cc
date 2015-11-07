@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/math_ops.cc.
 
 #define EIGEN_USE_THREADS
 
+<<<<<<< HEAD
 #include <numeric>
 
 #include "tensorflow/core/kernels/aggregate_ops.h"
@@ -30,13 +34,24 @@ limitations under the License.
 #include "tensorflow/core/lib/gtl/inlined_vector.h"
 #include "tensorflow/core/platform/logging.h"
 
+=======
+#include "tensorflow/core/kernels/aggregate_ops.h"
+
+#include "tensorflow/core/framework/numeric_op.h"
+#include "tensorflow/core/framework/register_types.h"
+
+#include "tensorflow/core/platform/logging.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace tensorflow {
 
 typedef Eigen::ThreadPoolDevice CPUDevice;
 typedef Eigen::GpuDevice GPUDevice;
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 typedef Eigen::SyclDevice SYCLDevice;
 #endif  // TENSORFLOW_USE_SYCL
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename Device, typename T>
 class AddNOp : public OpKernel {
@@ -47,6 +62,7 @@ class AddNOp : public OpKernel {
     if (!ctx->ValidateInputsAreSameShape(this)) return;
 
     const Tensor& input0 = ctx->input(0);
+<<<<<<< HEAD
     const int num = ctx->num_inputs();
 
     if (num == 1) {
@@ -80,6 +96,22 @@ class AddNOp : public OpKernel {
 
 #if defined(__ANDROID_TYPES_SLIM__)
     // On Android by default,we only support additions of two arguments, so we
+=======
+    Tensor* output = nullptr;
+    OP_REQUIRES_OK(ctx, ctx->allocate_output(0, input0.shape(), &output));
+    auto To = output->flat<T>();
+
+    const int num = ctx->num_inputs();
+    if (num == 1) {
+      *output = input0;
+      return;
+    }
+
+#define I(IDX) ctx->input(IDX).flat<T>()
+
+#if defined(PLATFORM_POSIX_ANDROID) || defined(PLATFORM_GOOGLE_ANDROID)
+    // On Android, we only support additions of two arguments, so we
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // can reduce the number of template instantiations.
     OP_REQUIRES(ctx, num == 2,
                 errors::InvalidArgument("Only additions of two arguments "
@@ -147,12 +179,17 @@ class AddNOp : public OpKernel {
       functor8p(ctx->template eigen_device<Device>(), To, I(r), I(r + 1),
                 I(r + 2), I(r + 3), I(r + 4), I(r + 5), I(r + 6), I(r + 7));
     }
+<<<<<<< HEAD
 #endif  // defined(__ANDROID_TYPES_SLIM__)
+=======
+#endif  // defined(PLATFORM_POSIX_ANDROID) || defined(PLATFORM_GOOGLE_ANDROID)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #undef I
   }
 };
 
+<<<<<<< HEAD
 template <typename Device>
 class AddNOp<Device, Variant> : public OpKernel {
  public:
@@ -199,6 +236,118 @@ class AddNOp<Device, Variant> : public OpKernel {
   }
 };
 
+=======
+// Partial specializations for a CPUDevice, that uses the Eigen implementation
+// from AddNEigenImpl.
+namespace functor {
+template <typename T>
+struct Add2Functor<CPUDevice, T> {
+  void operator()(const CPUDevice& d, typename TTypes<T>::Flat out,
+                  typename TTypes<T>::ConstFlat in1,
+                  typename TTypes<T>::ConstFlat in2) {
+    Add2EigenImpl<CPUDevice, T>::Compute(d, out, in1, in2);
+  }
+};
+template <typename T>
+struct Add3Functor<CPUDevice, T> {
+  void operator()(const CPUDevice& d, typename TTypes<T>::Flat out,
+                  typename TTypes<T>::ConstFlat in1,
+                  typename TTypes<T>::ConstFlat in2,
+                  typename TTypes<T>::ConstFlat in3) {
+    Add3EigenImpl<CPUDevice, T>::Compute(d, out, in1, in2, in3);
+  }
+};
+template <typename T>
+struct Add4Functor<CPUDevice, T> {
+  void operator()(const CPUDevice& d, typename TTypes<T>::Flat out,
+                  typename TTypes<T>::ConstFlat in1,
+                  typename TTypes<T>::ConstFlat in2,
+                  typename TTypes<T>::ConstFlat in3,
+                  typename TTypes<T>::ConstFlat in4) {
+    Add4EigenImpl<CPUDevice, T>::Compute(d, out, in1, in2, in3, in4);
+  }
+};
+template <typename T>
+struct Add5Functor<CPUDevice, T> {
+  void operator()(const CPUDevice& d, typename TTypes<T>::Flat out,
+                  typename TTypes<T>::ConstFlat in1,
+                  typename TTypes<T>::ConstFlat in2,
+                  typename TTypes<T>::ConstFlat in3,
+                  typename TTypes<T>::ConstFlat in4,
+                  typename TTypes<T>::ConstFlat in5) {
+    Add5EigenImpl<CPUDevice, T>::Compute(d, out, in1, in2, in3, in4, in5);
+  }
+};
+template <typename T>
+struct Add6Functor<CPUDevice, T> {
+  void operator()(const CPUDevice& d, typename TTypes<T>::Flat out,
+                  typename TTypes<T>::ConstFlat in1,
+                  typename TTypes<T>::ConstFlat in2,
+                  typename TTypes<T>::ConstFlat in3,
+                  typename TTypes<T>::ConstFlat in4,
+                  typename TTypes<T>::ConstFlat in5,
+                  typename TTypes<T>::ConstFlat in6) {
+    Add6EigenImpl<CPUDevice, T>::Compute(d, out, in1, in2, in3, in4, in5, in6);
+  }
+};
+template <typename T>
+struct Add7Functor<CPUDevice, T> {
+  void operator()(const CPUDevice& d, typename TTypes<T>::Flat out,
+                  typename TTypes<T>::ConstFlat in1,
+                  typename TTypes<T>::ConstFlat in2,
+                  typename TTypes<T>::ConstFlat in3,
+                  typename TTypes<T>::ConstFlat in4,
+                  typename TTypes<T>::ConstFlat in5,
+                  typename TTypes<T>::ConstFlat in6,
+                  typename TTypes<T>::ConstFlat in7) {
+    Add7EigenImpl<CPUDevice, T>::Compute(d, out, in1, in2, in3, in4, in5, in6,
+                                         in7);
+  }
+};
+
+template <typename T>
+struct Add8Functor<CPUDevice, T> {
+  void operator()(
+      const CPUDevice& d, typename TTypes<T>::Flat out,
+      typename TTypes<T>::ConstFlat in1, typename TTypes<T>::ConstFlat in2,
+      typename TTypes<T>::ConstFlat in3, typename TTypes<T>::ConstFlat in4,
+      typename TTypes<T>::ConstFlat in5, typename TTypes<T>::ConstFlat in6,
+      typename TTypes<T>::ConstFlat in7, typename TTypes<T>::ConstFlat in8) {
+    Add8EigenImpl<CPUDevice, T>::Compute(d, out, in1, in2, in3, in4, in5, in6,
+                                         in7, in8);
+  }
+};
+
+template <typename T>
+struct Add8pFunctor<CPUDevice, T> {
+  void operator()(
+      const CPUDevice& d, typename TTypes<T>::Flat out,
+      typename TTypes<T>::ConstFlat in1, typename TTypes<T>::ConstFlat in2,
+      typename TTypes<T>::ConstFlat in3, typename TTypes<T>::ConstFlat in4,
+      typename TTypes<T>::ConstFlat in5, typename TTypes<T>::ConstFlat in6,
+      typename TTypes<T>::ConstFlat in7, typename TTypes<T>::ConstFlat in8) {
+    Add8pEigenImpl<CPUDevice, T>::Compute(d, out, in1, in2, in3, in4, in5, in6,
+                                          in7, in8);
+  }
+};
+
+template <typename T>
+struct Add9Functor<CPUDevice, T> {
+  void operator()(
+      const CPUDevice& d, typename TTypes<T>::Flat out,
+      typename TTypes<T>::ConstFlat in1, typename TTypes<T>::ConstFlat in2,
+      typename TTypes<T>::ConstFlat in3, typename TTypes<T>::ConstFlat in4,
+      typename TTypes<T>::ConstFlat in5, typename TTypes<T>::ConstFlat in6,
+      typename TTypes<T>::ConstFlat in7, typename TTypes<T>::ConstFlat in8,
+      typename TTypes<T>::ConstFlat in9) {
+    Add9EigenImpl<CPUDevice, T>::Compute(d, out, in1, in2, in3, in4, in5, in6,
+                                         in7, in8, in9);
+  }
+};
+
+}  // namespace functor
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #define REGISTER_ADDN(type, dev)                                   \
   REGISTER_KERNEL_BUILDER(                                         \
       Name("AddN").Device(DEVICE_##dev).TypeConstraint<type>("T"), \
@@ -207,6 +356,7 @@ class AddNOp<Device, Variant> : public OpKernel {
 #define REGISTER_ADDN_CPU(type) REGISTER_ADDN(type, CPU)
 
 TF_CALL_NUMBER_TYPES(REGISTER_ADDN_CPU);
+<<<<<<< HEAD
 REGISTER_ADDN_CPU(Variant);
 
 #undef REGISTER_ADDN_CPU
@@ -247,6 +397,13 @@ REGISTER_KERNEL_BUILDER(Name("AddN")
                             .HostMemory("sum"),
                         AddNOp<CPUDevice, int32>);
 #endif  // TENSORFLOW_USE_SYCL
+=======
+#undef REGISTER_ADDN_CPU
+
+#if GOOGLE_CUDA
+REGISTER_ADDN(float, GPU);
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #undef REGISTER_ADDN
 

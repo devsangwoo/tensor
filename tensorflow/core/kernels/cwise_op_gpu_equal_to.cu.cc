@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +15,15 @@ limitations under the License.
 ==============================================================================*/
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/kernels/cwise_ops_gpu_common.cu.h"
 
 namespace tensorflow {
 namespace functor {
+<<<<<<< HEAD
 DEFINE_BINARY10(equal_to, float, Eigen::half, double, uint8, int8, int16, int64,
                 complex64, complex128, bool);
 DEFINE_APPROXIMATE_EQUAL2(float, double);
@@ -26,3 +31,10 @@ DEFINE_APPROXIMATE_EQUAL2(float, double);
 }  // namespace tensorflow
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+DEFINE_BINARY4(equal_to, float, double, int64, complex64);
+}  // namespace functor
+}  // namespace tensorflow
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

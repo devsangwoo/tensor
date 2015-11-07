@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,14 @@ limitations under the License.
 #include "tensorflow/core/lib/core/stringpiece.h"
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_PYTHON_LIB_IO_PY_RECORD_READER_H_
+#define TENSORFLOW_PYTHON_LIB_IO_PY_RECORD_READER_H_
+
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -34,6 +43,7 @@ class RecordReader;
 // by multiple threads.
 class PyRecordReader {
  public:
+<<<<<<< HEAD
   // TODO(vrv): make this take a shared proto to configure
   // the compression options.
   static PyRecordReader* New(const string& filename, uint64 start_offset,
@@ -48,6 +58,15 @@ class PyRecordReader {
   // (e.g., filesystem errors).
   void GetNext(TF_Status* status);
 
+=======
+  static PyRecordReader* New(const string& filename, uint64 start_offset);
+  ~PyRecordReader();
+
+  // Attempt to get the next record at "current_offset()".  If
+  // successful, returns true, and the record contents can be retrieve
+  // with "this->record()".  Otherwise, returns false.
+  bool GetNext();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Return the current record contents.  Only valid after the preceding call
   // to GetNext() returned true
   string record() const { return record_; }
@@ -63,7 +82,11 @@ class PyRecordReader {
   uint64 offset_;
   RandomAccessFile* file_;    // Owned
   io::RecordReader* reader_;  // Owned
+<<<<<<< HEAD
   tstring record_;
+=======
+  string record_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TF_DISALLOW_COPY_AND_ASSIGN(PyRecordReader);
 };
 

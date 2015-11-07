@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +37,17 @@ def _truncate_seed(seed):
 
 @tf_export(v1=['random.get_seed', 'get_seed'])
 @deprecation.deprecated_endpoints('get_seed')
+=======
+"""For seeding individual ops based on a graph-level seed.
+"""
+
+from tensorflow.python.framework import ops
+
+
+_DEFAULT_GRAPH_SEED = 87654321
+
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 def get_seed(op_seed):
   """Returns the local seeds an operation should use given an op-specific seed.
 
@@ -45,7 +57,11 @@ def get_seed(op_seed):
   graph, or for only specific operations.
 
   For details on how the graph-level seed interacts with op seeds, see
+<<<<<<< HEAD
   `tf.compat.v1.random.set_random_seed`.
+=======
+  [`set_random_seed`](constant_op.md#set_random_seed).
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Args:
     op_seed: integer.
@@ -54,6 +70,7 @@ def get_seed(op_seed):
     A tuple of two integers that should be used for the local seed of this
     operation.
   """
+<<<<<<< HEAD
   eager = context.executing_eagerly()
 
   if eager:
@@ -87,6 +104,23 @@ def get_seed(op_seed):
 @tf_export(v1=['random.set_random_seed', 'set_random_seed'])
 def set_random_seed(seed):
   """Sets the graph-level random seed for the default graph.
+=======
+  graph_seed = ops.get_default_graph().seed
+  if graph_seed is not None:
+    if op_seed is not None:
+      return graph_seed, op_seed
+    else:
+      return graph_seed, ops.get_default_graph()._last_id
+  else:
+    if op_seed is not None:
+      return _DEFAULT_GRAPH_SEED, op_seed
+    else:
+      return None, None
+
+
+def set_random_seed(seed):
+  """Sets the graph-level random seed.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Operations that rely on a random seed actually derive it from two seeds:
   the graph-level and operation-level seeds. This sets the graph-level seed.
@@ -96,12 +130,17 @@ def set_random_seed(seed):
     1. If neither the graph-level nor the operation seed is set:
       A random seed is used for this op.
     2. If the graph-level seed is set, but the operation seed is not:
+<<<<<<< HEAD
       The system deterministically picks an operation seed in conjunction with
       the graph-level seed so that it gets a unique random sequence. Within the
       same version of tensorflow and user code, this sequence is deterministic.
       However across different versions, this sequence might change. If the
       code depends on particular seeds to work, specify both graph-level
       and operation-level seeds explicitly.
+=======
+      The system deterministically picks an operation seed in conjunction
+      with the graph-level seed so that it gets a unique random sequence.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     3. If the graph-level seed is not set, but the operation seed is set:
       A default graph-level seed and the specified operation seed are used to
       determine the random sequence.
@@ -114,6 +153,7 @@ def set_random_seed(seed):
   graph-level nor op-level seeds:
 
   ```python
+<<<<<<< HEAD
   a = tf.random.uniform([1])
   b = tf.random.normal([1])
 
@@ -130,12 +170,31 @@ def set_random_seed(seed):
     print(sess2.run(a))  # generates 'A4'
     print(sess2.run(b))  # generates 'B3'
     print(sess2.run(b))  # generates 'B4'
+=======
+  a = tf.random_uniform([1])
+  b = tf.random_normal([1])
+
+  print "Session 1"
+  with tf.Session() as sess1:
+    print sess1.run(a)  # generates 'A1'
+    print sess1.run(a)  # generates 'A2'
+    print sess1.run(b)  # generates 'B1'
+    print sess1.run(b)  # generates 'B2'
+
+  print "Session 2"
+  with tf.Session() as sess2:
+    print sess2.run(a)  # generates 'A3'
+    print sess2.run(a)  # generates 'A4'
+    print sess2.run(b)  # generates 'B3'
+    print sess2.run(b)  # generates 'B4'
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ```
 
   To generate the same repeatable sequence for an op across sessions, set the
   seed for the op:
 
   ```python
+<<<<<<< HEAD
   a = tf.random.uniform([1], seed=1)
   b = tf.random.normal([1])
 
@@ -154,12 +213,33 @@ def set_random_seed(seed):
     print(sess2.run(a))  # generates 'A2'
     print(sess2.run(b))  # generates 'B3'
     print(sess2.run(b))  # generates 'B4'
+=======
+  a = tf.random_uniform([1], seed=1)
+  b = tf.random_normal([1])
+
+  # Repeatedly running this block with the same graph will generate the same
+  # sequence of values for 'a', but different sequences of values for 'b'.
+  print "Session 1"
+  with tf.Session() as sess1:
+    print sess1.run(a)  # generates 'A1'
+    print sess1.run(a)  # generates 'A2'
+    print sess1.run(b)  # generates 'B1'
+    print sess1.run(b)  # generates 'B2'
+
+  print "Session 2"
+  with tf.Session() as sess2:
+    print sess2.run(a)  # generates 'A1'
+    print sess2.run(a)  # generates 'A2'
+    print sess2.run(b)  # generates 'B3'
+    print sess2.run(b)  # generates 'B4'
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ```
 
   To make the random sequences generated by all ops be repeatable across
   sessions, set a graph-level seed:
 
   ```python
+<<<<<<< HEAD
   tf.compat.v1.random.set_random_seed(1234)
   a = tf.random.uniform([1])
   b = tf.random.normal([1])
@@ -339,3 +419,30 @@ def set_seed(seed):
     seed: integer.
   """
   set_random_seed(seed)
+=======
+  tf.set_random_seed(1234)
+  a = tf.random_uniform([1])
+  b = tf.random_normal([1])
+
+  # Repeatedly running this block with the same graph will generate different
+  # sequences of 'a' and 'b'.
+  print "Session 1"
+  with tf.Session() as sess1:
+    print sess1.run(a)  # generates 'A1'
+    print sess1.run(a)  # generates 'A2'
+    print sess1.run(b)  # generates 'B1'
+    print sess1.run(b)  # generates 'B2'
+
+  print "Session 2"
+  with tf.Session() as sess2:
+    print sess2.run(a)  # generates 'A1'
+    print sess2.run(a)  # generates 'A2'
+    print sess2.run(b)  # generates 'B1'
+    print sess2.run(b)  # generates 'B2'
+  ```
+
+  Args:
+    seed: integer.
+  """
+  ops.get_default_graph().seed = seed
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

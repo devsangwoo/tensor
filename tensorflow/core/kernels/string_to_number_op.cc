@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/parse_ops.cc.
 
 #include <errno.h>
@@ -20,10 +23,17 @@ limitations under the License.
 
 #include "tensorflow/core/framework/kernel_def_builder.h"
 #include "tensorflow/core/framework/op_kernel.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/strings/numbers.h"
+=======
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/strings/numbers.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -40,7 +50,11 @@ class StringToNumberOp : public OpKernel {
     // underlying storage.
     const Tensor* input_tensor;
     OP_REQUIRES_OK(context, context->input("string_tensor", &input_tensor));
+<<<<<<< HEAD
     const auto& input_flat = input_tensor->flat<tstring>();
+=======
+    const auto& input_flat = input_tensor->flat<string>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Tensor* output_tensor = nullptr;
     OP_REQUIRES_OK(context,
@@ -49,6 +63,7 @@ class StringToNumberOp : public OpKernel {
     auto output_flat = output_tensor->flat<OutputType>();
 
     for (int i = 0; i < input_flat.size(); ++i) {
+<<<<<<< HEAD
       OP_REQUIRES(
           context,
           strings::SafeStringToNumeric<OutputType>(input_flat(i),
@@ -58,6 +73,32 @@ class StringToNumberOp : public OpKernel {
   }
 };
 
+=======
+      const char* s = input_flat(i).data();
+      Convert(s, &output_flat(i), context);
+    }
+  }
+
+ private:
+  void Convert(const char* s, OutputType* output_data,
+               OpKernelContext* context);
+};
+
+template <>
+void StringToNumberOp<float>::Convert(const char* s, float* output_data,
+                                      OpKernelContext* context) {
+  OP_REQUIRES(context, strings::safe_strtof(s, output_data),
+              errors::InvalidArgument(kErrorMessage, s));
+}
+
+template <>
+void StringToNumberOp<int32>::Convert(const char* s, int32* output_data,
+                                      OpKernelContext* context) {
+  OP_REQUIRES(context, strings::safe_strto32(s, output_data),
+              errors::InvalidArgument(kErrorMessage, s));
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Registers the currently supported output types.
 #define REGISTER(type)                                           \
   REGISTER_KERNEL_BUILDER(Name("StringToNumber")                 \
@@ -65,9 +106,13 @@ class StringToNumberOp : public OpKernel {
                               .TypeConstraint<type>("out_type"), \
                           StringToNumberOp<type>)
 REGISTER(float);
+<<<<<<< HEAD
 REGISTER(double);
 REGISTER(int32);
 REGISTER(int64);
+=======
+REGISTER(int32);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef REGISTER
 
 }  // namespace tensorflow

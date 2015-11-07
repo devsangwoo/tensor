@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2016 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,13 @@ limitations under the License.
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor_types.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_TRAINING_OPS_H_
+#define TENSORFLOW_KERNELS_TRAINING_OPS_H_
+
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -35,6 +43,7 @@ struct ApplyGradientDescent {
 };
 
 template <typename Device, typename T>
+<<<<<<< HEAD
 struct ApplyAdadelta {
   void operator()(const Device& d, typename TTypes<T>::Flat var,
                   typename TTypes<T>::Flat accum,
@@ -64,10 +73,13 @@ struct ApplyProximalGradientDescent {
 };
 
 template <typename Device, typename T>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 struct ApplyAdagrad {
   void operator()(const Device& d, typename TTypes<T>::Flat var,
                   typename TTypes<T>::Flat accum,
                   typename TTypes<T>::ConstScalar lr,
+<<<<<<< HEAD
                   typename TTypes<T>::ConstFlat grad, bool update_slots);
 };
 
@@ -98,10 +110,13 @@ struct ApplyProximalAdagrad {
                   typename TTypes<T>::ConstScalar lr,
                   typename TTypes<T>::ConstScalar l1,
                   typename TTypes<T>::ConstScalar l2,
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   typename TTypes<T>::ConstFlat grad);
 };
 
 template <typename Device, typename T>
+<<<<<<< HEAD
 struct ApplyFtrl {
   void operator()(const Device& d, typename TTypes<T>::Flat var,
                   typename TTypes<T>::Flat accum,
@@ -127,11 +142,14 @@ struct ApplyFtrlV2 {
 };
 
 template <typename Device, typename T>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 struct ApplyMomentum {
   void operator()(const Device& d, typename TTypes<T>::Flat var,
                   typename TTypes<T>::Flat accum,
                   typename TTypes<T>::ConstScalar lr,
                   typename TTypes<T>::ConstFlat grad,
+<<<<<<< HEAD
                   typename TTypes<T>::ConstScalar momentum, bool use_nesterov);
 };
 
@@ -153,6 +171,9 @@ struct SparseApplyKerasMomentum {
                     typename TTypes<Tindex>::ConstFlat indices,
                     typename TTypes<T>::ConstScalar momentum,
                     bool use_nesterov);
+=======
+                  typename TTypes<T>::ConstScalar momentum);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 template <typename Device, typename T>
@@ -165,6 +186,7 @@ struct ApplyAdam {
                   typename TTypes<T>::ConstScalar beta1,
                   typename TTypes<T>::ConstScalar beta2,
                   typename TTypes<T>::ConstScalar epsilon,
+<<<<<<< HEAD
                   typename TTypes<T>::ConstFlat grad, bool use_nesterov);
 };
 
@@ -191,6 +213,8 @@ struct ApplyAdaMax {
                   typename TTypes<T>::ConstScalar beta1,
                   typename TTypes<T>::ConstScalar beta2,
                   typename TTypes<T>::ConstScalar epsilon,
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   typename TTypes<T>::ConstFlat grad);
 };
 
@@ -205,6 +229,7 @@ struct ApplyRMSProp {
                   typename TTypes<T>::ConstFlat grad);
 };
 
+<<<<<<< HEAD
 template <typename Device, typename T>
 struct ApplyCenteredRMSProp {
   void operator()(const Device& d, typename TTypes<T>::Flat var,
@@ -243,3 +268,9 @@ struct ApplyPowerSign {
 }  // end namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_TRAINING_OPS_H_
+=======
+}  // end namespace functor
+}  // end namespace tensorflow
+
+#endif  // TENSORFLOW_KERNELS_TRAINING_OPS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

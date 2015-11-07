@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +26,14 @@ limitations under the License.
 #endif  // IS_SLIM_BUILD
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_LIB_IO_RECORD_READER_H_
+#define TENSORFLOW_LIB_IO_RECORD_READER_H_
+
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -32,6 +41,7 @@ class RandomAccessFile;
 
 namespace io {
 
+<<<<<<< HEAD
 class RecordReaderOptions {
  public:
   enum CompressionType { NONE = 0, ZLIB_COMPRESSION = 1 };
@@ -85,10 +95,20 @@ class RecordReader {
       const RecordReaderOptions& options = RecordReaderOptions());
 
   virtual ~RecordReader() = default;
+=======
+class RecordReader {
+ public:
+  // Create a reader that will return log records from "*file".
+  // "*file" must remain live while this Reader is in use.
+  explicit RecordReader(RandomAccessFile* file);
+
+  ~RecordReader();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Read the record at "*offset" into *record and update *offset to
   // point to the offset of the next record.  Returns OK on success,
   // OUT_OF_RANGE for end of file, or something else for an error.
+<<<<<<< HEAD
   Status ReadRecord(uint64* offset, tstring* record);
 
   // Return the metadata of the Record file.
@@ -110,10 +130,17 @@ class RecordReader {
   bool last_read_failed_;
 
   std::unique_ptr<Metadata> cached_metadata_;
+=======
+  Status ReadRecord(uint64* offset, string* record);
+
+ private:
+  RandomAccessFile* src_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   TF_DISALLOW_COPY_AND_ASSIGN(RecordReader);
 };
 
+<<<<<<< HEAD
 // High-level interface to read TFRecord files.
 //
 // Note: this class is not thread safe; external synchronization required.
@@ -156,3 +183,9 @@ class SequentialRecordReader {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_LIB_IO_RECORD_READER_H_
+=======
+}  // namespace io
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_LIB_IO_RECORD_READER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

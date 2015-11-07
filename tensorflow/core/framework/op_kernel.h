@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,11 +22,18 @@ limitations under the License.
 #include <unordered_set>
 #include <utility>
 #include <vector>
+=======
+#ifndef TENSORFLOW_FRAMEWORK_OP_KERNEL_H_
+#define TENSORFLOW_FRAMEWORK_OP_KERNEL_H_
+
+#include <functional>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/framework/allocator.h"
 #include "tensorflow/core/framework/cancellation.h"
 #include "tensorflow/core/framework/control_flow.h"
 #include "tensorflow/core/framework/device_base.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/graph.pb.h"
 #include "tensorflow/core/framework/kernel_def.pb.h"
 #include "tensorflow/core/framework/kernel_def_builder.h"
@@ -59,6 +67,32 @@ namespace Eigen {
 struct ThreadPoolDevice;
 struct GpuDevice;
 struct SyclDevice;
+=======
+#include "tensorflow/core/framework/function.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/kernel_def.pb.h"
+#include "tensorflow/core/framework/kernel_def_builder.h"
+#include "tensorflow/core/framework/node_def_util.h"
+#include "tensorflow/core/framework/op.h"
+#include "tensorflow/core/framework/rendezvous.h"
+#include "tensorflow/core/framework/step_stats.pb.h"
+#include "tensorflow/core/framework/tensor_shape.pb.h"
+#include "tensorflow/core/framework/tracking_allocator.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/thread_annotations.h"
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+
+namespace Eigen {
+class ThreadPoolDevice;
+class GpuDevice;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // end namespace Eigen
 
 namespace tensorflow {
@@ -68,6 +102,7 @@ class TensorSliceReaderCacheWrapper;
 }  // namespace checkpoint
 
 class AsyncOpKernel;
+<<<<<<< HEAD
 class CallFrameInterface;
 class DeviceMgr;
 class FunctionLibraryRuntime;
@@ -79,11 +114,19 @@ class ScopedStepContainer;
 class CollectiveExecutor;
 class StepStatsCollectorInterface;
 
+=======
+class OpKernelConstruction;  // declared below
+class OpKernelContext;       // declared below
+class ResourceMgr;
+
+// TODO(josh11b): Make reference-counted if needed.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class OpKernel {
  public:
   // OpKernel won't be instantiated by the scheduler, so you may perform
   // expensive initialization in the descendant's constructor.
   explicit OpKernel(OpKernelConstruction* context);
+<<<<<<< HEAD
 
   // Specialized constructor that enables the descendant to provide a different
   // `NodeDef` value. For example, this constructor can be used to provide a
@@ -122,6 +165,21 @@ class OpKernel {
   // unblocking kernel may never run (due to an error or cancellation), in most
   // cases the AsyncOpKernel should implement cancellation support via
   // `ctx->cancellation_manager()`.
+=======
+  virtual ~OpKernel() {}
+
+  // An OpKernel's computation can be either synchronous or
+  // asynchronous.
+  //
+  // Most OpKernels should compute synchronously.  They should
+  // subclass OpKernel and override the Compute() method and have it
+  // return after completing the supplied work.
+  //
+  // A few special kernels might need to be asynchronous to bound the
+  // number of threads (e.g., network receive operations). These
+  // kernels must subclass AsyncOpKernel and override
+  // AsyncOpKernel::ComputeAsync().
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //
   // In both cases, implementations of Compute() and ComputeAsync()
   // get inputs and write outputs through the given OpKernelContext
@@ -135,6 +193,7 @@ class OpKernel {
 
   // Returns nullptr iff this op kernel is synchronous.
   virtual AsyncOpKernel* AsAsync() { return nullptr; }
+<<<<<<< HEAD
   virtual const AsyncOpKernel* AsAsync() const { return nullptr; }
 
   // Initial time (in CPU cycles) we expect an operation to take.  Used to
@@ -143,10 +202,13 @@ class OpKernel {
   static const uint64 kInitialCostEstimateCycles = 100 * 1000 * 1000;
   static const uint64 kOpIsExpensiveThresholdCycles = 5000;
   static const uint64 kCostDecay = 10;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns true iff this op kernel is considered "expensive". The
   // runtime may use this flag to optimize graph execution for example
   // to "inline" inexpensive kernels.
+<<<<<<< HEAD
   virtual bool IsExpensive() {
     return expensive_ && (cost_estimate_.load(std::memory_order_relaxed) >
                           kOpIsExpensiveThresholdCycles);
@@ -173,6 +235,14 @@ class OpKernel {
   const string& type_string() const;       // Same as def().op()
   absl::string_view type_string_view() const { return type_string_view_; }
   const string& requested_device() const;  // Same as def().device()
+=======
+  virtual bool IsExpensive() { return true; }
+
+  // Accessors.
+  const NodeDef& def() const { return def_; }
+  const string& name() const { return def_.name(); }
+  const string& type_string() const { return def_.op(); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   int num_inputs() const { return input_types_.size(); }
   DataType input_type(int i) const { return input_types_[i]; }
@@ -180,7 +250,10 @@ class OpKernel {
   const MemoryTypeVector& input_memory_types() const {
     return input_memory_types_;
   }
+<<<<<<< HEAD
   const string& requested_input(int i) const;  // Same as def().input(i)
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   int num_outputs() const { return output_types_.size(); }
   DataType output_type(int o) const { return output_types_[o]; }
@@ -189,6 +262,7 @@ class OpKernel {
     return output_memory_types_;
   }
 
+<<<<<<< HEAD
   Status InputRange(StringPiece input_name, int* start, int* stop) const;
   Status OutputRange(StringPiece output_name, int* start, int* stop) const;
 
@@ -236,6 +310,19 @@ class OpKernel {
   const bool is_deferred_;
   bool expensive_;
   std::atomic_uint_fast64_t cost_estimate_;
+=======
+  Status InputRange(const string& input_name, int* start, int* stop) const;
+  Status OutputRange(const string& output_name, int* start, int* stop) const;
+
+ private:
+  const NodeDef def_;
+  const DataTypeVector input_types_;
+  const DataTypeVector output_types_;
+  NameRangeMap input_name_map_;
+  NameRangeMap output_name_map_;
+  MemoryTypeVector input_memory_types_;
+  MemoryTypeVector output_memory_types_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   TF_DISALLOW_COPY_AND_ASSIGN(OpKernel);
 };
@@ -246,6 +333,7 @@ class AsyncOpKernel : public OpKernel {
 
   // Asynchronous compute.
   //
+<<<<<<< HEAD
   // Implementations of ComputeAsync() must ensure that `done` is (eventually)
   // called exactly once to signal the completion of the computation. The
   // implementation of ComputeAsync() must not block on the execution of another
@@ -273,6 +361,25 @@ class AsyncOpKernel : public OpKernel {
 // when a Tensor is used inside an Op execution. The wrapper ensures that all
 // uses of the Tensor are tracked, because in order to retrieve the Tensor the
 // caller must use AccessTensor which notifies the context.
+=======
+  // Implementations of ComputeAsync() must run "done" to signal the
+  // completion of the computation. "context" is guaranteed to be
+  // alive until the "done" callback starts.
+  typedef std::function<void()> DoneCallback;
+  virtual void ComputeAsync(OpKernelContext* context, DoneCallback done) = 0;
+
+  AsyncOpKernel* AsAsync() final { return this; }
+
+  void Compute(OpKernelContext* context) final;
+};
+
+// Wraps a tensor that is held by an Op across calls to Compute(). For
+// memory safety when using asynchronous devices like GPUs, the system
+// must be notified when a Tensor is used inside an Op execution. The
+// wrapper ensures that all uses of the Tensor are tracked, because in
+// order to retrieve the Tensor the caller must use AccessTensor which
+// notifies the context.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class PersistentTensor {
  public:
   PersistentTensor() {}
@@ -285,11 +392,15 @@ class PersistentTensor {
 
   // The check for initialization does not need to access the
   // underlying tensor buffer.
+<<<<<<< HEAD
   bool IsInitialized() const { return tensor_.IsInitialized(); }
 
   int64 NumElements() const { return tensor_.NumElements(); }
 
   int64 AllocatedBytes() const { return tensor_.AllocatedBytes(); }
+=======
+  bool IsInitialized() { return tensor_.IsInitialized(); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   Tensor tensor_;
@@ -297,14 +408,31 @@ class PersistentTensor {
 
 class OpKernelConstruction {
  public:
+<<<<<<< HEAD
+=======
+  // TODO(yuanbyu): Probably reduce the number of arguments.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   OpKernelConstruction(DeviceType device_type, DeviceBase* device,
                        Allocator* allocator, const NodeDef* node_def,
                        const OpDef* op_def, FunctionLibraryRuntime* flib,
                        const DataTypeSlice& input_types,
+<<<<<<< HEAD
                        const MemoryTypeSlice& input_memory_types,
                        const DataTypeSlice& output_types,
                        const MemoryTypeSlice& output_memory_types,
                        int graph_def_version, Status* status);
+=======
+                       const DataTypeSlice& output_types, Status* status)
+      : device_type_(device_type),
+        device_(device),
+        allocator_(allocator),
+        def_(node_def),
+        op_def_(op_def),
+        flib_(flib),
+        input_types_(input_types),
+        output_types_(output_types),
+        status_(status) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Env* env() const { return device_->env(); }
 
@@ -343,21 +471,33 @@ class OpKernelConstruction {
   // User-supplied configuration of this operation.
   const NodeDef& def() const { return *def_; }
 
+<<<<<<< HEAD
+=======
+  // Op registered for this op type.
+  const OpDef& op_def() const { return *op_def_; }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // For inspecting the inputs to this operation.
   int num_inputs() const { return input_types_.size(); }
   DataType input_type(int i) const { return input_types_[i]; }
   const DataTypeSlice& input_types() const { return input_types_; }
+<<<<<<< HEAD
   const MemoryTypeSlice& input_memory_types() const {
     return input_memory_types_;
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // For inspecting the outputs expected from this operation.
   int num_outputs() const { return output_types_.size(); }
   DataType output_type(int i) const { return output_types_[i]; }
   const DataTypeSlice& output_types() const { return output_types_; }
+<<<<<<< HEAD
   const MemoryTypeSlice& output_memory_types() const {
     return output_memory_types_;
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // If expected_inputs == inputs() and expected_outputs == output_types(),
   // returns OK, else returns INVALID_ARGUMENT with an error message.
@@ -366,17 +506,31 @@ class OpKernelConstruction {
                         const DataTypeSlice expected_outputs);
 
   // For recording configuration errors during construction.
+<<<<<<< HEAD
   void SetStatus(const Status& status);
+=======
+  void SetStatus(const Status& status) { status_->Update(status); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const Status& status() const { return *status_; }
 
   // Look up the attr with name attr_name and set *value to its value.  If no
   // attr with attr_name is found in def(), or the attr does not have
   // a matching type, a non-ok status will be returned.
   template <class T>
+<<<<<<< HEAD
   Status GetAttr(StringPiece attr_name, T* value) const;
 
   // Return true if the attr_name is defined in def().
   bool HasAttr(StringPiece attr_name) const;
+=======
+  Status GetAttr(const string& attr_name, T* value) const {
+    return GetNodeAttr(def(), attr_name, value);
+  }
+
+  // May be used, e.g., to get GPU handles, etc.
+  // TODO(tucker): Add example usage.
+  DeviceBase* device() const { return device_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Return the device type.
   const DeviceType& device_type() const { return device_type_; }
@@ -386,6 +540,7 @@ class OpKernelConstruction {
   // CHECK_NOTNULL(function_library())->Instantiate("Foo", ...).
   FunctionLibraryRuntime* function_library() const { return flib_; }
 
+<<<<<<< HEAD
   // The GraphDef version whose behavior we should follow.
   int graph_def_version() const { return graph_def_version_; }
 
@@ -407,6 +562,8 @@ class OpKernelConstruction {
   // ideas.
   DeviceBase* device() const { return device_; }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  private:
   const DeviceType device_type_;
   DeviceBase* const device_;
@@ -415,6 +572,7 @@ class OpKernelConstruction {
   const OpDef* op_def_;
   FunctionLibraryRuntime* flib_;
   DataTypeSlice input_types_;
+<<<<<<< HEAD
   MemoryTypeSlice input_memory_types_;
   DataTypeSlice output_types_;
   MemoryTypeSlice output_memory_types_;
@@ -425,6 +583,11 @@ class OpKernelConstruction {
   // TODO(irving): Remove protos from this header entirely.
   friend class OpKernel;
 
+=======
+  DataTypeSlice output_types_;
+  Status* status_;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TF_DISALLOW_COPY_AND_ASSIGN(OpKernelConstruction);
 };
 
@@ -434,6 +597,7 @@ class OpKernelConstruction {
 template <typename ListType, typename ElementType>
 class OpArgIterator {
  public:
+<<<<<<< HEAD
   using iterator_category = std::forward_iterator_tag;
   using value_type = ElementType;
   using pointer = ElementType*;
@@ -470,6 +634,20 @@ class OpArgIterator {
 
   const_reference operator*() const { return (*list_)[i_]; }
   const_pointer operator->() const { return &(*list_)[i_]; }
+=======
+  typedef OpArgIterator<ListType, ElementType> ME;
+  OpArgIterator(const ListType* list, int i) : list_(list), i_(i) {}
+  bool operator==(const ME& rhs) {
+    DCHECK(list_ == rhs.list_);
+    return i_ == rhs.i_;
+  }
+  bool operator!=(const ME& rhs) {
+    DCHECK(list_ == rhs.list_);
+    return i_ != rhs.i_;
+  }
+  void operator++() { ++i_; }
+  ElementType& operator*() { return (*list_)[i_]; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   const ListType* const list_;
@@ -480,9 +658,15 @@ class OpArgIterator {
 // that are passed to the op as a single named argument.
 class OpInputList {
  public:
+<<<<<<< HEAD
   typedef OpArgIterator<OpInputList, const Tensor> Iterator;
   OpInputList() : ctx_(nullptr), start_(0), stop_(0) {}
   OpInputList(OpKernelContext* ctx, int start, int stop)
+=======
+  typedef OpArgIterator<OpInputList, const Tensor&> Iterator;
+  OpInputList() : ctx_(nullptr), start_(0), stop_(0) {}
+  OpInputList(const OpKernelContext* ctx, int start, int stop)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       : ctx_(ctx), start_(start), stop_(stop) {}
   OpInputList& operator=(const OpInputList& other) = default;
   const Tensor& operator[](int i) const;
@@ -491,7 +675,11 @@ class OpInputList {
   Iterator end() const { return Iterator(this, size()); }
 
  private:
+<<<<<<< HEAD
   OpKernelContext* ctx_;  // not owned
+=======
+  const OpKernelContext* ctx_;  // not owned
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int start_;
   int stop_;
 };
@@ -528,7 +716,10 @@ class OpOutputList {
   OpOutputList& operator=(const OpOutputList& other) = default;
   Tensor* operator[](int i);
   bool required(int i) const;
+<<<<<<< HEAD
   DataType expected_output_dtype(int i) const;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Status allocate(int i, const TensorShape& shape, Tensor** output);
   void set(int i, const Tensor& tensor);
   void set_ref(int i, mutex* mu, Tensor* tensor_for_ref);
@@ -546,11 +737,18 @@ class OpOutputList {
 // a mutex to prevent concurrent access to the tensor.
 struct TensorValue {
   TensorValue() : mutex_if_ref(nullptr), tensor(nullptr) {}
+<<<<<<< HEAD
   explicit TensorValue(Tensor* t) : mutex_if_ref(nullptr), tensor(t) {}
+=======
+  TensorValue(Tensor* t)  // NOLINT(runtime/explicit)
+      : mutex_if_ref(nullptr),
+        tensor(t) {}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TensorValue(mutex* mu, Tensor* t) : mutex_if_ref(mu), tensor(t) {}
   Tensor* operator->() const { return tensor; }
   bool is_ref() const { return mutex_if_ref != nullptr; }
 
+<<<<<<< HEAD
   // Return the dtype of the Tensor. For references, return the underlying type.
   DataType dtype() const {
     if (is_ref()) {
@@ -573,10 +771,13 @@ struct TensorValue {
     }
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   mutex* mutex_if_ref;  // nullptr if not a ref, != nullptr if a ref
   Tensor* tensor;
 };
 
+<<<<<<< HEAD
 // Used to store partitioned graphs from function-calling ops.
 struct GraphCollector {
   mutex mu;
@@ -619,6 +820,8 @@ struct GraphCollector {
   }
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class OpKernelContext {
  public:
   // The first element of a WrappedAllocator is a "base" Allocator and
@@ -627,6 +830,7 @@ class OpKernelContext {
   typedef std::pair<Allocator*, TrackingAllocator*> WrappedAllocator;
 
   // TODO(zhifengc): Do some cleanup of Params.
+<<<<<<< HEAD
   // The Params struct is passed in to initialize an OpKernelContext,
   // and must outlive the OpKernelContext.
   struct Params {
@@ -638,12 +842,16 @@ class OpKernelContext {
     // True if the op is created by eager runtime.
     bool is_eager = false;
 
+=======
+  struct Params {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // The op kernel being computed.
     OpKernel* op_kernel = nullptr;
 
     // The device on which the kernel is running.
     DeviceBase* device = nullptr;
 
+<<<<<<< HEAD
     // The Eigen GPU device wrapper, which may include a per-op
     // wrapped allocator. The concrete type of this object depends on
     // the type of this->device, so eigen_gpu_device can't be an
@@ -676,10 +884,15 @@ class OpKernelContext {
 
     // Array indexed by output number for this node
     const AllocatorAttributes* output_attr_array = nullptr;
+=======
+    bool track_allocations = false;
+    std::function<AllocatorAttributes(int index)> output_alloc_attr = nullptr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Shared resources accessible by this op kernel invocation.
     ResourceMgr* resource_manager = nullptr;
 
+<<<<<<< HEAD
     // Per-step resources accessible by this op kernel invocation should be
     // stored in this container..
     ScopedStepContainer* step_container = nullptr;
@@ -705,6 +918,14 @@ class OpKernelContext {
 
     // The tensor store for this op.
     TensorStore* tensor_store = nullptr;
+=======
+    // Per-step resources accessible by this op kernel invocation.
+    ResourceMgr* step_resource_manager = nullptr;
+
+    // Mechanism used by this op kernel invocation to communicate with
+    // computations running on other devices.
+    Rendezvous* rendezvous = nullptr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Mechanism used by this op kernel invocation to register a callback
     // for its cancellation.
@@ -717,13 +938,20 @@ class OpKernelContext {
     const gtl::InlinedVector<AllocatorAttributes, 4>* input_alloc_attrs =
         nullptr;
 
+<<<<<<< HEAD
     // Device context.
+=======
+    // Device contexts.
+    const gtl::InlinedVector<DeviceContext*, 4>* input_device_contexts =
+        nullptr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     DeviceContext* op_device_context = nullptr;
 
     // Control-flow op supports.
     FrameAndIter frame_iter;
 
     // Function call supports.
+<<<<<<< HEAD
     CallFrameInterface* call_frame = nullptr;
     FunctionLibraryRuntime* function_library = nullptr;
     std::function<void(std::function<void()>)>* runner = nullptr;
@@ -767,6 +995,25 @@ class OpKernelContext {
   int num_outputs() const { return outputs_.size(); }
   DataType expected_output_dtype(int index) const;
   MemoryType output_memory_type(int index) const;
+=======
+    FunctionCallFrame* call_frame = nullptr;
+    FunctionLibraryRuntime* function_library = nullptr;
+
+    // TensorSliceReaderCache support.
+    checkpoint::TensorSliceReaderCacheWrapper* slice_reader_cache = nullptr;
+  };
+  explicit OpKernelContext(const Params& params);
+  ~OpKernelContext();
+
+  Env* env() const { return params_.device->env(); }
+
+  // Input/output signature.
+
+  int num_inputs() const { return params_.inputs->size(); }
+  DataType input_dtype(int index) const;
+  int num_outputs() const { return outputs_.size(); }
+  DataType expected_output_dtype(int index) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Input
 
@@ -774,21 +1021,33 @@ class OpKernelContext {
   // inputs. For Ref inputs use mutable_input below.
   // REQUIRES: !IsRefType(input_dtype(index))
   // TODO(mrry): Convert this to return Status.
+<<<<<<< HEAD
   const Tensor& input(int index);
+=======
+  const Tensor& input(int index) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns the named immutable input tensor in "tensor", as defined
   // in the OpDef. May only be used for non-Ref inputs. For Ref inputs
   // use mutable_input below.
   // REQUIRES: !IsRefType(input_dtype(index))
   // REQUIRES: the named input must not be a list.
+<<<<<<< HEAD
   Status input(StringPiece name, const Tensor** tensor);
+=======
+  Status input(const string& name, const Tensor** tensor) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns the named list-valued immutable input in "list", as
   // defined in the OpDef.  If the named output is not list-valued,
   // returns a one-element list. May only be used for non-Ref
   // inputs. For Ref inputs use mutable_input below.
   // REQUIRES: !IsRefType(input_dtype(index))
+<<<<<<< HEAD
   Status input_list(StringPiece name, OpInputList* list);
+=======
+  Status input_list(const string& name, OpInputList* list) const;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // For mutable inputs, use the following together to make sure there
   // is no concurrent access to mutable_input(), e.g.:
@@ -798,7 +1057,13 @@ class OpKernelContext {
   //   // modify the values in t
   // }
   // REQUIRES: IsRefType(input_dtype(index))
+<<<<<<< HEAD
   Status input_ref_mutex(StringPiece name, mutex** out_mutex);
+=======
+  // TODO(mrry): Convert this to return Status.
+  mutex* input_ref_mutex(int index);
+  Status input_ref_mutex(const string& name, mutex** out_mutex);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Returns a mutable input tensor. Must be used to access Ref
   // inputs.  REQUIRES: IsRefType(input_dtype(index)). The caller may
@@ -806,7 +1071,12 @@ class OpKernelContext {
   // will be visible to other Ops reading the same ref tensor. If
   // !lock_held the input mutex will be acquired before returning the
   // Tensor.
+<<<<<<< HEAD
   // TODO(mrry): Convert this to return Status.
+=======
+  // TODO(mrry):
+  // Convert this to return Status.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Tensor mutable_input(int index, bool lock_held);
 
   // Returns the named mutable input tensor in "tensor", as defined in
@@ -816,15 +1086,26 @@ class OpKernelContext {
   // the input mutex will be acquired before returning the Tensor.
   // REQUIRES: the named input must not be a list.
   // REQUIRES: the named input must be a ref tensor.
+<<<<<<< HEAD
   Status mutable_input(StringPiece name, Tensor* tensor, bool lock_held);
 
   // Returns the named list-valued mutable input in "list", as defined
   // in the OpDef.  If the named input is not list-valued, returns a
+=======
+  Status mutable_input(const string& name, Tensor* tensor, bool lock_held);
+
+  // Returns the named list-valued mutable input in "list", as defined
+  // in the OpDef.  If the named intput is not list-valued, returns a
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // one-element list. Must be used to access Ref inputs. The values
   // stored in the Tensor buffer may be modified, and modifications
   // will be visible to other Ops reading the same ref tensor.
   // REQUIRES: the named input must be a ref tensor.
+<<<<<<< HEAD
   Status mutable_input_list(StringPiece name, OpMutableInputList* list);
+=======
+  Status mutable_input_list(const string& name, OpMutableInputList* list);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Replace the corresponding Ref Input to use the storage buffer
   // used by tensor. If !lock_held the input mutex will be acquired
@@ -836,9 +1117,21 @@ class OpKernelContext {
   // buffer used by tensor. If !lock_held the input mutex will be
   // acquired before returning the Tensor.
   // REQUIRES: IsRefType(input_dtype(index)).
+<<<<<<< HEAD
   Status replace_ref_input(StringPiece name, const Tensor& tensor,
                            bool lock_held);
 
+=======
+  Status replace_ref_input(const string& name, const Tensor& tensor,
+                           bool lock_held);
+
+  // Set the output Ref Tensor at output_index to be an alias of the
+  // input Ref Tensor at input_index.
+  // REQUIRES: IsRefType(input_dtype(input_index)).
+  // REQUIRES: IsRefType(output_dtype(output_index)).
+  void forward_ref_input_to_ref_output(int input_index, int output_index);
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Deletes the Tensor object used as the Ref Input at
   // input_index. This is not usually necessary and should be used
   // with caution. If !lock_held the input mutex will be acquired
@@ -857,6 +1150,7 @@ class OpKernelContext {
   // Usage: if (!context->ValidateInputsAreSameShape(this)) return;
   bool ValidateInputsAreSameShape(OpKernel* op);
 
+<<<<<<< HEAD
   // If non-null, kernels should populate with any partition subgraphs created.
   GraphCollector* graph_collector() { return params_->graph_collector; }
 
@@ -941,11 +1235,17 @@ class OpKernelContext {
                                           AllocatorAttributes(), out_temp);
   }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Output
 
   // Returns the named list-valued output in "list", as defined in the OpDef.
   // If the named output is not list-valued, returns a one-element list.
+<<<<<<< HEAD
   Status output_list(StringPiece name, OpOutputList* list);
+=======
+  Status output_list(const string& name, OpOutputList* list);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // If output_required(index) returns true, the OpKernel's Compute() method
   // should call allocate_output(index, ...), set_output(index, ...),
@@ -997,7 +1297,11 @@ class OpKernelContext {
   // Tensors allocated via allocate_temp. There may be a performance
   // penalty to using a Tensor that was not allocated using
   // allocate_output. This is because allocate_output uses the
+<<<<<<< HEAD
   // AllocatorAttributes stored in output_attr_array for the
+=======
+  // AllocatorAttributes stored in output_alloc_attr for the
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // designated output. In some cases, using the wrong attributes may
   // cause an extra copy of the Tensor's buffer.
 
@@ -1010,6 +1314,7 @@ class OpKernelContext {
   // REQUIRES: !IsRefType(expected_output_dtype(index))
   Status allocate_output(int index, const TensorShape& shape,
                          Tensor** tensor) TF_MUST_USE_RESULT;
+<<<<<<< HEAD
   Status allocate_output(StringPiece name, const TensorShape& shape,
                          Tensor** tensor) TF_MUST_USE_RESULT;
   // The following methods use the supplied attributes instead of
@@ -1020,6 +1325,18 @@ class OpKernelContext {
   Status allocate_output(int index, const TensorShape& shape, Tensor** tensor,
                          AllocatorAttributes attr) TF_MUST_USE_RESULT;
   Status allocate_output(StringPiece name, const TensorShape& shape,
+=======
+  Status allocate_output(const string& name, const TensorShape& shape,
+                         Tensor** tensor) TF_MUST_USE_RESULT;
+  // The following methods use the supplied attributes instead of
+  // those in output_alloc_attr. The caller is responsible for
+  // ensuring that the attributes are "compatible" with the
+  // output_alloc_attr, e.g. the tensor is allocated on the correct
+  // device. See comment above.
+  Status allocate_output(int index, const TensorShape& shape, Tensor** tensor,
+                         AllocatorAttributes attr) TF_MUST_USE_RESULT;
+  Status allocate_output(const string& name, const TensorShape& shape,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                          Tensor** tensor,
                          AllocatorAttributes attr) TF_MUST_USE_RESULT;
 
@@ -1028,6 +1345,7 @@ class OpKernelContext {
   // may retain references to the temporary tensors after the Op's
   // Compute method has run. See comment above.
   Status allocate_temp(DataType type, const TensorShape& shape,
+<<<<<<< HEAD
                        Tensor* out_temp, AllocatorAttributes allocator_attr,
                        const AllocationAttributes& allocation_attr);
   Status allocate_temp(DataType type, const TensorShape& shape,
@@ -1035,6 +1353,9 @@ class OpKernelContext {
     return allocate_temp(type, shape, out_temp, allocator_attr,
                          AllocationAttributes());
   }
+=======
+                       Tensor* out_temp, AllocatorAttributes attr);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Status allocate_temp(DataType type, const TensorShape& shape,
                        Tensor* out_temp) {
     return allocate_temp(type, shape, out_temp, AllocatorAttributes());
@@ -1062,15 +1383,52 @@ class OpKernelContext {
   // index.  REQUIRES: !IsRefType(expected_output_dtype(index))
   // REQUIRES: 'tensor' must have the same MemoryType as
   // output_memory_types[index]. See comment above.
+<<<<<<< HEAD
   Status set_output(StringPiece name, const Tensor& tensor);
+=======
+  // TODO(mrry): Convert this to return Status.
+  void set_output(int index, const Tensor& tensor);
+  Status set_output(const string& name, const Tensor& tensor);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // To output a reference.  Caller retains ownership of mu and tensor_for_ref,
   // and they must outlive all uses within the step. See comment above.
   // REQUIRES: IsRefType(expected_output_dtype(index))
+<<<<<<< HEAD
   Status set_output_ref(StringPiece name, mutex* mu, Tensor* tensor_for_ref);
 
   // Returns nullptr if allocate_output() or set_output() have not been called.
   Status mutable_output(StringPiece name, Tensor** tensor);
+=======
+  // TODO(mrry): Convert this to return Status.
+  void set_output_ref(int index, mutex* mu, Tensor* tensor_for_ref);
+  Status set_output_ref(const string& name, mutex* mu, Tensor* tensor_for_ref);
+
+  // Returns nullptr if allocate_output() or set_output() have not been called.
+  // TODO(mrry): Convert this to return Status.
+  Tensor* mutable_output(int index);
+  Status mutable_output(const string& name, Tensor** tensor);
+
+  // Transfers ownership of an output tensor to the caller.
+  // NOTE: For non-reference outputs, the caller takes responsibility
+  // for deletion. For reference outputs, the caller does NOT take
+  // responsibility for deletion.
+  // TODO(mrry): Convert this to return Status.
+  TensorValue release_output(int index);
+  Status release_output(const string& name, TensorValue* value);
+
+  // Records device specific state about how the input tensors were
+  // computed.
+  //
+  // If using the templated function, the type must be a subclass
+  // of DeviceContext.
+  //
+  // Get the DeviceContext used for the index input.  Returns nullptr
+  // if no DeviceContext was provided.
+  template <typename T>
+  T* input_device_context(int index);
+  DeviceContext* input_device_context(int index);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Return the DeviceContext that should be used for this Op.
   //
@@ -1081,7 +1439,11 @@ class OpKernelContext {
   template <typename T>
   T* op_device_context();
   DeviceContext* op_device_context() {
+<<<<<<< HEAD
     DeviceContext* ret = params_->op_device_context;
+=======
+    DeviceContext* ret = params_.op_device_context;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (ret == nullptr) {
       auto* dev_info = device()->tensorflow_gpu_device_info();
       if (dev_info) ret = dev_info->default_context;
@@ -1090,6 +1452,7 @@ class OpKernelContext {
   }
 
   AllocatorAttributes input_alloc_attr(int index) const {
+<<<<<<< HEAD
     if (params_->input_alloc_attrs == nullptr) {
       return AllocatorAttributes();
     } else {
@@ -1109,6 +1472,20 @@ class OpKernelContext {
       mutex_lock lock(tracking_state_->mu);
       retrieved.swap(tracking_state_->wrapped_allocators);
     }
+=======
+    DCHECK_GE(index, 0);
+    DCHECK_LT(index, params_.input_alloc_attrs->size());
+    return (*params_.input_alloc_attrs)[index];
+  }
+
+  AllocatorAttributes output_alloc_attr(int index) const {
+    return params_.output_alloc_attr(index);
+  }
+
+  gtl::InlinedVector<WrappedAllocator, 4> wrapped_allocators() const {
+    mutex_lock lock(mu_);
+    gtl::InlinedVector<WrappedAllocator, 4> retrieved = wrapped_allocators_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return retrieved;
   }
 
@@ -1116,6 +1493,7 @@ class OpKernelContext {
   //
   // An op kernel communicates with outside environment through
   // Rendezvous Send() and Recv().
+<<<<<<< HEAD
   RendezvousInterface* rendezvous() const { return params_->rendezvous; }
   Status create_rendezvous(const int64 step_id, const DeviceMgr* device_mgr,
                            Rendezvous** r) const {
@@ -1139,16 +1517,24 @@ class OpKernelContext {
 
   // An op kernel can access the tensor store of the run it belongs to.
   TensorStore* tensor_store() const { return params_->tensor_store; }
+=======
+  Rendezvous* rendezvous() const { return params_.rendezvous; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Function call support.
   //
   // If this kernel invocation is within a function execution,
   // call_frame() returns the call frame for the function call.
+<<<<<<< HEAD
   CallFrameInterface* call_frame() const { return params_->call_frame; }
+=======
+  FunctionCallFrame* call_frame() const { return params_.call_frame; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // If not nullptr, the kernel invoke functions defined in the
   // library. E.g., CHECK_NOTNULL(function_library())->Run("Foo", ...).
   FunctionLibraryRuntime* function_library() const {
+<<<<<<< HEAD
     return params_->function_library;
   }
 
@@ -1164,6 +1550,16 @@ class OpKernelContext {
 
   checkpoint::TensorSliceReaderCacheWrapper* slice_reader_cache() const {
     return params_->slice_reader_cache;
+=======
+    return params_.function_library;
+  }
+
+  // Shared resources accessible to this kernel.
+  ResourceMgr* resource_manager() const { return params_.resource_manager; }
+
+  checkpoint::TensorSliceReaderCacheWrapper* slice_reader_cache() const {
+    return params_.slice_reader_cache;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Execution.
@@ -1174,6 +1570,7 @@ class OpKernelContext {
     return *device()->eigen_cpu_device();
   }
   const Eigen::GpuDevice& eigen_gpu_device() const {
+<<<<<<< HEAD
     return params_->eigen_gpu_device->device();
   }
 #ifdef TENSORFLOW_USE_SYCL
@@ -1181,6 +1578,10 @@ class OpKernelContext {
     return *device()->eigen_sycl_device();
   }
 #endif
+=======
+    return eigen_gpu_device_->device();
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   template <typename EigenDeviceType>
   const EigenDeviceType& eigen_device() const;
 
@@ -1195,20 +1596,32 @@ class OpKernelContext {
 
   // An OpKernel should call SetStatus() if Compute() encounters an
   // error.
+<<<<<<< HEAD
   void SetStatus(const Status& status);
+=======
+  void SetStatus(const Status& status) { status_.Update(status); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const Status& status() const { return status_; }
 
   // Cancellation.
   //
+<<<<<<< HEAD
   // EXPERIMENTAL. See the implementation in tensorflow::FIFOQueue for an
   // example of how to use this API.
   CancellationManager* cancellation_manager() const {
     return params_->cancellation_manager;
+=======
+  // EXPERIMENTAL. See the implementation in tensorflow::TensorQueue for an
+  // example of how to use this API.
+  CancellationManager* cancellation_manager() const {
+    return params_.cancellation_manager;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Other accessors.
 
   // For control flow.
+<<<<<<< HEAD
   FrameAndIter frame_iter() const { return params_->frame_iter; }
   bool is_input_dead() const { return params_->is_input_dead; }
 
@@ -1324,6 +1737,55 @@ class OpKernelContext {
   // Initialize the allocated_scope_ids_ set the first time this method is
   // called.
   void maybe_initialize_scope_id_set();
+=======
+  FrameAndIter frame_iter() const { return params_.frame_iter; }
+  bool is_input_dead() const { return params_.is_input_dead; }
+  bool* is_output_dead() { return &is_output_dead_; }
+
+  // May be used, e.g., to get GPU handles, etc.
+  // TODO(tucker): Add example usage.
+  DeviceBase* device() const { return params_.device; }
+
+  // Access to list of temporary tensors.
+  int num_temps();
+  Tensor* temp(int index);
+
+  // Access to information about whether each output was newly
+  // allocated or copied from an existing tensor
+  AllocationType output_allocation_type(int index) const {
+    return output_allocation_types_[index];
+  }
+
+ private:
+  Allocator* get_allocator(AllocatorAttributes attr) {
+    Allocator* allocator = params_.device->GetAllocator(attr);
+    if (params_.track_allocations) {
+      mutex_lock lock(mu_);
+      for (const auto& wrapped : wrapped_allocators_) {
+        if (wrapped.first == allocator) {
+          return wrapped.second;
+        }
+      }
+      TrackingAllocator* wrapped_allocator = new TrackingAllocator(allocator);
+      wrapped_allocators_.push_back(
+          std::make_pair(allocator, wrapped_allocator));
+      return wrapped_allocator;
+    } else {
+      return allocator;
+    }
+  }
+
+  // Per-step resource manager for use by white-listed internal ops.
+  friend class TemporaryVariableOp;
+  friend class DestroyTemporaryVariableOp;
+  ResourceMgr* step_resource_manager() const {
+    return params_.step_resource_manager;
+  }
+
+  // Internal common method used when allocating tensor memory
+  Status allocate_tensor(DataType type, const TensorShape& shape,
+                         Tensor* out_tensor, AllocatorAttributes attr);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // This is called by PersistentTensor::AccessTensor whenever the
   // wrapped tensor is retrieved, to ensure the runtime knows that the
@@ -1334,6 +1796,7 @@ class OpKernelContext {
   void NotifyUseOfPersistentTensor(const Tensor& tensor);
 
   Status status_;
+<<<<<<< HEAD
   friend class CollectiveExecutor;  // for access to params_
   Params* params_;                  // not owned
   gtl::InlinedVector<TensorValue, 4> outputs_;
@@ -1360,10 +1823,22 @@ class OpKernelContext {
     gtl::InlinedVector<int64, 2> persistent_alloc_ids GUARDED_BY(stats_mu);
   };
   std::unique_ptr<TrackingState> tracking_state_;
+=======
+  Params params_;  // immutable after construction.
+  const PerOpGpuDevice* eigen_gpu_device_;  // owned, with a per-op
+                                            // wrapped allocator
+  mutable mutex mu_;  // mutable so const accessors can acquire the lock
+  gtl::InlinedVector<WrappedAllocator, 4> wrapped_allocators_ GUARDED_BY(mu_);
+  gtl::InlinedVector<TensorValue, 4> outputs_;
+  gtl::InlinedVector<AllocationType, 4> output_allocation_types_;
+  gtl::InlinedVector<Tensor*, 4> temp_tensors_;
+  bool is_output_dead_ = false;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   TF_DISALLOW_COPY_AND_ASSIGN(OpKernelContext);
 };
 
+<<<<<<< HEAD
 template <>
 const Eigen::ThreadPoolDevice& OpKernelContext::eigen_device() const;
 
@@ -1375,6 +1850,8 @@ template <>
 const Eigen::SyclDevice& OpKernelContext::eigen_device() const;
 #endif
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Register your OpKernel by specifying the Op's name, the device the
 // kernel runs on, any type attr constraints for this kernel, any
 // host-memory args, and the class to instantiate.  Examples:
@@ -1411,12 +1888,19 @@ const Eigen::SyclDevice& OpKernelContext::eigen_device() const;
 std::unique_ptr<OpKernel> CreateOpKernel(DeviceType device_type,
                                          DeviceBase* device,
                                          Allocator* allocator,
+<<<<<<< HEAD
                                          const NodeDef& def,
                                          int graph_def_version, Status* status);
 Status CreateOpKernel(DeviceType device_type, DeviceBase* device,
                       Allocator* allocator, FunctionLibraryRuntime* flib,
                       const NodeDef& def, int graph_def_version,
                       OpKernel** kernel);
+=======
+                                         const NodeDef& def, Status* status);
+Status CreateOpKernel(DeviceType device_type, DeviceBase* device,
+                      Allocator* allocator, FunctionLibraryRuntime* flib,
+                      const NodeDef& def, OpKernel** kernel);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Returns into 'device_types' the subset of prioritized_types that this
 // binary has registered for the given NodeDef.
@@ -1425,6 +1909,7 @@ Status CreateOpKernel(DeviceType device_type, DeviceBase* device,
 //           * def has all attrs specified (e.g. using AddDefaultsToNodeDef()).
 Status SupportedDeviceTypesForNode(
     const std::vector<DeviceType>& prioritized_types, const NodeDef& def,
+<<<<<<< HEAD
     PrioritizedDeviceTypeVector* device_types,
     const DeviceNameUtils::ParsedName* local_address_spec = nullptr);
 
@@ -1434,12 +1919,36 @@ string KernelsRegisteredForOp(StringPiece op_name);
 
 // Call once after Op registration has completed.
 Status ValidateKernelRegistrations(const OpRegistryInterface& op_registry);
+=======
+    DeviceTypeVector* device_types);
+
+// Returns into *{input,output}_memory_types the memory type of each
+// {input,output} tensor.
+//
+// REQUIRES: * '*_memory_types' is not nullptr.
+//           * def has all attrs specified (e.g. using AddDefaultsToNodeDef()).
+Status MemoryTypesForNode(DeviceType device_type, const NodeDef& ndef,
+                          const OpDef& op_def,
+                          const NameRangeMap& input_name_map,
+                          const NameRangeMap& output_name_map,
+                          MemoryTypeVector* input_memory_types,
+                          MemoryTypeVector* output_memory_types);
+
+Status MemoryTypesForNode(const OpRegistryInterface* op_registry,
+                          DeviceType device_type, const NodeDef& ndef,
+                          MemoryTypeVector* input_memory_types,
+                          MemoryTypeVector* output_memory_types);
+
+// Call once after Op registration has completed.
+Status ValidateKernelRegistrations(const OpRegistryInterface* op_registry);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // -----------------------------------------------------------------------------
 // OpKernel registration implementation follows, please ignore.
 
 // Allow the REGISTER_KERNEL_BUILDER(Name("op_name").Device(...)...) syntax.
 namespace register_kernel {
+<<<<<<< HEAD
 
 class Name : public KernelDefBuilder {
  public:
@@ -1468,6 +1977,9 @@ class Name : public KernelDefBuilder {
 
 }  // namespace system
 
+=======
+typedef ::tensorflow::KernelDefBuilder Name;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace register_kernel
 
 #define REGISTER_KERNEL_BUILDER(kernel_builder, ...) \
@@ -1476,6 +1988,7 @@ class Name : public KernelDefBuilder {
 #define REGISTER_KERNEL_BUILDER_UNIQ_HELPER(ctr, kernel_builder, ...) \
   REGISTER_KERNEL_BUILDER_UNIQ(ctr, kernel_builder, __VA_ARGS__)
 
+<<<<<<< HEAD
 #define REGISTER_KERNEL_BUILDER_UNIQ(ctr, kernel_builder, ...)        \
   constexpr bool should_register_##ctr##__flag =                      \
       SHOULD_REGISTER_OP_KERNEL(#__VA_ARGS__);                        \
@@ -1593,6 +2106,21 @@ class OpKernelRegistrar {
 
   void InitInternal(const KernelDef* kernel_def, StringPiece kernel_class_name,
                     std::unique_ptr<OpKernelFactory> factory);
+=======
+#define REGISTER_KERNEL_BUILDER_UNIQ(ctr, kernel_builder, ...)   \
+  static ::tensorflow::kernel_factory::OpKernelRegistrar         \
+      registrar__body__##ctr##__object(                          \
+          ::tensorflow::register_kernel::kernel_builder.Build(), \
+          +[](::tensorflow::OpKernelConstruction* context)       \
+              -> ::tensorflow::OpKernel* { return new __VA_ARGS__(context); })
+
+namespace kernel_factory {
+
+class OpKernelRegistrar {
+ public:
+  typedef OpKernel* (*Factory)(OpKernelConstruction*);
+  OpKernelRegistrar(const KernelDef* kernel_def, Factory factory);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace kernel_factory
@@ -1600,6 +2128,7 @@ class OpKernelRegistrar {
 // -----------------------------------------------------------------------------
 // Template and inline method implementations, please ignore
 
+<<<<<<< HEAD
 template <class T>
 Status OpKernelConstruction::GetAttr(StringPiece attr_name, T* value) const {
   return GetNodeAttr(def(), attr_name, value);
@@ -1649,18 +2178,96 @@ inline void OpKernelContext::retrieve_accessed_tensors(
     DCHECK(tracking_state_);
     mutex_lock l(tracking_state_->mu);
     tracking_state_->referenced_tensors.FreezeAndReturnReferences(out_vector);
+=======
+inline DataType OpKernelContext::input_dtype(int index) const {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, params_.inputs->size());
+  const TensorValue& value((*params_.inputs)[index]);
+  if (value.is_ref()) {
+    return MakeRefType(value->dtype());
+  } else {
+    return value->dtype();
+  }
+}
+
+inline DataType OpKernelContext::expected_output_dtype(int index) const {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, params_.op_kernel->output_types().size());
+  return params_.op_kernel->output_type(index);
+}
+
+inline const Tensor& OpKernelContext::input(int index) const {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, params_.inputs->size());
+  DCHECK(!(*params_.inputs)[index].is_ref());
+  return *((*params_.inputs)[index].tensor);
+}
+
+inline Tensor OpKernelContext::mutable_input(int index, bool lock_held) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, params_.inputs->size());
+  DCHECK((*params_.inputs)[index].is_ref());
+  // return a copy of the Ref acquired while holding the mutex
+  if (lock_held) {
+    return *((*params_.inputs)[index].tensor);
+  } else {
+    mutex_lock l(*input_ref_mutex(index));
+    return *((*params_.inputs)[index].tensor);
+  }
+}
+
+inline void OpKernelContext::replace_ref_input(int index, const Tensor& tensor,
+                                               bool lock_held) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, params_.inputs->size());
+  DCHECK((*params_.inputs)[index].is_ref());
+  // should only modify the tensor while holding the mutex
+  if (lock_held) {
+    *(*params_.inputs)[index].tensor = tensor;
+  } else {
+    mutex_lock l(*input_ref_mutex(index));
+    *(*params_.inputs)[index].tensor = tensor;
+  }
+}
+
+inline void OpKernelContext::forward_ref_input_to_ref_output(int input_index,
+                                                             int output_index) {
+  DCHECK_GE(input_index, 0);
+  DCHECK_LT(input_index, params_.inputs->size());
+  DCHECK((*params_.inputs)[input_index].is_ref());
+  set_output_ref(output_index, (*params_.inputs)[input_index].mutex_if_ref,
+                 (*params_.inputs)[input_index].tensor);
+}
+
+inline void OpKernelContext::delete_ref_input(int index, bool lock_held) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, params_.inputs->size());
+  DCHECK((*params_.inputs)[index].is_ref());
+  // should only modify the tensor while holding the mutex
+  if (lock_held) {
+    delete (*params_.inputs)[index].tensor;
+  } else {
+    mutex_lock l(*input_ref_mutex(index));
+    delete (*params_.inputs)[index].tensor;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
 // no input if tensor == nullptr.
 inline bool OpKernelContext::has_input(int index) const {
   DCHECK_GE(index, 0);
+<<<<<<< HEAD
   DCHECK_LT(index, num_inputs());
   return (*params_->inputs)[index].tensor != nullptr;
+=======
+  DCHECK_LT(index, params_.inputs->size());
+  return (*params_.inputs)[index].tensor != nullptr;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 inline mutex* OpKernelContext::input_ref_mutex(int index) {
   DCHECK_GE(index, 0);
+<<<<<<< HEAD
   DCHECK_LT(index, num_inputs());
   DCHECK(input_is_ref(index));
   return (*params_->inputs)[index].mutex_if_ref;
@@ -1677,17 +2284,147 @@ inline Tensor* OpKernelContext::mutable_output(int index) {
   DCHECK_LT(index, num_outputs());
   // No need to record_tensor_reference since the output must already
   // have been set by a call that did so.
+=======
+  DCHECK_LT(index, params_.inputs->size());
+  DCHECK((*params_.inputs)[index].is_ref());
+  return (*params_.inputs)[index].mutex_if_ref;
+}
+
+inline Status OpKernelContext::allocate_output(int index,
+                                               const TensorShape& shape,
+                                               Tensor** output) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, num_outputs());
+  DCHECK(params_.output_alloc_attr);
+  AllocatorAttributes attr = params_.output_alloc_attr(index);
+  return allocate_output(index, shape, output, attr);
+}
+
+inline Status OpKernelContext::allocate_tensor(DataType type,
+                                               const TensorShape& shape,
+                                               Tensor* out_tensor,
+                                               AllocatorAttributes attr) {
+  Allocator* a = get_allocator(attr);
+  Tensor new_tensor(a, type, shape);
+
+  if (!new_tensor.IsInitialized() && shape.num_elements() > 0) {
+    return errors::ResourceExhausted("OOM when allocating tensor with shape",
+                                     shape.DebugString());
+  }
+  *out_tensor = new_tensor;
+  return Status::OK();
+}
+
+inline Status OpKernelContext::allocate_output(int index,
+                                               const TensorShape& shape,
+                                               Tensor** output,
+                                               AllocatorAttributes attr) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, outputs_.size());
+  // Record the fact that this output tensor was allocated by the Op
+  DCHECK_LT(index, output_allocation_types_.size());
+  output_allocation_types_[index] = AT_ALLOCATED;
+  const DataType type = params_.op_kernel->output_type(index);
+  DCHECK(!IsRefType(type));
+  DCHECK(mutable_output(index) == nullptr);
+  Tensor* output_tensor = new Tensor();
+  Status s = allocate_tensor(type, shape, output_tensor, attr);
+  if (s.ok()) {
+    outputs_[index] = TensorValue(output_tensor);
+    *output = outputs_[index].tensor;
+  }
+  return s;
+}
+
+inline Status OpKernelContext::allocate_temp(DataType type,
+                                             const TensorShape& shape,
+                                             Tensor* out_temp,
+                                             AllocatorAttributes attr) {
+  Status s = allocate_tensor(type, shape, out_temp, attr);
+  if (s.ok()) {
+    if (params_.device->SaveTemporaryTensors()) {
+      // keep a reference to the underlying memory around
+      temp_tensors_.push_back(new Tensor(*out_temp));
+    }
+  }
+  return s;
+}
+
+inline Status OpKernelContext::allocate_persistent(
+    DataType type, const TensorShape& shape, PersistentTensor* out_persistent,
+    Tensor** out_tensor, AllocatorAttributes attr) {
+  // TODO(misard) add specific memory tracking for persistent tensors
+  Tensor persistent;
+  Status s = allocate_tensor(type, shape, &persistent, attr);
+  if (s.ok()) {
+    *out_persistent = PersistentTensor(persistent);
+    // This call saves a reference to the newly-allocated tensor if we
+    // are saving temporary tensors
+    Tensor* allocated = out_persistent->AccessTensor(this);
+    if (out_tensor) {
+      *out_tensor = allocated;
+    }
+  }
+  return s;
+}
+
+inline void OpKernelContext::NotifyUseOfPersistentTensor(const Tensor& t) {
+  if (t.IsInitialized() && params_.device->SaveTemporaryTensors()) {
+    // keep a reference to the underlying memory around
+    temp_tensors_.push_back(new Tensor(t));
+  }
+}
+
+inline int OpKernelContext::num_temps() { return temp_tensors_.size(); }
+
+inline Tensor* OpKernelContext::temp(int index) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, temp_tensors_.size());
+  return temp_tensors_[index];
+}
+
+inline void OpKernelContext::set_output(int index, const Tensor& tensor) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, outputs_.size());
+  // Record the fact that this output tensor was set by the Op
+  DCHECK_LT(index, output_allocation_types_.size());
+  output_allocation_types_[index] = AT_EXISTING;
+  DCHECK(!IsRefType(params_.op_kernel->output_type(index)));
+  DCHECK_EQ(mutable_output(index), nullptr);
+  outputs_[index] = TensorValue(new Tensor(tensor));
+}
+
+inline void OpKernelContext::set_output_ref(int index, mutex* mu,
+                                            Tensor* tensor_for_ref) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, outputs_.size());
+  // Record the fact that this output tensor was set by reference the Op
+  DCHECK_LT(index, output_allocation_types_.size());
+  output_allocation_types_[index] = AT_REF;
+  DCHECK(IsRefType(params_.op_kernel->output_type(index)));
+  outputs_[index] = TensorValue(mu, tensor_for_ref);
+}
+
+inline Tensor* OpKernelContext::mutable_output(int index) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, outputs_.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return outputs_[index].tensor;
 }
 
 inline TensorValue OpKernelContext::release_output(int index) {
   DCHECK_GE(index, 0);
+<<<<<<< HEAD
   DCHECK_LT(index, num_outputs());
+=======
+  DCHECK_LT(index, outputs_.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TensorValue value = outputs_[index];
   outputs_[index] = TensorValue();
   return value;
 }
 
+<<<<<<< HEAD
 inline Status OpKernelContext::forward_input_or_allocate_output(
     gtl::ArraySlice<int> candidate_input_indices, int output_index,
     const TensorShape& output_shape, Tensor** output) {
@@ -1713,6 +2450,8 @@ inline Status OpKernelContext::forward_input_or_allocate_output(
   return allocate_output(output_name, output_shape, output);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <typename T>
 T* OpKernelContext::op_device_context() {
   static_assert(std::is_base_of<DeviceContext, T>::value,
@@ -1720,6 +2459,24 @@ T* OpKernelContext::op_device_context() {
   return static_cast<T*>(op_device_context());
 }
 
+<<<<<<< HEAD
+=======
+template <typename T>
+T* OpKernelContext::input_device_context(int index) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, params_.input_device_contexts->size());
+  static_assert(std::is_base_of<DeviceContext, T>::value,
+                "T is not a subclass of DeviceContext");
+  return static_cast<T*>((*params_.input_device_contexts)[index]);
+}
+
+inline DeviceContext* OpKernelContext::input_device_context(int index) {
+  DCHECK_GE(index, 0);
+  DCHECK_LT(index, params_.input_device_contexts->size());
+  return (*params_.input_device_contexts)[index];
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 inline const Tensor& OpInputList::operator[](int i) const {
   DCHECK_GE(i, 0);
   DCHECK_LT(i, stop_ - start_);
@@ -1750,12 +2507,15 @@ inline bool OpOutputList::required(int i) const {
   return ctx_->output_required(start_ + i);
 }
 
+<<<<<<< HEAD
 inline DataType OpOutputList::expected_output_dtype(int i) const {
   DCHECK_GE(i, 0);
   DCHECK_LT(i, stop_ - start_);
   return ctx_->expected_output_dtype(start_ + i);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 inline Status OpOutputList::allocate(int i, const TensorShape& shape,
                                      Tensor** output) {
   DCHECK_GE(i, 0);
@@ -1775,6 +2535,7 @@ inline void OpOutputList::set_ref(int i, mutex* mu, Tensor* tensor_for_ref) {
   ctx_->set_output_ref(i, mu, tensor_for_ref);
 }
 
+<<<<<<< HEAD
 // Convenience macros for asserting and handling exceptional conditions.
 // Analogous to the CHECK* macros provided by logging.h.
 //
@@ -1842,3 +2603,8 @@ void CheckNotInComputeAsync(OpKernelContext* ctx,
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_FRAMEWORK_OP_KERNEL_H_
+=======
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_FRAMEWORK_OP_KERNEL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

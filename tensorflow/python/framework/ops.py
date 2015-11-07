@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -341,11 +342,139 @@ class Tensor(_TensorLike):
   `tf.placeholder`, `tf.SparseTensor`, and `tf.RaggedTensor`.
 
   For more on Tensors, see the [guide](https://tensorflow.org/guide/tensor`).
+=======
+"""Classes and functions used to construct graphs."""
+# pylint: disable=g-bad-name
+import collections
+import contextlib
+import copy
+import linecache
+import re
+import sys
+import threading
+import weakref
+
+import tensorflow.python.platform
+
+from tensorflow.core.framework import attr_value_pb2
+from tensorflow.core.framework import graph_pb2
+from tensorflow.python.framework import device as pydev
+from tensorflow.python.framework import registry
+from tensorflow.python.framework import tensor_shape
+from tensorflow.python.framework import types
+
+
+def _convert_stack(stack):
+  """Converts a stack extracted using _extract_stack() to a traceback stack.
+
+  Args:
+    stack: A list of n 4-tuples, (filename, lineno, name, frame_globals).
+
+  Returns:
+    A list of n 4-tuples (filename, lineno, name, code), where the code tuple
+    element is calculated from the corresponding elements of the input tuple.
+  """
+  ret = []
+  for filename, lineno, name, frame_globals in stack:
+    linecache.checkcache(filename)
+    line = linecache.getline(filename, lineno, frame_globals)
+    if line:
+      line = line.strip()
+    else:
+      line = None
+    ret.append((filename, lineno, name, line))
+  return ret
+
+
+# pylint: disable=line-too-long
+def _extract_stack():
+  """A lightweight re-implementation of traceback.extract_stack.
+
+  NOTE(mrry): traceback.extract_stack eagerly retrieves the line of code for
+    each stack frame using linecache, which results in an abundance of stat()
+    calls. This implementation does not retrieve the code, and any consumer
+    should apply _convert_stack to the result to obtain a traceback that can
+    be formatted etc. using traceback methods.
+
+  Returns:
+    A list of 4-tuples (filename, lineno, name, frame_globals) corresponding to
+    the call stack of the current thread.
+  """
+  # pylint: enable=line-too-long
+  try:
+    raise ZeroDivisionError
+  except ZeroDivisionError:
+    f = sys.exc_info()[2].tb_frame.f_back
+  ret = []
+  while f is not None:
+    lineno = f.f_lineno
+    co = f.f_code
+    filename = co.co_filename
+    name = co.co_name
+    frame_globals = f.f_globals
+    ret.append((filename, lineno, name, frame_globals))
+    f = f.f_back
+  ret.reverse()
+  return ret
+
+
+class Tensor(object):
+  """Represents a value produced by an `Operation`.
+
+  A `Tensor` is a symbolic handle to one of the outputs of an
+  `Operation`. It does not hold the values of that operation's output,
+  but instead provides a means of computing those values in a
+  TensorFlow [`Session`](client.md#Session).
+
+  This class has two primary purposes:
+
+  1. A `Tensor` can be passed as an input to another `Operation`.
+     This builds a dataflow connection between operations, which
+     enables TensorFlow to execute an entire `Graph` that represents a
+     large, multi-step computation.
+
+  2. After the graph has been launched in a session, the value of the
+     `Tensor` can be computed by passing it to
+     [`Session.run()`](client.md#Session.run).
+     `t.eval()` is a shortcut for calling
+     `tf.get_default_session().run(t)`.
+
+  In the following example, `c`, `d`, and `e` are symbolic `Tensor`
+  objects, whereas `result` is a numpy array that stores a concrete
+  value:
+
+  ```python
+  # Build a dataflow graph.
+  c = tf.constant([[1.0, 2.0], [3.0, 4.0]])
+  d = tf.constant([[1.0, 1.0], [0.0, 1.0]])
+  e = tf.matmul(c, d)
+
+  # Construct a `Session` to execut the graph.
+  sess = tf.Session()
+
+  # Execute the graph and store the value that `e` represents in `result`.
+  result = sess.run(e)
+  ```
+
+  @@dtype
+  @@name
+  @@value_index
+  @@graph
+  @@op
+  @@consumers
+
+  @@eval
+
+  @@get_shape
+  @@set_shape
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """
 
   # List of Python operators that we allow to override.
   OVERLOADABLE_OPERATORS = {
       # Binary.
+<<<<<<< HEAD
       "__add__",
       "__radd__",
       "__sub__",
@@ -385,6 +514,23 @@ class Tensor(_TensorLike):
 
   # Whether to allow hashing or numpy-style equality
   _USE_EQUALITY = tf2.enabled()
+=======
+      "__add__", "__radd__",
+      "__sub__", "__rsub__",
+      "__mul__", "__rmul__",
+      "__div__", "__rdiv__",
+      "__truediv__", "__rtruediv__",
+      "__mod__", "__rmod__",
+      "__lt__", "__le__",
+      "__gt__", "__ge__",
+      "__and__", "__rand__",
+      "__or__", "__ror__",
+      "__xor__", "__rxor__",
+      "__getitem__",
+      # Unary.
+      "__invert__",
+      "__neg__", "__abs__"}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def __init__(self, op, value_index, dtype):
     """Creates a new `Tensor`.
@@ -393,7 +539,11 @@ class Tensor(_TensorLike):
       op: An `Operation`. `Operation` that computes this tensor.
       value_index: An `int`. Index of the operation's endpoint that produces
         this tensor.
+<<<<<<< HEAD
       dtype: A `DType`. Type of elements stored in this tensor.
+=======
+      dtype: A `types.DType`. Type of data stored in this tensor.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Raises:
       TypeError: If the op is not an `Operation`.
@@ -402,6 +552,7 @@ class Tensor(_TensorLike):
       raise TypeError("op needs to be an Operation: %s" % op)
     self._op = op
     self._value_index = value_index
+<<<<<<< HEAD
     self._dtype = dtypes.as_dtype(dtype)
     # This will be set by self._as_tf_output().
     self._tf_output = None
@@ -418,6 +569,13 @@ class Tensor(_TensorLike):
     ret = Tensor(op, value_index, dtype)
     ret._tf_output = tf_output
     return ret
+=======
+    self._dtype = types.as_dtype(dtype)
+    self._shape = tensor_shape.unknown_shape()
+    # List of operations that use this Tensor as input.  We maintain this list
+    # to easily navigate a computation graph.
+    self._consumers = []
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   @property
   def op(self):
@@ -437,17 +595,24 @@ class Tensor(_TensorLike):
   @property
   def name(self):
     """The string name of this tensor."""
+<<<<<<< HEAD
     if self._name is None:
       if not self._op.name:
         raise ValueError("Operation was not named: %s" % self._op)
       self._name = "%s:%d" % (self._op.name, self._value_index)
     return self._name
+=======
+    if not self._op.name:
+      raise ValueError("Operation was not named: %s" % self._op)
+    return "%s:%d" % (self._op.name, self._value_index)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   @property
   def device(self):
     """The name of the device on which this tensor will be produced, or None."""
     return self._op.device
 
+<<<<<<< HEAD
   @property
   def shape(self):
     """Returns the `TensorShape` that represents the shape of this tensor.
@@ -484,6 +649,46 @@ class Tensor(_TensorLike):
     >>> print(f.shape)
     (3, 4)
 
+=======
+  def _shape_as_list(self):
+    if self._shape.ndims is not None:
+      return [dim.value for dim in self._shape.dims]
+    else:
+      return None
+
+  def get_shape(self):
+    """Returns the `TensorShape` that represents the shape of this tensor.
+
+    The shape is computed using shape inference functions that are
+    registered for each `Operation` type using `tf.RegisterShape`.
+    See [`TensorShape`](framework.md#TensorShape) for more details of what a shape
+    represents.
+
+    The inferred shape of a tensor is used to provide shape
+    information without having to launch the graph in a session. This
+    can be used for debugging, and providing early error messages. For
+    example:
+
+    ```python
+    c = tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+
+    print c.get_shape()
+    ==> TensorShape([Dimension(2), Dimension(3)])
+
+    d = tf.constant([[1.0, 0.0], [0.0, 1.0], [1.0, 0.0], [0.0, 1.0]])
+
+    print d.get_shape()
+    ==> TensorShape([Dimension(4), Dimension(2)])
+
+    # Raises a ValueError, because `c` and `d` do not have compatible
+    # inner dimensions.
+    e = tf.matmul(c, d)
+
+    f = tf.matmul(c, d, transpose_a=True, transpose_b=True)
+
+    print f.get_shape()
+    ==> TensorShape([Dimension(3), Dimension(4)])
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ```
 
     In some cases, the inferred shape may have unknown dimensions. If
@@ -492,6 +697,7 @@ class Tensor(_TensorLike):
     inferred shape.
 
     Returns:
+<<<<<<< HEAD
       A `tf.TensorShape` representing the shape of this tensor.
 
     """
@@ -594,6 +800,11 @@ class Tensor(_TensorLike):
   def get_shape(self):
     """Alias of `tf.Tensor.shape`."""
     return self.shape
+=======
+      A `TensorShape` representing the shape of this tensor.
+    """
+    return self._shape
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def set_shape(self, shape):
     """Updates the shape of this tensor.
@@ -605,16 +816,25 @@ class Tensor(_TensorLike):
     to provide additional information about the shapes of images:
 
     ```python
+<<<<<<< HEAD
     _, image_data = tf.compat.v1.TFRecordReader(...).read(...)
+=======
+    _, image_data = tf.TFRecordReader(...).read(...)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     image = tf.image.decode_png(image_data, channels=3)
 
     # The height and width dimensions of `image` are data dependent, and
     # cannot be computed without executing the op.
+<<<<<<< HEAD
     print(image.shape)
+=======
+    print image.get_shape()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ==> TensorShape([Dimension(None), Dimension(None), Dimension(3)])
 
     # We know that each image in this dataset is 28 x 28 pixels.
     image.set_shape([28, 28, 3])
+<<<<<<< HEAD
     print(image.shape)
     ==> TensorShape([Dimension(28), Dimension(28), Dimension(3)])
     ```
@@ -627,11 +847,20 @@ class Tensor(_TensorLike):
     Args:
       shape: A `TensorShape` representing the shape of this tensor, a
         `TensorShapeProto`, a list, a tuple, or None.
+=======
+    print image.get_shape()
+    ==> TensorShape([Dimension(28), Dimension(28), Dimension(3)])
+    ```
+
+    Args:
+      shape: A `TensorShape` representing the shape of this tensor.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Raises:
       ValueError: If `shape` is not compatible with the current shape of
         this tensor.
     """
+<<<<<<< HEAD
     # Reset cached shape.
     self._shape_val = None
 
@@ -657,6 +886,9 @@ class Tensor(_TensorLike):
     except errors.InvalidArgumentError as e:
       # Convert to ValueError for backwards compatibility.
       raise ValueError(str(e))
+=======
+    self._shape = self._shape.merge_with(shape)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   @property
   def value_index(self):
@@ -669,6 +901,7 @@ class Tensor(_TensorLike):
     Returns:
       A list of `Operation`s.
     """
+<<<<<<< HEAD
     consumer_names = c_api.TF_OperationOutputConsumers_wrapper(
         self._as_tf_output())
     # pylint: disable=protected-access
@@ -677,6 +910,22 @@ class Tensor(_TensorLike):
         for name in consumer_names
     ]
     # pylint: enable=protected-access
+=======
+    return self._consumers
+
+  def _add_consumer(self, consumer):
+    """Add a consumer to this tensor.
+
+    Args:
+      consumer: an Operation.
+
+    Raises:
+      TypeError: if the consumer is not an Operation.
+    """
+    if not isinstance(consumer, Operation):
+      raise TypeError("Consumer must be an Operation: %s" % consumer)
+    self._consumers.append(consumer)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _as_node_def_input(self):
     """Return a value to use for the NodeDef "input" attribute.
@@ -697,6 +946,7 @@ class Tensor(_TensorLike):
     else:
       return "%s:%d" % (self._op.name, self._value_index)
 
+<<<<<<< HEAD
   def _as_tf_output(self):
     # pylint: disable=protected-access
     # NOTE: Beyond preventing unnecessary (re-)allocation, the cached object
@@ -735,6 +985,23 @@ class Tensor(_TensorLike):
     result = cls.__new__(cls)
     result.__dict__.update(self.__dict__)
     return result
+=======
+  def __str__(self):
+    return "Tensor(\"%s\"%s%s%s)" % (
+        self.name,
+        (", shape=%s" % self.get_shape())
+        if self.get_shape().ndims is not None else "",
+        (", dtype=%s" % self._dtype.name) if self._dtype else "",
+        (", device=%s" % self.device) if self.device else "")
+
+  def __hash__(self):
+    # Necessary to support Python's collection membership operators
+    return id(self)
+
+  def __eq__(self, other):
+    # Necessary to support Python's collection membership operators
+    return id(self) == id(other)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   # NOTE(mrry): This enables the Tensor's overloaded "right" binary
   # operators to run when the left operand is an ndarray, because it
@@ -745,6 +1012,7 @@ class Tensor(_TensorLike):
   # with ndarrays.
   __array_priority__ = 100
 
+<<<<<<< HEAD
   def __array__(self):
     raise NotImplementedError("Cannot convert a symbolic Tensor ({}) to a numpy"
                               " array.".format(self.name))
@@ -787,14 +1055,52 @@ class Tensor(_TensorLike):
       `TypeError`.
     """
     self._disallow_bool_casting()
+=======
+  @staticmethod
+  def _override_operator(operator, func):
+    """Overrides (string) operator on Tensors to call func.
+
+    Args:
+      operator: the string name of the operator to override.
+      func: the function that replaces the overriden operator.
+
+    Raises:
+      ValueError: If operator has already been overwritten,
+        or if operator is not allowed to be overwritten.
+    """
+    if getattr(Tensor, operator, None) is not None:
+      # check to see if this is a default method-wrapper which will be true
+      # for the comparison operators.
+      if not isinstance(getattr(Tensor, operator, None), type(all.__call__)):
+        raise ValueError("operator %s cannot be overwritten again." % operator)
+    if operator not in Tensor.OVERLOADABLE_OPERATORS:
+      raise ValueError("Overriding %s is disallowed" % operator)
+    setattr(Tensor, operator, func)
+
+  def __iter__(self):
+    """Dummy method to prevent iteration. Do not call.
+
+    NOTE(mrry): If we register __getitem__ as an overloaded operator,
+    Python will valiantly attempt to iterate over the Tensor from 0 to
+    infinity.  Declaring this method prevents this unintended
+    behavior.
+
+    Raises:
+      TypeError: when invoked.
+    """
+    raise TypeError("'Tensor' object is not iterable")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def eval(self, feed_dict=None, session=None):
     """Evaluates this tensor in a `Session`.
 
+<<<<<<< HEAD
     Note: If you are not using `compat.v1` libraries, you should not need this,
     (or `feed_dict` or `Session`).  In eager execution (or within `tf.function`)
     you do not need to call `eval`.
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Calling this method will execute all preceding operations that
     produce the inputs needed for the operation that produces this
     tensor.
@@ -804,13 +1110,20 @@ class Tensor(_TensorLike):
     available, or `session` must be specified explicitly.
 
     Args:
+<<<<<<< HEAD
       feed_dict: A dictionary that maps `Tensor` objects to feed values. See
         `tf.Session.run` for a description of the valid feed values.
+=======
+      feed_dict: A dictionary that maps `Tensor` objects to feed values.
+        See [`Session.run()`](client.md#Session.run) for a description of
+        the valid feed values.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       session: (Optional.) The `Session` to be used to evaluate this tensor. If
         none, the default session will be used.
 
     Returns:
       A numpy array corresponding to the value of this tensor.
+<<<<<<< HEAD
     """
     return _eval_using_default_session(self, feed_dict, self.graph, session)
 
@@ -1580,17 +1893,450 @@ def convert_n_to_tensor_or_composite(values, dtype=None, name=None):
 
 def _device_string(dev_spec):
   if pydev.is_device_spec(dev_spec):
+=======
+
+    """
+    return _eval_using_default_session(self, feed_dict, self.graph, session)
+
+
+def _TensorTensorConversionFunction(t, dtype=None, name=None):
+  _ = name
+  if dtype and not dtype.is_compatible_with(t.dtype):
+    raise ValueError(
+        "Tensor conversion requested dtype %s for Tensor with dtype %s: %r"
+        % (dtype.name, t.dtype.name, str(t)))
+  return t
+
+
+_tensor_conversion_func_registry = {
+    0: [(Tensor, _TensorTensorConversionFunction)]}
+
+
+def convert_to_tensor(value, dtype=None, name=None):
+  """Converts the given `value` to a `Tensor`.
+
+  This function converts Python objects of various types to `Tensor`
+  objects. It accepts `Tensor` objects, numpy arrays, Python lists,
+  and Python scalars. For example:
+
+  ```python
+  import numpy as np
+  array = np.random.rand((32, 100, 100))
+
+  def my_func(arg):
+    arg = tf.convert_to_tensor(arg, dtype=tf.float32)
+    return tf.matmul(arg, arg) + arg
+
+  # The following calls are equivalent.
+  value_1 = my_func(tf.constant([[1.0, 2.0], [3.0, 4.0]))
+  value_2 = my_func([[1.0, 2.0], [3.0, 4.0]])
+  value_3 = my_func(numpy.array([[1.0, 2.0], [3.0, 4.0]], dtype=numpy.float32))
+  ```
+
+  This function can be useful when composing a new operation in Python
+  (such as `my_func` in the example above). All standard Python op
+  constructors apply this function to each of their Tensor-valued
+  inputs, which allows those ops to accept numpy arrays, Python lists,
+  and scalars in addition to `Tensor` objects.
+
+  Args:
+    value: An object whose type has a registered `Tensor` conversion function.
+    dtype: Optional element type for the returned tensor. If missing, the
+      type is inferred from the type of `value`.
+    name: Optional name to use if a new `Tensor` is created.
+
+  Returns:
+    A `Tensor` based on `value`.
+
+  Raises:
+    TypeError: If no conversion function is registered for `value`.
+    RuntimeError: If a registered conversion function returns an invalid value.
+
+  """
+  error_prefix = "" if name is None else "%s: " % name
+  if dtype is not None:
+    dtype = types.as_dtype(dtype)
+  for _, funcs_at_priority in sorted(_tensor_conversion_func_registry.items()):
+    for base_type, conversion_func in funcs_at_priority:
+      if isinstance(value, base_type):
+        ret = conversion_func(value, dtype=dtype, name=name)
+        if not isinstance(ret, Tensor):
+          raise RuntimeError(
+              "%sConversion function %r for type %s returned non-Tensor: %r"
+              % (error_prefix, conversion_func, base_type, ret))
+        if dtype and not dtype.is_compatible_with(ret.dtype):
+          raise RuntimeError(
+              "%sConversion function %r for type %s returned incompatible "
+              "dtype: requested = %s, actual = %s"
+              % (error_prefix, conversion_func, base_type,
+                 dtype.name, ret.dtype.name))
+        return ret
+  raise TypeError("%sCannot convert %r with type %s to Tensor: "
+                  "no conversion function registered."
+                  % (error_prefix, value, type(value)))
+
+
+def convert_to_tensor_or_indexed_slices(value, dtype=None, name=None):
+  """Converts the given object to a `Tensor` or an `IndexedSlices`.
+
+  If `value` is an `IndexedSlices` it is returned
+  unmodified. Otherwise, it is converted to a `Tensor` using
+  `convert_to_tensor()`.
+
+  Args:
+    value: An `IndexedSlices` or an object that can be consumed by
+      `convert_to_tensor()`.
+    dtype: (Optional.) The required `DType` of the returned `Tensor` or
+      `IndexedSlices`.
+    name: (Optional.) A name to use if a new `Tensor` is created.
+
+  Returns:
+    An `Tensor` or an `IndexedSlices` based on `value`.
+
+  Raises:
+    ValueError: If `dtype` does not match the element type of `value`.
+  """
+  if isinstance(value, IndexedSlices):
+    if dtype and not types.AsDType(dtype).is_compatible_with(value.dtype):
+      raise ValueError(
+          "Tensor conversion requested dtype %s for Tensor with dtype %s: %r"
+          % (types.AsDType(dtype).name, value.dtype.name, str(value)))
+    return value
+  else:
+    return convert_to_tensor(value, dtype, name)
+
+
+def convert_n_to_tensor_or_indexed_slices(values, dtype=None, name=None):
+  """Converts `values` to a list of `Tensor` or `IndexedSlices` objects.
+
+  Args:
+    values: A list of `None`, `IndexedSlices`, or objects that can be consumed
+      by `convert_to_tensor()`.
+    dtype: (Optional.) The required `DType` of the returned `Tensor`
+      `IndexedSlices`.
+
+    name: (Optional.) A name prefix to used when a new `Tensor` is
+      created, in which case element `i` will be given the name `name
+      + '_' + i`.
+
+  Returns:
+    A list of `Tensor` and/or `IndexedSlices` objects.
+
+  Raises:
+    TypeError: If no conversion function is registered for an element in
+      `values`.
+    RuntimeError: If a registered conversion function returns an invalid
+      value.
+  """
+  if not isinstance(values, collections.Sequence):
+    raise TypeError("values must be a list.")
+  ret = []
+  for i, value in enumerate(values):
+    if value is None:
+      ret.append(value)
+    else:
+      n = None if name is None else "%s_%d" % (name, i)
+      ret.append(
+          convert_to_tensor_or_indexed_slices(value, dtype=dtype, name=n))
+  return ret
+
+
+def register_tensor_conversion_function(base_type, conversion_func,
+                                        priority=100):
+  """Registers a function for converting objects of base_type to Tensor.
+
+  The conversion function must have the following signature:
+
+      def conversion_func(value, dtype=None, name=None):
+        # ...
+
+  It must return a Tensor with the given dtype if specified. If the
+  conversion function creates a new Tensor, it should use the given
+  name if specified. All exceptions will be propagated to the caller.
+
+  NOTE: The conversion functions will execute in order of priority,
+    followed by order of registration. To ensure that a conversion
+    function F runs before another conversion function G, ensure that
+    F is registered with a smaller priority than G.
+
+  Args:
+    base_type: The base type or tuple of base types for all objects that
+      `conversion_func` accepts.
+    conversion_func: A function that converts instances of base_type to Tensor.
+    priority: Optional integer that indicates the priority for applying this
+      conversion function. Conversion functions with smaller priority values
+      run earlier than conversion functions with larger priority values.
+      Defaults to 100.
+
+  Raises:
+    TypeError: If the arguments do not have the appropriate type.
+
+  """
+  if not (isinstance(base_type, type) or
+          (isinstance(base_type, tuple)
+           and all(isinstance(x, type) for x in base_type))):
+    raise TypeError("base_type must be a type or a tuple of types.")
+  if not callable(conversion_func):
+    raise TypeError("conversion_func must be callable.")
+
+  try:
+    funcs_at_priority = _tensor_conversion_func_registry[priority]
+  except KeyError:
+    funcs_at_priority = []
+    _tensor_conversion_func_registry[priority] = funcs_at_priority
+  funcs_at_priority.append((base_type, conversion_func))
+
+
+class IndexedSlices(object):
+  """A sparse representation of a set of tensor slices at given indices.
+
+  This class is a simple wrapper for a pair of `Tensor` objects:
+
+  * `values`: A `Tensor` of any dtype with shape `[D0, D1, ..., Dn]`.
+  * `indices`: A 1-D integer `Tensor` with shape `[D0]`.
+
+  An `IndexedSlices` is typically used to represent a subset of a larger
+  tensor `dense` of shape `[LARGE0, D1, .. , DN]` where `LARGE0 >> D0`.
+  The values in `indices` are the indices in the first dimension of
+  the slices that have been extracted from the larger tensor.
+
+  The dense tensor `dense` represented by an `IndexedSlices` `slices` has
+
+  ```python
+  dense[slices.indices[i], :, :, :, ...] = slices.values[i, :, :, :, ...]
+  ```
+
+  The `IndexedSlices` class is used principally in the definition of
+  gradients for operations that have sparse gradients
+  (e.g. [`tf.gather`](array_ops.md#gather)).
+
+  Contrast this representation with
+  [`SparseTensor`](sparse_ops.md#SparseTensor),
+  which uses multi-dimensional indices and scalar values.
+
+  @@__init__
+
+  @@values
+  @@indices
+  @@dense_shape
+
+  @@name
+  @@dtype
+  @@device
+  @@op
+  """
+
+  def __init__(self, values, indices, dense_shape=None):
+    """Creates an `IndexedSlices`."""
+    self._values = values
+    self._indices = indices
+    self._dense_shape = dense_shape
+
+  @property
+  def values(self):
+    """A `Tensor` containing the values of the slices."""
+    return self._values
+
+  @property
+  def indices(self):
+    """A 1-D `Tensor` containing the indices of the slices."""
+    return self._indices
+
+  @property
+  def dense_shape(self):
+    """A 1-D `Tensor` containing the shape of the corresponding dense tensor."""
+    return self._dense_shape
+
+  @property
+  def name(self):
+    """The name of this `IndexedSlices`."""
+    return self.values.name
+
+  @property
+  def device(self):
+    """The name of the device on which `values` will be produced, or `None`."""
+    return self.values.device
+
+  @property
+  def op(self):
+    """The `Operation` that produces `values` as an output."""
+    return self.values.op
+
+  @property
+  def dtype(self):
+    """The `DType` of elements in this tensor."""
+    return self.values.dtype
+
+  def __str__(self):
+    return "IndexedSlices(indices=%s, values=%s)" % (
+        self._indices, self._values)
+
+
+def assert_same_graph(items, expected_graph=None):
+  """Asserts all items are from the same graph.
+
+  Args:
+    items: List of graph items (e.g., Variable, Tensor, SparseTensor,
+        Operation, or IndexedSlices).
+    expected_graph: Expected graph. If not specified, assert all tensors are
+        from the same graph.
+  Returns:
+    items, for chaining.
+  Raises:
+    ValueError: If any graphs do not match.
+  """
+  for item in items:
+    if not expected_graph:
+      expected_graph = item.graph
+    elif expected_graph != item.graph:
+      raise ValueError("Items must be from the same graph.")
+  return items
+
+
+class SparseTensor(object):
+  """Represents a sparse tensor.
+
+  Tensorflow represents a sparse tensor as three separate dense tensors:
+  `indices`, `values`, and `dense_shape`.  In Python, the three tensors are
+  collected into a `SparseTensor` class for ease of use.  If you have separate
+  `indices`, `values`, and `dense_shape` tensors, wrap them in a `SparseTensor`
+  object before passing to the Ops below.
+
+  Concretely, the sparse tensor `SparseTensor(values, indices, dense_shape)` is
+
+  * `indices`: A 2-D int64 tensor of shape `[N, ndims]`.
+  * `values`: A 1-D tensor of any type and shape `[N]`.
+  * `dense_shape`: A 1-D int64 tensor of shape `[ndims]`.
+
+  where `N` and `ndims` are the number of values, and number of dimensions in
+  the `SparseTensor` respectively.
+
+  The corresponding dense tensor satisfies
+
+  ```python
+  dense.shape = dense_shape
+  dense[tuple(indices[i])] = values[i]
+  ```
+
+  By convention, `indices` should be sorted in row-major order (or equivalently
+  lexigraphic order on the tuples `indices[i]`).  This is not enforced when
+  `SparseTensor` objects are constructed, but most Ops assume correct ordering.
+  If the ordering is wrong, it can be fixed by calling `sparse_reorder` on the
+  misordered `SparseTensor`.
+
+  Example: The sparse tensor
+
+  ```python
+    SparseTensor(values=[1, 2], indices=[[0, 0], [1, 2]], shape=[3, 4])
+  ```
+
+  represents the dense tensor
+
+  ```python
+    [[1, 0, 0, 0]
+     [0, 0, 2, 0]
+     [0, 0, 0, 0]]
+  ```
+
+  @@__init__
+  @@indices
+  @@values
+  @@dtype
+  @@shape
+  @@graph
+  """
+
+  def __init__(self, indices, values, shape):
+    """Creates a `SparseTensor`.
+
+    Args:
+      indices: A 2-D int64 tensor of shape `[N, ndims]`.
+      values: A 1-D tensor of any type and shape `[N]`.
+     dense_shape: A 1-D int64 tensor of shape `[ndims]`.
+
+    Returns:
+      A `SparseTensor`
+    """
+    with op_scope([indices, values, shape], None, "SparseTensor"):
+      indices = convert_to_tensor(indices, name="indices")
+      values = convert_to_tensor(values, name="values")
+      shape = convert_to_tensor(shape, name="shape")
+    self._indices = indices
+    self._values = values
+    self._shape = shape
+
+    indices_shape = indices.get_shape().with_rank(2)
+    values_shape = values.get_shape().with_rank(1)
+    shape_shape = shape.get_shape().with_rank(1)
+
+    # Assert number of rows in indices match the number of elements in values.
+    indices_shape[0].merge_with(values_shape[0])
+    # Assert number of columns in indices matches the number of elements in
+    # shape.
+    indices_shape[1].merge_with(shape_shape[0])
+
+  @property
+  def indices(self):
+    """The indices of non-zero values in the represented dense tensor.
+
+    Returns:
+      A 2-D Tensor of int64 with shape `[N, ndims]`, where `N` is the
+        number of non-zero values in the tensor, and `ndims` is the rank.
+    """
+    return self._indices
+
+  @property
+  def values(self):
+    """The non-zero values in the represented dense tensor.
+
+    Returns:
+      A 1-D Tensor of any data type.
+    """
+    return self._values
+
+  @property
+  def dtype(self):
+    """The `DType` of elements in this tensor."""
+    return self._values.dtype
+
+  @property
+  def shape(self):
+    """A 1-D Tensor of int64 representing the shape of the dense tensor."""
+    return self._shape
+
+  @property
+  def graph(self):
+    """The `Graph` that contains the index, value, and shape tensors."""
+    return self._indices.graph
+
+  def __str__(self):
+    return "SparseTensor(indices=%s, values=%s, shape=%s)" % (
+        self._indices, self._values, self._shape)
+
+
+SparseTensorValue = collections.namedtuple("SparseTensorValue",
+                                           ["indices", "values", "shape"])
+
+
+def _device_string(dev_spec):
+  if isinstance(dev_spec, pydev.Device):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return dev_spec.to_string()
   else:
     return dev_spec
 
 
+<<<<<<< HEAD
 def _NodeDef(op_type, name, attrs=None):
+=======
+def _NodeDef(op_type, name, device=None, attrs=None):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """Create a NodeDef proto.
 
   Args:
     op_type: Value for the "op" attribute of the NodeDef proto.
     name: Value for the "name" attribute of the NodeDef proto.
+<<<<<<< HEAD
     attrs: Dictionary where the key is the attribute name (a string)
       and the value is the respective "attr" attribute of the NodeDef proto (an
       AttrValue).
@@ -1603,11 +2349,32 @@ def _NodeDef(op_type, name, attrs=None):
   if attrs:
     for k, v in six.iteritems(attrs):
       node_def.attr[k].CopyFrom(v)
+=======
+    device: string, device, or function from NodeDef to string.
+      Value for the "device" attribute of the NodeDef proto.
+    attrs: optional list for the "attr" attribute of the NodeDef proto.
+
+  Returns:
+    A graph_pb2.NodeDef protocol buffer.
+  """
+  node_def = graph_pb2.NodeDef()
+  node_def.op = str(op_type)
+  node_def.name = str(name)
+  if attrs is not None:
+    for k, v in attrs.iteritems():
+      node_def.attr[k].CopyFrom(v)
+  if device is not None:
+    if callable(device):
+      node_def.device = device(node_def)
+    else:
+      node_def.device = _device_string(device)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return node_def
 
 
 # Copied from core/framework/node_def_util.cc
 # TODO(mrry,josh11b): Consolidate this validation in C++ code.
+<<<<<<< HEAD
 _VALID_OP_NAME_REGEX = re.compile("^[A-Za-z0-9.][A-Za-z0-9_.\\-/>]*$")
 _VALID_SCOPE_NAME_REGEX = re.compile("^[A-Za-z0-9_.\\-/>]*$")
 
@@ -1876,19 +2643,161 @@ class Operation(object):
     # If there are no colocation groups in the explicit _class field,
     # return the default colocation group.
     return attr_groups if attr_groups else default_colocation_group
+=======
+_VALID_OP_NAME_REGEX = re.compile("[A-Za-z0-9.][A-Za-z0-9_.\\-/]*")
+
+
+class Operation(object):
+  """Represents a graph node that performs computation on tensors.
+
+  An `Operation` is a node in a TensorFlow `Graph` that takes zero or
+  more `Tensor` objects as input, and produces zero or more `Tensor`
+  objects as output. Objects of type `Operation` are created by
+  calling a Python op constructor (such as [`tf.matmul()`](math_ops.md#matmul))
+  or [`Graph.create_op()`](framework.md#Graph.create_op).
+
+  For example `c = tf.matmul(a, b)` creates an `Operation` of type
+  "MatMul" that takes tensors `a` and `b` as input, and produces `c`
+  as output.
+
+  After the graph has been launched in a session, an `Operation` can
+  be executed by passing it to [`Session.run()`](client.md#Session.run).
+  `op.run()` is a shortcut for calling `tf.get_default_session().run(op)`.
+
+  @@name
+  @@type
+  @@inputs
+  @@control_inputs
+  @@outputs
+  @@device
+  @@graph
+
+  @@run
+
+  @@get_attr
+  @@traceback
+  """
+
+  def __init__(self, node_def, g, inputs=None, output_types=None,
+               control_inputs=None, input_types=None, original_op=None,
+               op_def=None):
+    """Creates an `Operation`.
+
+    NOTE: This constructor validates the name of the Operation (passed
+    as "node_def.name"). Valid Operation names match the following
+    regular expression:
+
+      [A-Za-z0-9.][A-Za-z0-9_.\\-/]*
+
+    Args:
+      node_def: graph_pb2.NodeDef.  NodeDef for the Operation.
+        Used for attributes of graph_pb2.NodeDef, typically "name",
+        "op", and "device".  The "input" attribute is irrelevant here
+        as it will be computed when generating the model.
+      g: Graph. The parent graph.
+      inputs: list of Tensor objects. The inputs to this Operation.
+      output_types: list of types_pb2.DataType.  List of the types of the
+        Tensors computed by this operation.  The length of this list indicates
+        the number of output endpoints of the Operation.
+      control_inputs: list of operations or tensors from which to have a
+        control dependency.
+      input_types: List of types_pb2.DataType representing the
+        types of the Tensors accepted by the Operation.  By default
+        uses [x.dtype.base_dtype for x in inputs].  Operations that expect
+        reference-typed inputs must specify these explicitly.
+      original_op: Optional. Used to associate the new Operation with an
+        existing Operation (for example, a replica with the op that was
+        replicated).
+      op_def: Optional. The op_def_pb2.OpDef proto that describes the
+        op type that this Operation represents.
+
+    Raises:
+      TypeError: if control inputs are not Operations or Tensors,
+        or if node_def is not a NodeDef,
+        or if g is not a Graph,
+        or if inputs are not Tensors,
+        or if inputs and input_types are incompatible.
+      ValueError: if the node_def name is not valid.
+    """
+    if not isinstance(node_def, graph_pb2.NodeDef):
+      raise TypeError("node_def needs to be a NodeDef: %s" % node_def)
+    if node_def.ByteSize() >= (1 << 31) or node_def.ByteSize() < 0:
+      raise ValueError(
+          "Cannot create an Operation with a NodeDef larger than 2GB.")
+    if not _VALID_OP_NAME_REGEX.match(node_def.name):
+      raise ValueError("'%s' is not a valid node name" % node_def.name)
+    if not isinstance(g, Graph):
+      raise TypeError("g needs to be a Graph: %s" % g)
+    self._node_def = copy.deepcopy(node_def)
+    self._graph = g
+    if inputs is None:
+      inputs = []
+    self._inputs = inputs
+    for a in self._inputs:
+      if not isinstance(a, Tensor):
+        raise TypeError("input needs to be a Tensor: %s" % a)
+      # Mark that we consume the inputs.
+      a._add_consumer(self)  # pylint: disable=protected-access
+    if output_types is None:
+      output_types = []
+    self._output_types = output_types
+    self._outputs = [Tensor(self, i, output_types[i])
+                     for i in xrange(len(output_types))]
+    if input_types is None:
+      input_types = [i.dtype.base_dtype for i in self._inputs]
+    else:
+      if not all(x.is_compatible_with(i.dtype)
+                 for i, x in zip(self._inputs, input_types)):
+        raise TypeError("Inputs are not compatible with input types")
+    self._input_types = input_types
+
+    # Build the list of control inputs.
+    self._control_inputs = []
+    if control_inputs:
+      for c in control_inputs:
+        c_op = None
+        if isinstance(c, Operation):
+          c_op = c
+        elif isinstance(c, (Tensor, IndexedSlices)):
+          c_op = c.op
+        else:
+          raise TypeError("Control input must be an Operation, "
+                          "a Tensor, or IndexedSlices: %s" % c)
+        self._control_inputs.append(c_op)
+
+    self._original_op = original_op
+    self._op_def = op_def
+    self._traceback = _extract_stack()
+    # Add this op to the current control flow context:
+    self._control_flow_context = g._get_control_flow_context()
+    if g._get_control_flow_context() is not None:
+      g._get_control_flow_context().AddOp(self)
+    # NOTE(keveman): Control flow context's AddOp could be creating new ops and
+    # setting op.inputs[index] = new_op. Thus the new ops' id could be larger
+    # than this op's id even though this op depend on them. Therefore, delaying
+    # assigning id to this op until all ops this could be dependent on are
+    # created.
+    self._id_value = self._graph._next_id()  # pylint: disable=protected-access
+    self._recompute_node_def()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def values(self):
     """DEPRECATED: Use outputs."""
     return tuple(self.outputs)
 
   def _get_control_flow_context(self):
+<<<<<<< HEAD
     """Returns the control flow context of this op.
+=======
+    """Returns the current control flow context.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Returns:
       A context object.
     """
     return self._control_flow_context
 
+<<<<<<< HEAD
   def _set_control_flow_context(self, ctx):
     """Sets the current control flow context of this op.
 
@@ -1901,6 +2810,12 @@ class Operation(object):
   def name(self):
     """The full name of this operation."""
     return c_api.TF_OperationName(self._c_op)
+=======
+  @property
+  def name(self):
+    """The full name of this operation."""
+    return self._node_def.name
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   @property
   def _id(self):
@@ -1913,6 +2828,7 @@ class Operation(object):
 
     Returns:
       The string name of the device to which this op has been
+<<<<<<< HEAD
       assigned, or an empty string if it has not been assigned to a
       device.
     """
@@ -2023,11 +2939,20 @@ class Operation(object):
     return tf_input
 
   def _set_device(self, device):  # pylint: disable=redefined-outer-name
+=======
+      assigned, or None if it has not been assigned to a device.
+    """
+    dev = self._node_def.device
+    return None if not dev else dev
+
+  def _set_device(self, device):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Set the device of this operation.
 
     Args:
       device: string or device..  The device to set.
     """
+<<<<<<< HEAD
     self._set_device_from_string(compat.as_str(_device_string(device)))
 
   def _set_device_from_string(self, device_str):
@@ -2053,6 +2978,17 @@ class Operation(object):
     Args:
       index: the index of the input to update.
       tensor: the Tensor to be used as the input at the given index.
+=======
+    self._node_def.device = _device_string(device)
+
+  def _add_input(self, tensor, dtype=None):
+    """Add a new input to this operation.
+
+    Args:
+      tensor: the Tensor to add as an input.
+      dtype: types.DType: type of the input; defaults to
+        the tensor's dtype.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Raises:
       TypeError: if tensor is not a Tensor,
@@ -2061,6 +2997,7 @@ class Operation(object):
     """
     if not isinstance(tensor, Tensor):
       raise TypeError("tensor must be a Tensor: %s" % tensor)
+<<<<<<< HEAD
     _assert_same_graph(self, tensor)
 
     # Reset cached inputs.
@@ -2072,17 +3009,43 @@ class Operation(object):
 
   def _add_while_inputs(self, tensors):
     """See AddWhileInputHack in python_api.h.
+=======
+    assert_same_graph([self, tensor])
+    if dtype is None:
+      dtype = tensor.dtype
+    else:
+      dtype = types.as_dtype(dtype)
+      if not dtype.is_compatible_with(tensor.dtype):
+        raise TypeError(
+            "Cannot convert a tensor of type %s to an input of type %s"
+            % (tensor.dtype.name, dtype.name))
+    self._inputs.append(tensor)
+    self._input_types.append(dtype)
+    tensor._add_consumer(self)  # pylint: disable=protected-access
+    self._recompute_node_def()
+
+  def _update_input(self, index, tensor, dtype=None):
+    """Update the input to this operation at the given index.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     NOTE: This is for TF internal use only. Please don't use it.
 
     Args:
+<<<<<<< HEAD
       tensors: list of Tensors
+=======
+      index: the index of the input to update.
+      tensor: the Tensor to be used as the input at the given index.
+      dtype: types.DType: type of the input; defaults to
+        the tensor's dtype.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Raises:
       TypeError: if tensor is not a Tensor,
         or if input tensor type is not convertible to dtype.
       ValueError: if the Tensor is from a different graph.
     """
+<<<<<<< HEAD
     for tensor in tensors:
       if not isinstance(tensor, Tensor):
         raise TypeError("tensor must be a Tensor: %s" % tensor)
@@ -2109,6 +3072,25 @@ class Operation(object):
       if not isinstance(op, Operation):
         raise TypeError("op must be an Operation: %s" % op)
       c_api.AddControlInput(self._graph._c_graph, self._c_op, op._c_op)  # pylint: disable=protected-access
+=======
+    if not isinstance(tensor, Tensor):
+      raise TypeError("tensor must be a Tensor: %s" % tensor)
+    assert_same_graph([self, tensor])
+    if dtype is None:
+      dtype = tensor.dtype
+    else:
+      dtype = types.as_dtype(dtype)
+      if not dtype.is_compatible_with(tensor.dtype):
+        raise TypeError(
+            "Cannot convert a tensor of type %s to an input of type %s"
+            % (tensor.dtype.name, dtype.name))
+
+    self._inputs[index].consumers().remove(self)
+    self._inputs[index] = tensor
+    self._input_types[index] = dtype
+    tensor._add_consumer(self)  # pylint: disable=protected-access
+    self._recompute_node_def()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _add_control_input(self, op):
     """Add a new control input to this operation.
@@ -2122,6 +3104,7 @@ class Operation(object):
     """
     if not isinstance(op, Operation):
       raise TypeError("op must be an Operation: %s" % op)
+<<<<<<< HEAD
     c_api.AddControlInput(self._graph._c_graph, self._c_op, op._c_op)  # pylint: disable=protected-access
 
   def _remove_all_control_inputs(self):
@@ -2150,12 +3133,29 @@ class Operation(object):
 
   def __repr__(self):
     return "<tf.Operation '%s' type=%s>" % (self.name, self.type)
+=======
+    assert_same_graph([self, op])
+    self._control_inputs.append(op)
+    self._recompute_node_def()
+
+  # Methods below are used when building the NodeDef and Graph proto.
+  def _recompute_node_def(self):
+    del self._node_def.input[:]
+    self._node_def.input.extend([t._as_node_def_input() for t in self._inputs])
+    if self._control_inputs:
+      self._node_def.input.extend(["^%s" % op.name for op in
+                                   self._control_inputs])
+
+  def __str__(self):
+    return str(self._node_def)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   @property
   def outputs(self):
     """The list of `Tensor` objects representing the outputs of this op."""
     return self._outputs
 
+<<<<<<< HEAD
   @property
   def inputs(self):
     """The sequence of `Tensor` objects representing the data inputs of this op."""
@@ -2174,6 +3174,36 @@ class Operation(object):
         for i in xrange(num_inputs)
     ]
     return input_types
+=======
+# pylint: disable=protected-access
+  class _InputList(object):
+    """Immutable input list wrapper."""
+
+    def __init__(self, op):
+      self._op = op
+
+    def __iter__(self):
+      return iter(self._op._inputs)
+
+    def __len__(self):
+      return len(self._op._inputs)
+
+    def __bool__(self):
+      return bool(self._op._inputs)
+
+    def __getitem__(self, i):
+      return self._op._inputs[i]
+# pylint: enable=protected-access
+
+  @property
+  def inputs(self):
+    """The list of `Tensor` objects representing the data inputs of this op."""
+    return Operation._InputList(self)
+
+  @property
+  def _input_dtypes(self):
+    return self._input_types
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   @property
   def control_inputs(self):
@@ -2189,6 +3219,7 @@ class Operation(object):
       A list of `Operation` objects.
 
     """
+<<<<<<< HEAD
     control_c_ops = c_api.TF_OperationGetControlInputs_wrapper(self._c_op)
     # pylint: disable=protected-access
     return [
@@ -2215,11 +3246,18 @@ class Operation(object):
         for c_op in control_c_ops
     ]
     # pylint: enable=protected-access
+=======
+    return self._control_inputs
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   @property
   def type(self):
     """The type of the op (e.g. `"MatMul"`)."""
+<<<<<<< HEAD
     return c_api.TF_OperationOpType(self._c_op)
+=======
+    return self._node_def.op
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   @property
   def graph(self):
@@ -2228,6 +3266,7 @@ class Operation(object):
 
   @property
   def node_def(self):
+<<<<<<< HEAD
     # pylint: disable=line-too-long
     """Returns the `NodeDef` representation of this operation.
 
@@ -2247,19 +3286,40 @@ class Operation(object):
   @property
   def op_def(self):
     # pylint: disable=line-too-long
+=======
+    """Returns a serialized `NodeDef` representation of this operation.
+
+    Returns:
+      A
+      [`NodeDef`](https://tensorflow.googlesource.com/tensorflow/+/master/tensorflow/core/framework/graph.proto)
+      protocol buffer.
+    """
+    return self._node_def
+
+  @property
+  def op_def(self):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Returns the `OpDef` proto that represents the type of this op.
 
     Returns:
       An
+<<<<<<< HEAD
       [`OpDef`](https://www.tensorflow.org/code/tensorflow/core/framework/op_def.proto)
       protocol buffer.
     """
     # pylint: enable=line-too-long
     return self._graph._get_op_def(self.type)
+=======
+      [`OpDef`](https://tensorflow.googlesource.com/tensorflow/+/master/tensorflow/core/framework/op_def.proto)
+      protocol buffer.
+    """
+    return self._op_def
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   @property
   def traceback(self):
     """Returns the call stack from when this operation was constructed."""
+<<<<<<< HEAD
     return self._traceback
 
   def _set_attr(self, attr_name, attr_value):
@@ -2309,6 +3369,9 @@ class Operation(object):
     # pylint: disable=protected-access
     c_api.ClearAttr(self._graph._c_graph, self._c_op, attr_name)
     # pylint: enable=protected-access
+=======
+    return _convert_stack(self._traceback)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def get_attr(self, name):
     """Returns the value of the attr of this op with the given `name`.
@@ -2322,6 +3385,7 @@ class Operation(object):
     Raises:
       ValueError: If this op does not have an attr with the given `name`.
     """
+<<<<<<< HEAD
     fields = ("s", "i", "f", "b", "type", "shape", "tensor", "func")
     try:
       with c_api_util.tf_buffer() as buf:
@@ -2373,6 +3437,26 @@ class Operation(object):
     except errors.InvalidArgumentError as e:
       # Convert to ValueError for backwards compatibility.
       raise ValueError(str(e))
+=======
+    fields = ["s", "i", "f", "b", "type", "shape", "tensor"]
+    if name not in self._node_def.attr:
+      raise ValueError("No attr named '" + name + "' in " +
+                       str(self._node_def))
+    x = self._node_def.attr[name]
+    # Treat an empty oneof value as an empty list.
+    if not x.WhichOneof("value"):
+      return []
+    if x.HasField("list"):
+      for f in fields:
+        if getattr(x.list, f):
+          return list(getattr(x.list, f))
+      return []
+    else:
+      for f in fields:
+        if x.HasField(f):
+          return getattr(x, f)
+      assert False, "Unsupported field type in " + str(x)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def run(self, feed_dict=None, session=None):
     """Runs this operation in a `Session`.
@@ -2385,22 +3469,39 @@ class Operation(object):
     available, or `session` must be specified explicitly.
 
     Args:
+<<<<<<< HEAD
       feed_dict: A dictionary that maps `Tensor` objects to feed values. See
         `tf.Session.run` for a description of the valid feed values.
+=======
+      feed_dict: A dictionary that maps `Tensor` objects to feed values.
+        See [`Session.run()`](client.md#Session.run) for a description of the
+        valid feed values.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       session: (Optional.) The `Session` to be used to run to this operation. If
         none, the default session will be used.
     """
     _run_using_default_session(self, feed_dict, self.graph, session)
 
+<<<<<<< HEAD
 _gradient_registry = registry.Registry("gradient")
 
 
 @tf_export("RegisterGradient")
+=======
+
+_gradient_registry = registry.Registry("gradient")
+
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class RegisterGradient(object):
   """A decorator for registering the gradient function for an op type.
 
   This decorator is only used when defining a new op type. For an op
+<<<<<<< HEAD
   with `m` inputs and `n` outputs, the gradient function is a function
+=======
+  with `m` inputs and `n` inputs, the gradient function is a function
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   that takes the original `Operation` and `n` `Tensor` objects
   (representing the gradients with respect to each output of the op),
   and returns `m` `Tensor` objects (representing the partial gradients
@@ -2413,12 +3514,21 @@ class RegisterGradient(object):
   ```python
   @tf.RegisterGradient("Sub")
   def _sub_grad(unused_op, grad):
+<<<<<<< HEAD
     return grad, tf.negative(grad)
+=======
+    return grad, tf.Neg(grad)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ```
 
   The decorator argument `op_type` is the string type of an
   operation. This corresponds to the `OpDef.name` field for the proto
   that defines the operation.
+<<<<<<< HEAD
+=======
+
+  @@__init__
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """
 
   def __init__(self, op_type):
@@ -2427,11 +3537,16 @@ class RegisterGradient(object):
     Args:
       op_type: The string type of an operation. This corresponds to the
         `OpDef.name` field for the proto that defines the operation.
+<<<<<<< HEAD
 
     Raises:
       TypeError: If `op_type` is not string.
     """
     if not isinstance(op_type, six.string_types):
+=======
+    """
+    if not isinstance(op_type, basestring):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       raise TypeError("op_type must be a string")
     self._op_type = op_type
 
@@ -2441,6 +3556,7 @@ class RegisterGradient(object):
     return f
 
 
+<<<<<<< HEAD
 @deprecation.deprecated_endpoints("NotDifferentiable", "NoGradient")
 @tf_export("no_gradient", v1=["no_gradient", "NotDifferentiable", "NoGradient"])
 def no_gradient(op_type):
@@ -2448,12 +3564,17 @@ def no_gradient(op_type):
 
   This function should *not* be used for operations that have a
   well-defined gradient that is not yet implemented.
+=======
+def NoGradient(op_type):
+  """Specifies that ops of type `op_type` do not have a defined gradient.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   This function is only used when defining a new op type. It may be
   used for ops such as `tf.size()` that are not differentiable.  For
   example:
 
   ```python
+<<<<<<< HEAD
   tf.no_gradient("Size")
   ```
 
@@ -2463,6 +3584,11 @@ def no_gradient(op_type):
   no declaration should be made, and an error *must* be thrown if
   an attempt to request its gradient is made.
 
+=======
+  tf.NoGradient("Size")
+  ```
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Args:
     op_type: The string type of an operation. This corresponds to the
       `OpDef.name` field for the proto that defines the operation.
@@ -2471,11 +3597,16 @@ def no_gradient(op_type):
     TypeError: If `op_type` is not a string.
 
   """
+<<<<<<< HEAD
   if not isinstance(op_type, six.string_types):
+=======
+  if not isinstance(op_type, basestring):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     raise TypeError("op_type must be a string")
   _gradient_registry.register(None, op_type)
 
 
+<<<<<<< HEAD
 # Aliases for the old names, will be eventually removed.
 NoGradient = no_gradient
 NotDifferentiable = no_gradient
@@ -2490,6 +3621,11 @@ def get_gradient_function(op):
   if gradient_function:
     return gradient_function
 
+=======
+def get_gradient_function(op):
+  """Returns the function that computes gradients for "op"."""
+  if not op.inputs: return None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   try:
     op_type = op.get_attr("_gradient_op_type")
   except ValueError:
@@ -2497,6 +3633,7 @@ def get_gradient_function(op):
   return _gradient_registry.lookup(op_type)
 
 
+<<<<<<< HEAD
 def set_shape_and_handle_data_for_outputs(_):
   """No op. TODO(b/74620627): Remove this."""
   pass
@@ -2676,6 +3813,104 @@ class Graph(object):
   A default graph can be registered with the `tf.Graph.as_default` context
   manager. Then, operations will be added to the graph instead of being executed
   eagerly. For example:
+=======
+_shape_registry = registry.Registry("shape functions")
+_default_shape_function_registry = registry.Registry("default shape functions")
+
+class RegisterShape(object):
+  """A decorator for registering the shape function for an op type.
+
+  This decorator is only used when defining a new op type. A shape
+  function is a function from an `Operation` object to a list of
+  `TensorShape` objects, with one `TensorShape` for each output of the
+  operation.
+
+  For example, assuming that operations of type `"Sub"` take two
+  inputs `x` and `y`, and return a single output `x - y`, all with the
+  same shape, the following shape function would be registered:
+
+  ```python
+  @tf.RegisterShape("Sub")
+  def _sub_shape(op):
+    return [op.inputs[0].get_shape().merge_with(op.inputs[1].get_shape())]
+  ```
+
+  The decorator argument `op_type` is the string type of an
+  operation. This corresponds to the `OpDef.name` field for the proto
+  that defines the operation.
+
+  """
+
+  def __init__(self, op_type):
+    """Saves the "op_type" as the Operation type."""
+    if not isinstance(op_type, basestring):
+      raise TypeError("op_type must be a string")
+    self._op_type = op_type
+
+  def __call__(self, f):
+    """Registers "f" as the shape function for "op_type"."""
+    if f is None:
+      # None is a special "weak" value that provides a default shape function,
+      # and can be overridden by a non-None registration.
+      try:
+        _default_shape_function_registry.register(_no_shape_function,
+                                                  self._op_type)
+      except KeyError:
+        # Ignore duplicate registrations of the weak value. This can
+        # occur if the op library input to wrapper generation
+        # inadvertently links in one or more of the standard op
+        # libraries.
+        pass
+    else:
+      _shape_registry.register(f, self._op_type)
+    return f
+
+
+def _no_shape_function(op):
+  return [tensor_shape.unknown_shape() for _ in op.outputs]
+
+
+def set_shapes_for_outputs(op):
+  """Uses the registered shape functions to set the shapes for op's outputs."""
+  try:
+    shape_func = _shape_registry.lookup(op.type)
+  except LookupError:
+    try:
+      shape_func = _default_shape_function_registry.lookup(op.type)
+    except LookupError:
+      raise RuntimeError("No shape function registered for standard op: %s"
+                         % op.type)
+  shapes = shape_func(op)
+  if len(op.outputs) != len(shapes):
+    raise RuntimeError(
+        "Shape function for op %s returned %g shapes but expecting %g" %
+        (op, len(op.outputs), len(shapes)))
+  for output, s in zip(op.outputs, shapes):
+    output.set_shape(s)
+
+
+class Graph(object):
+  """A TensorFlow computation, represented as a dataflow graph.
+
+  A `Graph` contains a set of [`Operation`](framework.md#Operation) objects,
+  which represent units of computation; and [`Tensor`](framework.md#Tensor)
+  objects, which represent the units of data that flow between operations.
+
+  A default `Graph` is always registered, and accessible by calling
+  [`tf.get_default_graph()`](framework.md#get_default_graph). To add an
+  operation to the default graph, simply call one of the functions that defines
+  a new `Operation`:
+
+  ```
+  c = tf.constant(4.0)
+  assert c.graph is tf.get_default_graph()
+  ```
+
+  Another typical usage involves the
+  [`Graph.as_default()`](framework.md#Graph.as_default)
+  context manager, which overrides the current default graph for the
+  lifetime of the context:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ```python
   g = tf.Graph()
@@ -2685,24 +3920,63 @@ class Graph(object):
     assert c.graph is g
   ```
 
+<<<<<<< HEAD
   `tf.compat.v1.get_default_graph()` can be used to obtain the default graph.
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Important note: This class *is not* thread-safe for graph construction. All
   operations should be created from a single thread, or external
   synchronization must be provided. Unless otherwise specified, all methods
   are not thread-safe.
 
+<<<<<<< HEAD
+=======
+  @@__init__
+  @@as_default
+  @@as_graph_def
+  @@finalize
+  @@finalized
+
+  @@control_dependencies
+  @@device
+  @@name_scope
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   A `Graph` instance supports an arbitrary number of "collections"
   that are identified by name. For convenience when building a large
   graph, collections can store groups of related objects: for
   example, the `tf.Variable` uses a collection (named
+<<<<<<< HEAD
   `tf.GraphKeys.GLOBAL_VARIABLES`) for
   all variables that are created during the construction of a graph. The caller
   may define additional collections by specifying a new name.
+=======
+  [`tf.GraphKeys.VARIABLES`](framework.md#GraphKeys)) for all variables that are
+  created during the construction of a graph. The caller may define
+  additional collections by specifying a new name.
+
+  @@add_to_collection
+  @@get_collection
+
+  @@as_graph_element
+  @@get_operation_by_name
+  @@get_tensor_by_name
+  @@get_operations
+
+  @@get_default_device
+  @@seed
+  @@unique_name
+  @@version
+
+  @@create_op
+  @@gradient_override_map
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """
 
   def __init__(self):
     """Creates a new, empty Graph."""
+<<<<<<< HEAD
     # Protects core state that can be returned via public accessors.
     # Thread-safety is provided on a best-effort basis to support buggy
     # programs, and is not guaranteed by the public `tf.Graph` API.
@@ -2730,12 +4004,27 @@ class Graph(object):
     # In TF2.x or after switch_to_thread_local(),
     # self._thread_local._device_function_stack is used instead.
     self._graph_device_function_stack = traceable_stack.TraceableStack()
+=======
+    self._nodes_by_id = dict()
+    self._next_node_id = [dict()]
+    self._next_id_counter = 0
+    self._nodes_by_name = dict()
+    # Current name stack: a pair of uniquified names and plain names.
+    self._name_stack = ("", "")
+    # Maps a name used in the graph to the next id to use for that name.
+    self._names_in_use = {}
+    # Default device applied to new ops.
+    self._default_device = None
+    # Functions that will be applied to choose a device if none is specified.
+    self._device_function_stack = []
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     # Default original_op applied to new ops.
     self._default_original_op = None
     # Current control flow context. It could be either CondContext or
     # WhileContext defined in ops/control_flow_ops.py
     self._control_flow_context = None
     # A new node will depend of the union of all of the nodes in the stack.
+<<<<<<< HEAD
     # In TF2.x or after switch_to_thread_local(),
     # self._thread_local._control_dependencies_stack is used instead.
     self._graph_control_dependencies_stack = []
@@ -2745,11 +4034,19 @@ class Graph(object):
     self._seed = None
     # A dictionary of attributes that should be applied to all ops.
     self._attr_scope_map = {}
+=======
+    self._control_dependencies_stack = []
+    # Arbritrary collections of objects.
+    self._collections = {}
+    # The graph-level random seed
+    self._seed = None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     # A map from op type to the kernel label that should be used.
     self._op_to_kernel_label_map = {}
     # A map from op type to an alternative op type that should be used when
     # computing gradients.
     self._gradient_override_map = {}
+<<<<<<< HEAD
     # A map from op type to a gradient function that should be used instead.
     self._gradient_function_map = {}
     # True if the graph is considered "finalized".  In that case no
@@ -2881,6 +4178,11 @@ class Graph(object):
   @_variable_creator_stack.setter
   def _variable_creator_stack(self, variable_creator_stack):
     self._thread_local._variable_creator_stack = variable_creator_stack  # pylint: disable=protected-access
+=======
+    # True if the graph is considered "finalized".  In that case no
+    # new operations can be added.
+    self._finalized = False
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def _check_not_finalized(self):
     """Check if the graph is finalized.
@@ -2891,6 +4193,7 @@ class Graph(object):
     if self._finalized:
       raise RuntimeError("Graph is finalized and cannot be modified.")
 
+<<<<<<< HEAD
   def _add_op(self, op, op_name):
     """Adds 'op' to the graph and returns the unique ID for the added Operation.
 
@@ -2954,6 +4257,38 @@ class Graph(object):
   @property
   def seed(self):
     """The graph-level random seed of this graph."""
+=======
+  def _add_op(self, op):
+    """Adds 'op' to the graph.
+
+    Args:
+      op: the Operator or Tensor to add.
+
+    Raises:
+      TypeError: if op is not an Operation or Tensor.
+      ValueError: if the op.name or op._id are already used.
+    """
+    self._check_not_finalized()
+    if not isinstance(op, (Tensor, Operation)):
+      raise TypeError("op must be a Tensor or Operation: %s" % op)
+
+    if op._id in self._nodes_by_id:
+      raise ValueError("cannot add an op with id %d as it already "
+                       "exists in the graph" % op._id)
+    if op.name in self._nodes_by_name:
+      raise ValueError("cannot add op with name %s as that name "
+                       "is already used" % op.name)
+    self._nodes_by_id[op._id] = op
+    self._nodes_by_name[op.name] = op
+
+  @property
+  def version(self):
+    """Returns a version number that increases as ops are added to the graph."""
+    return self._next_id_counter
+
+  @property
+  def seed(self):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return self._seed
 
   @seed.setter
@@ -2971,6 +4306,7 @@ class Graph(object):
     After calling `g.finalize()`, no new operations can be added to
     `g`.  This method is used to ensure that no operations are added
     to a graph when it is shared between multiple threads, for example
+<<<<<<< HEAD
     when using a `tf.compat.v1.train.QueueRunner`.
     """
     self._finalized = True
@@ -2987,6 +4323,12 @@ class Graph(object):
     """
     self._finalized = False
 
+=======
+    when using a [`QueueRunner`](train.md#QueueRunner).
+    """
+    self._finalized = True
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def _get_control_flow_context(self):
     """Returns the current control flow context.
 
@@ -2995,6 +4337,7 @@ class Graph(object):
     """
     return self._control_flow_context
 
+<<<<<<< HEAD
   def _set_control_flow_context(self, ctx):
     """Sets the current control flow context.
 
@@ -3210,6 +4553,46 @@ class Graph(object):
       op_def=None,
       compute_shapes=True,
       compute_device=True):
+=======
+  def _set_control_flow_context(self, context):
+    """Sets the current control flow context.
+
+    Args:
+      context: a context object.
+    """
+    self._control_flow_context = context
+
+  def as_graph_def(self, from_version=None):
+    """Returns a serialized `GraphDef` representation of this graph.
+
+    This method is thread-safe.
+
+    Args:
+      from_version: Optional.  If this is set, returns a `GraphDef`
+        containing only the nodes that were added to this graph since
+        its `version` property had the given value.
+
+    Returns:
+      A
+      [`GraphDef`](https://tensorflow.googlesource.com/tensorflow/+/master/tensorflow/core/framework/graph.proto)
+      protocol buffer.
+    """
+    graph = graph_pb2.GraphDef()
+    bytesize = 0
+    for op_id in sorted(self._nodes_by_id):
+      op = self._nodes_by_id[op_id]
+      if from_version is None or op_id > from_version:
+        graph.node.extend([op.node_def])
+        bytesize += op.node_def.ByteSize()
+        if bytesize >= (1 << 31) or bytesize < 0:
+          raise ValueError("GraphDef cannot be larger than 2GB.")
+    return graph
+
+  # Helper functions to create operations.
+  def create_op(self, op_type, inputs, dtypes,
+                input_types=None, name=None, attrs=None, op_def=None,
+                compute_shapes=True):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Creates an `Operation` in this graph.
 
     This is a low-level interface for creating an `Operation`. Most
@@ -3221,6 +4604,7 @@ class Graph(object):
       op_type: The `Operation` type to create. This corresponds to the
         `OpDef.name` field for the proto that defines the operation.
       inputs: A list of `Tensor` objects that will be inputs to the `Operation`.
+<<<<<<< HEAD
       dtypes: (Optional) A list of `DType` objects that will be the types of the
         tensors that the operation produces.
       input_types: (Optional.) A list of `DType`s that will be the types of the
@@ -3297,11 +4681,40 @@ class Graph(object):
       An `Operation` object.
     """
     self._check_not_finalized()
+=======
+      dtypes: A list of `DType` objects that will be the types of the tensors
+        that the operation produces.
+      input_types: (Optional.) A list of `DType`s that will be the types of
+        the tensors that the operation consumes. By default, uses the base
+        `DType` of each input in `inputs`. Operations that expect
+        reference-typed inputs must specify `input_types` explicitly.
+      name: (Optional.) A string name for the operation. If not specified, a
+        name is generated based on `op_type`.
+      attrs: (Optional.) A list of `AttrValue` protos for the `attr` field of
+        the `NodeDef` proto that will represent the operation.
+      op_def: (Optional.) The `OpDef` proto that describes the `op_type` that
+        the operation will have.
+      compute_shapes: (Optional.) If True, shape inference will be performed
+        to compute the shapes of the outputs.
+
+    Raises:
+      TypeError: if any of the inputs is not a `Tensor`.
+
+    Returns:
+      An `Operation` object.
+
+    """
+    self._check_not_finalized()
+    for idx, a in enumerate(inputs):
+      if not isinstance(a, Tensor):
+        raise TypeError("Input #%d is not a tensor: %s" % (idx, a))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if name is None:
       name = op_type
     # If a names ends with a '/' it is a "name scope" and we use it as-is,
     # after removing the trailing '/'.
     if name and name[-1] == "/":
+<<<<<<< HEAD
       name = name_from_scope_name(name)
     else:
       name = self.unique_name(name)
@@ -3469,6 +4882,47 @@ class Graph(object):
     # pylint: enable=protected-access
 
     return new_ops
+=======
+      name = name[:-1]
+    else:
+      name = self.unique_name(name)
+
+    node_def = _NodeDef(
+        op_type, name, device=self._default_device or None, attrs=attrs)
+
+    # Apply a kernel label if one has been specified for this op_type.
+    try:
+      kernel_label = self._op_to_kernel_label_map[op_type]
+      node_def.attr["_kernel"].CopyFrom(
+          attr_value_pb2.AttrValue(s=kernel_label))
+    except KeyError:
+      pass
+
+    # Apply the overriding op_type for gradients if one has been
+    # specified for this op_type.
+    try:
+      mapped_op_type = self._gradient_override_map[op_type]
+      node_def.attr["_gradient_op_type"].CopyFrom(
+          attr_value_pb2.AttrValue(s=mapped_op_type))
+    except KeyError:
+      pass
+
+    control_inputs = self._control_dependencies_for_inputs(inputs)
+    ret = Operation(node_def, self, inputs=inputs, output_types=dtypes,
+                    control_inputs=control_inputs, input_types=input_types,
+                    original_op=self._default_original_op, op_def=op_def)
+    if compute_shapes:
+      set_shapes_for_outputs(ret)
+    self._add_op(ret)
+    self._record_op_seen_by_control_dependencies(ret)
+    # Apply any device functions in reverse order, so that the most recently
+    # pushed function has the first chance to apply a device to the op.
+    # We apply here because the result can depend on the Operation's
+    # signature, which is computed in the Operation constructor.
+    for device_function in reversed(self._device_function_stack):
+      ret._set_device(device_function(ret))
+    return ret
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def as_graph_element(self, obj, allow_tensor=True, allow_operation=True):
     """Returns the object referred to by `obj`, as an `Operation` or `Tensor`.
@@ -3483,10 +4937,16 @@ class Graph(object):
     This method may be called concurrently from multiple threads.
 
     Args:
+<<<<<<< HEAD
       obj: A `Tensor`, an `Operation`, or the name of a tensor or operation. Can
         also be any object with an `_as_graph_element()` method that returns a
         value of one of these types. Note: `_as_graph_element` will be called
         inside the graph's lock and so may not modify the graph.
+=======
+      obj: A `Tensor`, an `Operation`, or the name of a tensor or operation.
+        Can also be any object with an `_as_graph_element()` method that returns
+        a value of one of these types.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       allow_tensor: If true, `obj` may refer to a `Tensor`.
       allow_operation: If true, `obj` may refer to an `Operation`.
 
@@ -3500,6 +4960,7 @@ class Graph(object):
         example, an invalid string.
       KeyError: If `obj` is not an object in the graph.
     """
+<<<<<<< HEAD
     if self._finalized:
       return self._as_graph_element_locked(obj, allow_tensor, allow_operation)
 
@@ -3508,6 +4969,9 @@ class Graph(object):
 
   def _as_graph_element_locked(self, obj, allow_tensor, allow_operation):
     """See `Graph.as_graph_element()` for details."""
+=======
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     # The vast majority of this function is figuring
     # out what an API user might be doing wrong, so
     # that we can give helpful error messages.
@@ -3524,6 +4988,7 @@ class Graph(object):
     else:
       raise ValueError("allow_tensor and allow_operation can't both be False.")
 
+<<<<<<< HEAD
     temp_obj = _as_graph_element(obj)
     if temp_obj is not None:
       obj = temp_obj
@@ -3531,6 +4996,15 @@ class Graph(object):
     # If obj appears to be a name...
     if isinstance(obj, compat.bytes_or_text_types):
       name = compat.as_str(obj)
+=======
+    conv_fn = getattr(obj, "_as_graph_element", None)
+    if conv_fn and callable(conv_fn):
+      obj = conv_fn()
+
+    # If obj appears to be a name...
+    if isinstance(obj, basestring):
+      name = obj
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       if ":" in name and allow_tensor:
         # Looks like a Tensor name and can be a Tensor.
@@ -3552,6 +5026,7 @@ class Graph(object):
         except:
           raise KeyError("The name %s refers to a Tensor which does not "
                          "exist. The operation, %s, exists but only has "
+<<<<<<< HEAD
                          "%s outputs." %
                          (repr(name), repr(op_name), len(op.outputs)))
 
@@ -3559,6 +5034,15 @@ class Graph(object):
         # Looks like a Tensor name but can't be a Tensor.
         raise ValueError("Name %s appears to refer to a Tensor, not a %s." %
                          (repr(name), types_str))
+=======
+                         "%s outputs."
+                         % (repr(name), repr(op_name), len(op.outputs)))
+
+      elif ":" in name and not allow_tensor:
+        # Looks like a Tensor name but can't be a Tensor.
+        raise ValueError("Name %s appears to refer to a Tensor, not a %s."
+                         % (repr(name), types_str))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       elif ":" not in name and allow_operation:
         # Looks like an Operation name and can be an Operation.
@@ -3571,8 +5055,13 @@ class Graph(object):
         # Looks like an Operation name but can't be an Operation.
         if name in self._nodes_by_name:
           # Yep, it's an Operation name
+<<<<<<< HEAD
           err_msg = ("The name %s refers to an Operation, not a %s." %
                      (repr(name), types_str))
+=======
+          err_msg = ("The name %s refers to an Operation, not a %s."
+                     % (repr(name), types_str))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         else:
           err_msg = ("The name %s looks like an (invalid) Operation name, "
                      "not a %s." % (repr(name), types_str))
@@ -3582,6 +5071,7 @@ class Graph(object):
 
     elif isinstance(obj, Tensor) and allow_tensor:
       # Actually obj is just the object it's referring to.
+<<<<<<< HEAD
       if obj.graph is not self:
         raise ValueError("Tensor %s is not an element of this graph." % obj)
       return obj
@@ -3594,6 +5084,16 @@ class Graph(object):
       # We give up!
       raise TypeError("Can not convert a %s into a %s." %
                       (type(obj).__name__, types_str))
+=======
+      return obj
+    elif isinstance(obj, Operation) and allow_operation:
+      # Actually obj is just the object it's referring to.
+      return obj
+    else:
+      # We give up!
+      raise TypeError("Can not convert a %s into a %s."
+                      % (type(obj).__name__, types_str))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def get_operations(self):
     """Return the list of operations in the graph.
@@ -3607,11 +5107,15 @@ class Graph(object):
     Returns:
       A list of Operations.
     """
+<<<<<<< HEAD
     if self._finalized:
       return list(self._nodes_by_id.values())
 
     with self._lock:
       return list(self._nodes_by_id.values())
+=======
+    return self._nodes_by_id.values()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def get_operation_by_name(self, name):
     """Returns the `Operation` with the given `name`.
@@ -3629,6 +5133,7 @@ class Graph(object):
       KeyError: If `name` does not correspond to an operation in this graph.
     """
 
+<<<<<<< HEAD
     if not isinstance(name, six.string_types):
       raise TypeError("Operation names are strings (or similar), not %s." %
                       type(name).__name__)
@@ -3661,6 +5166,13 @@ class Graph(object):
     op_name = c_api.TF_OperationName(tf_oper)
     return self._get_operation_by_name_unsafe(op_name)
 
+=======
+    if not isinstance(name, basestring):
+      raise TypeError("Operation names are strings (or similar), not %s."
+                      % type(name).__name__)
+    return self.as_graph_element(name, allow_tensor=False, allow_operation=True)
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def get_tensor_by_name(self, name):
     """Returns the `Tensor` with the given `name`.
 
@@ -3677,6 +5189,7 @@ class Graph(object):
       KeyError: If `name` does not correspond to a tensor in this graph.
     """
     # Names should be strings.
+<<<<<<< HEAD
     if not isinstance(name, six.string_types):
       raise TypeError("Tensor names are strings (or similar), not %s." %
                       type(name).__name__)
@@ -3718,6 +5231,22 @@ class Graph(object):
       op_def.ParseFromString(compat.as_bytes(data))
       self._op_def_cache[type] = op_def
       return op_def
+=======
+    if not isinstance(name, basestring):
+      raise TypeError("Tensor names are strings (or similar), not %s."
+                      % type(name).__name__)
+    return self.as_graph_element(name, allow_tensor=True, allow_operation=False)
+
+  def _next_id(self):
+    """Id for next Operation instance. Also increments the internal id."""
+    self._check_not_finalized()
+    self._next_id_counter += 1
+    return self._next_id_counter
+
+  @property
+  def _last_id(self):
+    return self._next_id_counter
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def as_default(self):
     """Returns a context manager that makes this `Graph` the default graph.
@@ -3725,6 +5254,7 @@ class Graph(object):
     This method should be used if you want to create multiple graphs
     in the same process. For convenience, a global default graph is
     provided, and all ops will be added to this graph if you do not
+<<<<<<< HEAD
     create a new graph explicitly.
 
     Use this method with the `with` keyword to specify that ops created within
@@ -3732,6 +5262,11 @@ class Graph(object):
     the scope of the `with` is exited, the previous default graph is set again
     as default. There is a stack, so it's ok to have multiple nested levels
     of `as_default` calls.
+=======
+    create a new graph explicitly. Use this method the `with` keyword
+    to specify that ops created within the scope of a block should be
+    added to this graph.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     The default graph is a property of the current thread. If you
     create a new thread, and wish to use the default graph in that
@@ -3753,14 +5288,18 @@ class Graph(object):
       assert c.graph is g
     ```
 
+<<<<<<< HEAD
     If eager execution is enabled ops created under this context manager will be
     added to the graph instead of executed eagerly.
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Returns:
       A context manager for using this graph as the default graph.
     """
     return _default_graph_stack.get_controller(self)
 
+<<<<<<< HEAD
   @property
   def collections(self):
     """Returns the names of the collections known to this graph."""
@@ -3829,10 +5368,26 @@ class Graph(object):
         coll_list = []
         self._collections[name] = coll_list
       return coll_list
+=======
+  def add_to_collection(self, name, value):
+    """Stores `value` in the collection with the given `name`.
+
+    Args:
+      name: The key for the collection. For example, the `GraphKeys` class
+        contains many standard names for collections.
+      value: The value to add to the collection.
+    """
+    self._check_not_finalized()
+    if name not in self._collections:
+      self._collections[name] = [value]
+    else:
+      self._collections[name].append(value)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def get_collection(self, name, scope=None):
     """Returns a list of values in the collection with the given `name`.
 
+<<<<<<< HEAD
     This is different from `get_collection_ref()` which always returns the
     actual collection list if it exists in that it returns a new list each time
     it is called.
@@ -3845,12 +5400,20 @@ class Graph(object):
         `re.match`. Items without a `name` attribute are never returned if a
         scope is supplied. The choice of `re.match` means that a `scope` without
         special tokens filters by prefix.
+=======
+    Args:
+      key: The key for the collection. For example, the `GraphKeys` class
+        contains many standard names for collections.
+      scope: (Optional.) If supplied, the resulting list is filtered to include
+        only items whose name begins with this string.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Returns:
       The list of values in the collection with the given `name`, or
       an empty list if no value has been added to that collection. The
       list contains the values in the order under which they were
       collected.
+<<<<<<< HEAD
     """  # pylint: disable=g-doc-exception
     with self._lock:
       collection = self._collections.get(name, None)
@@ -3888,6 +5451,19 @@ class Graph(object):
         del self._collections[name]
 
   @tf_contextlib.contextmanager
+=======
+    """
+    if scope is None:
+      return self._collections.get(name, list())
+    else:
+      c = []
+      for item in self._collections.get(name, list()):
+        if hasattr(item, 'name') and item.name.startswith(scope):
+          c.append(item)
+      return c
+
+  @contextlib.contextmanager
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def _original_op(self, op):
     """Python 'with' handler to help annotate ops with their originator.
 
@@ -3906,12 +5482,18 @@ class Graph(object):
       Nothing.
     """
     old_original_op = self._default_original_op
+<<<<<<< HEAD
     self._default_original_op = op
     try:
+=======
+    try:
+      self._default_original_op = op
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       yield
     finally:
       self._default_original_op = old_original_op
 
+<<<<<<< HEAD
   @property
   def _name_stack(self):
     # This may be called from a thread where name_stack doesn't yet exist.
@@ -3925,6 +5507,10 @@ class Graph(object):
 
   # pylint: disable=g-doc-return-or-yield,line-too-long
   @tf_contextlib.contextmanager
+=======
+  # pylint: disable=g-doc-return-or-yield
+  @contextlib.contextmanager
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def name_scope(self, name):
     """Returns a context manager that creates hierarchical names for operations.
 
@@ -3948,34 +5534,60 @@ class Graph(object):
     ```python
     with tf.Graph().as_default() as g:
       c = tf.constant(5.0, name="c")
+<<<<<<< HEAD
       assert c.op.name == "c"
       c_1 = tf.constant(6.0, name="c")
       assert c_1.op.name == "c_1"
+=======
+      assert c_1.name == "c"
+      c_1 = tf.constant(6.0, name="c")
+      assert c_1.name == "c_1"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
       # Creates a scope called "nested"
       with g.name_scope("nested") as scope:
         nested_c = tf.constant(10.0, name="c")
+<<<<<<< HEAD
         assert nested_c.op.name == "nested/c"
+=======
+        assert nested_c.name == "nested/c"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
         # Creates a nested scope called "inner".
         with g.name_scope("inner"):
           nested_inner_c = tf.constant(20.0, name="c")
+<<<<<<< HEAD
           assert nested_inner_c.op.name == "nested/inner/c"
+=======
+          assert nested_inner_c.name == "nested/inner/c"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
         # Create a nested scope called "inner_1".
         with g.name_scope("inner"):
           nested_inner_1_c = tf.constant(30.0, name="c")
+<<<<<<< HEAD
           assert nested_inner_1_c.op.name == "nested/inner_1/c"
+=======
+          assert nested_inner_1_c.name == "nested/inner_1/c"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
           # Treats `scope` as an absolute name scope, and
           # switches to the "nested/" scope.
           with g.name_scope(scope):
             nested_d = tf.constant(40.0, name="d")
+<<<<<<< HEAD
             assert nested_d.op.name == "nested/d"
 
             with g.name_scope(""):
               e = tf.constant(50.0, name="e")
               assert e.op.name == "e"
+=======
+            assert nested_d.name == "nested/d"
+
+            with g.name_scope(""):
+              e = tf.constant(50.0, name="e")
+              assert e.name == "e"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ```
 
     The name of the scope itself can be captured by `with
@@ -3993,17 +5605,21 @@ class Graph(object):
       output = tf.nn.relu(affine, name=scope)
     ```
 
+<<<<<<< HEAD
     NOTE: This constructor validates the given `name`. Valid scope
     names match one of the following regular expressions:
 
         [A-Za-z0-9.][A-Za-z0-9_.\\-/]* (for scopes at the root)
         [A-Za-z0-9_.\\-/]* (for other scopes)
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Args:
       name: A name for the scope.
 
     Returns:
       A context manager that installs `name` as a new name scope.
+<<<<<<< HEAD
 
     Raises:
       ValueError: If `name` is not a valid scope name, according to the rules
@@ -4061,11 +5677,43 @@ class Graph(object):
     Args:
       name: The name for an operation.
       mark_as_used: Whether to mark this name as being used.
+=======
+    """
+    try:
+      old_stack = self._name_stack
+      if not name:  # Both for name=None nad name="" we re-set to empty scope.
+        new_stack = (None, None)
+      elif name and name[-1] == "/":
+        new_stack = (name[:-1], name[:-1])
+      else:
+        new_stack = (self.unique_name(name), self._plain_name(name))
+      self._name_stack = new_stack
+      yield "" if new_stack[0] is None else new_stack[0] + "/"
+    finally:
+      self._name_stack = old_stack
+  # pylint: enable=g-doc-return-or-yield
+
+  def unique_name(self, name):
+    """Return a unique Operation name for "name".
+
+    Note: You rarely need to call unique_name() directly.  Most of the time you
+    just need to create "with g.name_scope()" blocks to generate structured
+    names.
+
+    `unique_name` is used to generate structured names, separated by "/",
+    to help identify Operations when debugging a Graph.  Operation names
+    are displayed in error messages reported by the TensorFlow runtime,
+    and in various visualization tools such as TensorBoard.
+
+    Args:
+      name: The name for an `Operation`.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Returns:
       A string to be passed to `create_op()` that will be used
       to name the operation being created.
     """
+<<<<<<< HEAD
     if self._name_stack:
       name = self._name_stack + "/" + name
 
@@ -4204,12 +5852,97 @@ class Graph(object):
   @tf_contextlib.contextmanager
   def device(self, device_name_or_function):
     # pylint: disable=line-too-long
+=======
+    if self._name_stack[0]:
+      name = self._name_stack[0] + "/" + name
+    i = self._names_in_use.get(name, 0)
+    # Increment the number for "name".
+    self._names_in_use[name] = i + 1
+    if i > 0:
+      base_name = name
+      # Make sure the composed name is not already used.
+      while name in self._names_in_use:
+        name = "%s_%d" % (base_name, i)
+        i += 1
+      # Mark the composed name as used in case someone wants
+      # to call unique_name("name_1").
+      self._names_in_use[name] = 1
+    return name
+
+  # TODO(mdevin): remove
+  def _plain_name(self, name):
+    """Return the fully scoped 'name'.
+
+    Args:
+      name: a string.
+
+    Returns:
+      'name' scoped in the current name stack, without any uniquified
+      elements.
+    """
+    if self._name_stack[1]:
+      return self._name_stack[1] + "/" + name
+    else:
+      return name
+
+  def _set_default_device(self, dev):
+    """Set the default device properties.
+
+    Args:
+      dev: string or Device.
+    """
+    self._default_device = _device_string(dev)
+
+  def get_default_device(self):
+    """Returns the default device.
+
+    Returns:
+      A string.
+    """
+    return self._default_device
+
+  def _push_default_device_function(self, device_function):
+    """Pushes the given function onto the stack of device functions.
+
+    See Graph.device for more details.
+
+    Args:
+      device_function: The function to be pushed onto the stack of device
+        functions.
+    """
+    self._device_function_stack.append(device_function)
+
+  def _pop_default_device_function(self, device_function):
+    """Pops the given function from the stack of device functions.
+
+    See Graph.device for more details.
+
+    Args:
+      device_function: The function to be popped from the stack of device
+        functions.
+
+    Raises:
+      ValueError: if the device_function to be popped is not top of the stack,
+        or if the stack is empty.
+    """
+    if not self._device_function_stack:
+      raise ValueError("Tried to pop, but the device function stack is empty")
+    if self._device_function_stack[-1] is not device_function:
+      raise ValueError("Tried to pop device function, but it was not on top "
+                       "of the stack")
+
+    self._device_function_stack.pop()
+
+  @contextlib.contextmanager
+  def device(self, device_name_or_function):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """Returns a context manager that specifies the default device to use.
 
     The `device_name_or_function` argument may either be a device name
     string, a device function, or None:
 
     * If it is a device name string, all operations constructed in
+<<<<<<< HEAD
       this context will be assigned to the device with that name, unless
       overridden by a nested `device()` context.
     * If it is a function, it will be treated as a function from
@@ -4222,11 +5955,23 @@ class Graph(object):
     For information about the valid syntax of device name strings, see
     the documentation in
     [`DeviceNameUtils`](https://www.tensorflow.org/code/tensorflow/core/util/device_name_utils.h).
+=======
+      this context will be assigned to the device with that name.
+    * If it is a function, it will be treated as function from
+      Operation objects to device name strings, and invoked each time
+      a new Operation is created. The Operation will be assigned to
+      the device with the returned name.
+    * If it is None, the default device will be cleared.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     For example:
 
     ```python
+<<<<<<< HEAD
     with g.device('/device:GPU:0'):
+=======
+    with g.device('/gpu:0'):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       # All operations constructed in this context will be placed
       # on GPU 0.
       with g.device(None):
@@ -4236,7 +5981,11 @@ class Graph(object):
     # Defines a function from `Operation` to device string.
     def matmul_on_gpu(n):
       if n.type == "MatMul":
+<<<<<<< HEAD
         return "/device:GPU:0"
+=======
+        return "/gpu:0"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       else:
         return "/cpu:0"
 
@@ -4246,6 +5995,7 @@ class Graph(object):
       # on CPU 0.
     ```
 
+<<<<<<< HEAD
     **N.B.** The device scope may be overridden by op wrappers or
     other library code. For example, a variable assignment op
     `v.assign()` must be colocated with the `tf.Variable` `v`, and
@@ -4351,11 +6101,35 @@ class Graph(object):
       self._container = original_container
 
   # pylint: enable=g-doc-return-or-yield
+=======
+    Args:
+      device_name_or_function: The device name or function to use in
+        the context.
+
+    Returns:
+      A context manager that specifies the default device to use for newly
+      created ops.
+    """
+    if callable(device_name_or_function):
+      try:
+        self._push_default_device_function(device_name_or_function)
+        yield
+      finally:
+        self._pop_default_device_function(device_name_or_function)
+    else:
+      try:
+        old_dev = self.get_default_device()
+        self._set_default_device(_device_string(device_name_or_function))
+        yield
+      finally:
+        self._set_default_device(old_dev)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   class _ControlDependenciesController(object):
     """Context manager for `control_dependencies()`."""
 
     def __init__(self, graph, control_inputs):
+<<<<<<< HEAD
       """Create a new `_ControlDependenciesController`.
 
       A `_ControlDependenciesController` is the context manager for
@@ -4398,18 +6172,30 @@ class Graph(object):
         # Clear the control_flow_context too.
         self._old_control_flow_context = self._graph._get_control_flow_context()
         self._graph._set_control_flow_context(None)
+=======
+      self._graph = graph
+      self._control_inputs = control_inputs
+      self._seen_nodes = set()
+
+# pylint: disable=protected-access
+    def __enter__(self):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       self._graph._push_control_dependencies_controller(self)
 
     def __exit__(self, unused_type, unused_value, unused_traceback):
       self._graph._pop_control_dependencies_controller(self)
+<<<<<<< HEAD
       if self._new_stack:
         self._graph._control_dependencies_stack = self._old_stack
         self._graph._set_control_flow_context(self._old_control_flow_context)
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 # pylint: enable=protected-access
 
     @property
     def control_inputs(self):
+<<<<<<< HEAD
       return self._control_inputs_val
 
     def add_op(self, op):
@@ -4420,6 +6206,14 @@ class Graph(object):
     def op_in_group(self, op):
       if isinstance(op, Tensor):
         op = op.experimental_ref()
+=======
+      return self._control_inputs
+
+    def add_op(self, op):
+      self._seen_nodes.add(op)
+
+    def op_in_group(self, op):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       return op in self._seen_nodes
 
   def _push_control_dependencies_controller(self, controller):
@@ -4436,8 +6230,13 @@ class Graph(object):
         ret.add(op)
     return ret
 
+<<<<<<< HEAD
   def _control_dependencies_for_inputs(self, input_ops):
     """For an op that takes `input_ops` as inputs, compute control inputs.
+=======
+  def _control_dependencies_for_inputs(self, input_tensors):
+    """For an op that takes `input_tensors` as inputs, compute control inputs.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     The returned control dependencies should yield an execution that
     is equivalent to adding all control inputs in
@@ -4448,16 +6247,28 @@ class Graph(object):
     the explicit approach redundant.
 
     Args:
+<<<<<<< HEAD
       input_ops: The data input ops for an op to be created.
+=======
+      input_tensors: The direct data dependencies for an op to be created.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Returns:
       A list of control inputs for the op to be created.
     """
     ret = []
+<<<<<<< HEAD
     for controller in self._control_dependencies_stack:
       # If any of the input_ops already depends on the inputs from controller,
       # we say that the new op is dominated (by that input), and we therefore
       # do not need to add control dependencies for this controller's inputs.
+=======
+    input_ops = set([t.op for t in input_tensors])
+    for controller in self._control_dependencies_stack:
+      # If any of the input_ops already depends on the inputs from controller,
+      # we say that the new op is dominated (by that input), and we therefore
+      # do not need to add control dependences for this controller's inputs.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       dominated = False
       for op in input_ops:
         if controller.op_in_group(op):
@@ -4467,7 +6278,11 @@ class Graph(object):
         # Don't add a control input if we already have a data dependency on i.
         # NOTE(mrry): We do not currently track transitive data dependencies,
         #   so we may add redundant control inputs.
+<<<<<<< HEAD
         ret.extend(c for c in controller.control_inputs if c not in input_ops)
+=======
+        ret.extend([c for c in controller.control_inputs if c not in input_ops])
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return ret
 
   def _record_op_seen_by_control_dependencies(self, op):
@@ -4499,6 +6314,7 @@ class Graph(object):
 
     ```python
     with g.control_dependencies([a, b]):
+<<<<<<< HEAD
       # Ops constructed here run after `a` and `b`.
       with g.control_dependencies([c, d]):
         # Ops constructed here run after `a`, `b`, `c`, and `d`.
@@ -4514,6 +6330,11 @@ class Graph(object):
         with g.control_dependencies([c, d]):
           # Ops constructed here run after `c` and `d`, also not waiting
           # for either `a` or `b`.
+=======
+      # Ops declared here run after `a` and `b`.
+      with g.control_dependencies([c, d]):
+        # Ops declared here run after `a`, `b`, `c`, and `d`.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ```
 
     *N.B.* The control dependencies context applies *only* to ops that
@@ -4538,6 +6359,7 @@ class Graph(object):
         return tf.matmul(tensor, tensor)
     ```
 
+<<<<<<< HEAD
     Also note that though execution of ops created under this scope will trigger
     execution of the dependencies, the ops created under this scope might still
     be pruned from a normal tensorflow graph. For example, in the following
@@ -4558,6 +6380,12 @@ class Graph(object):
       control_inputs: A list of `Operation` or `Tensor` objects which must be
         executed or computed before running the operations defined in the
         context.  Can also be `None` to clear the control dependencies.
+=======
+    Args:
+      control_inputs: A list of `Operation` or `Tensor` objects, which
+        must be executed or computed before running the operations
+        defined in the context.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Returns:
      A context manager that specifies control dependencies for all
@@ -4567,8 +6395,11 @@ class Graph(object):
       TypeError: If `control_inputs` is not a list of `Operation` or
         `Tensor` objects.
     """
+<<<<<<< HEAD
     if control_inputs is None:
       return self._ControlDependenciesController(self, None)
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     # First convert the inputs to ops, and deduplicate them.
     # NOTE(mrry): Other than deduplication, we do not currently track direct
     #   or indirect dependencies between control_inputs, which may result in
@@ -4576,6 +6407,7 @@ class Graph(object):
     control_ops = []
     current = self._current_control_dependencies()
     for c in control_inputs:
+<<<<<<< HEAD
       # The hasattr(handle) is designed to match ResourceVariables. This is so
       # control dependencies on a variable or on an unread variable don't
       # trigger reads.
@@ -4583,6 +6415,8 @@ class Graph(object):
           (hasattr(c, "_handle") and hasattr(c, "op"))):
         c = c.op
       c = self.as_graph_element(c)
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if isinstance(c, Tensor):
         c = c.op
       elif not isinstance(c, Operation):
@@ -4593,6 +6427,7 @@ class Graph(object):
     return self._ControlDependenciesController(self, control_ops)
 
   # pylint: disable=g-doc-return-or-yield
+<<<<<<< HEAD
   @tf_contextlib.contextmanager
   def _attr_scope(self, attr_map):
     """EXPERIMENTAL: A context manager for setting attributes on operators.
@@ -4660,6 +6495,9 @@ class Graph(object):
 
   # pylint: disable=g-doc-return-or-yield
   @tf_contextlib.contextmanager
+=======
+  @contextlib.contextmanager
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def _kernel_label_map(self, op_to_kernel_label_map):
     """EXPERIMENTAL: A context manager for setting kernel labels.
 
@@ -4681,8 +6519,13 @@ class Graph(object):
                              # for the Foo op.
 
     Args:
+<<<<<<< HEAD
       op_to_kernel_label_map: A dictionary mapping op type strings to kernel
         label strings.
+=======
+      op_to_kernel_label_map: A dictionary mapping op type strings to
+        kernel label strings.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Returns:
       A context manager that sets the kernel label to be used for one or more
@@ -4700,8 +6543,13 @@ class Graph(object):
     saved_labels = {}
     # Install the given label
     for op_type, label in op_to_kernel_label_map.items():
+<<<<<<< HEAD
       if not (isinstance(op_type, six.string_types) and
               isinstance(label, six.string_types)):
+=======
+      if not (isinstance(op_type, basestring)
+              and isinstance(label, basestring)):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         raise TypeError("op_to_kernel_label_map must be a dictionary mapping "
                         "strings to strings")
       try:
@@ -4718,6 +6566,7 @@ class Graph(object):
           self._op_to_kernel_label_map[op_type] = saved_labels[op_type]
         except KeyError:
           del self._op_to_kernel_label_map[op_type]
+<<<<<<< HEAD
 
   # pylint: enable=g-doc-return-or-yield
 
@@ -4733,6 +6582,12 @@ class Graph(object):
 
   # pylint: disable=g-doc-return-or-yield
   @tf_contextlib.contextmanager
+=======
+  # pylint: enable=g-doc-return-or-yield
+
+  # pylint: disable=g-doc-return-or-yield
+  @contextlib.contextmanager
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def gradient_override_map(self, op_type_map):
     """EXPERIMENTAL: A context manager for overriding gradient functions.
 
@@ -4743,7 +6598,11 @@ class Graph(object):
 
     ```python
     @tf.RegisterGradient("CustomSquare")
+<<<<<<< HEAD
     def _custom_square_grad(op, grad):
+=======
+    def _custom_square_grad(op, inputs):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       # ...
 
     with tf.Graph().as_default() as g:
@@ -4755,8 +6614,13 @@ class Graph(object):
     ```
 
     Args:
+<<<<<<< HEAD
       op_type_map: A dictionary mapping op type strings to alternative op type
         strings.
+=======
+      op_type_map: A dictionary mapping op type strings to alternative op
+        type strings.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Returns:
       A context manager that sets the alternative op type to be used for one
@@ -4774,8 +6638,13 @@ class Graph(object):
     saved_mappings = {}
     # Install the given label
     for op_type, mapped_op_type in op_type_map.items():
+<<<<<<< HEAD
       if not (isinstance(op_type, six.string_types) and
               isinstance(mapped_op_type, six.string_types)):
+=======
+      if not (isinstance(op_type, basestring)
+              and isinstance(mapped_op_type, basestring)):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         raise TypeError("op_type_map must be a dictionary mapping "
                         "strings to strings")
       try:
@@ -4792,6 +6661,7 @@ class Graph(object):
           self._gradient_override_map[op_type] = saved_mappings[op_type]
         except KeyError:
           del self._gradient_override_map[op_type]
+<<<<<<< HEAD
 
   # pylint: enable=g-doc-return-or-yield
 
@@ -5239,6 +7109,112 @@ def default_session(session):
     sess = ...
     c = tf.constant(5.0)
     sess.run(c)
+=======
+  # pylint: enable=g-doc-return-or-yield
+
+
+def device(dev):
+  """Wrapper for `Graph.device()` using the default graph.
+
+  See [`Graph.name_scope()`](framework.md#Graph.name_scope) for more details.
+
+  Args:
+    device_name_or_function: The device name or function to use in
+      the context.
+
+  Returns:
+    A context manager that specifies the default device to use for newly
+    created ops.
+  """
+  return get_default_graph().device(dev)
+
+
+def name_scope(name):
+  """Wrapper for `Graph.name_scope()` using the default graph.
+
+  See [`Graph.name_scope()`](framework.md#Graph.name_scope) for more details.
+
+  Args:
+    name: A name for the scope.
+
+  Returns:
+    A context manager that installs `name` as a new name scope in the
+    default graph.
+  """
+  return get_default_graph().name_scope(name)
+
+
+def control_dependencies(control_inputs):
+  """Wrapper for `Graph.control_dependencies()` using the default graph.
+
+  See [`Graph.control_dependencies()`](framework.md#Graph.control_dependencies)
+  for more details.
+
+  Args:
+    control_inputs: A list of `Operation` or `Tensor` objects, which
+      must be executed or computed before running the operations
+      defined in the context.
+
+  Returns:
+   A context manager that specifies control dependencies for all
+   operations constructed within the context.
+  """
+  return get_default_graph().control_dependencies(control_inputs)
+
+
+class _DefaultStack(threading.local):
+  """A thread-local stack of objects for providing implicit defaults."""
+
+  def __init__(self):
+    super(_DefaultStack, self).__init__()
+    self.stack = []
+
+  def get_default(self):
+    return self.stack[-1] if len(self.stack) >= 1 else None
+
+  def reset(self):
+    self.stack = []
+
+  @contextlib.contextmanager
+  def get_controller(self, default):
+    """A context manager for manipulating a default stack."""
+    try:
+      self.stack.append(default)
+      yield default
+    finally:
+      assert self.stack[-1] is default
+      self.stack.pop()
+
+
+_default_session_stack = _DefaultStack()
+
+
+def default_session(session):
+  """Python "with" handler for defining a default session.
+
+  This function provides a means of registering a session for handling
+  Tensor.eval() and Operation.run() calls. It is primarily intended for use
+  by session.Session, but can be used with any object that implements
+  the Session.run() interface.
+
+  Use with the "with" keyword to specify that Tensor.eval() and Operation.run()
+  invocations within the scope of a block should be executed by a particular
+  session.
+
+  The default session applies to the current thread only, so it is always
+  possible to inspect the call stack and determine the scope of a default
+  session. If you create a new thread, and wish to use the default session
+  in that thread, you must explicitly add a "with ops.default_session(sess):"
+  block in that thread's function.
+
+  Example:
+    The following code examples are equivalent:
+
+    # 1. Using the Session object directly:
+    sess = ...
+    c = tf.constant(5.0)
+    sess.run(c)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     # 2. Using default_session():
     sess = ...
@@ -5259,17 +7235,27 @@ def default_session(session):
   Returns:
     A context manager for the default session.
   """
+<<<<<<< HEAD
   return _default_session_stack.get_controller(session)
 
 
 @tf_export(v1=["get_default_session"])
+=======
+  return _default_session_stack.get_controller(weakref.ref(session))
+
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 def get_default_session():
   """Returns the default session for the current thread.
 
   The returned `Session` will be the innermost session on which a
   `Session` or `Session.as_default()` context has been entered.
 
+<<<<<<< HEAD
   NOTE: The default session is a property of the current thread. If you
+=======
+  *N.B.* The default session is a property of the current thread. If you
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   create a new thread, and wish to use the default session in that
   thread, you must explicitly add a `with sess.as_default():` in that
   thread's function.
@@ -5277,7 +7263,21 @@ def get_default_session():
   Returns:
     The default `Session` being used in the current thread.
   """
+<<<<<<< HEAD
   return _default_session_stack.get_default()
+=======
+  ref = _default_session_stack.get_default()
+  if ref is None:
+    # No default session has been registered.
+    return None
+  else:
+    # De-reference ref.
+    ret = ref()
+    if ret is None:
+      # This should never happen with the current session implementations.
+      raise RuntimeError("Default session has been garbage collected.")
+  return ret
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 def _eval_using_default_session(tensors, feed_dict, graph, session=None):
@@ -5303,15 +7303,26 @@ def _eval_using_default_session(tensors, feed_dict, graph, session=None):
   if session is None:
     session = get_default_session()
     if session is None:
+<<<<<<< HEAD
       raise ValueError("Cannot evaluate tensor using `eval()`: No default "
                        "session is registered. Use `with "
                        "sess.as_default()` or pass an explicit session to "
                        "`eval(session=sess)`")
+=======
+      raise ValueError("Cannot evaluate tensor using eval(): No default "
+                       "session is registered. Use 'with "
+                       "DefaultSession(sess)' or pass an explicit session to "
+                       "eval(session=sess)")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if session.graph is not graph:
       raise ValueError("Cannot use the default session to evaluate tensor: "
                        "the tensor's graph is different from the session's "
                        "graph. Pass an explicit session to "
+<<<<<<< HEAD
                        "`eval(session=sess)`.")
+=======
+                       "eval(session=sess).")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   else:
     if session.graph is not graph:
       raise ValueError("Cannot use the given session to evaluate tensor: "
@@ -5338,15 +7349,26 @@ def _run_using_default_session(operation, feed_dict, graph, session=None):
   if session is None:
     session = get_default_session()
     if session is None:
+<<<<<<< HEAD
       raise ValueError("Cannot execute operation using `run()`: No default "
                        "session is registered. Use `with "
                        "sess.as_default():` or pass an explicit session to "
                        "`run(session=sess)`")
+=======
+      raise ValueError("Cannot execute operation using Run(): No default "
+                       "session is registered. Use 'with "
+                       "default_session(sess)' or pass an explicit session to "
+                       "Run(session=sess)")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if session.graph is not graph:
       raise ValueError("Cannot use the default session to execute operation: "
                        "the operation's graph is different from the "
                        "session's graph. Pass an explicit session to "
+<<<<<<< HEAD
                        "run(session=sess).")
+=======
+                       "Run(session=sess).")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   else:
     if session.graph is not graph:
       raise ValueError("Cannot use the given session to execute operation: "
@@ -5355,7 +7377,11 @@ def _run_using_default_session(operation, feed_dict, graph, session=None):
   session.run(operation, feed_dict)
 
 
+<<<<<<< HEAD
 class _DefaultGraphStack(_DefaultStack):  # pylint: disable=protected-access
+=======
+class _DefaultGraphStack(_DefaultStack):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """A thread-local stack of objects for providing an implicit default graph."""
 
   def __init__(self):
@@ -5382,6 +7408,7 @@ class _DefaultGraphStack(_DefaultStack):  # pylint: disable=protected-access
     super(_DefaultGraphStack, self).reset()
     self._global_default_graph = None
 
+<<<<<<< HEAD
   @tf_contextlib.contextmanager
   def get_controller(self, default):
     context.context().context_switches.push(default.building_function,
@@ -5769,6 +7796,20 @@ def reset_default_graph():
 
 
 @tf_export(v1=["get_default_graph"])
+=======
+_default_graph_stack = _DefaultGraphStack()
+
+
+def reset_default_graph():
+  """Clears the default graph stack and resets the global default graph.
+
+  *N.B.* The default graph is a property of the current thread. This
+   function applies only to the current thread.
+  """
+  _default_graph_stack.reset()
+
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 def get_default_graph():
   """Returns the default graph for the current thread.
 
@@ -5776,7 +7817,11 @@ def get_default_graph():
   `Graph.as_default()` context has been entered, or a global default
   graph if none has been explicitly created.
 
+<<<<<<< HEAD
   NOTE: The default graph is a property of the current thread. If you
+=======
+  *N.B.* The default graph is a property of the current thread. If you
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   create a new thread, and wish to use the default graph in that
   thread, you must explicitly add a `with g.as_default():` in that
   thread's function.
@@ -5787,6 +7832,7 @@ def get_default_graph():
   return _default_graph_stack.get_default()
 
 
+<<<<<<< HEAD
 def has_default_graph():
   """Returns True if there is a default graph."""
   return len(_default_graph_stack.stack) >= 1
@@ -5827,12 +7873,15 @@ def _assert_same_graph(original_item, item):
                      (item, original_item))
 
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 def _get_graph_from_inputs(op_input_list, graph=None):
   """Returns the appropriate graph to use for the given inputs.
 
   This library method provides a consistent algorithm for choosing the graph
   in which an Operation should be constructed:
 
+<<<<<<< HEAD
   1. If the default graph is being used to construct a function, we
      use the default graph.
   2. If the "graph" is specified explicitly, we validate that all of the inputs
@@ -5846,6 +7895,19 @@ def _get_graph_from_inputs(op_input_list, graph=None):
   Args:
     op_input_list: A list of inputs to an operation, which may include `Tensor`,
       `Operation`, and other objects that may be converted to a graph element.
+=======
+  1. If the "graph" is specified explicitly, we validate that all of the inputs
+     in "op_input_list" are compatible with that graph.
+  2. Otherwise, we attempt to select a graph from the first Operation-
+     or Tensor-valued input in "op_input_list", and validate that all other
+     such inputs are in the same graph.
+  3. If the graph was not specified and it could not be inferred from
+     "op_input_list", we attempt to use the default graph.
+
+  Args:
+    op_input_list: A list of inputs to an operation, which may include Tensor
+      and Operation objects.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     graph: (Optional) The explicit graph to use.
 
   Raises:
@@ -5857,6 +7919,7 @@ def _get_graph_from_inputs(op_input_list, graph=None):
 
   Returns:
     The appropriate graph to use for the given inputs.
+<<<<<<< HEAD
 
   """
   current_default_graph = get_default_graph()
@@ -5898,6 +7961,44 @@ def _get_graph_from_inputs(op_input_list, graph=None):
 
 
 @tf_export(v1=["GraphKeys"])
+=======
+  """
+  if not isinstance(op_input_list, (list, tuple)):
+    raise TypeError("The op_input_list must be a list or tuple")
+
+  # 1. If the graph is specified explicitly, we validate that all of the inputs
+  #    are compatible with that graph.
+  if graph is not None:
+    if not isinstance(graph, Graph):
+      raise TypeError("Input graph needs to be a Graph: %s" % graph)
+    for op_input in op_input_list:
+      if isinstance(op_input, Operation):
+        if op_input.graph is not graph:
+          raise ValueError("Operation %s is not from the passed-in graph"
+                           % op_input)
+      elif isinstance(op_input, Tensor):
+        if op_input.graph is not graph:
+          raise ValueError("Tensor %s is not from the passed-in graph"
+                           % op_input)
+    return graph
+
+  # 2. Otherwise, we attempt to select a graph from one of the Operation-
+  #    or Tensor-valued inputs.
+  original_input = None
+  for op_input in op_input_list:
+    if isinstance(op_input, (Operation, Tensor)):
+      if original_input is None:
+        original_input = op_input
+      else:
+        assert_same_graph([original_input, op_input])
+  if original_input is not None:
+    return original_input.graph
+
+  # 3. If all else fails, we use the default graph, which is always there.
+  return get_default_graph()
+
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class GraphKeys(object):
   """Standard names to use for graph collections.
 
@@ -5910,6 +8011,7 @@ class GraphKeys(object):
 
   The following standard keys are defined:
 
+<<<<<<< HEAD
   * `GLOBAL_VARIABLES`: the default collection of `Variable` objects, shared
     across distributed environment (model variables are subset of these). See
     `tf.compat.v1.global_variables`
@@ -5961,6 +8063,27 @@ class GraphKeys(object):
   # Key to collect model variables defined by layers.
   MODEL_VARIABLES = "model_variables"
   # Key to collect Variable objects that will be trained by the
+=======
+  * `VARIABLES`: the `Variable` objects that comprise a model, and
+    must be saved and restored together. See
+    [`tf.all_variables()`](state_ops.md#all_variables) for more details.
+  * `TRAINABLE_VARIABLES`: the subset of `Variable` objects that will
+    be trained by an optimizer. See
+    [`tf.trainable_variables()`](state_ops.md#trainable_variables)
+    for more details.
+  * `SUMMARIES`: the summary `Tensor` objects that have been created
+    in the graph. See [`tf.merge_all_summaries()`](train.md#merge_all_summaries)
+    for more details.
+  * `QUEUE_RUNNERS`: the `QueueRunner` objects that are used to
+    produce input for a computation. See
+    [`tf.start_queue_runners()`](train.md#start_queue_runners) for more details.
+  """
+
+  # Key to collect variables.Variable objects that must be saved and restored
+  # by the model.
+  VARIABLES = "variables"
+  # Key to collect variables.Variable objects that will be trained by the
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   # optimizers.
   TRAINABLE_VARIABLES = "trainable_variables"
   # Key to collect summaries.
@@ -5969,6 +8092,7 @@ class GraphKeys(object):
   QUEUE_RUNNERS = "queue_runners"
   # Key to collect table initializers.
   TABLE_INITIALIZERS = "table_initializer"
+<<<<<<< HEAD
   # Key to collect asset filepaths. An asset represents an external resource
   # like a vocabulary file.
   ASSET_FILEPATHS = "asset_filepaths"
@@ -6068,19 +8192,32 @@ def add_to_collection(name, value):
   """Wrapper for `Graph.add_to_collection()` using the default graph.
 
   See `tf.Graph.add_to_collection`
+=======
+
+
+def add_to_collection(name, value):
+  """Wrapper for `Graph.add_to_collection()` using the default graph.
+
+  See [`Graph.add_to_collection()`](framework.md#Graph.add_to_collection)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for more details.
 
   Args:
     name: The key for the collection. For example, the `GraphKeys` class
       contains many standard names for collections.
+<<<<<<< HEAD
     value: The value to add to the collection.  @compatibility(eager)
       Collections are only supported in eager when variables are created inside
       an EagerVariableStore (e.g. as part of a layer or template).
       @end_compatibility
+=======
+    value: The value to add to the collection.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """
   get_default_graph().add_to_collection(name, value)
 
 
+<<<<<<< HEAD
 @tf_export(v1=["add_to_collections"])
 def add_to_collections(names, value):
   """Wrapper for `Graph.add_to_collections()` using the default graph.
@@ -6138,20 +8275,37 @@ def get_collection(key, scope=None):
       a `name` attribute are never returned if a scope is supplied and the
       choice or `re.match` means that a `scope` without special tokens filters
       by prefix.
+=======
+def get_collection(key, scope=None):
+  """Wrapper for `Graph.get_collection()` using the default graph.
+
+  See [`Graph.get_collection()`](framework.md#Graph.get_collection)
+  for more details.
+
+  Args:
+    key: The key for the collection. For example, the `GraphKeys` class
+      contains many standard names for collections.
+    scope: (Optional.) If supplied, the resulting list is filtered to include
+      only items whose name begins with this string.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Returns:
     The list of values in the collection with the given `name`, or
     an empty list if no value has been added to that collection. The
     list contains the values in the order under which they were
     collected.
+<<<<<<< HEAD
 
   @compatibility(eager)
   Collections are not supported when eager execution is enabled.
   @end_compatibility
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """
   return get_default_graph().get_collection(key, scope)
 
 
+<<<<<<< HEAD
 def get_all_collection_keys():
   """Returns a list of collections used in the default graph."""
   return get_default_graph().get_all_collection_keys()
@@ -6352,12 +8506,26 @@ class name_scope_v2(object):
 
   This context manager pushes a name scope, which will make the name of all
   operations added within it have a prefix.
+=======
+# pylint: disable=g-doc-return-or-yield
+@contextlib.contextmanager
+def op_scope(values, name, default_name):
+  """Returns a context manager for use when defining a Python op.
+
+  This context manager validates that the given `values` are from the
+  same graph, ensures that that graph is the default graph, and pushes a
+  name scope.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   For example, to define a new Python op called `my_op`:
 
   ```python
   def my_op(a, b, c, name=None):
+<<<<<<< HEAD
     with tf.name_scope("MyOp") as scope:
+=======
+    with tf.op_scope([a, b, c], name, "MyOp") as scope:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       a = tf.convert_to_tensor(a, name="a")
       b = tf.convert_to_tensor(b, name="b")
       c = tf.convert_to_tensor(c, name="c")
@@ -6365,6 +8533,7 @@ class name_scope_v2(object):
       return foo_op(..., name=scope)
   ```
 
+<<<<<<< HEAD
   When executed, the Tensors `a`, `b`, `c`, will have names `MyOp/a`, `MyOp/b`,
   and `MyOp/c`.
 
@@ -6693,3 +8862,18 @@ def _reconstruct_sequence_inputs(op_def, inputs, attrs):
 
   assert i == len(inputs)
   return grouped_inputs
+=======
+  Args:
+    values: The list of `Tensor` arguments that are passed to the op function.
+    name: The name argument that is passed to the op function.
+    default_name: The default name to use if the `name` argument is `None`.
+
+  Returns:
+    A context manager for use in defining a Python op.
+  """
+  g = _get_graph_from_inputs(values)
+  n = default_name if name is None else name
+  with g.as_default(), g.name_scope(n) as scope:
+    yield scope
+# pylint: enable=g-doc-return-or-yield
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

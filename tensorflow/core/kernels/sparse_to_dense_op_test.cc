@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <functional>
 #include <vector>
 
@@ -20,6 +23,7 @@ limitations under the License.
 #include "tensorflow/core/common_runtime/device_factory.h"
 #include "tensorflow/core/framework/allocator.h"
 #include "tensorflow/core/framework/fake_input.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/node_def_builder.h"
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/tensor.h"
@@ -31,6 +35,20 @@ limitations under the License.
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
 #include "tensorflow/core/public/session.h"
+=======
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/tensor_testutil.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/kernels/ops_testutil.h"
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/session.h"
+#include "tensorflow/core/public/tensor.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -38,6 +56,7 @@ namespace {
 
 class SparseToDenseTest : public OpsTestBase {
  protected:
+<<<<<<< HEAD
   void MakeOp(int dim, DataType index_type, DataType value_type) {
     TF_ASSERT_OK(NodeDefBuilder("sparsetodense", "SparseToDense")
                      .Input(FakeInput(index_type))
@@ -46,6 +65,18 @@ class SparseToDenseTest : public OpsTestBase {
                      .Input(FakeInput(value_type))
                      .Finalize(node_def()));
     TF_ASSERT_OK(InitOp());
+=======
+  void SetUp() override { RequireDefaultOps(); }
+
+  void MakeOp(int dim, DataType index_type, DataType value_type) {
+    ASSERT_OK(NodeDefBuilder("sparsetodense", "SparseToDense")
+                  .Input(FakeInput(index_type))
+                  .Input(FakeInput(index_type))
+                  .Input(FakeInput(value_type))
+                  .Input(FakeInput(value_type))
+                  .Finalize(node_def()));
+    ASSERT_OK(InitOp());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -61,7 +92,11 @@ TEST_F(SparseToDenseTest, OneD_OneValue) {
   // default_value
   AddInputFromArray<float>(TensorShape({}), {-2});
 
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Tensor expected(allocator(), DT_FLOAT, {5});
   test::FillValues<float>(&expected, {-2, 2, -2, 2, 2});
@@ -80,7 +115,11 @@ TEST_F(SparseToDenseTest, OneD_OneValue_int64_double) {
   // default_value
   AddInputFromArray<double>(TensorShape({}), {-2});
 
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Tensor expected(allocator(), DT_DOUBLE, {5});
   test::FillValues<double>(&expected, {-2, 2, -2, 2, 2});
@@ -99,7 +138,11 @@ TEST_F(SparseToDenseTest, OneD_MultValues) {
   // default_value
   AddInputFromArray<float>({}, {-2});
 
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Tensor expected(allocator(), DT_FLOAT, {5});
   test::FillValues<float>(&expected, {-2, 3, -2, 4, 5});
@@ -118,7 +161,11 @@ TEST_F(SparseToDenseTest, TwoD_OneValue) {
   // default_value
   AddInputFromArray<float>(TensorShape({}), {-2});
 
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Tensor expected(allocator(), DT_FLOAT, {3, 4});
   expected.flat<float>().setConstant(-2);
@@ -140,7 +187,11 @@ TEST_F(SparseToDenseTest, TwoD_MultValues) {
   // default_value
   AddInputFromArray<float>(TensorShape({}), {-2});
 
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Tensor expected(allocator(), DT_FLOAT, {3, 4});
   expected.flat<float>().setConstant(-2);
@@ -162,7 +213,11 @@ TEST_F(SparseToDenseTest, ThreeD_OneValue) {
   // default_value
   AddInputFromArray<float>(TensorShape({}), {-2});
 
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Tensor expected(allocator(), DT_FLOAT, {3, 4, 2});
   expected.flat<float>().setConstant(-2);
@@ -184,7 +239,11 @@ TEST_F(SparseToDenseTest, ThreeD_MultValues) {
   // default_value
   AddInputFromArray<float>(TensorShape({}), {-2});
 
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Tensor expected(allocator(), DT_FLOAT, {3, 4, 2});
   expected.flat<float>().setConstant(-2);
@@ -243,25 +302,45 @@ static void BM_SparseToDense(int iters, const int bm_arg) {
                   .Finalize(&sparse_node_def));
 
   Status status;
+<<<<<<< HEAD
   std::unique_ptr<OpKernel> op(CreateOpKernel(DEVICE_CPU, device.get(),
                                               cpu_allocator(), sparse_node_def,
                                               TF_GRAPH_DEF_VERSION, &status));
+=======
+  std::unique_ptr<OpKernel> op(CreateOpKernel(
+      DEVICE_CPU, device.get(), cpu_allocator(), sparse_node_def, &status));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   OpKernelContext::Params params;
   params.device = device.get();
   params.frame_iter = FrameAndIter(0, 0);
   params.inputs = &inputs;
   params.op_kernel = op.get();
+<<<<<<< HEAD
   std::vector<AllocatorAttributes> attrs;
   test::SetOutputAttrs(&params, &attrs);
 
   std::unique_ptr<OpKernelContext> sparse_context(new OpKernelContext(&params));
+=======
+  params.output_alloc_attr = [&device, &op, &params](int index) {
+    AllocatorAttributes attr;
+    const bool on_host = (op->output_memory_types()[index] == HOST_MEMORY);
+    attr.set_on_host(on_host);
+    return attr;
+  };
+
+  std::unique_ptr<OpKernelContext> sparse_context(new OpKernelContext(params));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   op->Compute(sparse_context.get());
   tensorflow::testing::StartTiming();
   for (int i = 0; i < iters; ++i) {
     delete sparse_context->release_output(0).tensor;
     op->Compute(sparse_context.get());
+<<<<<<< HEAD
     TF_ASSERT_OK(sparse_context->status());
+=======
+    ASSERT_OK(sparse_context->status());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   tensorflow::testing::StopTiming();
 

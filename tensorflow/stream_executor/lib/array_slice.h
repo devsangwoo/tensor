@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +38,21 @@ namespace gputools {
 // completed the migration.
 using namespace stream_executor;  // NOLINT[build/namespaces]
 
+=======
+#ifndef TENSORFLOW_STREAM_EXECUTOR_LIB_ARRAY_SLICE_H_
+#define TENSORFLOW_STREAM_EXECUTOR_LIB_ARRAY_SLICE_H_
+
+#include "tensorflow/core/lib/gtl/array_slice.h"
+
+namespace perftools {
+namespace gputools {
+namespace port {
+
+using tensorflow::gtl::ArraySlice;
+using tensorflow::gtl::MutableArraySlice;
+
+}  // namespace port
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace gputools
 }  // namespace perftools
 

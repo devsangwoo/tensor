@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,10 +25,20 @@ limitations under the License.
 #include "tensorflow/core/lib/io/compression.h"
 #include "tensorflow/core/lib/io/random_inputstream.h"
 #include "tensorflow/core/platform/env.h"
+=======
+#include "tensorflow/core/lib/io/record_reader.h"
+
+#include <limits.h>
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/lib/core/coding.h"
+#include "tensorflow/core/lib/hash/crc32c.h"
+#include "tensorflow/core/lib/core/errors.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace io {
 
+<<<<<<< HEAD
 RecordReaderOptions RecordReaderOptions::CreateRecordReaderOptions(
     const string& compression_type) {
   RecordReaderOptions options;
@@ -85,20 +96,44 @@ RecordReader::RecordReader(RandomAccessFile* file,
 // offset corresponds to the user-provided value to ReadRecord()
 // and is used only in error messages.
 Status RecordReader::ReadChecksummed(uint64 offset, size_t n, tstring* result) {
+=======
+RecordReader::RecordReader(RandomAccessFile* file) : src_(file) {}
+
+RecordReader::~RecordReader() {}
+
+// Read n+4 bytes from file, verify that checksum of first n bytes is
+// stored in the last 4 bytes and store the first n bytes in *result.
+// May use *storage as backing store.
+static Status ReadChecksummed(RandomAccessFile* file, uint64 offset,
+                                   size_t n, StringPiece* result,
+                                   string* storage) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (n >= SIZE_MAX - sizeof(uint32)) {
     return errors::DataLoss("record size too large");
   }
 
   const size_t expected = n + sizeof(uint32);
+<<<<<<< HEAD
   TF_RETURN_IF_ERROR(input_stream_->ReadNBytes(expected, result));
 
   if (result->size() != expected) {
     if (result->empty()) {
+=======
+  storage->resize(expected);
+  StringPiece data;
+  Status s = file->Read(offset, expected, &data, &(*storage)[0]);
+  if (!s.ok()) {
+    return s;
+  }
+  if (data.size() != expected) {
+    if (data.size() == 0) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       return errors::OutOfRange("eof");
     } else {
       return errors::DataLoss("truncated record at ", offset);
     }
   }
+<<<<<<< HEAD
 
   const uint32 masked_crc = core::DecodeFixed32(result->data() + n);
   if (crc32c::Unmask(masked_crc) != crc32c::Value(result->data(), n)) {
@@ -187,11 +222,38 @@ Status RecordReader::ReadRecord(uint64* offset, tstring* record) {
   s = ReadChecksummed(*offset + kHeaderSize, length, record);
   if (!s.ok()) {
     last_read_failed_ = true;
+=======
+  uint32 masked_crc = core::DecodeFixed32(data.data() + n);
+  if (crc32c::Unmask(masked_crc) != crc32c::Value(data.data(), n)) {
+    return errors::DataLoss("corrupted record at ", offset);
+  }
+  *result = StringPiece(data.data(), n);
+  return Status::OK();
+}
+
+Status RecordReader::ReadRecord(uint64* offset, string* record) {
+  static const size_t kHeaderSize = sizeof(uint64) + sizeof(uint32);
+  static const size_t kFooterSize = sizeof(uint32);
+
+  // Read length
+  StringPiece lbuf;
+  Status s = ReadChecksummed(src_, *offset, sizeof(uint64), &lbuf, record);
+  if (!s.ok()) {
+    return s;
+  }
+  const uint64 length = core::DecodeFixed64(lbuf.data());
+
+  // Read data
+  StringPiece data;
+  s = ReadChecksummed(src_, *offset + kHeaderSize, length, &data, record);
+  if (!s.ok()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (errors::IsOutOfRange(s)) {
       s = errors::DataLoss("truncated record at ", *offset);
     }
     return s;
   }
+<<<<<<< HEAD
 
   *offset += kHeaderSize + length + kFooterSize;
   DCHECK_EQ(*offset, input_stream_->Tell());
@@ -202,5 +264,17 @@ SequentialRecordReader::SequentialRecordReader(
     RandomAccessFile* file, const RecordReaderOptions& options)
     : underlying_(file, options), offset_(0) {}
 
+=======
+  if (record->data() != data.data()) {
+    // RandomAccessFile placed the data in some other location.
+    memmove(&(*record)[0], data.data(), data.size());
+  }
+
+  record->resize(data.size());
+  *offset += kHeaderSize + length + kFooterSize;
+  return Status::OK();
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace io
 }  // namespace tensorflow

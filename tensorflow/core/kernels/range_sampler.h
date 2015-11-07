@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,14 +20,27 @@ limitations under the License.
 #include <vector>
 
 #include "tensorflow/core/lib/core/status.h"
+=======
+#ifndef TENSORFLOW_KERNELS_RANGE_SAMPLER_H_
+#define TENSORFLOW_KERNELS_RANGE_SAMPLER_H_
+
+#include <vector>
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/lib/random/distribution_sampler.h"
 #include "tensorflow/core/lib/random/random_distributions.h"
 #include "tensorflow/core/lib/random/weighted_picker.h"
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/thread_annotations.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/thread_annotations.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -36,7 +50,11 @@ class Env;
 // [0, range)
 class RangeSampler {
  public:
+<<<<<<< HEAD
   explicit RangeSampler(int64 range) : range_(range) { CHECK_GT(range_, 0); }
+=======
+  explicit RangeSampler(int range) : range_(range) { CHECK_GT(range_, 0); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   virtual ~RangeSampler();
 
   // Sample a single value
@@ -65,7 +83,11 @@ class RangeSampler {
   // Expected counts for the elements of the returned "batch" are reported
   // in the aligned array "batch_expected_count".
   //
+<<<<<<< HEAD
   // The user can optionally provide "extras", containing values in the range.
+=======
+  // The user can optionally provide "extras", containg values in the range.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // The expected counts for the extras are reported in the aligned array
   // "extras_expected_count".
   //
@@ -115,12 +137,18 @@ class AllSampler : public RangeSampler {
 
   int64 Sample(random::SimplePhilox* rnd) const override {
     LOG(FATAL) << "Should not be called";
+<<<<<<< HEAD
     return 0;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   float Probability(int64 value) const override {
     LOG(FATAL) << "Should not be called";
+<<<<<<< HEAD
     return 0;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void SampleBatchGetExpectedCountAvoid(
@@ -130,6 +158,12 @@ class AllSampler : public RangeSampler {
       gtl::ArraySlice<int64> extras,
       gtl::MutableArraySlice<float> extras_expected_count,
       gtl::ArraySlice<int64> avoided_values) const override;
+<<<<<<< HEAD
+=======
+
+ private:
+  const float inv_range_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 class UniformSampler : public RangeSampler {
@@ -187,7 +221,11 @@ class UnigramSampler : public RangeSampler {
 
   float Probability(int64 value) const override;
 
+<<<<<<< HEAD
   // Overriding at a high level results in far fewer lock acquisitions.
+=======
+  // Overriding at a high level results in far fewer lock aquisitions.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   void SampleBatchGetExpectedCountAvoid(
       random::SimplePhilox* rnd, bool unique,
       gtl::MutableArraySlice<int64> batch,
@@ -249,4 +287,8 @@ class FixedUnigramSampler : public RangeSampler {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_RANGE_SAMPLER_H_
+=======
+#endif  // TENSORFLOW_KERNELS_RANGE_SAMPLER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

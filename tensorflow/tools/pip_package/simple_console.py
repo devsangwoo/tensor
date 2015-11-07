@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +20,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+=======
+"""Start a simple interactive console with TensorFlow available."""
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 import code
 import sys
 
 
 def main(_):
+<<<<<<< HEAD
   """Run an interactive console."""
   code.interact()
   return 0
@@ -31,3 +37,12 @@ def main(_):
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv))
+=======
+    """Run an interactive console."""
+    code.interact()
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

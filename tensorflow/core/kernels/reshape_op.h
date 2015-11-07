@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +16,15 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_KERNELS_RESHAPE_OP_H_
 #define TENSORFLOW_CORE_KERNELS_RESHAPE_OP_H_
+=======
+#ifndef TENSORFLOW_KERNELS_RESHAPE_OP_H_
+#define TENSORFLOW_KERNELS_RESHAPE_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <memory>
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/register_types.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "tensorflow/core/framework/types.h"
@@ -28,6 +34,16 @@ limitations under the License.
 namespace tensorflow {
 
 // Note that this op is subclassed for QuantizedReshapeOp.
+=======
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class ReshapeOp : public OpKernel {
  public:
   explicit ReshapeOp(OpKernelConstruction* context) : OpKernel(context) {}
@@ -36,13 +52,24 @@ class ReshapeOp : public OpKernel {
     const Tensor& input = context->input(0);
     const Tensor& sizes = context->input(1);
     // Preliminary validation of sizes.
+<<<<<<< HEAD
     OP_REQUIRES(context, IsLegacyVector(sizes.shape()),
                 errors::InvalidArgument("sizes input must be 1-D, not ",
                                         sizes.shape().DebugString()));
+=======
+    OP_REQUIRES(context, TensorShapeUtils::IsLegacyVector(sizes.shape()),
+                errors::InvalidArgument("sizes input must be 1-D, not shape ",
+                                        sizes.shape().ShortDebugString()));
+    const int64 num_dims = sizes.NumElements();
+    OP_REQUIRES(
+        context, num_dims <= 8,
+        errors::InvalidArgument(num_dims, " > max 8 output dims supported"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Compute the output shape.  Determine product of specified
     // dimensions, and find the index of the unspecified one.
     TensorShape shape;
+<<<<<<< HEAD
     int64 product = 1;
     int unknown_index = -1;
     bool sizes_has_zero_dim;
@@ -92,6 +119,44 @@ class ReshapeOp : public OpKernel {
                 errors::InvalidArgument("Input to reshape is a tensor with ",
                                         input.NumElements(),
                                         " values, but the requested shape has ",
+=======
+    int32 product = 1;
+    int unknown_index = -1;
+    auto Svec = sizes.flat<int32>();
+    for (int d = 0; d < num_dims; ++d) {
+      const int32 size = Svec(d);
+      if (size == -1) {
+        OP_REQUIRES(
+            context, unknown_index == -1,
+            errors::InvalidArgument("only one input size may be -1, not both ",
+                                    unknown_index, " and ", d));
+        unknown_index = d;
+        shape.AddDim(1);
+      } else {
+        OP_REQUIRES(context, size >= 0,
+                    errors::InvalidArgument(
+                        "size ", d, " must be non-negative, not ", size));
+        shape.AddDim(size);
+        product *= size;
+      }
+    }
+    if (unknown_index != -1) {
+      OP_REQUIRES(
+          context, product > 0,
+          errors::InvalidArgument("cannot infer the missing input size for "
+                                  "an empty tensor unless all specified "
+                                  "input sizes are non-zero"));
+      const int32 missing = input.NumElements() / product;
+      OP_REQUIRES(context, product * missing == input.NumElements(),
+                  errors::InvalidArgument("Input has ", input.NumElements(),
+                                          " values, which isn't divisible by ",
+                                          product));
+      shape.set_dim(unknown_index, missing);
+    }
+    OP_REQUIRES(context, shape.num_elements() == input.NumElements(),
+                errors::InvalidArgument("Input has ", input.NumElements(),
+                                        " values, which isn't the same as ",
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                         shape.num_elements()));
 
     // Actually produce the reshaped output.
@@ -101,6 +166,7 @@ class ReshapeOp : public OpKernel {
   }
 
   bool IsExpensive() override { return false; }
+<<<<<<< HEAD
 
  private:
   template <typename Tshape>
@@ -137,8 +203,14 @@ class ReshapeOp : public OpKernel {
     }
     return Status::OK();
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_RESHAPE_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_RESHAPE_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

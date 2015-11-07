@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +24,15 @@ limitations under the License.
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 // clang-format on
 #include "tensorflow/core/framework/tensor_types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_SOFTPLUS_OP_H_
+#define TENSORFLOW_KERNELS_SOFTPLUS_OP_H_
+// Functor definition for SoftplusOp and SoftplusGradOp, must be compilable by
+// nvcc.
+
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -36,6 +46,7 @@ struct Softplus {
   // activations: same shape as "features".
   void operator()(const Device& d, typename TTypes<T>::ConstTensor features,
                   typename TTypes<T>::Tensor activations) {
+<<<<<<< HEAD
     // Choose a threshold on x below which exp(x) may underflow
     // when added to 1, but for which exp(x) is always within epsilon of the
     // true softplus(x).  Offset of 2 from machine epsilon checked
@@ -54,6 +65,11 @@ struct Softplus {
         features,                       // softplus(x) ~= x for x large
         too_small.select(features_exp,  // softplus(x) ~= exp(x) for x small
                          (features_exp + features.constant(T(1))).log()));
+=======
+    activations.device(d) =
+        (features > features.constant(30.f))
+            .select(features, (features.exp() + features.constant(1.0f)).log());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -69,11 +85,19 @@ struct SoftplusGrad {
                   typename TTypes<T>::ConstTensor features,
                   typename TTypes<T>::Tensor backprops) {
     backprops.device(d) =
+<<<<<<< HEAD
         gradients / ((-features).exp() + features.constant(T(1)));
+=======
+        gradients / ((-features).exp() + features.constant(1.0f));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 }  // namespace functor
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_SOFTPLUS_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_SOFTPLUS_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

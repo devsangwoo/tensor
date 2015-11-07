@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +18,19 @@ limitations under the License.
 
 #include <vector>
 #include "tensorflow/core/framework/attr_value.pb.h"
+=======
+#include "tensorflow/core/framework/fake_input.h"
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/node_def_util.h"
 #include "tensorflow/core/framework/op_def.pb.h"
 #include "tensorflow/core/framework/op_def_util.h"
 #include "tensorflow/core/lib/core/errors.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/status.h"
+=======
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -101,11 +110,20 @@ Status FakeInputImpl::AddInputToBuilder() {
   } else {
     if (!dt_specified_ && !arg_->type_list_attr().empty()) {
       DataTypeVector dts;
+<<<<<<< HEAD
       Status status = GetNodeAttr(*node_def_, arg_->type_list_attr(), &dts);
       if (!status.ok()) {
         return errors::InvalidArgument(
             "Could not infer list of types for input '", arg_->name(),
             "': ", status.error_message());
+=======
+      Status status =
+          GetNodeAttr(*node_def_, arg_->type_list_attr(), &dts);
+      if (!status.ok()) {
+        return errors::InvalidArgument(
+            "Could not infer list of types for input '", arg_->name(), "': ",
+            status.error_message());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
       SourceList(dts);
       return Status::OK();
@@ -131,8 +149,13 @@ Status FakeInputImpl::GetN(int* n) const {
     Status status = GetNodeAttr(*node_def_, arg_->number_attr(), n);
     if (!status.ok()) {
       return errors::InvalidArgument("Could not infer length of input '",
+<<<<<<< HEAD
                                      arg_->name(),
                                      "': ", status.error_message());
+=======
+                                     arg_->name(), "': ",
+                                     status.error_message());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
   return Status::OK();
@@ -141,12 +164,16 @@ Status FakeInputImpl::GetN(int* n) const {
 Status FakeInputImpl::GetDataType(DataType* dt) const {
   if (dt_specified_) {
     *dt = dt_;
+<<<<<<< HEAD
     return Status::OK();  // Ignore is_ref field of arg_.
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   } else if (arg_->type() != DT_INVALID) {
     *dt = arg_->type();
   } else if (!arg_->type_attr().empty()) {
     Status status = GetNodeAttr(*node_def_, arg_->type_attr(), dt);
     if (!status.ok()) {
+<<<<<<< HEAD
       // Check if the type attr has a default
       const OpDef::AttrDef* attr = FindAttr(arg_->type_attr(), *op_def_);
       if (attr && attr->has_default_value()) {
@@ -156,14 +183,22 @@ Status FakeInputImpl::GetDataType(DataType* dt) const {
                                        arg_->name(),
                                        "': ", status.error_message());
       }
+=======
+      return errors::InvalidArgument("Could not infer type for input '",
+                                     arg_->name(), "': ",
+                                     status.error_message());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   } else {
     return errors::InvalidArgument("No type or type_attr field in arg '",
                                    arg_->name(), "'");
   }
+<<<<<<< HEAD
   if (arg_->is_ref()) {
     *dt = MakeRefType(*dt);
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return Status::OK();
 }
 
@@ -173,7 +208,11 @@ void FakeInputImpl::NSources(int n, DataType dt) const {
   for (int i = 0; i < n; ++i) {
     srcs.emplace_back(in_node_, i, dt);
   }
+<<<<<<< HEAD
   builder_->Input(gtl::ArraySlice<NodeDefBuilder::NodeOut>(srcs));
+=======
+  builder_->Input(srcs);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 void FakeInputImpl::SourceList(DataTypeSlice dts) const {
@@ -182,7 +221,11 @@ void FakeInputImpl::SourceList(DataTypeSlice dts) const {
   for (size_t i = 0; i < dts.size(); ++i) {
     srcs.emplace_back(in_node_, i, dts[i]);
   }
+<<<<<<< HEAD
   builder_->Input(gtl::ArraySlice<NodeDefBuilder::NodeOut>(srcs));
+=======
+  builder_->Input(srcs);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace

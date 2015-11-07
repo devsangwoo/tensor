@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // This provides a very simple, boring adaptor for a begin and end iterator
 // into a range type. This should be used to build range views that work well
 // with range based for loops and range based constructors.
@@ -37,10 +40,13 @@ namespace gtl {
 template <typename IteratorT>
 class iterator_range {
  public:
+<<<<<<< HEAD
   using value_type = decltype(*std::declval<IteratorT>());
   using iterator = IteratorT;
   using const_iterator = IteratorT;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   iterator_range() : begin_iterator_(), end_iterator_() {}
   iterator_range(IteratorT begin_iterator, IteratorT end_iterator)
       : begin_iterator_(std::move(begin_iterator)),

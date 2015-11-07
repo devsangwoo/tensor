@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +15,38 @@ limitations under the License.
 ==============================================================================*/
 
 #include <string>
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <unordered_set>
 #include <utility>
 
 #include "tensorflow/core/framework/op_kernel.h"
 #include "tensorflow/core/framework/register_types.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/framework/tensor_shape.h"
 #include "tensorflow/core/lib/core/status.h"
 
 namespace tensorflow {
 template <typename T, typename Tidx>
+=======
+#include "tensorflow/core/public/tensor_shape.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/status.h"
+
+namespace tensorflow {
+template <typename T>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class ListDiffOp : public OpKernel {
  public:
   explicit ListDiffOp(OpKernelConstruction* context) : OpKernel(context) {
     const DataType dt = DataTypeToEnum<T>::v();
+<<<<<<< HEAD
     const DataType dtidx = DataTypeToEnum<Tidx>::v();
     OP_REQUIRES_OK(context, context->MatchSignature({dt, dt}, {dt, dtidx}));
+=======
+    OP_REQUIRES_OK(context, context->MatchSignature({dt, dt}, {dt, DT_INT32}));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void Compute(OpKernelContext* context) override {
@@ -43,6 +59,7 @@ class ListDiffOp : public OpKernel {
     OP_REQUIRES(context, TensorShapeUtils::IsVector(y.shape()),
                 errors::InvalidArgument("y should be a 1D vector."));
 
+<<<<<<< HEAD
     const auto Tx = x.vec<T>();
     const size_t x_size = Tx.size();
     const auto Ty = y.vec<T>();
@@ -54,13 +71,28 @@ class ListDiffOp : public OpKernel {
     std::unordered_set<T> y_set;
     y_set.reserve(y_size);
     for (size_t i = 0; i < y_size; ++i) {
+=======
+    std::unordered_set<T> y_set;
+    const auto Ty = y.vec<T>();
+    const int y_size = Ty.size();
+    y_set.reserve(y_size);
+    for (int i = 0; i < y_size; ++i) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       y_set.insert(Ty(i));
     }
 
     // Compute the size of the output.
+<<<<<<< HEAD
 
     int64 out_size = 0;
     for (size_t i = 0; i < x_size; ++i) {
+=======
+    const auto Tx = x.vec<T>();
+    const int x_size = Tx.size();
+
+    int out_size = 0;
+    for (int i = 0; i < x_size; ++i) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if (y_set.count(Tx(i)) == 0) {
         ++out_size;
       }
@@ -73,6 +105,7 @@ class ListDiffOp : public OpKernel {
 
     Tensor* indices = nullptr;
     OP_REQUIRES_OK(context, context->allocate_output(1, {out_size}, &indices));
+<<<<<<< HEAD
     auto Tindices = indices->vec<Tidx>();
 
     for (Tidx i = 0, p = 0; i < static_cast<Tidx>(x_size); ++i) {
@@ -83,6 +116,12 @@ class ListDiffOp : public OpKernel {
                         " when output Tensor only had ", out_size,
                         " elements. Check that your "
                         "input tensors are not being concurrently mutated."));
+=======
+    auto Tindices = indices->vec<int32>();
+
+    for (int i = 0, p = 0; i < x_size; ++i) {
+      if (y_set.count(Tx(i)) == 0) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         Tout(p) = Tx(i);
         Tindices(p) = i;
         p++;
@@ -91,6 +130,7 @@ class ListDiffOp : public OpKernel {
   }
 };
 
+<<<<<<< HEAD
 #define REGISTER_LISTDIFF(type)                                  \
   REGISTER_KERNEL_BUILDER(Name("ListDiff")                       \
                               .Device(DEVICE_CPU)                \
@@ -105,6 +145,14 @@ class ListDiffOp : public OpKernel {
 
 TF_CALL_REAL_NUMBER_TYPES(REGISTER_LISTDIFF);
 REGISTER_LISTDIFF(tstring);
+=======
+#define REGISTER_LISTDIFF(type)                                      \
+  REGISTER_KERNEL_BUILDER(                                           \
+      Name("ListDiff").Device(DEVICE_CPU).TypeConstraint<type>("T"), \
+      ListDiffOp<type>)
+
+TF_CALL_REAL_NUMBER_TYPES(REGISTER_LISTDIFF);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #undef REGISTER_LISTDIFF
 
 }  // namespace tensorflow

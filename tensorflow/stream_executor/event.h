@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifndef TENSORFLOW_STREAM_EXECUTOR_EVENT_H_
 #define TENSORFLOW_STREAM_EXECUTOR_EVENT_H_
 
 #include <memory>
 
+<<<<<<< HEAD
 #include "tensorflow/stream_executor/platform/port.h"
 
 namespace stream_executor {
+=======
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace internal {
 class EventInterface;
@@ -61,6 +69,7 @@ class Event {
   // Returns a pointer to the underlying platform-specific implementation.
   internal::EventInterface* implementation() { return implementation_.get(); }
 
+<<<<<<< HEAD
   Event(Event&&) = default;
   Event& operator=(Event&&) = default;
 
@@ -71,13 +80,28 @@ class Event {
   // Not owned.
   StreamExecutor* stream_exec_;
 
+=======
+ private:
+  friend class Stream;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Pointer to the platform-specific EventInterface implementation underlying
   // the object. Owned.
   std::unique_ptr<internal::EventInterface> implementation_;
 
+<<<<<<< HEAD
   SE_DISALLOW_COPY_AND_ASSIGN(Event);
 };
 
 }  // namespace stream_executor
+=======
+  // Pointer to the StreamExecutor interface used to create this object.
+  // Not owned.
+  StreamExecutor* stream_exec_;
+};
+
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_EVENT_H_

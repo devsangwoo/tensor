@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,10 @@ limitations under the License.
 
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/lib/random/random_distributions.h"
+=======
+#ifndef TENSORFLOW_KERNELS_RANDOM_OP_H_
+#define TENSORFLOW_KERNELS_RANDOM_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -28,6 +33,7 @@ namespace functor {
 template <typename Device, class Distribution>
 struct FillPhiloxRandom;
 
+<<<<<<< HEAD
 typedef Eigen::ThreadPoolDevice CPUDevice;
 // Declares the partially CPU-specialized functor struct.
 //
@@ -70,3 +76,9 @@ struct FillPhiloxRandom<SYCLDevice, Distribution> {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_RANDOM_OP_H_
+=======
+}  // namespace functor
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_KERNELS_RANDOM_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

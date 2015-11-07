@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Functions to read and write images in PNG format.
 
 #include <string.h>
 #include <sys/types.h>
+<<<<<<< HEAD
 #include <zlib.h>
 #include <string>
 #include <utility>
@@ -29,6 +33,19 @@ limitations under the License.
 #include "tensorflow/core/platform/byte_order.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/png.h"
+=======
+#include <string>
+#include <utility>
+#include <vector>
+// NOTE(skal): we don't '#include <setjmp.h>' before png/png.h as it otherwise
+// provokes a compile error. We instead let png.h include what is needed.
+
+#include "tensorflow/core/lib/core/casts.h"
+#include "tensorflow/core/lib/png/png_io.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"  // endian
+#include "external/png_archive/libpng-1.2.53/png.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace png {
@@ -39,6 +56,7 @@ namespace png {
 
 namespace {
 
+<<<<<<< HEAD
 #define PTR_INC(type, ptr, del) \
   (ptr = reinterpret_cast<type*>(reinterpret_cast<char*>(ptr) + (del)))
 #define CPTR_INC(type, ptr, del)                                            \
@@ -66,6 +84,29 @@ static void Convert8to16(const uint8* p8, int num_comps, int p8_row_bytes,
        CPTR_INC(uint8, p8, bump8), PTR_INC(uint16, p16, bump16)) {
     for (int w = width; w-- != 0; --p8, --p16) {
       uint32 pix = *p8;
+=======
+#define PTR_INC(type, ptr, del) (ptr = \
+    reinterpret_cast<type*>(reinterpret_cast<char*>(ptr) + (del)))
+#define CPTR_INC(type, ptr, del) (ptr = \
+    reinterpret_cast<const type*>(reinterpret_cast<const char*>(ptr) + (del)))
+
+// Convert from 8 bit components to 16. This works in-place.
+static void Convert8to16(const uint8* p8, int num_comps, int p8_row_bytes,
+                         int width, int height, uint16* p16,
+                         int p16_row_bytes) {
+  // Adjust pointers to copy backwards
+  width *= num_comps;
+  CPTR_INC(uint8,  p8, (height - 1) * p8_row_bytes +
+                       (width  - 1) * sizeof(*p8));
+  PTR_INC(uint16, p16, (height - 1) * p16_row_bytes +
+                       (width  - 1) * sizeof(*p16));
+  int bump8  = width * sizeof(*p8)  - p8_row_bytes;
+  int bump16 = width * sizeof(*p16) - p16_row_bytes;
+  for (; height-- != 0;
+      CPTR_INC(uint8, p8, bump8), PTR_INC(uint16, p16, bump16)) {
+    for (int w = width; w-- != 0; --p8, --p16) {
+      uint pix = *p8;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       pix |= pix << 8;
       *p16 = static_cast<uint16>(pix);
     }
@@ -76,8 +117,12 @@ static void Convert8to16(const uint8* p8, int num_comps, int p8_row_bytes,
 #undef CPTR_INC
 
 void ErrorHandler(png_structp png_ptr, png_const_charp msg) {
+<<<<<<< HEAD
   DecodeContext* const ctx =
       absl::bit_cast<DecodeContext*>(png_get_io_ptr(png_ptr));
+=======
+  DecodeContext* const ctx = bit_cast<DecodeContext*>(png_get_io_ptr(png_ptr));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   ctx->error_condition = true;
   // To prevent log spam, errors are logged as VLOG(1) instead of ERROR.
   VLOG(1) << "PNG error: " << msg;
@@ -88,6 +133,7 @@ void WarningHandler(png_structp png_ptr, png_const_charp msg) {
   LOG(WARNING) << "PNG warning: " << msg;
 }
 
+<<<<<<< HEAD
 void StringReader(png_structp png_ptr, png_bytep data, png_size_t length) {
   DecodeContext* const ctx =
       absl::bit_cast<DecodeContext*>(png_get_io_ptr(png_ptr));
@@ -98,6 +144,17 @@ void StringReader(png_structp png_ptr, png_bytep data, png_size_t length) {
     // data leak, so it is safe to just leave the buffer be as it is and just
     // exit with error.
     png_error(png_ptr, "More bytes requested to read than available");
+=======
+void StringReader(png_structp png_ptr,
+                  png_bytep data, png_size_t length) {
+  DecodeContext* const ctx = bit_cast<DecodeContext*>(png_get_io_ptr(png_ptr));
+  if (static_cast<png_size_t>(ctx->data_left) < length) {
+    if (!ctx->error_condition) {
+      VLOG(1) << "PNG read decoding error";
+      ctx->error_condition = true;
+    }
+    memset(data, 0, length);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   } else {
     memcpy(data, ctx->data, length);
     ctx->data += length;
@@ -105,6 +162,7 @@ void StringReader(png_structp png_ptr, png_bytep data, png_size_t length) {
   }
 }
 
+<<<<<<< HEAD
 template <typename T>
 void StringWriter(png_structp png_ptr, png_bytep data, png_size_t length) {
   T* const s = absl::bit_cast<T*>(png_get_io_ptr(png_ptr));
@@ -112,6 +170,15 @@ void StringWriter(png_structp png_ptr, png_bytep data, png_size_t length) {
 }
 
 void StringWriterFlush(png_structp png_ptr) {}
+=======
+void StringWriter(png_structp png_ptr, png_bytep data, png_size_t length) {
+  string* const s = bit_cast<string*>(png_get_io_ptr(png_ptr));
+  s->append(bit_cast<const char*>(data), length);
+}
+
+void StringWriterFlush(png_structp png_ptr) {
+}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 char* check_metadata_string(const string& s) {
   const char* const c_string = s.c_str();
@@ -129,8 +196,12 @@ char* check_metadata_string(const string& s) {
 void CommonFreeDecode(DecodeContext* context) {
   if (context->png_ptr) {
     png_destroy_read_struct(&context->png_ptr,
+<<<<<<< HEAD
                             context->info_ptr ? &context->info_ptr : nullptr,
                             nullptr);
+=======
+                            context->info_ptr ? &context->info_ptr : NULL, 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     context->png_ptr = nullptr;
     context->info_ptr = nullptr;
   }
@@ -155,6 +226,7 @@ bool DecodeHeader(StringPiece png_string, int* width, int* height,
   *width = static_cast<int>(context.width);
   CHECK_NOTNULL(height);
   *height = static_cast<int>(context.height);
+<<<<<<< HEAD
   if (components != nullptr) {
     switch (context.color_type) {
       case PNG_COLOR_TYPE_PALETTE:
@@ -162,6 +234,12 @@ bool DecodeHeader(StringPiece png_string, int* width, int* height,
             (png_get_valid(context.png_ptr, context.info_ptr, PNG_INFO_tRNS))
                 ? 4
                 : 3;
+=======
+  if (components != NULL) {
+    switch (context.color_type) {
+      case PNG_COLOR_TYPE_PALETTE:
+        *components = (context.info_ptr->valid & PNG_INFO_tRNS) ? 4 : 3;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         break;
       case PNG_COLOR_TYPE_GRAY:
         *components = 1;
@@ -180,6 +258,7 @@ bool DecodeHeader(StringPiece png_string, int* width, int* height,
         break;
     }
   }
+<<<<<<< HEAD
   if (channel_bit_depth != nullptr) {
     *channel_bit_depth = context.bit_depth;
   }
@@ -190,6 +269,15 @@ bool DecodeHeader(StringPiece png_string, int* width, int* height,
     png_get_text(context.png_ptr, context.info_ptr, &text_ptr, &num_text);
     for (int i = 0; i < num_text; i++) {
       const png_text& text = text_ptr[i];
+=======
+  if (channel_bit_depth != NULL) {
+    *channel_bit_depth = context.bit_depth;
+  }
+  if (metadata != NULL) {
+    metadata->clear();
+    for (int i = 0; i < context.info_ptr->num_text; i++) {
+      const png_text& text = context.info_ptr->text[i];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       metadata->push_back(std::make_pair(text.key, text.text));
     }
   }
@@ -201,8 +289,13 @@ bool CommonInitDecode(StringPiece png_string, int desired_channels,
                       int desired_channel_bits, DecodeContext* context) {
   CHECK(desired_channel_bits == 8 || desired_channel_bits == 16)
       << "desired_channel_bits = " << desired_channel_bits;
+<<<<<<< HEAD
   CHECK(0 <= desired_channels && desired_channels <= 4)
       << "desired_channels = " << desired_channels;
+=======
+  CHECK(0 <= desired_channels && desired_channels <= 4) << "desired_channels = "
+                                                        << desired_channels;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   context->error_condition = false;
   context->channels = desired_channels;
   context->png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, context,
@@ -222,6 +315,7 @@ bool CommonInitDecode(StringPiece png_string, int desired_channels,
     CommonFreeDecode(context);
     return false;
   }
+<<<<<<< HEAD
   context->data = absl::bit_cast<const uint8*>(png_string.data());
   context->data_left = png_string.size();
   png_set_read_fn(context->png_ptr, context, StringReader);
@@ -229,6 +323,16 @@ bool CommonInitDecode(StringPiece png_string, int desired_channels,
   png_get_IHDR(context->png_ptr, context->info_ptr, &context->width,
                &context->height, &context->bit_depth, &context->color_type,
                nullptr, nullptr, nullptr);
+=======
+  context->data = bit_cast<const uint8*>(png_string.data());
+  context->data_left = png_string.size();
+  png_set_read_fn(context->png_ptr, context, StringReader);
+  png_read_info(context->png_ptr, context->info_ptr);
+  png_get_IHDR(context->png_ptr, context->info_ptr,
+               &context->width, &context->height,
+               &context->bit_depth, &context->color_type,
+               0, 0, 0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (context->error_condition) {
     VLOG(1) << ": DecodePNG <- error during header parsing.";
     CommonFreeDecode(context);
@@ -239,6 +343,7 @@ bool CommonInitDecode(StringPiece png_string, int desired_channels,
     CommonFreeDecode(context);
     return false;
   }
+<<<<<<< HEAD
   const bool has_tRNS =
       (png_get_valid(context->png_ptr, context->info_ptr, PNG_INFO_tRNS)) != 0;
   if (context->channels == 0) {  // Autodetect number of channels
@@ -252,18 +357,33 @@ bool CommonInitDecode(StringPiece png_string, int desired_channels,
       context->channels = png_get_channels(context->png_ptr, context->info_ptr);
     }
   }
+=======
+  if (context->channels == 0) {  // Autodetect number of channels
+    context->channels = context->info_ptr->channels;
+  }
+  const bool has_tRNS = (context->info_ptr->valid & PNG_INFO_tRNS) != 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   const bool has_alpha = (context->color_type & PNG_COLOR_MASK_ALPHA) != 0;
   if ((context->channels & 1) == 0) {  // We desire alpha
     if (has_alpha) {                   // There is alpha
     } else if (has_tRNS) {
       png_set_tRNS_to_alpha(context->png_ptr);  // Convert transparency to alpha
     } else {
+<<<<<<< HEAD
       png_set_add_alpha(context->png_ptr, (1 << context->bit_depth) - 1,
                         PNG_FILLER_AFTER);
     }
   } else {                                    // We don't want alpha
     if (has_alpha || has_tRNS) {              // There is alpha
       png_set_strip_alpha(context->png_ptr);  // Strip alpha
+=======
+      png_set_add_alpha(
+          context->png_ptr, (1 << context->bit_depth) - 1, PNG_FILLER_AFTER);
+    }
+  } else {                                        // We don't want alpha
+    if (has_alpha || has_tRNS) {  // There is alpha
+      png_set_strip_alpha(context->png_ptr);                  // Strip alpha
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
@@ -276,6 +396,7 @@ bool CommonInitDecode(StringPiece png_string, int desired_channels,
 
   png_set_packing(context->png_ptr);
   context->num_passes = png_set_interlace_handling(context->png_ptr);
+<<<<<<< HEAD
 
   if (desired_channel_bits > 8 && port::kLittleEndian) {
     png_set_swap(context->png_ptr);
@@ -284,10 +405,23 @@ bool CommonInitDecode(StringPiece png_string, int desired_channels,
   // convert palette to rgb(a) if needs be.
   if (context->color_type == PNG_COLOR_TYPE_PALETTE)
     png_set_palette_to_rgb(context->png_ptr);
+=======
+  png_read_update_info(context->png_ptr, context->info_ptr);
+
+#ifdef IS_LITTLE_ENDIAN
+  if (desired_channel_bits > 8)
+    png_set_swap(context->png_ptr);
+#endif  // IS_LITTLE_ENDIAN
+
+  // convert palette to rgb(a) if needs be.
+  if (context->color_type == PNG_COLOR_TYPE_PALETTE)
+      png_set_palette_to_rgb(context->png_ptr);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // handle grayscale case for source or destination
   const bool want_gray = (context->channels < 3);
   const bool is_gray = !(context->color_type & PNG_COLOR_MASK_COLOR);
+<<<<<<< HEAD
   if (is_gray) {  // upconvert gray to 8-bit if needed.
     if (context->bit_depth < 8) {
       png_set_expand_gray_1_2_4_to_8(context->png_ptr);
@@ -303,6 +437,19 @@ bool CommonInitDecode(StringPiece png_string, int desired_channels,
 
   // Must come last to incorporate all requested transformations.
   png_read_update_info(context->png_ptr, context->info_ptr);
+=======
+  if (is_gray) {    // upconvert gray to 8-bit if needed.
+    if (context->bit_depth < 8)
+      png_set_gray_1_2_4_to_8(context->png_ptr);
+  }
+  if (want_gray) {    // output is grayscale
+    if (!is_gray)
+      png_set_rgb_to_gray(context->png_ptr, 1, 0.299, 0.587);   // 601, JPG
+  } else {            // output is rgb(a)
+    if (is_gray)
+      png_set_gray_to_rgb(context->png_ptr);  // Enable gray -> RGB conversion
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return true;
 }
 
@@ -320,6 +467,7 @@ bool CommonFinishDecode(png_bytep data, int row_bytes, DecodeContext* context) {
   for (int p = 0; p < context->num_passes; ++p) {
     png_bytep row = data;
     for (int h = context->height; h-- != 0; row += row_bytes) {
+<<<<<<< HEAD
       png_read_row(context->png_ptr, row, nullptr);
     }
   }
@@ -327,6 +475,13 @@ bool CommonFinishDecode(png_bytep data, int row_bytes, DecodeContext* context) {
   // Marks iDAT as valid.
   png_set_rows(context->png_ptr, context->info_ptr,
                png_get_rows(context->png_ptr, context->info_ptr));
+=======
+      png_read_row(context->png_ptr, row, NULL);
+    }
+  }
+
+  context->info_ptr->valid |= PNG_INFO_IDAT;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   png_read_end(context->png_ptr, context->info_ptr);
 
   // Clean up.
@@ -335,21 +490,33 @@ bool CommonFinishDecode(png_bytep data, int row_bytes, DecodeContext* context) {
 
   // Synthesize 16 bits from 8 if requested.
   if (context->need_to_synthesize_16)
+<<<<<<< HEAD
     Convert8to16(absl::bit_cast<uint8*>(data), context->channels, row_bytes,
                  context->width, context->height, absl::bit_cast<uint16*>(data),
+=======
+    Convert8to16(bit_cast<uint8*>(data), context->channels, row_bytes,
+                 context->width, context->height, bit_cast<uint16*>(data),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                  row_bytes);
   return ok;
 }
 
+<<<<<<< HEAD
 template <typename T>
 bool WriteImageToBuffer(
     const void* image, int width, int height, int row_bytes, int num_channels,
     int channel_bits, int compression, T* png_string,
+=======
+bool WriteImageToBuffer(
+    const void* image, int width, int height, int row_bytes, int num_channels,
+    int channel_bits, int compression, string* png_string,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     const std::vector<std::pair<string, string> >* metadata) {
   CHECK_NOTNULL(image);
   CHECK_NOTNULL(png_string);
   // Although this case is checked inside png.cc and issues an error message,
   // that error causes memory corruption.
+<<<<<<< HEAD
   if (width == 0 || height == 0) return false;
 
   png_string->resize(0);
@@ -364,6 +531,24 @@ bool WriteImageToBuffer(
   info_ptr = png_create_info_struct(png_ptr);
   if (info_ptr == nullptr) {
     png_destroy_write_struct(&png_ptr, nullptr);
+=======
+  if (width == 0 || height == 0)
+    return false;
+
+  png_string->resize(0);
+  png_infop info_ptr = NULL;
+  png_structp png_ptr =
+    png_create_write_struct(PNG_LIBPNG_VER_STRING,
+                            NULL, ErrorHandler, WarningHandler);
+  if (png_ptr == NULL) return false;
+  if (setjmp(png_jmpbuf(png_ptr))) {
+    png_destroy_write_struct(&png_ptr, info_ptr ? &info_ptr : NULL);
+    return false;
+  }
+  info_ptr = png_create_info_struct(png_ptr);
+  if (info_ptr == NULL) {
+    png_destroy_write_struct(&png_ptr, NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return false;
   }
 
@@ -386,7 +571,11 @@ bool WriteImageToBuffer(
       return false;
   }
 
+<<<<<<< HEAD
   png_set_write_fn(png_ptr, png_string, StringWriter<T>, StringWriterFlush);
+=======
+  png_set_write_fn(png_ptr, png_string, StringWriter, StringWriterFlush);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (compression < 0) compression = Z_DEFAULT_COMPRESSION;
   png_set_compression_level(png_ptr, compression);
   png_set_compression_mem_level(png_ptr, MAX_MEM_LEVEL);
@@ -410,16 +599,28 @@ bool WriteImageToBuffer(
   }
 
   png_write_info(png_ptr, info_ptr);
+<<<<<<< HEAD
   if (channel_bits > 8 && port::kLittleEndian) png_set_swap(png_ptr);
 
   png_byte* row = reinterpret_cast<png_byte*>(const_cast<void*>(image));
   for (; height--; row += row_bytes) png_write_row(png_ptr, row);
   png_write_end(png_ptr, nullptr);
+=======
+#ifdef IS_LITTLE_ENDIAN
+  if (channel_bits > 8)
+    png_set_swap(png_ptr);
+#endif  // IS_LITTLE_ENDIAN
+
+  png_byte* row = reinterpret_cast<png_byte*>(const_cast<void*>(image));
+  for (; height--; row += row_bytes) png_write_row(png_ptr, row);
+  png_write_end(png_ptr, NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   png_destroy_write_struct(&png_ptr, &info_ptr);
   return true;
 }
 
+<<<<<<< HEAD
 template bool WriteImageToBuffer<string>(
     const void* image, int width, int height, int row_bytes, int num_channels,
     int channel_bits, int compression, string* png_string,
@@ -431,5 +632,7 @@ template bool WriteImageToBuffer<tstring>(
     const std::vector<std::pair<string, string> >* metadata);
 #endif  // USE_TSTRING
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace png
 }  // namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/strings/ordered_code.h"
 
 #include <assert.h>
 #include <stddef.h>
 
+<<<<<<< HEAD
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/stringpiece.h"
+=======
+#include "tensorflow/core/lib/core/stringpiece.h"
+#include "tensorflow/core/platform/logging.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace strings {
@@ -125,11 +133,16 @@ static const char kNullCharacter = '\xff';  // Combined with kEscape1
 static const char kSeparator = '\001';      // Combined with kEscape1
 
 static const char kEscape2 = '\xff';
+<<<<<<< HEAD
+=======
+static const char kInfinity = '\xff';     // Combined with kEscape2
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static const char kFFCharacter = '\000';  // Combined with kEscape2
 
 static const char kEscape1_Separator[2] = {kEscape1, kSeparator};
 
 // Append to "*dest" the "len" bytes starting from "*src".
+<<<<<<< HEAD
 inline static void AppendBytes(string* dest, const char* src, size_t len) {
   dest->append(src, len);
 }
@@ -137,6 +150,13 @@ inline static void AppendBytes(string* dest, const char* src, size_t len) {
 inline bool IsSpecialByte(char c) {
   return (static_cast<unsigned char>(c + 1)) < 2;
 }
+=======
+inline static void AppendBytes(string* dest, const char* src, int len) {
+  dest->append(src, len);
+}
+
+inline bool IsSpecialByte(char c) { return ((unsigned char)(c + 1)) < 2; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Return a pointer to the first byte in the range "[start..limit)"
 // whose value is 0 or 255 (kEscape1 or kEscape2).  If no such byte
@@ -203,7 +223,11 @@ void OrderedCode::WriteNumIncreasing(string* dest, uint64 val) {
     buf[9 - len] = (val & 0xff);
     val >>= 8;
   }
+<<<<<<< HEAD
   buf[9 - len - 1] = len;
+=======
+  buf[9 - len - 1] = (unsigned char)len;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   len++;
   AppendBytes(dest, reinterpret_cast<const char*>(buf + 9 - len), len);
 }
@@ -472,8 +496,12 @@ void OrderedCode::WriteSignedNumIncreasing(string* dest, int64 val) {
   // buf = val in network byte order, sign extended to 10 bytes
   const char sign_byte = val < 0 ? '\xff' : '\0';
   char buf[10] = {
+<<<<<<< HEAD
       sign_byte,
       sign_byte,
+=======
+      sign_byte, sign_byte,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   };
   StoreBigEndian64(buf + 2, val);
   static_assert(sizeof(buf) == kMaxSigned64Length, "max length size mismatch");

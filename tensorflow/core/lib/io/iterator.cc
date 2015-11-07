@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/lib/io/iterator.h"
 
@@ -19,6 +25,7 @@ namespace tensorflow {
 namespace table {
 
 Iterator::Iterator() {
+<<<<<<< HEAD
   cleanup_.function = nullptr;
   cleanup_.next = nullptr;
 }
@@ -27,6 +34,16 @@ Iterator::~Iterator() {
   if (cleanup_.function != nullptr) {
     (*cleanup_.function)(cleanup_.arg1, cleanup_.arg2);
     for (Cleanup* c = cleanup_.next; c != nullptr;) {
+=======
+  cleanup_.function = NULL;
+  cleanup_.next = NULL;
+}
+
+Iterator::~Iterator() {
+  if (cleanup_.function != NULL) {
+    (*cleanup_.function)(cleanup_.arg1, cleanup_.arg2);
+    for (Cleanup* c = cleanup_.next; c != NULL;) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       (*c->function)(c->arg1, c->arg2);
       Cleanup* next = c->next;
       delete c;
@@ -36,9 +53,15 @@ Iterator::~Iterator() {
 }
 
 void Iterator::RegisterCleanup(CleanupFunction func, void* arg1, void* arg2) {
+<<<<<<< HEAD
   assert(func != nullptr);
   Cleanup* c;
   if (cleanup_.function == nullptr) {
+=======
+  assert(func != NULL);
+  Cleanup* c;
+  if (cleanup_.function == NULL) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     c = &cleanup_;
   } else {
     c = new Cleanup;
@@ -53,6 +76,7 @@ void Iterator::RegisterCleanup(CleanupFunction func, void* arg1, void* arg2) {
 namespace {
 class EmptyIterator : public Iterator {
  public:
+<<<<<<< HEAD
   explicit EmptyIterator(const Status& s) : status_(s) {}
   bool Valid() const override { return false; }
   void Seek(const StringPiece& target) override {}
@@ -67,6 +91,22 @@ class EmptyIterator : public Iterator {
     return StringPiece();
   }
   Status status() const override { return status_; }
+=======
+  EmptyIterator(const Status& s) : status_(s) {}
+  virtual bool Valid() const { return false; }
+  virtual void Seek(const StringPiece& target) {}
+  virtual void SeekToFirst() {}
+  virtual void Next() { assert(false); }
+  StringPiece key() const {
+    assert(false);
+    return StringPiece();
+  }
+  StringPiece value() const {
+    assert(false);
+    return StringPiece();
+  }
+  virtual Status status() const { return status_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
  private:
   Status status_;

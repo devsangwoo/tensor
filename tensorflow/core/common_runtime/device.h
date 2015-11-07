@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // A Device is a something that can perform computations as part of a
 // model.  Devices can be local (runs computation on this machine), or
 // remote (contacts a device local to another machine using an RPC to
@@ -22,6 +25,7 @@ limitations under the License.
 // Device names
 // * Every Device should have a unique name with the format:
 //     /job:___/replica:___/task:___/(gpu|cpu):___
+<<<<<<< HEAD
 //   An example name would be "/job:train/replica:0/task:3/device:GPU:2".
 // * Task numbers are within the specified replica, so there are as
 //   many "task zeros" as replicas.
@@ -31,6 +35,18 @@ limitations under the License.
 
 #include <memory>
 #include <string>
+=======
+//   An example name would be "/job:train/replica:0/task:3/gpu:2".
+// * Task numbers are within the specified replica, so there are as
+//   many "task zeros" as replicas.
+
+#ifndef TENSORFLOW_COMMON_RUNTIME_DEVICE_H_
+#define TENSORFLOW_COMMON_RUNTIME_DEVICE_H_
+
+#include <memory>
+#include <string>
+#include <vector>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/framework/allocator.h"
 #include "tensorflow/core/framework/control_flow.h"
@@ -43,16 +59,22 @@ limitations under the License.
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/graph/types.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/device_name_utils.h"
 
 namespace tensorflow {
 
 class Device : public DeviceBase {
  public:
+<<<<<<< HEAD
   // Callback type that takes a Status and returns void.
   typedef std::function<void(const Status&)> DoneCallback;
 
@@ -66,6 +88,17 @@ class Device : public DeviceBase {
   const DeviceNameUtils::ParsedName& parsed_name() const {
     return parsed_name_;
   }
+=======
+  Device(Env* env, const DeviceAttributes& device_attributes,
+         Allocator* device_allocator);
+  ~Device() override;
+
+  // Full name of this device (see top comment).
+  const string& name() const { return device_attributes_.name(); }
+
+  // Parsed name of this device
+  const DeviceNameUtils::ParsedName parsed_name() const { return parsed_name_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Describes what kind of device this is.  This is intended to be
   // human-readable and not computer-parsed, except that two devices
@@ -89,6 +122,7 @@ class Device : public DeviceBase {
   // Asynchronous kernel's compute.
   virtual void ComputeAsync(AsyncOpKernel* op_kernel, OpKernelContext* context,
                             AsyncOpKernel::DoneCallback done) {
+<<<<<<< HEAD
     op_kernel->ComputeAsync(context, std::move(done));
   }
 
@@ -100,6 +134,9 @@ class Device : public DeviceBase {
     for (const auto& ref : tensors) {
       ref.Unref();
     }
+=======
+    op_kernel->ComputeAsync(context, done);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Blocks until all operations queued on the device at the time of
@@ -107,6 +144,7 @@ class Device : public DeviceBase {
   // at completion.
   virtual Status Sync() = 0;
 
+<<<<<<< HEAD
   // Calls the given callback when all operations queued on the device at the
   // time of the call have completed. The callback is passed any error pending
   // on the device at completion.
@@ -156,6 +194,15 @@ class Device : public DeviceBase {
   // and should call Unref().
   virtual Status TryGetDeviceContext(DeviceContext** out_context) {
     *out_context = nullptr;
+=======
+  // Fill in the context map for the graph. Default behavior is to do
+  // nothing.
+  //
+  // The caller takes ownership over the DeviceContext objects given
+  // by the device.
+  virtual Status FillContextMap(const Graph* graph,
+                                DeviceContextMap* device_context_map) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return Status::OK();
   }
 
@@ -164,7 +211,11 @@ class Device : public DeviceBase {
   OpSegment* op_segment() { return &op_seg_; }
 
   // Returns the resource manager associated w/ this device.
+<<<<<<< HEAD
   virtual ResourceMgr* resource_manager() { return rmgr_; }
+=======
+  ResourceMgr* resource_manager() { return rmgr_; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Summarizes the status of this Device, for debugging.
   string DebugString() const { return device_attributes_.DebugString(); }
@@ -172,6 +223,7 @@ class Device : public DeviceBase {
   // Assembles the parameter components into a complete DeviceAttributes value.
   static DeviceAttributes BuildDeviceAttributes(
       const string& name, DeviceType device, Bytes memory_limit,
+<<<<<<< HEAD
       const DeviceLocality& locality, const string& physical_device_desc);
 
   static DeviceAttributes BuildDeviceAttributes(
@@ -190,6 +242,16 @@ class Device : public DeviceBase {
   void DeleteResourceMgr() {
     delete rmgr_;
     rmgr_ = nullptr;
+=======
+      BusAdjacency bus_adjacency, const string& physical_device_desc);
+
+  static DeviceAttributes BuildDeviceAttributes(const string& name,
+                                                DeviceType device,
+                                                Bytes memory_limit,
+                                                BusAdjacency bus_adjacency) {
+    // Pass in an empty string as physical device name.
+    return BuildDeviceAttributes(name, device, memory_limit, bus_adjacency, "");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
  private:
@@ -207,4 +269,8 @@ class Device : public DeviceBase {
 
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_COMMON_RUNTIME_DEVICE_H_
+=======
+#endif  // TENSORFLOW_COMMON_RUNTIME_DEVICE_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

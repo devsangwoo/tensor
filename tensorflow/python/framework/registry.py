@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +14,15 @@
 # limitations under the License.
 # ==============================================================================
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 """Registry mechanism for "registering" classes/functions for general use.
 
 This is typically used with a decorator that calls Register for adding
 a class or function to a registry.
 """
 
+<<<<<<< HEAD
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -26,6 +30,11 @@ from __future__ import print_function
 from tensorflow.python.platform import tf_logging as logging
 from tensorflow.python.util import compat
 from tensorflow.python.util import tf_stack
+=======
+import traceback
+
+from tensorflow.python.platform import logging
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 # Registry mechanism below is based on mapreduce.python.mrpython.Register.
@@ -39,14 +48,23 @@ class Registry(object):
   def __init__(self, name):
     """Creates a new registry."""
     self._name = name
+<<<<<<< HEAD
     self._registry = {}
+=======
+    self._registry = dict()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def register(self, candidate, name=None):
     """Registers a Python object "candidate" for the given "name".
 
     Args:
+<<<<<<< HEAD
       candidate: The candidate object to add to the registry.
       name: An optional string specifying the registry key for the candidate.
+=======
+      candidate: the candidate object to add to the registry.
+      name: an optional string specifying the registry key for the candidate.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             If None, candidate.__name__ will be used.
     Raises:
       KeyError: If same name is used twice.
@@ -54,15 +72,24 @@ class Registry(object):
     if not name:
       name = candidate.__name__
     if name in self._registry:
+<<<<<<< HEAD
       frame = self._registry[name][_LOCATION_TAG]
       raise KeyError(
           "Registering two %s with name '%s'! "
           "(Previous registration was in %s %s:%d)" %
           (self._name, name, frame.name, frame.filename, frame.lineno))
+=======
+      (filename, line_number, function_name, _) = (
+          self._registry[name][_LOCATION_TAG])
+      raise KeyError("Registering two %s with name '%s' !"
+                     "(Previous registration was in %s %s:%d)" %
+                     (self._name, name, function_name, filename, line_number))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     logging.vlog(1, "Registering %s (%s) in %s.", name, candidate, self._name)
     # stack trace is [this_function, Register(), user_function,...]
     # so the user function is #2.
+<<<<<<< HEAD
     stack = tf_stack.extract_stack(limit=3)
     stack_index = min(2, len(stack)-1)
     if stack_index >= 0:
@@ -78,6 +105,10 @@ class Registry(object):
       A list of names of registered objects.
     """
     return self._registry.keys()
+=======
+    stack = traceback.extract_stack()
+    self._registry[name] = {_TYPE_TAG: candidate, _LOCATION_TAG: stack[2]}
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def lookup(self, name):
     """Looks up "name".
@@ -89,7 +120,10 @@ class Registry(object):
     Raises:
       LookupError: if "name" has not been registered.
     """
+<<<<<<< HEAD
     name = compat.as_str(name)
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if name in self._registry:
       return self._registry[name][_TYPE_TAG]
     else:

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,20 +21,33 @@ limitations under the License.
 
 #include "third_party/eigen3/Eigen/Core"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_REFERENCE_GEMM_H_
+#define TENSORFLOW_KERNELS_REFERENCE_GEMM_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // This is an unoptimized but debuggable implementation of the GEMM matrix
 // multiply function, used to compare to faster but more opaque versions, or
 // for bit depths or argument combinations that aren't supported by optimized
 // code.
 // It assumes the row-major convention used by TensorFlow, and implements
+<<<<<<< HEAD
 // C = A * B, like the standard BLAS GEMM interface. If the transpose flags are
+=======
+// C = A * B, like the standard BLAS GEMM interface. If the tranpose flags are
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // true, then the relevant matrix is treated as stored in column-major order.
 
 namespace tensorflow {
 template <class T1, class T2, class T3>
 void ReferenceGemm(bool transpose_a, bool transpose_b, bool transpose_c,
+<<<<<<< HEAD
                    size_t m, size_t n, size_t k, const T1* a, int32 offset_a,
                    size_t lda, const T2* b, int32 offset_b, size_t ldb, T3* c,
+=======
+                   size_t m, size_t n, size_t k, const T1* a, T1 offset_a,
+                   size_t lda, const T2* b, T2 offset_b, size_t ldb, T3* c,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                    int32 shift_c, int32 offset_c, int32 mult_c, size_t ldc) {
   int a_i_stride;
   int a_l_stride;
@@ -73,9 +87,15 @@ void ReferenceGemm(bool transpose_a, bool transpose_b, bool transpose_c,
       int32 total = 0;
       for (l = 0; l < k; l++) {
         const size_t a_index = ((i * a_i_stride) + (l * a_l_stride));
+<<<<<<< HEAD
         const int32 a_value = static_cast<int32>(a[a_index]) - offset_a;
         const size_t b_index = ((j * b_j_stride) + (l * b_l_stride));
         const int32 b_value = static_cast<int32>(b[b_index]) - offset_b;
+=======
+        const int32 a_value = a[a_index] - offset_a;
+        const size_t b_index = ((j * b_j_stride) + (l * b_l_stride));
+        const int32 b_value = b[b_index] - offset_b;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         total += (a_value * b_value);
       }
       const size_t c_index = ((i * c_i_stride) + (j * c_j_stride));
@@ -92,4 +112,8 @@ void ReferenceGemm(bool transpose_a, bool transpose_b, bool transpose_c,
 }
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_REFERENCE_GEMM_H_
+=======
+#endif  // TENSORFLOW_KERNELS_REFERENCE_GEMM_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

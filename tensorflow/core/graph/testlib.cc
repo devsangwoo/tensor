@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +22,23 @@ limitations under the License.
 #include "tensorflow/core/framework/node_def_builder.h"
 #include "tensorflow/core/framework/node_def_util.h"
 #include "tensorflow/core/framework/op.h"
+=======
+#include "tensorflow/core/graph/testlib.h"
+
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/framework/types.pb.h"
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/graph/node_builder.h"
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/platform/logging.h"
+=======
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace test {
@@ -81,6 +93,7 @@ Node* Constant(Graph* g, const Tensor& tensor, const string& name) {
   return ret;
 }
 
+<<<<<<< HEAD
 Node* HostConstant(Graph* g, const Tensor& tensor) {
   return HostConstant(g, tensor, g->NewName("n"));
 }
@@ -94,6 +107,8 @@ Node* HostConstant(Graph* g, const Tensor& tensor, const string& name) {
   return ret;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Node* Var(Graph* g, const DataType dtype, const TensorShape& shape) {
   Node* ret;
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), "Variable")
@@ -103,6 +118,7 @@ Node* Var(Graph* g, const DataType dtype, const TensorShape& shape) {
   return ret;
 }
 
+<<<<<<< HEAD
 Node* Var(Graph* g, const DataType dtype, const TensorShape& shape,
           const string& name) {
   Node* ret;
@@ -113,6 +129,8 @@ Node* Var(Graph* g, const DataType dtype, const TensorShape& shape,
   return ret;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Node* Assign(Graph* g, Node* var, Node* val) {
   Node* ret;
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), "Assign")
@@ -123,6 +141,7 @@ Node* Assign(Graph* g, Node* var, Node* val) {
   return ret;
 }
 
+<<<<<<< HEAD
 Node* Cumsum(Graph* g, Node* data, Node* axes, bool exclusive, bool reverse) {
   Node* ret;
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), "Cumsum")
@@ -138,6 +157,12 @@ Node* Reduce(Graph* g, const string& reduce, Node* data, Node* axes,
              bool keep_dims) {
   Node* ret;
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), reduce, g->op_registry())
+=======
+Node* Reduce(Graph* g, const string& reduce, Node* data, Node* axes,
+             bool keep_dims) {
+  Node* ret;
+  TF_CHECK_OK(NodeBuilder(g->NewName("n"), reduce)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   .Input(data)
                   .Input(axes)
                   .Attr("keep_dims", keep_dims)
@@ -168,6 +193,7 @@ Node* Matmul(Graph* g, Node* in0, Node* in1, bool transpose_a,
   return ret;
 }
 
+<<<<<<< HEAD
 Node* BatchMatmul(Graph* g, Node* in0, Node* in1, bool adj_x, bool adj_y) {
   Node* ret;
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), "BatchMatMul")
@@ -183,6 +209,12 @@ Node* RandomNumberGenerator(const string& op, Graph* g, Node* input,
                             DataType dtype) {
   Node* ret;
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), op, g->op_registry())
+=======
+Node* RandomNumberGenerator(const string& op, Graph* g, Node* input,
+                            DataType dtype) {
+  Node* ret;
+  TF_CHECK_OK(NodeBuilder(g->NewName("n"), op)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   .Input(input)
                   .Attr("dtype", dtype)
                   .Attr("seed", 0)
@@ -198,6 +230,7 @@ Node* RandomGaussian(Graph* g, Node* input, DataType dtype) {
   return RandomNumberGenerator("RandomStandardNormal", g, input, dtype);
 }
 
+<<<<<<< HEAD
 Node* TruncatedNormal(Graph* g, Node* input, DataType dtype) {
   return RandomNumberGenerator("TruncatedNormal", g, input, dtype);
 }
@@ -220,19 +253,32 @@ Node* RandomPoisson(Graph* g, Node* shape, Node* lam) {
                   .Attr("seed", 0)
                   .Finalize(g, &ret));
   return ret;
+=======
+Node* RandomParameters(Graph* g, Node* input, DataType dtype) {
+  return RandomNumberGenerator("RandomParameters", g, input, dtype);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 Node* Unary(Graph* g, const string& func, Node* input, int index) {
   Node* ret;
+<<<<<<< HEAD
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), func, g->op_registry())
                   .Input(input, index)
                   .Finalize(g, &ret));
+=======
+  TF_CHECK_OK(
+      NodeBuilder(g->NewName("n"), func).Input(input, index).Finalize(g, &ret));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return ret;
 }
 
 Node* Binary(Graph* g, const string& func, Node* in0, Node* in1) {
   Node* ret;
+<<<<<<< HEAD
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), func, g->op_registry())
+=======
+  TF_CHECK_OK(NodeBuilder(g->NewName("n"), func)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   .Input(in0)
                   .Input(in1)
                   .Finalize(g, &ret));
@@ -241,7 +287,11 @@ Node* Binary(Graph* g, const string& func, Node* in0, Node* in1) {
 
 Node* Multi(Graph* g, const string& func, gtl::ArraySlice<Node*> ins) {
   Node* ret;
+<<<<<<< HEAD
   auto b = NodeBuilder(g->NewName("n"), func, g->op_registry());
+=======
+  auto b = NodeBuilder(g->NewName("n"), func);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (Node* n : ins) b = b.Input(n);
   TF_CHECK_OK(b.Finalize(g, &ret));
   return ret;
@@ -257,6 +307,7 @@ Node* Identity(Graph* g, Node* input, int index) {
 
 Node* Add(Graph* g, Node* in0, Node* in1) { return Binary(g, "Add", in0, in1); }
 
+<<<<<<< HEAD
 Node* Reverse(Graph* g, Node* tensor, Node* axis) {
   return Binary(g, "ReverseV2", tensor, axis);
 }
@@ -272,11 +323,17 @@ Node* Roll(Graph* g, Node* input, Node* shift, Node* axis) {
 }
 
 Node* Error(Graph* g, Node* input, const string& errmsg, bool log_error) {
+=======
+Node* Error(Graph* g, Node* input, const string& errmsg) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Node* ret;
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), "Error")
                   .Input(input)
                   .Attr("message", errmsg)
+<<<<<<< HEAD
                   .Attr("log_error", log_error)
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   .Finalize(g, &ret));
   return ret;
 }
@@ -355,6 +412,7 @@ Node* Merge(Graph* g, Node* in0, gtl::ArraySlice<string> remaining_in) {
   return ret;
 }
 
+<<<<<<< HEAD
 Node* Concat(Graph* g, Node* concat_dim, gtl::ArraySlice<Node*> tensors) {
   std::vector<NodeBuilder::NodeOut> nodeouts;
   nodeouts.reserve(tensors.size());
@@ -383,6 +441,8 @@ Node* ConcatV2(Graph* g, gtl::ArraySlice<Node*> tensors, Node* concat_dim) {
   return ret;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 Node* Next(Graph* g, const string& name, Node* input) {
   Node* ret;
   TF_CHECK_OK(
@@ -420,6 +480,7 @@ Node* Cast(Graph* g, Node* in, DataType dst) {
   return ret;
 }
 
+<<<<<<< HEAD
 Node* Gather(Graph* g, Node* in0, Node* in1, Node* axis) {
   Node* ret;
   TF_CHECK_OK(NodeBuilder(g->NewName("n"), "GatherV2")
@@ -524,6 +585,8 @@ Node* Retval(Graph* g, int64 index, Node* in) {
   return ret;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 void ToGraphDef(Graph* g, GraphDef* gdef) { g->ToGraphDef(gdef); }
 
 }  // end namespace graph

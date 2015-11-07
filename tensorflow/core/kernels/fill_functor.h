@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,13 @@ limitations under the License.
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor_types.h"
 #include "tensorflow/core/framework/types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_FILL_FUNCTOR_H_
+#define TENSORFLOW_KERNELS_FILL_FUNCTOR_H_
+
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -38,6 +46,7 @@ struct SetZeroFunctor {
   void operator()(const Device& d, typename TTypes<T>::Flat out);
 };
 
+<<<<<<< HEAD
 // Partial specialization of SetZeroFunctor<Device=Eigen::ThreadPoolDevice, T>.
 template <typename T>
 struct SetZeroFunctor<Eigen::ThreadPoolDevice, T> {
@@ -90,3 +99,9 @@ struct SetOneFunctor<Eigen::ThreadPoolDevice, tstring> {
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_FILL_FUNCTOR_H_
+=======
+}  // namespace functor
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_KERNELS_FILL_FUNCTOR_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

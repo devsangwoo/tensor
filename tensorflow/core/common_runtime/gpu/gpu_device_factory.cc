@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +16,14 @@ limitations under the License.
 
 #if (defined(GOOGLE_CUDA) && GOOGLE_CUDA) || \
     (defined(TENSORFLOW_USE_ROCM) && TENSORFLOW_USE_ROCM)
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #define EIGEN_USE_GPU
 
 #include "tensorflow/core/common_runtime/gpu/gpu_device.h"
+<<<<<<< HEAD
 #include "tensorflow/core/common_runtime/gpu/gpu_id.h"
 #include "tensorflow/core/common_runtime/gpu/gpu_process_state.h"
 #include "tensorflow/core/common_runtime/threadpool_device.h"
@@ -47,6 +52,28 @@ class GPUDevice : public BaseGPUDevice {
       if (attr.gpu_compatible() || force_gpu_compatible_) {
         GPUProcessState* ps = GPUProcessState::singleton();
         return ps->GetGpuHostAllocator(0);
+=======
+#include "tensorflow/core/common_runtime/gpu/process_state.h"
+
+namespace tensorflow {
+
+void RequireGPUDevice() {}
+
+class GPUDevice : public BaseGPUDevice {
+ public:
+  GPUDevice(const SessionOptions& options, const string& name,
+            Bytes memory_limit, BusAdjacency bus_adjacency, int gpu_id,
+            const string& physical_device_desc, Allocator* gpu_allocator,
+            Allocator* cpu_allocator)
+      : BaseGPUDevice(options, name, memory_limit, bus_adjacency, gpu_id,
+                      physical_device_desc, gpu_allocator, cpu_allocator) {}
+
+  Allocator* GetAllocator(AllocatorAttributes attr) override {
+    if (attr.on_host()) {
+      ProcessState* ps = ProcessState::singleton();
+      if (attr.gpu_compatible()) {
+        return ps->GetCUDAHostAllocator(0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       } else {
         return cpu_allocator_;
       }
@@ -54,13 +81,17 @@ class GPUDevice : public BaseGPUDevice {
       return gpu_allocator_;
     }
   }
+<<<<<<< HEAD
 
  private:
   bool force_gpu_compatible_ = false;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 class GPUDeviceFactory : public BaseGPUDeviceFactory {
  private:
+<<<<<<< HEAD
   std::unique_ptr<BaseGPUDevice> CreateGPUDevice(
       const SessionOptions& options, const string& name, Bytes memory_limit,
       const DeviceLocality& locality, TfGpuId tf_gpu_id,
@@ -144,3 +175,21 @@ REGISTER_LOCAL_DEVICE_FACTORY("CPU", GPUCompatibleCPUDeviceFactory, 70);
 }  // namespace tensorflow
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+  LocalDevice* CreateGPUDevice(const SessionOptions& options,
+                               const string& name, Bytes memory_limit,
+                               BusAdjacency bus_adjacency, int gpu_id,
+                               const string& physical_device_desc,
+                               Allocator* gpu_allocator,
+                               Allocator* cpu_allocator) override {
+    return new GPUDevice(options, name, memory_limit, bus_adjacency, gpu_id,
+                         physical_device_desc, gpu_allocator, cpu_allocator);
+  }
+};
+
+REGISTER_LOCAL_DEVICE_FACTORY("GPU", GPUDeviceFactory);
+
+}  // namespace tensorflow
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

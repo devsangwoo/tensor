@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # -*- coding: utf-8 -*-
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
@@ -532,3 +533,17 @@ def string_to_hash_bucket_v1(
   return gen_string_ops.string_to_hash_bucket(string_tensor, num_buckets, name)
 
 string_to_hash_bucket_v1.__doc__ = gen_string_ops.string_to_hash_bucket.__doc__
+=======
+"""String Ops."""
+
+from tensorflow.python.framework import ops
+from tensorflow.python.framework import tensor_util
+from tensorflow.python.ops import common_shapes
+from tensorflow.python.ops import gen_string_ops
+# pylint: disable=wildcard-import,undefined-variable
+from tensorflow.python.ops.gen_string_ops import *
+
+ops.NoGradient("StringToHashBucket")
+
+ops.RegisterShape("StringToHashBucket")(common_shapes.unchanged_shape)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // See docs in ../ops/math_ops.cc.
 
 #define EIGEN_USE_THREADS
@@ -21,6 +24,7 @@ limitations under the License.
 
 #include "tensorflow/core/framework/op.h"
 #include "tensorflow/core/framework/op_kernel.h"
+<<<<<<< HEAD
 #include "tensorflow/core/framework/register_types.h"
 #include "tensorflow/core/kernels/fill_functor.h"
 #include "tensorflow/core/util/matmul_autotune.h"
@@ -144,10 +148,53 @@ struct LaunchMatMulBase {
 // On CPUs, we ignore USE_CUBLAS
 template <typename T>
 struct LaunchMatMulCPU : LaunchMatMulBase<CPUDevice, T> {};
+=======
+#include "tensorflow/core/kernels/fill_functor.h"
+
+#if GOOGLE_CUDA
+#include "tensorflow/core/common_runtime/gpu_device_context.h"
+#include "tensorflow/stream_executor/stream.h"
+#endif  // GOOGLE_CUDA
+
+namespace tensorflow {
+
+#if GOOGLE_CUDA
+
+namespace {
+template <typename T>
+perftools::gputools::DeviceMemory<T> AsDeviceMemory(const T* cuda_memory) {
+  perftools::gputools::DeviceMemoryBase wrapped(const_cast<T*>(cuda_memory));
+  perftools::gputools::DeviceMemory<T> typed(wrapped);
+  return typed;
+}
+}  // namespace
+
+#endif  // GOOGLE_CUDA
+
+typedef Eigen::ThreadPoolDevice CPUDevice;
+typedef Eigen::GpuDevice GPUDevice;
+
+template <typename Device, typename T, bool USE_CUBLAS>
+struct LaunchMatMul;
+
+// On CPUs, we ignore USE_CUBLAS
+template <typename T>
+struct LaunchMatMulCPU {
+  static void launch(
+      OpKernelContext* ctx, OpKernel* kernel, const Tensor& a, const Tensor& b,
+      const Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1>& dim_pair,
+      Tensor* out) {
+    functor::MatMulFunctor<CPUDevice, T>()(ctx->eigen_device<CPUDevice>(),
+                                           out->matrix<T>(), a.matrix<T>(),
+                                           b.matrix<T>(), dim_pair);
+  }
+};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename T, bool USE_CUBLAS>
 struct LaunchMatMul<CPUDevice, T, USE_CUBLAS> : public LaunchMatMulCPU<T> {};
 
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 template <typename T>
 struct LaunchMatMulSYCL : LaunchMatMulBase<SYCLDevice, T> {};
@@ -250,10 +297,14 @@ struct MatmulAutoTuneGroup {
 typedef AutoTuneSingleton<MatmulAutoTuneGroup, MatmulParameters,
                           se::blas::AlgorithmConfig>
     AutoTuneMatmul;
+=======
+#if GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename T>
 struct LaunchMatMul<GPUDevice, T, true /* USE_CUBLAS */> {
   static void launch(
+<<<<<<< HEAD
       OpKernelContext* ctx, const Tensor& a, const Tensor& b,
       const Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1>& dim_pair,
       std::vector<int64>* algorithms, bool use_autotune, Tensor* out) {
@@ -266,6 +317,14 @@ struct LaunchMatMul<GPUDevice, T, true /* USE_CUBLAS */> {
     using se::blas::ProfileResult;
     using se::blas::Transpose;
     Transpose trans[] = {Transpose::kNoTranspose, Transpose::kTranspose};
+=======
+      OpKernelContext* ctx, OpKernel* kernel, const Tensor& a, const Tensor& b,
+      const Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1>& dim_pair,
+      Tensor* out) {
+    perftools::gputools::blas::Transpose trans[] = {
+        perftools::gputools::blas::Transpose::kNoTranspose,
+        perftools::gputools::blas::Transpose::kTranspose};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     const uint64 m = a.dim_size(1 - dim_pair[0].first);
     const uint64 k = a.dim_size(dim_pair[0].first);
     const uint64 n = b.dim_size(1 - dim_pair[0].second);
@@ -274,6 +333,7 @@ struct LaunchMatMul<GPUDevice, T, true /* USE_CUBLAS */> {
     auto blas_transpose_a = trans[transpose_a];
     auto blas_transpose_b = trans[transpose_b];
 
+<<<<<<< HEAD
     auto* stream = ctx->op_device_context()->stream();
     OP_REQUIRES(ctx, stream, errors::Internal("No GPU stream available."));
 
@@ -437,10 +497,52 @@ struct LaunchMatMul<GPUDevice, T, true /* USE_CUBLAS */> {
 };
 
 #endif  // GOOGLE_CUDA || TENSORFLOW_USE_ROCM
+=======
+    auto* stream = ctx->op_device_context<GPUDeviceContext>()->stream();
+    OP_REQUIRES(ctx, stream, errors::Internal("No GPU stream available."));
+
+    auto a_ptr = AsDeviceMemory(a.template flat<T>().data());
+    auto b_ptr = AsDeviceMemory(b.template flat<T>().data());
+    auto c_ptr = AsDeviceMemory(out->template flat<T>().data());
+
+    // Cublas does
+    // C = A x B
+    // where A, B and C are assumed to be in column major.
+    // We want the output to be in row-major, so we can compute
+    // C' = B' x A' (' stands for transpose)
+    bool blas_launch_status =
+        stream->ThenBlasGemm(blas_transpose_b, blas_transpose_a, n, m, k, 1.0f,
+                             b_ptr, transpose_b ? k : n, a_ptr,
+                             transpose_a ? m : k, 0.0f, &c_ptr, n)
+            .ok();
+    if (!blas_launch_status) {
+      ctx->SetStatus(errors::Internal(
+          "Blas SGEMM launch failed : a.shape=(", a.dim_size(0), ", ",
+          a.dim_size(1), "), b.shape=(", b.dim_size(0), ", ", b.dim_size(1),
+          "), m=", m, ", n=", n, ", k=", k));
+    }
+  }
+};
+
+template <typename T>
+struct LaunchMatMul<GPUDevice, T, false /* USE_CUBLAS */> {
+  static void launch(
+      OpKernelContext* ctx, OpKernel* kernel, const Tensor& a, const Tensor& b,
+      const Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1>& dim_pair,
+      Tensor* out) {
+    functor::MatMulFunctor<GPUDevice, T>()(ctx->eigen_device<GPUDevice>(),
+                                           out->matrix<T>(), a.matrix<T>(),
+                                           b.matrix<T>(), dim_pair);
+  }
+};
+
+#endif  // GOOGLE_CUDA
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename Device, typename T, bool USE_CUBLAS>
 class MatMulOp : public OpKernel {
  public:
+<<<<<<< HEAD
   explicit MatMulOp(OpKernelConstruction* ctx)
       : OpKernel(ctx), algorithms_set_already_(false) {
     OP_REQUIRES_OK(ctx, ctx->GetAttr("transpose_a", &transpose_a_));
@@ -449,6 +551,11 @@ class MatMulOp : public OpKernel {
     LaunchMatMul<Device, T, USE_CUBLAS>::GetBlasGemmAlgorithm(
         ctx, &algorithms_, &algorithms_set_already_);
     use_autotune_ = MatmulAutotuneEnable();
+=======
+  explicit MatMulOp(OpKernelConstruction* ctx) : OpKernel(ctx) {
+    OP_REQUIRES_OK(ctx, ctx->GetAttr("transpose_a", &transpose_a_));
+    OP_REQUIRES_OK(ctx, ctx->GetAttr("transpose_b", &transpose_b_));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void Compute(OpKernelContext* ctx) override {
@@ -456,6 +563,7 @@ class MatMulOp : public OpKernel {
     const Tensor& b = ctx->input(1);
 
     // Check that the dimensions of the two matrices are valid.
+<<<<<<< HEAD
     OP_REQUIRES(
         ctx, TensorShapeUtils::IsMatrix(a.shape()),
         errors::InvalidArgument("In[0] is not a matrix. Instead it has shape ",
@@ -464,15 +572,29 @@ class MatMulOp : public OpKernel {
         ctx, TensorShapeUtils::IsMatrix(b.shape()),
         errors::InvalidArgument("In[1] is not a matrix. Instead it has shape ",
                                 b.shape().DebugString()));
+=======
+    OP_REQUIRES(ctx, TensorShapeUtils::IsMatrix(a.shape()),
+                errors::InvalidArgument("In[0] is not a matrix"));
+    OP_REQUIRES(ctx, TensorShapeUtils::IsMatrix(b.shape()),
+                errors::InvalidArgument("In[1] is not a matrix"));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Eigen::array<Eigen::IndexPair<Eigen::DenseIndex>, 1> dim_pair;
     dim_pair[0].first = transpose_a_ ? 0 : 1;
     dim_pair[0].second = transpose_b_ ? 1 : 0;
 
+<<<<<<< HEAD
     OP_REQUIRES(
         ctx, a.dim_size(dim_pair[0].first) == b.dim_size(dim_pair[0].second),
         errors::InvalidArgument(
             "Matrix size-incompatible: In[0]: ", a.shape().DebugString(),
             ", In[1]: ", b.shape().DebugString()));
+=======
+    OP_REQUIRES(ctx,
+                a.dim_size(dim_pair[0].first) == b.dim_size(dim_pair[0].second),
+                errors::InvalidArgument("Matrix size-compatible: In[0]: ",
+                                        a.shape().DebugString(), ", In[1]: ",
+                                        b.shape().DebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     int a_dim_remaining = 1 - dim_pair[0].first;
     int b_dim_remaining = 1 - dim_pair[0].second;
     TensorShape out_shape(
@@ -486,7 +608,11 @@ class MatMulOp : public OpKernel {
       return;
     }
 
+<<<<<<< HEAD
     if (a.NumElements() == 0 && b.NumElements() == 0) {
+=======
+    if (a.NumElements() == 0 || b.NumElements() == 0) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       // If a has shape [x, 0] and b has shape [0, y], the
       // output shape is [x, y] where x and y are non-zero, so we fill
       // the output with zeros.
@@ -495,6 +621,7 @@ class MatMulOp : public OpKernel {
       return;
     }
 
+<<<<<<< HEAD
     if (std::is_same<T, bfloat16>::value) {
       bool is_cpu = std::is_same<Device, CPUDevice>::value;
       OP_REQUIRES(ctx, is_cpu,
@@ -526,6 +653,12 @@ class MatMulOp : public OpKernel {
   std::vector<int64> algorithms_;
   bool algorithms_set_already_;
   bool use_autotune_;
+=======
+    LaunchMatMul<Device, T, USE_CUBLAS>::launch(ctx, this, a, b, dim_pair, out);
+  }
+
+ private:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   bool transpose_a_;
   bool transpose_b_;
 };
@@ -544,6 +677,7 @@ struct MatMulFunctor<CPUDevice, T> {
   }
 };
 
+<<<<<<< HEAD
 #ifdef TENSORFLOW_USE_SYCL
 // Partial specialization MatMulFunctor<Device=SYCLDevice, T>.
 template <typename T>
@@ -612,4 +746,38 @@ TF_CALL_float(REGISTER_SYCL);
 TF_CALL_double(REGISTER_SYCL);
 
 #endif  // TENSORFLOW_USE_SYCL
+=======
+}  // end namespace functor
+
+#define REGISTER_CPU(T)                                                        \
+  REGISTER_KERNEL_BUILDER(                                                     \
+      Name("MatMul").Device(DEVICE_CPU).TypeConstraint<T>("T"),                \
+      MatMulOp<CPUDevice, T, false /* cublas, ignored for CPU */>);            \
+  REGISTER_KERNEL_BUILDER(                                                     \
+      Name("MatMul").Device(DEVICE_CPU).TypeConstraint<T>("T").Label("eigen"), \
+      MatMulOp<CPUDevice, T, false /* cublas, ignored for CPU */>)
+
+#define REGISTER_GPU(T)                                                        \
+  REGISTER_KERNEL_BUILDER(                                                     \
+      Name("MatMul").Device(DEVICE_GPU).TypeConstraint<T>("T"),                \
+      MatMulOp<GPUDevice, T, true /* cublas, true by default */>);             \
+  REGISTER_KERNEL_BUILDER(Name("MatMul")                                       \
+                              .Device(DEVICE_GPU)                              \
+                              .TypeConstraint<T>("T")                          \
+                              .Label("cublas"),                                \
+                          MatMulOp<GPUDevice, T, true /* cublas */>);          \
+  REGISTER_KERNEL_BUILDER(                                                     \
+      Name("MatMul").Device(DEVICE_GPU).TypeConstraint<T>("T").Label("eigen"), \
+      MatMulOp<GPUDevice, T, false /* cublas */>)
+
+REGISTER_CPU(float);
+REGISTER_CPU(double);
+REGISTER_CPU(int32);
+REGISTER_CPU(complex64);
+#if GOOGLE_CUDA
+REGISTER_GPU(float);
+// REGISTER_GPU(double);
+#endif  // GOOGLE_CUDA
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // This file implements a memory destination for libjpeg
 // The design is very similar to jdatadst.c in libjpeg
 // These functions are not meant to be used directly, see jpeg_mem.h instead.
@@ -79,14 +82,24 @@ void MemTermDestination(j_compress_ptr cinfo) {
 
 // -----------------------------------------------------------------------------
 void SetDest(j_compress_ptr cinfo, void *buffer, int bufsize) {
+<<<<<<< HEAD
   SetDest(cinfo, buffer, bufsize, nullptr);
+=======
+  SetDest(cinfo, buffer, bufsize, NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // -----------------------------------------------------------------------------
 void SetDest(j_compress_ptr cinfo, void *buffer, int bufsize,
+<<<<<<< HEAD
              tstring *destination) {
   MemDestMgr *dest;
   if (cinfo->dest == nullptr) {
+=======
+             string *destination) {
+  MemDestMgr *dest;
+  if (cinfo->dest == NULL) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     cinfo->dest = reinterpret_cast<struct jpeg_destination_mgr *>(
         (*cinfo->mem->alloc_small)(reinterpret_cast<j_common_ptr>(cinfo),
                                    JPOOL_PERMANENT, sizeof(MemDestMgr)));
@@ -147,6 +160,7 @@ void MemTermSource(j_decompress_ptr cinfo) {}
 // -----------------------------------------------------------------------------
 void MemSkipInputData(j_decompress_ptr cinfo, long jump) {
   MemSourceMgr *src = reinterpret_cast<MemSourceMgr *>(cinfo->src);
+<<<<<<< HEAD
   if (jump < 0) {
     return;
   }
@@ -157,6 +171,10 @@ void MemSkipInputData(j_decompress_ptr cinfo, long jump) {
     src->pub.bytes_in_buffer -= jump;
     src->pub.next_input_byte += jump;
   }
+=======
+  src->pub.bytes_in_buffer -= jump;
+  src->pub.next_input_byte += jump;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // -----------------------------------------------------------------------------
@@ -177,7 +195,11 @@ void SetSrc(j_decompress_ptr cinfo, const void *data,
   src->data = reinterpret_cast<const unsigned char *>(data);
   src->datasize = datasize;
   src->pub.bytes_in_buffer = 0;
+<<<<<<< HEAD
   src->pub.next_input_byte = nullptr;
+=======
+  src->pub.next_input_byte = NULL;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   src->try_recover_truncated_jpeg = try_recover_truncated_jpeg;
 }
 

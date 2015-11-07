@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,10 @@ limitations under the License.
 
 #ifndef TENSORFLOW_CORE_LIB_RANDOM_SIMPLE_PHILOX_H_
 #define TENSORFLOW_CORE_LIB_RANDOM_SIMPLE_PHILOX_H_
+=======
+#ifndef TENSORFLOW_LIB_RANDOM_SIMPLE_PHILOX_H_
+#define TENSORFLOW_LIB_RANDOM_SIMPLE_PHILOX_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include <math.h>
 #include <string.h>
@@ -73,4 +78,8 @@ class SimplePhilox {
 }  // namespace random
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_LIB_RANDOM_SIMPLE_PHILOX_H_
+=======
+#endif  // TENSORFLOW_LIB_RANDOM_SIMPLE_PHILOX_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

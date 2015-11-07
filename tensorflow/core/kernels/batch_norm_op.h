@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,13 @@ limitations under the License.
 // Functor definition for BatchNormOp, must be compilable by nvcc.
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor_types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_BATCH_NORM_OP_H_
+#define TENSORFLOW_KERNELS_BATCH_NORM_OP_H_
+// Functor definition for BatchNormOp, must be compilable by nvcc.
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -29,7 +37,11 @@ struct BatchNorm {
                   typename TTypes<T>::ConstVec mean,
                   typename TTypes<T>::ConstVec var,
                   typename TTypes<T>::ConstVec beta,
+<<<<<<< HEAD
                   typename TTypes<T>::ConstVec gamma, T variance_epsilon,
+=======
+                  typename TTypes<T>::ConstVec gamma, float variance_epsilon,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   bool scale_after_normalization,
                   typename TTypes<T, 4>::Tensor output) {
     const int depth = mean.dimension(0);
@@ -77,7 +89,11 @@ struct BatchNormGrad {
                   typename TTypes<T>::ConstVec var,
                   typename TTypes<T>::ConstVec gamma,
                   typename TTypes<T, 4>::ConstTensor out_backprop,
+<<<<<<< HEAD
                   T variance_epsilon, bool scale_after_normalization,
+=======
+                  float variance_epsilon, bool scale_after_normalization,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                   typename TTypes<T, 4>::Tensor dx, typename TTypes<T>::Vec dm,
                   typename TTypes<T>::Vec dv, typename TTypes<T>::Vec db,
                   typename TTypes<T>::Vec dg, typename TTypes<T>::Vec scratch1,
@@ -86,6 +102,7 @@ struct BatchNormGrad {
     const int rest_size = input.size() / depth;
 
     typedef typename TTypes<T>::ConstVec::Index Index;
+<<<<<<< HEAD
 
     Eigen::DSizes<Index, 2> rest_by_depth(rest_size, depth);
 #if !defined(EIGEN_HAS_INDEX_LIST)
@@ -100,6 +117,11 @@ struct BatchNormGrad {
     one_by_depth.set(1, depth);
     Eigen::IndexList<Eigen::type2index<0> > reduction_axis;
 #endif
+=======
+    Eigen::DSizes<Index, 2> rest_by_depth(rest_size, depth);
+    Eigen::DSizes<Index, 2> rest_by_one(rest_size, 1);
+    Eigen::DSizes<Index, 2> one_by_depth(1, depth);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // db = out_backprop
     //
@@ -111,6 +133,12 @@ struct BatchNormGrad {
     // dm = sum_over_rest(out_backprop * gamma) * (-1 / rsqrt(v + epsilon))
     //
     // dx = out_backprop * (gamma * rsqrt(v + epsilon))
+<<<<<<< HEAD
+=======
+    Eigen::array<Index, 1> reduction_axis;
+    reduction_axis[0] = 0;  // Reduces on first dimension.
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     db.device(d) = out_backprop.reshape(rest_by_depth).sum(reduction_axis);
 
     // scratch1 = rsqrt(v + epsilon)
@@ -153,4 +181,8 @@ struct BatchNormGrad {
 }  // namespace functor
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_BATCH_NORM_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_BATCH_NORM_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -83,3 +84,15 @@ class FastGFile(_FileIO):
 # Does not alias to Open so that we use our version of GFile to strip
 # 'b' mode.
 Open = GFile
+=======
+"""Switch between depending on pyglib.gfile or an OSS replacement."""
+# pylint: disable=unused-import
+# pylint: disable=g-import-not-at-top
+# pylint: disable=wildcard-import
+import tensorflow.python.platform
+import control_imports
+if control_imports.USE_OSS and control_imports.OSS_GFILE:
+  from tensorflow.python.platform.default._gfile import *
+else:
+  from tensorflow.python.platform.google._gfile import *
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

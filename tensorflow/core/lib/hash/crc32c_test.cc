@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,10 @@ limitations under the License.
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include "tensorflow/core/lib/hash/crc32c.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace crc32c {
@@ -48,12 +53,15 @@ TEST(CRC, StandardResults) {
       0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   };
   ASSERT_EQ(0xd9963a56, Value(reinterpret_cast<char*>(data), sizeof(data)));
+<<<<<<< HEAD
 
   // Try unaligned sizes and offsets.
   // Accelerated and unaccelerated code both produce these results.
   ASSERT_EQ(0xdd1b19be, Value(reinterpret_cast<char*>(data), sizeof(data) - 7));
   ASSERT_EQ(0x4930c4b1,
             Value(reinterpret_cast<char*>(data) + 1, sizeof(data) - 4));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(CRC, Values) { ASSERT_NE(Value("a", 1), Value("foo", 3)); }
@@ -70,6 +78,7 @@ TEST(CRC, Mask) {
   ASSERT_EQ(crc, Unmask(Unmask(Mask(Mask(crc)))));
 }
 
+<<<<<<< HEAD
 #if defined(PLATFORM_GOOGLE)
 TEST(CRC, ValuesWithCord) {
   ASSERT_NE(Value(absl::Cord("a")), Value(absl::Cord("foo")));
@@ -92,5 +101,7 @@ static void BM_CRC(int iters, int len) {
 }
 BENCHMARK(BM_CRC)->Range(1, 256 * 1024);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace crc32c
 }  // namespace tensorflow

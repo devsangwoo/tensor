@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,10 +27,25 @@ limitations under the License.
 #include "tensorflow/core/framework/bounds_check.h"
 #include "tensorflow/core/framework/numeric_types.h"
 #include "tensorflow/core/framework/tensor_types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_CWISE_OPS_H_
+#define TENSORFLOW_KERNELS_CWISE_OPS_H_
+
+#include <cmath>
+#include <functional>
+#include "tensorflow/core/framework/numeric_types.h"
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+
+// The following functors (sign, tanh, sigmoid, etc.) are not defined
+// by Eigen.  When their equivalent are added into the Eigen, we can
+// replace them using type aliases.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace Eigen {
 namespace internal {
 
+<<<<<<< HEAD
 #if GOOGLE_CUDA
 template <>
 struct scalar_arg_op<std::complex<float>> {
@@ -144,10 +160,55 @@ template <typename T, typename DivOrMod>
 struct functor_traits<safe_div_or_mod_op<T, DivOrMod>> {
   enum {
     Cost = functor_traits<DivOrMod>::Cost + NumTraits<T>::AddCost,
+=======
+template <typename T>
+struct scalar_sign_op {
+  // TODO(zhifengc): this only works for real types. In theory,
+  // sign(x) = x / |x| works for both real and complex values.
+  EIGEN_EMPTY_STRUCT_CTOR(scalar_sign_op);
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T operator()(const T& x) const {
+    return T(x > T(0)) - T(x < T(0));
+  }
+};
+
+// TODO(zhifengc): Eigen::internal::pow_impl does not have proper
+// EIGEN host/device decoration. We duplicate code here for now.
+template <typename T, bool IsInteger>
+struct pow {
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T
+  operator()(const T& x, const T& y) const {
+    return std::pow(x, y);
+  }
+};
+
+template <typename T>
+struct pow<T, true> {
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T operator()(T x, T y) const {
+    T res(1);
+    if (y & 1) res *= x;
+    y >>= 1;
+    while (y) {
+      x *= x;
+      if (y & 1) res *= x;
+      y >>= 1;
+    }
+    return res;
+  }
+};
+
+template <typename T>
+struct scalar_pow2_op : pow<T, NumTraits<T>::IsInteger> {};
+
+template <typename T>
+struct functor_traits<scalar_pow2_op<T> > {
+  enum {
+    Cost = 5 * NumTraits<T>::MulCost,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     PacketAccess = false,
   };
 };
 
+<<<<<<< HEAD
 template <typename T, typename Binary>
 struct no_nan_op {
   EIGEN_EMPTY_STRUCT_CTOR(no_nan_op)
@@ -199,6 +260,31 @@ struct functor_traits<mul_no_nan_op<T>> {
 #else
     PacketAccess = true,
 #endif  // TENSORFLOW_USE_ROCM
+=======
+template <typename T>
+struct scalar_fmod2_op {
+  EIGEN_EMPTY_STRUCT_CTOR(scalar_fmod2_op)
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE const T operator()(const T& a,
+                                                           const T& b) const {
+    return fmod(a, b);
+  }
+};
+
+template <typename T>
+struct scalar_mod2_op {
+  EIGEN_EMPTY_STRUCT_CTOR(scalar_mod2_op)
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE const T
+  operator()(const T& a, const T& b) const {
+    return a % b;
+  }
+};
+
+template <typename T>
+struct functor_traits<scalar_mod2_op<T> > {
+  enum {
+    Cost = 5,  // Roughly the cost of a div
+    PacketAccess = false,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   };
 };
 
@@ -211,6 +297,7 @@ struct functor_traits<mul_no_nan_op<T>> {
 // f(x, y).
 
 template <typename Tout, typename Tin, typename Binary,
+<<<<<<< HEAD
           bool is_scalar_in_host_memory = false>
 struct scalar_left : private Binary {
   using result_type = Tout;
@@ -262,10 +349,50 @@ struct functor_traits<
 #else
     PacketAccess = functor_traits<Binary>::PacketAccess,
 #endif  // TENSORFLOW_USE_ROCM
+=======
+          bool PacketAccess = functor_traits<Binary>::PacketAccess>
+struct scalar_left {
+  typedef Tout result_type;
+  const Tin* left;
+  EIGEN_DEVICE_FUNC inline scalar_left(
+      const scalar_left& other)  // NOLINT(runtime/explicit)
+      : left(other.left) {}
+  EIGEN_DEVICE_FUNC inline explicit scalar_left(const Tin* c) : left(c) {}
+  EIGEN_DEVICE_FUNC inline Tout operator()(const Tin& right) const {
+    return Binary()(*left, right);
+  }
+};
+
+template <typename Tout, typename Tin, typename Binary>
+struct scalar_left<Tout, Tin, Binary, true> {
+  typedef Tout result_type;
+  const Tin* left;
+  EIGEN_DEVICE_FUNC inline scalar_left(
+      const scalar_left& other)  // NOLINT(runtime/explicit)
+      : left(other.left) {}
+  EIGEN_DEVICE_FUNC inline explicit scalar_left(const Tin* c) : left(c) {}
+  EIGEN_DEVICE_FUNC inline Tout operator()(const Tin& right) const {
+    return Binary()(*left, right);
+  }
+
+  template <typename Packet>
+  EIGEN_DEVICE_FUNC inline Packet packetOp(const Packet& right_packet) const {
+    const Packet left_packet = Eigen::internal::pset1<Packet>(*left);
+    return Binary().packetOp(left_packet, right_packet);
+  }
+};
+
+template <typename Tout, typename Tin, typename Binary>
+struct functor_traits<scalar_left<Tout, Tin, Binary> > {
+  enum {
+    Cost = functor_traits<Binary>::Cost,
+    PacketAccess = functor_traits<Binary>::PacketAccess,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   };
 };
 
 template <typename Tout, typename Tin, typename Binary,
+<<<<<<< HEAD
           bool is_scalar_in_host_memory = false>
 struct scalar_right : private Binary {
   using result_type = Tout;
@@ -317,57 +444,122 @@ struct functor_traits<
 #else
     PacketAccess = functor_traits<Binary>::PacketAccess,
 #endif  // TENSORFLOW_USE_ROCM
+=======
+          bool PacketAccess = functor_traits<Binary>::PacketAccess>
+struct scalar_right {
+  typedef Tout result_type;
+  const Tin* right;
+  EIGEN_DEVICE_FUNC inline scalar_right(
+      const scalar_right& other)  // NOLINT(runtime/explicit)
+      : right(other.right) {}
+  EIGEN_DEVICE_FUNC inline explicit scalar_right(const Tin* c) : right(c) {}
+  EIGEN_DEVICE_FUNC inline Tout operator()(const Tin& left) const {
+    return Binary()(left, *right);
+  }
+};
+
+template <typename Tout, typename Tin, typename Binary>
+struct scalar_right<Tout, Tin, Binary, true> {
+  typedef Tout result_type;
+  const Tin* right;
+  EIGEN_DEVICE_FUNC inline scalar_right(
+      const scalar_right& other)  // NOLINT(runtime/explicit)
+      : right(other.right) {}
+  EIGEN_DEVICE_FUNC inline explicit scalar_right(const Tin* c) : right(c) {}
+  EIGEN_DEVICE_FUNC inline Tout operator()(const Tin& left) const {
+    return Binary()(left, *right);
+  }
+
+  template <typename Packet>
+  EIGEN_DEVICE_FUNC inline Packet packetOp(const Packet& left_packet) const {
+    const Packet right_packet = Eigen::internal::pset1<Packet>(*right);
+    return Binary().packetOp(left_packet, right_packet);
+  }
+};
+
+template <typename Tout, typename Tin, typename Binary>
+struct functor_traits<scalar_right<Tout, Tin, Binary> > {
+  enum {
+    Cost = functor_traits<Binary>::Cost,
+    PacketAccess = functor_traits<Binary>::PacketAccess,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   };
 };
 
 // similar to std::equal_to, but with the DEVICE_FUNC qualifier
 template <class T>
 struct equal_to : std::binary_function<T, T, bool> {
+<<<<<<< HEAD
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool operator()(const T& x,
                                                         const T& y) const {
     return x == y;
   }
+=======
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
+  bool operator()(const T& x, const T& y) const { return x == y; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // similar to std::not_equal_to, but with the DEVICE_FUNC qualifier
 template <class T>
 struct not_equal_to : std::binary_function<T, T, bool> {
+<<<<<<< HEAD
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool operator()(const T& x,
                                                         const T& y) const {
     return x != y;
   }
+=======
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
+  bool operator()(const T& x, const T& y) const { return x != y; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // similar to std::greater, but with the DEVICE_FUNC qualifier
 template <class T>
 struct greater : std::binary_function<T, T, bool> {
+<<<<<<< HEAD
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool operator()(const T& x,
                                                         const T& y) const {
     return x > y;
   }
+=======
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
+  bool operator()(const T& x, const T& y) const { return x > y; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // similar to std::less, but with the DEVICE_FUNC qualifier
 template <class T>
 struct less : std::binary_function<T, T, bool> {
+<<<<<<< HEAD
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool operator()(const T& x,
                                                         const T& y) const {
     return x < y;
   }
+=======
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
+  bool operator()(const T& x, const T& y) const { return x < y; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // similar to std::greater_equal, but with the DEVICE_FUNC qualifier
 template <class T>
 struct greater_equal : std::binary_function<T, T, bool> {
+<<<<<<< HEAD
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool operator()(const T& x,
                                                         const T& y) const {
     return x >= y;
   }
+=======
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
+  bool operator()(const T& x, const T& y) const { return x >= y; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // similar to std::less_equal, but with the DEVICE_FUNC qualifier
 template <class T>
 struct less_equal : std::binary_function<T, T, bool> {
+<<<<<<< HEAD
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool operator()(const T& x,
                                                         const T& y) const {
     return x <= y;
@@ -801,6 +993,10 @@ struct functor_traits<scalar_erfinv_op<T>> {
     PacketAccess = packet_traits<T>::HasNdtri,
 #endif
   };
+=======
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
+  bool operator()(const T& x, const T& y) const { return x <= y; }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // end namespace internal
@@ -840,10 +1036,13 @@ struct base {
   typedef typename TTypes<out_type>::Flat tout_type;
   typedef typename TTypes<in_type>::ConstFlat tin_type;
   typedef typename TTypes<in_type>::ConstScalar tscalar_type;
+<<<<<<< HEAD
 
   // Whether the functor can error out.  Currently applies only to integer
   // div and mod.
   static const bool has_errors = false;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 // For now, we only apply certain speed optimization for
@@ -874,9 +1073,13 @@ struct use_bcast_optimization<double> {
 // sqrt(x) = x^(1/2)
 // rsqrt(x) = x^(-1/2)
 // exp(x) = e^x
+<<<<<<< HEAD
 // expm1(x) = e^x - 1
 // log(x) = natural logarithm of x
 // log1p(x) = natural logarithm of 1 + x
+=======
+// log(x) = natural logrithm of x
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // tanh = (exp(x) - exp(-x)) / (exp(x) + exp(-x))
 // sigmoid = 1 / (1 + exp(-x))  // a.k.a, logistic
 //
@@ -889,6 +1092,7 @@ struct abs : base<T, Eigen::internal::scalar_abs_op<T>,
                   typename Eigen::internal::scalar_abs_op<T>::result_type> {};
 
 template <typename T>
+<<<<<<< HEAD
 struct neg : base<T, Eigen::internal::scalar_opposite_op<T>> {};
 
 template <typename T>
@@ -990,10 +1194,127 @@ struct invert_op {
   EIGEN_EMPTY_STRUCT_CTOR(invert_op)
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T operator()(const T& a) const {
     return ~a;
+=======
+struct neg : base<T, Eigen::internal::scalar_opposite_op<T> > {};
+
+template <typename T>
+struct inverse : base<T, Eigen::internal::scalar_inverse_op<T> > {};
+
+template <typename T>
+struct square : base<T, Eigen::internal::scalar_square_op<T> > {};
+
+template <typename T>
+struct sqrt : base<T, Eigen::internal::scalar_sqrt_op<T> > {};
+
+template <typename T>
+struct rsqrt : base<T, Eigen::internal::scalar_rsqrt_op<T> > {};
+
+template <typename T>
+struct exp : base<T, Eigen::internal::scalar_exp_op<T> > {};
+
+template <typename T>
+struct log : base<T, Eigen::internal::scalar_log_op<T> > {};
+
+template <typename T>
+struct sign : base<T, Eigen::internal::scalar_sign_op<T> > {};
+
+template <typename T>
+struct tanh : base<T, Eigen::internal::scalar_tanh_op<T> > {};
+
+template <typename T>
+struct sigmoid : base<T, Eigen::internal::scalar_sigmoid_op<T> > {};
+
+template <typename T>
+struct sin : base<T, Eigen::internal::scalar_sin_op<T> > {};
+
+template <typename T>
+struct cos : base<T, Eigen::internal::scalar_cos_op<T> > {};
+
+struct logical_not : base<bool, std::logical_not<bool> > {};
+
+namespace impl {
+
+#ifndef __CUDACC__
+// Uses STL std cmath functions.
+template <typename T>
+bool isinf(T v) {
+  return std::isinf(v);
+}
+
+template <typename T>
+bool isnan(T v) {
+  return std::isnan(v);
+}
+
+template <typename T>
+bool isfinite(T v) {
+  return std::isfinite(v);
+}
+
+template <typename T>
+T floor(T v) {
+  return std::floor(v);
+}
+
+template <typename T>
+T ceil(T v) {
+  return std::ceil(v);
+}
+#else
+// Uses CUDA's functions for float and double.
+template <typename T>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool isinf(T v) {
+  return ::isinf(v);
+}
+
+template <typename T>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool isnan(T v) {
+  return ::isnan(v);
+}
+
+template <typename T>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool isfinite(T v) {
+  return ::isfinite(v);
+}
+
+template <typename T>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T floor(T v) {
+  return ::floor(v);
+}
+
+template <typename T>
+EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T ceil(T v) {
+  return ::ceil(v);
+}
+#endif
+}  // end namespace impl
+
+// NOTE: std::isinf, std::isnan, std::isfinite are plain function.
+// Therefore we need to wrap them in functors to be used with Eigen's
+// type system.
+
+template <typename T>
+struct isinf_func {
+  typedef bool result_type;
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool operator()(T x) const {
+    return impl::isinf(x);
   }
 };
 
 template <typename T>
+struct isinf : base<T, isinf_func<T>, bool> {};
+
+template <typename T>
+struct isnan_func {
+  typedef bool result_type;
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool operator()(T x) const {
+    return impl::isnan(x);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
+  }
+};
+
+template <typename T>
+<<<<<<< HEAD
 struct invert : base<T, invert_op<T>> {};
 
 // NOTE: std::isinf, std::isnan, std::isfinite are plain function.
@@ -1019,6 +1340,42 @@ struct ceil : base<T, Eigen::internal::scalar_ceil_op<T>> {};
 
 template <typename T>
 struct rint : base<T, Eigen::internal::scalar_rint_op<T>> {};
+=======
+struct isnan : base<T, isnan_func<T>, bool> {};
+
+template <typename T>
+struct isfinite_func {
+  typedef bool result_type;
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE bool operator()(T x) const {
+    return impl::isfinite(x);
+  }
+};
+
+template <typename T>
+struct isfinite : base<T, isfinite_func<T>, bool> {};
+
+template <typename T>
+struct floor_func {
+  typedef T result_type;
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T operator()(T x) const {
+    return impl::floor(x);
+  }
+};
+
+template <typename T>
+struct floor : base<T, floor_func<T> > {};
+
+template <typename T>
+struct ceil_func {
+  typedef T result_type;
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T operator()(T x) const {
+    return impl::ceil(x);
+  }
+};
+
+template <typename T>
+struct ceil : base<T, ceil_func<T> > {};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 ////////////////////////////////////////////////////////////////////////////////
 // Binary functors
@@ -1035,19 +1392,30 @@ struct rint : base<T, Eigen::internal::scalar_rint_op<T>> {};
 // pow(x, y) = x ^ y
 // maximum(x, y) = x > y ? x : y
 // minimum(x, y) = x < y ? x : y
+<<<<<<< HEAD
 // squared_difference(x, y) = conj(x - y) * (x - y)
 
 template <typename T>
 struct add : base<T, Eigen::internal::scalar_sum_op<T>> {
+=======
+
+template <typename T>
+struct add : base<T, Eigen::internal::scalar_sum_op<T> > {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   static const bool use_bcast_optimization = true;
 };
 
 template <typename T>
+<<<<<<< HEAD
 struct sub : base<T, Eigen::internal::scalar_difference_op<T>> {
+=======
+struct sub : base<T, Eigen::internal::scalar_difference_op<T> > {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   static const bool use_bcast_optimization = true;
 };
 
 template <typename T>
+<<<<<<< HEAD
 struct mul : base<T, Eigen::internal::scalar_product_op<T>> {
   static const bool use_bcast_optimization = true;
 };
@@ -1160,6 +1528,27 @@ struct xlogy : base<T, Eigen::internal::xlogy_op<T>> {};
 
 template <typename T>
 struct xlog1py : base<T, Eigen::internal::xlog1py_op<T>> {};
+=======
+struct mul : base<T, Eigen::internal::scalar_product_op<T> > {};
+
+template <typename T>
+struct div : base<T, Eigen::internal::scalar_quotient_op<T> > {};
+
+template <typename T>
+struct fmod : base<T, Eigen::internal::scalar_fmod2_op<T> > {};
+
+template <typename T>
+struct mod : base<T, Eigen::internal::scalar_mod2_op<T> > {};
+
+template <typename T>
+struct pow : base<T, Eigen::internal::scalar_pow2_op<T> > {};
+
+template <typename T>
+struct maximum : base<T, Eigen::internal::scalar_max_op<T> > {};
+
+template <typename T>
+struct minimum : base<T, Eigen::internal::scalar_min_op<T> > {};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename T>
 struct less : base<T, Eigen::internal::less<T>, bool> {};
@@ -1184,6 +1573,7 @@ struct logical_and : base<bool, Eigen::internal::scalar_boolean_and_op> {};
 struct logical_or : base<bool, Eigen::internal::scalar_boolean_or_op> {};
 
 template <typename T>
+<<<<<<< HEAD
 struct bitwise_and_op {
   EIGEN_EMPTY_STRUCT_CTOR(bitwise_and_op)
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE T operator()(const T& x,
@@ -1259,12 +1649,22 @@ struct make_complex_func {
   typedef std::complex<T> result_type;
   EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE result_type operator()(T real,
                                                                T imag) const {
+=======
+struct make_complex_func {
+  typedef std::complex<T> result_type;
+  EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
+  result_type operator()(T real, T imag) const {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return std::complex<T>(real, imag);
   }
 };
 
 template <typename T>
+<<<<<<< HEAD
 struct make_complex : base<T, make_complex_func<T>, std::complex<T>> {};
+=======
+struct make_complex : base<T, make_complex_func<T>, std::complex<T> > {};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 template <typename T>
 struct get_real
@@ -1275,11 +1675,15 @@ struct get_imag
     : base<T, Eigen::internal::scalar_imag_op<T>, typename T::value_type> {};
 
 template <typename T>
+<<<<<<< HEAD
 struct get_angle
     : base<T, Eigen::internal::scalar_arg_op<T>, typename T::value_type> {};
 
 template <typename T>
 struct conj : base<T, Eigen::internal::scalar_conjugate_op<T>> {};
+=======
+struct conj : base<T, Eigen::internal::scalar_conjugate_op<T> > {};
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 ////////////////////////////////////////////////////////////////////////////////
 // Functors takes 1 or 2 tensors, computes the base functor on
@@ -1293,26 +1697,45 @@ struct UnaryFunctor {
                   typename Functor::tin_type in);
 };
 
+<<<<<<< HEAD
 template <typename Device, typename Functor, int NDIMS,
           bool has_errors = Functor::has_errors>
+=======
+template <typename Device, typename Functor, int NDIMS>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 struct BinaryFunctor {
   // Computes on device "d": out[i] = Functor(in0[i], in1[i])
   void operator()(const Device& d, typename Functor::tout_type out,
                   typename Functor::tin_type in0,
+<<<<<<< HEAD
                   typename Functor::tin_type in1, bool* error);
+=======
+                  typename Functor::tin_type in1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Computes on device "d": out[i] = Functor(scalar[0], in[i])
   void Left(const Device& d, typename Functor::tout_type out,
             typename Functor::tscalar_type scalar,
+<<<<<<< HEAD
             typename Functor::tin_type in, bool* error);
+=======
+            typename Functor::tin_type in);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Computes on device "d": out[i] = Functor(in[i], scalar[0])
   void Right(const Device& d, typename Functor::tout_type out,
              typename Functor::tin_type in,
+<<<<<<< HEAD
              typename Functor::tscalar_type scalar, bool* error);
 
   // Computes on device "d":
   //   out = Functor(in0.broadcast(bcast0), in1.broadcast(bcast1))
+=======
+             typename Functor::tscalar_type scalar);
+
+  // Computes on device "d":
+  //   out = Functor(in0.broadcast(bcast0), in1.broadcast(bcast01))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   //
   // TODO(zhifengc): makes BCast a template member function on NDIMS
   // instead making BinaryFunctor templates on NDIMS.
@@ -1321,6 +1744,7 @@ struct BinaryFunctor {
              typename TTypes<typename Functor::in_type, NDIMS>::ConstTensor in0,
              typename Eigen::array<Eigen::DenseIndex, NDIMS> bcast0,
              typename TTypes<typename Functor::in_type, NDIMS>::ConstTensor in1,
+<<<<<<< HEAD
              typename Eigen::array<Eigen::DenseIndex, NDIMS> bcast1,
              bool* error);
 };
@@ -1330,11 +1754,18 @@ struct ApproximateEqual {
   void operator()(const Device& d, typename TTypes<T>::ConstFlat x,
                   typename TTypes<T>::ConstFlat y, T tolerance,
                   typename TTypes<bool>::Flat z);
+=======
+             typename Eigen::array<Eigen::DenseIndex, NDIMS> bcast1);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 template <int NDIMS>
 bool AllOne(const typename Eigen::array<Eigen::DenseIndex, NDIMS>& a) {
+<<<<<<< HEAD
   for (size_t i = 0; i < a.size(); ++i) {
+=======
+  for (int i = 0; i < a.size(); ++i) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (a[i] != 1) return false;
   }
   return true;
@@ -1348,6 +1779,7 @@ struct SelectFunctor {
                   typename TTypes<T>::ConstFlat else_flat);
 };
 
+<<<<<<< HEAD
 template <typename Device, typename T>
 struct SelectScalarFunctor {
   void operator()(const Device& d, typename TTypes<T>::Flat out,
@@ -1381,3 +1813,9 @@ struct BCastSelectFunctor {
 }  // end namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_CWISE_OPS_H_
+=======
+}  // end namespace functor
+}  // end namespace tensorflow
+
+#endif  // TENSORFLOW_KERNELS_CWISE_OPS_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

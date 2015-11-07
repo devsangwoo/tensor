@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,11 +24,25 @@ limitations under the License.
 #include <vector>
 
 #include "tensorflow/core/lib/math/math_util.h"
+=======
+#include "tensorflow/core/lib/random/random_distributions.h"
+
+#include <math.h>
+#include <algorithm>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/random/philox_random.h"
 #include "tensorflow/core/lib/random/philox_random_test_utils.h"
 #include "tensorflow/core/lib/random/random.h"
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/test.h"
+=======
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace random {
@@ -37,20 +52,30 @@ namespace {
 // unit normal distribution, it should almost definitely never exceed 6.
 static constexpr float kZLimit = 6.0;
 
+<<<<<<< HEAD
 // As bfloat16 has much less precision, the largest z-value will should be
 // larger than float32.
 static constexpr float kZLimitBfloat16 = 20.0;
 
 // A utility function to fill the given array with samples from the given
 // distribution, using the single adapter of the underlying generator
+=======
+// A utility function to fill the given array with samples from the given
+// distribution, using the single adatper of the underlying generator
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <class Distribution>
 void FillRandomsWithSingles(PhiloxRandom gen,
                             typename Distribution::ResultElementType* p,
                             int64 size) {
   int granularity = Distribution::kResultElementCount;
 
+<<<<<<< HEAD
   CHECK(size % granularity == 0)
       << " size: " << size << " granularity: " << granularity;
+=======
+  CHECK(size % granularity == 0) << " size: " << size
+                                 << " granularity: " << granularity;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   SingleSampleAdapter<PhiloxRandom> single_samples(&gen);
 
@@ -76,7 +101,11 @@ void FillRandomsWithSingles(PhiloxRandom gen,
 //   z_limit: the maximum z-test we would consider the test to pass;
 template <typename T>
 bool CheckSamplesMoments(const std::vector<T>& samples,
+<<<<<<< HEAD
                          const std::function<double(int)>& theoretical_moments,
+=======
+                         std::function<double(int)> theoretical_moments,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                          int max_moments, int stride, T z_limit) {
   const T* const samples_data = &samples[0];
   const int samples_size = samples.size();
@@ -93,11 +122,19 @@ bool CheckSamplesMoments(const std::vector<T>& samples,
         break;
       }
       // moments[i] store the i-th order measured moments.
+<<<<<<< HEAD
       // bypass std::vector::operator[] because they are too slow in the debug
       // mode, given the large number of samples.
       moments_data[i] += moment;
       ++moments_sample_count_data[i];
       moment *= static_cast<double>(samples_data[index]);
+=======
+      // bypass std::vector::opeartor[] because they are too slow in the debug
+      // mode, given the large number of samples.
+      moments_data[i] += moment;
+      ++moments_sample_count_data[i];
+      moment *= samples_data[index];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
@@ -110,12 +147,21 @@ bool CheckSamplesMoments(const std::vector<T>& samples,
 
   for (int i = 1; i <= max_moments; ++i) {
     // Calculate the theoretical mean and variance
+<<<<<<< HEAD
     const double moments_i_mean =
         (stride == 0) ? theoretical_moments(i)
                       : MathUtil::IPow(theoretical_moments(1), i);
     const double moments_i_squared =
         (stride == 0) ? theoretical_moments(2 * i)
                       : MathUtil::IPow(theoretical_moments(2), i);
+=======
+    const double moments_i_mean = (stride == 0)
+                                      ? theoretical_moments(i)
+                                      : std::pow(theoretical_moments(1), i);
+    const double moments_i_squared = (stride == 0)
+                                         ? theoretical_moments(2 * i)
+                                         : std::pow(theoretical_moments(2), i);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     const double moments_i_var =
         moments_i_squared - moments_i_mean * moments_i_mean;
 
@@ -129,7 +175,11 @@ bool CheckSamplesMoments(const std::vector<T>& samples,
     const double z_test =
         fabs((moments[i] - moments_i_mean) / sqrt(total_variance));
 
+<<<<<<< HEAD
     if (z_test > static_cast<double>(z_limit)) {
+=======
+    if (z_test > z_limit) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       LOG(ERROR) << "failing z_test:"
                  << " moment: " << i << " stride: " << stride
                  << " z_test: " << z_test << " z_limit: " << z_limit
@@ -156,8 +206,13 @@ void UniformMomentsTest(int count, int max_moments,
   PhiloxRandom gen(seed);
   FillRandoms<UniformDistribution<PhiloxRandom, T> >(gen, &v1[0], v1.size());
   for (int stride : strides) {
+<<<<<<< HEAD
     bool status =
         CheckSamplesMoments(v1, uniform_moments, max_moments, stride, z_limit);
+=======
+    bool status = CheckSamplesMoments<T>(v1, uniform_moments, max_moments,
+                                         stride, z_limit);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ASSERT_TRUE(status) << " UniformMomentsTest failing. seed: " << seed;
   }
 }
@@ -188,8 +243,13 @@ void NormalMomentsTest(int count, int max_moments,
   FillRandoms<NormalDistribution<PhiloxRandom, T> >(gen, &v1[0], v1.size());
 
   for (int stride : strides) {
+<<<<<<< HEAD
     bool status =
         CheckSamplesMoments(v1, normal_moments, max_moments, stride, z_limit);
+=======
+    bool status = CheckSamplesMoments<T>(v1, normal_moments, max_moments,
+                                         stride, z_limit);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ASSERT_TRUE(status) << " NormalMomentsTest failing. seed: " << seed;
   }
 }
@@ -219,7 +279,11 @@ class TruncatedNormalMoments {
     }
 
     // The real computation of the moment.
+<<<<<<< HEAD
     double bias = 2.0 * MathUtil::IPow(kV, n - 1) * kFV / (2.0 * kPhiV - 1.0);
+=======
+    double bias = 2.0 * std::pow(kV, n - 1) * kFV / (2.0 * kPhiV - 1.0);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     double moment_n_minus_2 = (*this)(n - 2);
     double moment_n = (n - 1) * moment_n_minus_2 - bias;
 
@@ -250,12 +314,18 @@ void RandomParametersMomentsTest(int count, int max_moments,
       gen, &v1[0], v1.size());
 
   for (int stride : strides) {
+<<<<<<< HEAD
     bool status = CheckSamplesMoments(v1, TruncatedNormalMoments(), max_moments,
                                       stride, z_limit);
+=======
+    bool status = CheckSamplesMoments<T>(v1, TruncatedNormalMoments(),
+                                         max_moments, stride, z_limit);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     ASSERT_TRUE(status) << " NormalMomentsTest failing. seed: " << seed;
   }
 }
 
+<<<<<<< HEAD
 TEST(PhiloxRandomTest, UniformBfloat16MomentsTest) {
   const std::vector<int> strides = {0, 1, 4, 17};
   UniformMomentsTest<bfloat16>(1 << 20, 40, strides, bfloat16(kZLimitBfloat16));
@@ -272,6 +342,8 @@ TEST(PhiloxRandomTest, RandomParametersBfloat16MomentsTest) {
                                         bfloat16(kZLimitBfloat16));
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(PhiloxRandomTest, UniformFloatMomentsTest) {
   const std::vector<int> strides = {0, 1, 4, 17};
   UniformMomentsTest<float>(1 << 20, 40, strides, kZLimit);
@@ -302,6 +374,7 @@ TEST(PhiloxRandomTest, RandomParametersDoubleMomentsTest) {
   RandomParametersMomentsTest<double>(1 << 20, 40, strides, kZLimit);
 }
 
+<<<<<<< HEAD
 class MockGenerator {
  public:
   explicit MockGenerator(uint64 seed) : counter_(seed) {}
@@ -368,6 +441,8 @@ TEST(SingleSampleAdapterTest, MockGeneratorSkip) {
   SingleSampleAdapterSkipTest<MockGenerator>();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace random
 }  // namespace tensorflow

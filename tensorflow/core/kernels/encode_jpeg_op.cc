@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +26,19 @@ limitations under the License.
 #include "tensorflow/core/lib/core/status.h"
 #include "tensorflow/core/lib/jpeg/jpeg_mem.h"
 #include "tensorflow/core/platform/logging.h"
+=======
+// See docs in ../ops/image_ops.cc
+
+#include <memory>
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/register_types.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/status.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+#include "tensorflow/core/lib/jpeg/jpeg_mem.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -55,6 +69,11 @@ class EncodeJpegOp : public OpKernel {
         context, context->GetAttr("optimize_size", &flags_.optimize_jpeg_size));
     OP_REQUIRES_OK(context, context->GetAttr("chroma_downsampling",
                                              &flags_.chroma_downsampling));
+<<<<<<< HEAD
+=======
+    OP_REQUIRES_OK(context, context->GetAttr("chroma_downsampling",
+                                             &flags_.chroma_downsampling));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     string density_unit;
     OP_REQUIRES_OK(context, context->GetAttr("density_unit", &density_unit));
@@ -78,6 +97,7 @@ class EncodeJpegOp : public OpKernel {
     const Tensor& image = context->input(0);
     OP_REQUIRES(context, image.dims() == 3,
                 errors::InvalidArgument("image must be 3-dimensional",
+<<<<<<< HEAD
                                         image.shape().DebugString()));
 
     OP_REQUIRES(
@@ -89,22 +109,35 @@ class EncodeJpegOp : public OpKernel {
     const int32 dim_size0 = static_cast<int32>(image.dim_size(0));
     const int32 dim_size1 = static_cast<int32>(image.dim_size(1));
     const int32 dim_size2 = static_cast<int32>(image.dim_size(2));
+=======
+                                        image.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Autodetect format if desired, otherwise make sure format and
     // image channels are consistent.
     int channels;
     jpeg::CompressFlags adjusted_flags = flags_;
     if (flags_.format == 0) {
+<<<<<<< HEAD
       channels = dim_size2;
+=======
+      channels = image.dim_size(2);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       if (channels == 1) {
         adjusted_flags.format = jpeg::FORMAT_GRAYSCALE;
       } else if (channels == 3) {
         adjusted_flags.format = jpeg::FORMAT_RGB;
       } else {
+<<<<<<< HEAD
         OP_REQUIRES(
             context, false,
             errors::InvalidArgument("image must have 1 or 3 channels, got ",
                                     image.shape().DebugString()));
+=======
+        OP_REQUIRES(context, false, errors::InvalidArgument(
+                                        "image must have 1 or 3 channels, got ",
+                                        image.shape().ShortDebugString()));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     } else {
       if (flags_.format == jpeg::FORMAT_GRAYSCALE) {
@@ -112,6 +145,7 @@ class EncodeJpegOp : public OpKernel {
       } else {  // RGB
         channels = 3;
       }
+<<<<<<< HEAD
       OP_REQUIRES(context, channels == dim_size2,
                   errors::InvalidArgument("format ", format_, " expects ",
                                           channels, " channels, got ",
@@ -125,6 +159,22 @@ class EncodeJpegOp : public OpKernel {
     OP_REQUIRES(context,
                 jpeg::Compress(image.flat<uint8>().data(), dim_size1, dim_size0,
                                adjusted_flags, &output->scalar<tstring>()()),
+=======
+      OP_REQUIRES(context, channels == image.dim_size(2),
+                  errors::InvalidArgument("format ", format_, " expects ",
+                                          channels, " channels, got ",
+                                          image.shape().ShortDebugString()));
+    }
+
+    // Encode image to jpeg string
+    Tensor* output = NULL;
+    OP_REQUIRES_OK(context,
+                   context->allocate_output(0, TensorShape({}), &output));
+    OP_REQUIRES(context,
+                jpeg::Compress(image.flat<uint8>().data(), image.dim_size(1),
+                               image.dim_size(0), adjusted_flags,
+                               &output->scalar<string>()()),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                 errors::Internal("JPEG encoding failed"));
   }
 
@@ -135,6 +185,7 @@ class EncodeJpegOp : public OpKernel {
 };
 REGISTER_KERNEL_BUILDER(Name("EncodeJpeg").Device(DEVICE_CPU), EncodeJpegOp);
 
+<<<<<<< HEAD
 class EncodeJpegVariableQualityOp : public OpKernel {
  public:
   explicit EncodeJpegVariableQualityOp(OpKernelConstruction* context)
@@ -197,4 +248,6 @@ class EncodeJpegVariableQualityOp : public OpKernel {
 REGISTER_KERNEL_BUILDER(Name("EncodeJpegVariableQuality").Device(DEVICE_CPU),
                         EncodeJpegVariableQualityOp);
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace tensorflow

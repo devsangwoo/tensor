@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/jpeg/jpeg_mem.h"
 
 #include <setjmp.h>
@@ -22,6 +25,7 @@ limitations under the License.
 
 #include <memory>
 
+<<<<<<< HEAD
 #include "absl/base/casts.h"
 #include "tensorflow/core/lib/jpeg/jpeg_handle.h"
 #include "tensorflow/core/platform/env.h"
@@ -29,12 +33,24 @@ limitations under the License.
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/types.h"
 
+=======
+#include "tensorflow/core/lib/jpeg/jpeg_handle.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/public/env.h"
+#include <gtest/gtest.h>
+
+#include "tensorflow/core/lib/core/casts.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace jpeg {
 namespace {
 
+<<<<<<< HEAD
 using absl::bit_cast;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 const char kTestData[] = "tensorflow/core/lib/jpeg/testdata/";
 
 int ComputeSumAbsoluteDifference(const uint8* a, const uint8* b, int width,
@@ -58,17 +74,26 @@ void ReadFileToStringOrDie(Env* env, const string& filename, string* output) {
 void TestJPEG(Env* env, const string& jpegfile) {
   // Read the data from the jpeg file into memory
   string jpeg;
+<<<<<<< HEAD
   ReadFileToStringOrDie(env, jpegfile, &jpeg);
   const int fsize = jpeg.size();
   const uint8* const temp = bit_cast<const uint8*>(jpeg.data());
 
   // Try partial decoding (half of the data)
+=======
+  ReadFileToStringOrDie(Env::Default(), jpegfile, &jpeg);
+  const int fsize = jpeg.size();
+  const uint8* const temp = bit_cast<const uint8*>(jpeg.data());
+
+  // try partial decoding (half of the data)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   int w, h, c;
   std::unique_ptr<uint8[]> imgdata;
 
   UncompressFlags flags;
   flags.components = 3;
 
+<<<<<<< HEAD
   // Set min_acceptable_fraction to something insufficient
   flags.min_acceptable_fraction = 0.8;
   imgdata.reset(Uncompress(temp, fsize / 2, flags, &w, &h, &c, nullptr));
@@ -83,6 +108,28 @@ void TestJPEG(Env* env, const string& jpegfile) {
   flags.min_acceptable_fraction = 1.0;
   imgdata.reset(Uncompress(temp, fsize, flags, &w, &h, &c, nullptr));
   CHECK(imgdata != nullptr);
+=======
+  // set min_acceptable_fraction to something insufficient
+  flags.min_acceptable_fraction = 0.8;
+  imgdata.reset(Uncompress(temp, fsize / 2, flags, &w, &h, &c, NULL));
+  CHECK(imgdata.get() == NULL);
+
+  // now, use a value that makes fsize/2 be enough for a black-filling
+  flags.min_acceptable_fraction = 0.01;
+  imgdata.reset(Uncompress(temp, fsize / 2, flags, &w, &h, &c, NULL));
+  CHECK(imgdata.get() != NULL);
+
+  // finally, uncompress the whole data
+  flags.min_acceptable_fraction = 1.0;
+  imgdata.reset(Uncompress(temp, fsize, flags, &w, &h, &c, NULL));
+  CHECK(imgdata.get() != NULL);
+
+  // Uncompress the data to RGBA, too
+  flags.min_acceptable_fraction = 1.0;
+  flags.components = 4;
+  imgdata.reset(Uncompress(temp, fsize, flags, &w, &h, &c, NULL));
+  CHECK(imgdata.get() != NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(JpegMemTest, Jpeg) {
@@ -96,6 +143,7 @@ TEST(JpegMemTest, Jpeg) {
   TestJPEG(env, data_path + "jpeg_merge_test1_cmyk.jpg");
 }
 
+<<<<<<< HEAD
 void TestCropAndDecodeJpeg(Env* env, const string& jpegfile,
                            const UncompressFlags& default_flags) {
   // Read the data from the jpeg file into memory
@@ -284,6 +332,8 @@ TEST(JpegMemTest, CropAndDecodeJpegWithInvalidCropWindow) {
   CheckInvalidCropWindowFailed(temp, fsize, 11, /*y=*/h - 10, 11, 11);
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 TEST(JpegMemTest, Jpeg2) {
   // create known data, for size in_w x in_h
   const int in_w = 256;
@@ -326,7 +376,11 @@ TEST(JpegMemTest, Jpeg2) {
     CHECK_NE(string::npos, cpdata1.find(kXMP));
 
     // Test the other API, where a storage string is supplied
+<<<<<<< HEAD
     tstring cptest;
+=======
+    string cptest;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     flags.stride = 0;
     Compress(refdata1.get(), in_w, in_h, flags, &cptest);
     CHECK_EQ(cptest, cpdata1);
@@ -335,15 +389,24 @@ TEST(JpegMemTest, Jpeg2) {
     CHECK_EQ(cptest, cpdata2);
   }
 
+<<<<<<< HEAD
   // Uncompress twice: once with 3 components and once with autodetect.
+=======
+  // Uncompress twice: once with 3 components and once with autodetect
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   std::unique_ptr<uint8[]> imgdata1;
   for (const int components : {0, 3}) {
     // Uncompress it
     UncompressFlags flags;
     flags.components = components;
     int w, h, c;
+<<<<<<< HEAD
     imgdata1.reset(Uncompress(cpdata1.c_str(), cpdata1.length(), flags, &w, &h,
                               &c, nullptr));
+=======
+    imgdata1.reset(
+        Uncompress(cpdata1.c_str(), cpdata1.length(), flags, &w, &h, &c, NULL));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Check obvious formatting stuff
     CHECK_EQ(w, in_w);
@@ -364,8 +427,12 @@ TEST(JpegMemTest, Jpeg2) {
     flags.stride = 3 * 411;
     const std::unique_ptr<uint8[]> imgdata2(new uint8[flags.stride * in_h]);
     CHECK(imgdata2.get() == Uncompress(cpdata2.c_str(), cpdata2.length(), flags,
+<<<<<<< HEAD
                                        nullptr /* nwarn */,
                                        [&imgdata2](int w, int h, int c) {
+=======
+                                       NULL, [&imgdata2](int w, int h, int c) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                          CHECK_EQ(w, in_w);
                                          CHECK_EQ(h, in_h);
                                          CHECK_EQ(c, 3);
@@ -375,6 +442,7 @@ TEST(JpegMemTest, Jpeg2) {
         imgdata1.get(), imgdata2.get(), in_w, in_h, stride1, flags.stride);
     CHECK_EQ(totalerr, 0);
   }
+<<<<<<< HEAD
 
   {
     // Uncompress it with a faster, lossier algorithm.
@@ -396,6 +464,8 @@ TEST(JpegMemTest, Jpeg2) {
         imgdata1.get(), refdata1.get(), in_w, in_h, stride1, stride1);
     ASSERT_LE(totalerr, 200000);
   }
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // Takes JPEG data and reads its headers to determine whether or not the JPEG
@@ -452,11 +522,18 @@ TEST(JpegMemTest, ChromaDownsampling) {
   // First, uncompress the JPEG.
   UncompressFlags unflags;
   unflags.components = 3;
+<<<<<<< HEAD
   int w, h, c;
   int64 num_warnings;
   std::unique_ptr<uint8[]> uncompressed(Uncompress(
       jpeg.c_str(), jpeg.size(), unflags, &w, &h, &c, &num_warnings));
   CHECK(uncompressed != nullptr);
+=======
+  int w, h, c, num_warnings;
+  std::unique_ptr<uint8[]> uncompressed(Uncompress(
+      jpeg.c_str(), jpeg.size(), unflags, &w, &h, &c, &num_warnings));
+  CHECK(uncompressed.get() != NULL);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   CHECK_EQ(num_warnings, 0);
 
   // Recompress the JPEG with and without chroma downsampling
@@ -465,7 +542,11 @@ TEST(JpegMemTest, ChromaDownsampling) {
     flags.format = FORMAT_RGB;
     flags.quality = 85;
     flags.chroma_downsampling = downsample;
+<<<<<<< HEAD
     tstring recompressed;
+=======
+    string recompressed;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     Compress(uncompressed.get(), w, h, flags, &recompressed);
     CHECK(!recompressed.empty());
     CHECK_EQ(IsChromaDownsampled(recompressed), downsample);
@@ -485,7 +566,11 @@ void TestBadJPEG(Env* env, const string& bad_jpeg_file, int expected_width,
   int width, height, components;
   std::unique_ptr<uint8[]> imgdata;
   imgdata.reset(Uncompress(jpeg.c_str(), jpeg.size(), flags, &width, &height,
+<<<<<<< HEAD
                            &components, nullptr));
+=======
+                           &components, NULL));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (expected_width > 0) {  // we expect the file to decode into 'something'
     CHECK_EQ(width, expected_width);
     CHECK_EQ(height, expected_height);

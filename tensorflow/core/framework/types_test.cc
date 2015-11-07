@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,13 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/framework/types.h"
+
+#include <gtest/gtest.h>
+#include "tensorflow/core/framework/type_traits.h"
+#include "tensorflow/core/platform/protobuf.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -26,7 +34,10 @@ namespace {
 TEST(TypesTest, DeviceTypeName) {
   EXPECT_EQ("CPU", DeviceTypeString(DeviceType(DEVICE_CPU)));
   EXPECT_EQ("GPU", DeviceTypeString(DeviceType(DEVICE_GPU)));
+<<<<<<< HEAD
   EXPECT_EQ("SYCL", DeviceTypeString(DeviceType(DEVICE_SYCL)));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(TypesTest, kDataTypeRefOffset) {
@@ -71,8 +82,13 @@ TEST(TypesTest, kDataTypeRefOffset) {
       << "Extra reference enum "
       << enum_descriptor->FindValueByNumber(e_ref)->name()
       << " without corresponding base enum with value " << e;
+<<<<<<< HEAD
   ASSERT_LT(DataType_MAX, e_ref)
       << "Gap in reference types, missing value for " << e_ref;
+=======
+  ASSERT_LT(DataType_MAX, e_ref) << "Gap in reference types, missing value for "
+                                 << e_ref;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Make sure there are no enums defined after the last regular type before
   // the first reference type.
@@ -125,12 +141,16 @@ TEST(TypesTest, QuantizedTypes) {
 
   EXPECT_FALSE(DataTypeIsQuantized(DT_INT8));
   EXPECT_FALSE(DataTypeIsQuantized(DT_UINT8));
+<<<<<<< HEAD
   EXPECT_FALSE(DataTypeIsQuantized(DT_UINT16));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_FALSE(DataTypeIsQuantized(DT_INT16));
   EXPECT_FALSE(DataTypeIsQuantized(DT_INT32));
   EXPECT_FALSE(DataTypeIsQuantized(DT_BFLOAT16));
 }
 
+<<<<<<< HEAD
 TEST(TypesTest, ComplexTypes) {
   EXPECT_TRUE(DataTypeIsComplex(DT_COMPLEX64));
   EXPECT_TRUE(DataTypeIsComplex(DT_COMPLEX128));
@@ -147,5 +167,7 @@ TEST(TypesTest, IntegerTypes) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

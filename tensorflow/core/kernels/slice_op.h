@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,15 @@ limitations under the License.
 
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "tensorflow/core/framework/tensor_types.h"
+=======
+#ifndef TENSORFLOW_KERNELS_SLICE_OP_H_
+#define TENSORFLOW_KERNELS_SLICE_OP_H_
+
+// Functor definition for SliceOp, must be compilable by nvcc.
+
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -28,6 +38,7 @@ template <typename Device, typename T, int NDIMS>
 struct Slice {
   void operator()(const Device& d, typename TTypes<T, NDIMS>::Tensor output,
                   typename TTypes<T, NDIMS>::ConstTensor input,
+<<<<<<< HEAD
                   const Eigen::DSizes<Eigen::DenseIndex, NDIMS>& slice_indices,
                   const Eigen::DSizes<Eigen::DenseIndex, NDIMS>& slice_sizes) {
     bool use_64bit = (input.size() > Eigen::NumTraits<int>::highest());
@@ -45,10 +56,19 @@ struct Slice {
     } else {
       output.device(d) = input.slice(slice_indices, slice_sizes);
     }
+=======
+                  const Eigen::DSizes<ptrdiff_t, NDIMS>& slice_indices,
+                  const Eigen::DSizes<ptrdiff_t, NDIMS>& slice_sizes) {
+    output.device(d) = input.slice(slice_indices, slice_sizes);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
 }  // namespace functor
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_KERNELS_SLICE_OP_H_
+=======
+#endif  // TENSORFLOW_KERNELS_SLICE_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

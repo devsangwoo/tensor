@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // This module implements a common subexpression elimination pass.  We
 // process the nodes in the graph in reverse postorder
 // (i.e. inputs before their downstream dependencies).  The rough algorithm is
@@ -39,6 +42,7 @@ limitations under the License.
 #include "tensorflow/core/graph/optimizer_cse.h"
 
 #include <unordered_map>
+<<<<<<< HEAD
 #include <utility>
 #include <vector>
 
@@ -46,6 +50,10 @@ limitations under the License.
 #include "tensorflow/core/framework/node_def_util.h"
 #include "tensorflow/core/graph/algorithm.h"
 #include "tensorflow/core/graph/graph_node_util.h"
+=======
+
+#include "tensorflow/core/graph/algorithm.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/gtl/map_util.h"
 #include "tensorflow/core/lib/hash/hash.h"
 #include "tensorflow/core/platform/logging.h"
@@ -56,19 +64,35 @@ class OptimizerCSE {
  public:
   explicit OptimizerCSE(Graph* g) : g_(g) {}
 
+<<<<<<< HEAD
   bool Optimize(const std::function<bool(const Node*)>& consider_fn);
 
  private:
   static size_t NodeHash(const Node* n);
   static bool Equivalent(const Node* a, const Node* b,
                          AttrSlice::Scratch* scratch);
+=======
+  void Optimize(std::function<bool(const Node*)> consider_fn);
+
+ private:
+  struct Scratch;
+
+  static size_t NodeHash(const Node* n);
+  static bool Equivalent(const Node* a, const Node* b, Scratch* s);
+  static bool EqualAttrs(const Node* a, const Node* b, Scratch* s);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Graph* g_;
 };
 
 static void FillInputs(const Node* n,
+<<<<<<< HEAD
                        gtl::InlinedVector<const Node*, 4>* control_edges,
                        gtl::InlinedVector<std::pair<const Node*, int>, 4>* in) {
+=======
+                       gtl::InlinedVector<Node*, 4>* control_edges,
+                       gtl::InlinedVector<std::pair<Node*, int>, 4>* in) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   DCHECK_EQ(in->size(), n->num_inputs());
   control_edges->clear();
   for (const Edge* e : n->in_edges()) {
@@ -98,8 +122,13 @@ size_t OptimizerCSE::NodeHash(const Node* n) {
 
   const int N_in = n->num_inputs();
   strings::StrAppend(&str_to_hash, N_in);
+<<<<<<< HEAD
   gtl::InlinedVector<const Node*, 4> control_edges;
   gtl::InlinedVector<std::pair<const Node*, int>, 4> in(N_in);
+=======
+  gtl::InlinedVector<Node*, 4> control_edges;
+  gtl::InlinedVector<std::pair<Node*, int>, 4> in(N_in);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   FillInputs(n, &control_edges, &in);
   for (const auto& edge : in) {
     strings::StrAppend(&str_to_hash, edge.first->id(), edge.second);
@@ -107,11 +136,19 @@ size_t OptimizerCSE::NodeHash(const Node* n) {
 
   size_t h = Hash64(str_to_hash);
 
+<<<<<<< HEAD
 #if !defined(__ANDROID__)
   // Hash the attrs.  For example, this makes sure different constants
   // end up in different hash buckets.
   string tmp;
   for (const auto& attr : n->attrs()) {
+=======
+#if !defined(__ANDROID__) && !defined(ANDROID)
+  // Hash the attrs.  For example, this makes sure different constants
+  // end up in different hash buckets.
+  string tmp;
+  for (const auto& attr : n->def().attr()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     tmp = attr.first;
     attr.second.AppendToString(&tmp);
     // Add hashes of attrs, so the order of attrs doesn't matter.
@@ -123,6 +160,31 @@ size_t OptimizerCSE::NodeHash(const Node* n) {
   return h;
 }
 
+<<<<<<< HEAD
+=======
+struct OptimizerCSE::Scratch {
+  // For EqualAttrs():
+  string a;
+  string b;
+};
+
+bool OptimizerCSE::EqualAttrs(const Node* a, const Node* b, Scratch* scratch) {
+  if (a->def().attr_size() != b->def().attr_size()) return false;
+
+  for (const auto& attr : b->def().attr()) {
+    auto iter = a->def().attr().find(attr.first);
+    if (iter == a->def().attr().end()) return false;
+    // Note: it should be safe to compare proto serializations of the attr
+    // values since at most one field should be set in each (indeed, it
+    // should be the same field).
+    iter->second.SerializeToString(&scratch->a);
+    attr.second.SerializeToString(&scratch->b);
+    if (scratch->a != scratch->b) return false;
+  }
+  return true;
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static bool HasRefInput(const Node* n) {
   for (auto dt : n->input_types()) {
     if (IsRefType(dt)) return true;
@@ -130,8 +192,12 @@ static bool HasRefInput(const Node* n) {
   return false;
 }
 
+<<<<<<< HEAD
 bool OptimizerCSE::Equivalent(const Node* a, const Node* b,
                               AttrSlice::Scratch* scratch) {
+=======
+bool OptimizerCSE::Equivalent(const Node* a, const Node* b, Scratch* scratch) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Different op names are different
   if (a->type_string() != b->type_string()) return false;
 
@@ -144,15 +210,26 @@ bool OptimizerCSE::Equivalent(const Node* a, const Node* b,
 
   // Compare attrs.  Note that equal attrs implies equal input and
   // output types.
+<<<<<<< HEAD
   if (!a->attrs().EqualAttrs(b->attrs(), scratch)) return false;
+=======
+  if (!EqualAttrs(a, b, scratch)) return false;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Compare input sources
   if (a->num_inputs() != b->num_inputs()) return false;
   const int N_in = a->num_inputs();
+<<<<<<< HEAD
   gtl::InlinedVector<const Node*, 4> a_control_edges;
   gtl::InlinedVector<const Node*, 4> b_control_edges;
   gtl::InlinedVector<std::pair<const Node*, int>, 4> a_in(N_in);
   gtl::InlinedVector<std::pair<const Node*, int>, 4> b_in(N_in);
+=======
+  gtl::InlinedVector<Node*, 4> a_control_edges;
+  gtl::InlinedVector<Node*, 4> b_control_edges;
+  gtl::InlinedVector<std::pair<Node*, int>, 4> a_in(N_in);
+  gtl::InlinedVector<std::pair<Node*, int>, 4> b_in(N_in);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   FillInputs(a, &a_control_edges, &a_in);
   FillInputs(b, &b_control_edges, &b_in);
   if (a_in != b_in) return false;
@@ -161,6 +238,7 @@ bool OptimizerCSE::Equivalent(const Node* a, const Node* b,
   return true;
 }
 
+<<<<<<< HEAD
 bool OptimizerCSE::Optimize(
     const std::function<bool(const Node*)>& consider_fn) {
   // This very simple implementation works if the whole graph is one
@@ -168,6 +246,13 @@ bool OptimizerCSE::Optimize(
   // topological order). This simple implementation works well
   // with control flow/loops/etc. But we need to be careful about
   // control flow if we want to add more sophisticated CSE optimizations.
+=======
+void OptimizerCSE::Optimize(std::function<bool(const Node*)> consider_fn) {
+  // This very simple implementation works if the whole graph is one
+  // giant basic block (because we just traverse nodes in a
+  // topological order).  We'll need to do something more
+  // sophisticated when we have control flow/loops/etc.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // TODO(jeff): We need to handle Update nodes specially, but dealing
   // with more general control flow will also solve this issue, and for
@@ -185,6 +270,7 @@ bool OptimizerCSE::Optimize(
 
   // Scratch space for Equivalent calls.  Allocated here and passed in to
   // Equivalent to avoid allocation inside the loop below.
+<<<<<<< HEAD
   bool changed = false;
   AttrSlice::Scratch scratch;
   for (Node* n : order) {
@@ -197,6 +283,12 @@ bool OptimizerCSE::Optimize(
       continue;
     }
 
+=======
+  Scratch scratch;
+  for (Node* n : order) {
+    if (!n->IsOp()) continue;
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // See if we should consider this node at all
     if (consider_fn != nullptr && !consider_fn(n)) continue;
 
@@ -214,6 +306,7 @@ bool OptimizerCSE::Optimize(
       for (const Edge* e : n->out_edges()) {
         g_->AddEdge(*candidate, e->src_output(), e->dst(), e->dst_input());
       }
+<<<<<<< HEAD
 
       MergeDebugInfo(NodeDebugInfo(*n), *candidate);
       g_->RemoveNode(n);
@@ -227,6 +320,16 @@ bool OptimizeCSE(Graph* g,
                  const std::function<bool(const Node*)>& consider_fn) {
   OptimizerCSE opt(g);
   return opt.Optimize(consider_fn);
+=======
+      g_->RemoveNode(n);
+    }
+  }
+}
+
+void OptimizeCSE(Graph* g, std::function<bool(const Node*)> consider_fn) {
+  OptimizerCSE opt(g);
+  opt.Optimize(consider_fn);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

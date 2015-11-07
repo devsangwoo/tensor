@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // DistributionSampler allows generating a discrete random variable with a given
 // distribution.
 // The values taken by the variable are [0, N) and relative weights for each
@@ -28,17 +31,30 @@ limitations under the License.
 //
 // The algorithm used is Walker's Aliasing algorithm, described in Knuth, Vol 2.
 
+<<<<<<< HEAD
 #ifndef TENSORFLOW_CORE_LIB_RANDOM_DISTRIBUTION_SAMPLER_H_
 #define TENSORFLOW_CORE_LIB_RANDOM_DISTRIBUTION_SAMPLER_H_
 
 #include <memory>
 #include <utility>
+=======
+#ifndef TENSORFLOW_LIB_RANDOM_DISTRIBUTION_SAMPLER_H_
+#define TENSORFLOW_LIB_RANDOM_DISTRIBUTION_SAMPLER_H_
+
+#include <memory>
+#include <utility>
+#include <vector>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #include "tensorflow/core/lib/gtl/array_slice.h"
 #include "tensorflow/core/lib/random/simple_philox.h"
 #include "tensorflow/core/platform/logging.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/macros.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace random {
@@ -91,4 +107,8 @@ class DistributionSampler {
 }  // namespace random
 }  // namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_LIB_RANDOM_DISTRIBUTION_SAMPLER_H_
+=======
+#endif  // TENSORFLOW_LIB_RANDOM_DISTRIBUTION_SAMPLER_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

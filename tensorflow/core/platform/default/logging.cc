@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,10 +25,17 @@ limitations under the License.
 #if defined(PLATFORM_POSIX_ANDROID)
 #include <android/log.h>
 #include <iostream>
+=======
+#include "tensorflow/core/platform/default/logging.h"
+
+#if defined(PLATFORM_POSIX_ANDROID)
+#include <android/log.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include <sstream>
 #endif
 
 #include <stdlib.h>
+<<<<<<< HEAD
 #include <string.h>
 #include <time.h>
 
@@ -179,10 +187,16 @@ int64 MinVLogLevelFromEnv() {
   return LogLevelStrToInt(tf_env_var_val);
 #endif
 }
+=======
+
+namespace tensorflow {
+namespace internal {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 LogMessage::LogMessage(const char* fname, int line, int severity)
     : fname_(fname), line_(line), severity_(severity) {}
 
+<<<<<<< HEAD
 LogMessage& LogMessage::AtLocation(const char* fname, int line) {
   fname_ = fname;
   line_ = line;
@@ -197,6 +211,8 @@ LogMessage::~LogMessage() {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #if defined(PLATFORM_POSIX_ANDROID)
 void LogMessage::GenerateLogMessage() {
   int android_log_level;
@@ -223,6 +239,7 @@ void LogMessage::GenerateLogMessage() {
   }
 
   std::stringstream ss;
+<<<<<<< HEAD
   const char* const partial_name = strrchr(fname_, '/');
   ss << (partial_name != nullptr ? partial_name + 1 : fname_) << ":" << line_
      << " " << str();
@@ -231,6 +248,11 @@ void LogMessage::GenerateLogMessage() {
   // Also log to stderr (for standalone Android apps).
   std::cerr << "native : " << ss.str() << std::endl;
 
+=======
+  ss << fname_ << ":" << line_ << " " << str();
+  __android_log_write(android_log_level, "native", ss.str().c_str());
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Android logging at level FATAL does not terminate execution, so abort()
   // is still required to stop the program.
   if (severity_ == FATAL) {
@@ -241,6 +263,7 @@ void LogMessage::GenerateLogMessage() {
 #else
 
 void LogMessage::GenerateLogMessage() {
+<<<<<<< HEAD
   static bool log_thread_id = EmitThreadIdFromEnv();
   uint64 now_micros = EnvTime::NowMicros();
   time_t now_seconds = static_cast<time_t>(now_micros / 1000000);
@@ -283,6 +306,16 @@ bool LogMessage::VmoduleActivated(const char* fname, int level) {
   auto it = vmodules->find(module);
   return it != vmodules->end() && it->second >= level;
 }
+=======
+  // TODO(jeff,sanjay): For open source version, replace this with something
+  // that logs through the env or something and fill in appropriate time info.
+  fprintf(stderr, "%c %s:%d] %s\n", "IWEF"[severity_], fname_, line_,
+          str().c_str());
+}
+#endif
+
+LogMessage::~LogMessage() { GenerateLogMessage(); }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 LogMessageFatal::LogMessageFatal(const char* file, int line)
     : LogMessage(file, line, FATAL) {}
@@ -293,17 +326,24 @@ LogMessageFatal::~LogMessageFatal() {
   abort();
 }
 
+<<<<<<< HEAD
 void LogString(const char* fname, int line, int severity,
                const string& message) {
   LogMessage(fname, line, severity) << message;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 template <>
 void MakeCheckOpValueString(std::ostream* os, const char& v) {
   if (v >= 32 && v <= 126) {
     (*os) << "'" << v << "'";
   } else {
+<<<<<<< HEAD
     (*os) << "char value " << static_cast<short>(v);
+=======
+    (*os) << "char value " << (short)v;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
@@ -312,7 +352,11 @@ void MakeCheckOpValueString(std::ostream* os, const signed char& v) {
   if (v >= 32 && v <= 126) {
     (*os) << "'" << v << "'";
   } else {
+<<<<<<< HEAD
     (*os) << "signed char value " << static_cast<short>(v);
+=======
+    (*os) << "signed char value " << (short)v;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
@@ -321,7 +365,11 @@ void MakeCheckOpValueString(std::ostream* os, const unsigned char& v) {
   if (v >= 32 && v <= 126) {
     (*os) << "'" << v << "'";
   } else {
+<<<<<<< HEAD
     (*os) << "unsigned char value " << static_cast<unsigned short>(v);
+=======
+    (*os) << "unsigned char value " << (unsigned short)v;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 }
 
@@ -349,6 +397,7 @@ string* CheckOpMessageBuilder::NewString() {
   return new string(stream_->str());
 }
 
+<<<<<<< HEAD
 namespace {
 // The following code behaves like AtomicStatsCounter::LossyAdd() for
 // speed since it is fine to lose occasional updates.
@@ -391,5 +440,7 @@ bool LogEveryNSecState::ShouldLog(double seconds) {
   return true;
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace internal
 }  // namespace tensorflow

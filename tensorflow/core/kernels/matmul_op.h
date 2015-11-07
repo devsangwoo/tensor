@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,13 @@ limitations under the License.
 #if defined(TENSORFLOW_USE_CUSTOM_CONTRACTION_KERNEL)
 #include "tensorflow/core/kernels/eigen_contraction_kernel.h"
 #endif
+=======
+#ifndef TENSORFLOW_KERNELS_MATMUL_OP_H_
+#define TENSORFLOW_KERNELS_MATMUL_OP_H_
+
+#include "tensorflow/core/framework/tensor_types.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace functor {
@@ -34,8 +42,12 @@ struct MatMulTypes {
   typedef Eigen::TensorMap<Eigen::Tensor<T, 2, Eigen::RowMajor>, Eigen::Aligned>
       out_type;
   typedef Eigen::TensorMap<Eigen::Tensor<const T, 2, Eigen::RowMajor>,
+<<<<<<< HEAD
                            Eigen::Aligned>
       in_type;
+=======
+                           Eigen::Aligned> in_type;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 template <typename Device, typename In0, typename In1, typename Out,
@@ -57,6 +69,7 @@ struct MatMulFunctor {
 };
 
 }  // end namespace functor
+<<<<<<< HEAD
 
 #if GOOGLE_CUDA || TENSORFLOW_USE_ROCM
 // Encapsulate all the shape information that is used in matmul operations.
@@ -122,3 +135,8 @@ typedef Eigen::GpuDevice GPUDevice;
 }  // end namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_KERNELS_MATMUL_OP_H_
+=======
+}  // end namespace tensorflow
+
+#endif  // TENSORFLOW_KERNELS_MATMUL_OP_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

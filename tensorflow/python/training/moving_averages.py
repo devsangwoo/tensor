@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,11 +34,27 @@ from tensorflow.python.util.tf_export import tf_export
 
 # TODO(touts): switch to variables.Variable.
 def assign_moving_average(variable, value, decay, zero_debias=True, name=None):
+=======
+"""Maintain moving averages of parameters."""
+from tensorflow.python.framework import ops
+from tensorflow.python.framework import types
+from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import constant_op
+from tensorflow.python.ops import control_flow_ops
+from tensorflow.python.ops import math_ops
+from tensorflow.python.ops import state_ops
+from tensorflow.python.ops import variables
+
+
+# TODO(mdevin): switch to variables.Variable.
+def assign_moving_average(variable, value, decay, name=None):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """Compute the moving average of a variable.
 
   The moving average of 'variable' updated with 'value' is:
     variable * decay + value * (1 - decay)
 
+<<<<<<< HEAD
   The returned Operation sets 'variable' to the newly computed moving average,
   by performing this subtraction:
      variable -= (1 - decay) * (variable - value)
@@ -270,6 +287,34 @@ def _zero_debias(strategy, unbiased_var, value, decay):
 @tf_export("train.ExponentialMovingAverage")
 class ExponentialMovingAverage(object):
   """Maintains moving averages of variables by employing an exponential decay.
+=======
+  The returned Operation sets 'variable' to the newly computed moving average.
+
+  The new value of 'variable' can be set with the 'AssignSub' op as:
+     variable -= (1 - decay) * (variable - value)
+
+  Args:
+    variable: A Variable.
+    value: A tensor with the same shape as 'variable'
+    decay: A float Tensor or float value.  The moving average decay.
+    name: Optional name of the returned operation.
+
+  Returns:
+    An Operation that updates 'variable' with the newly computed
+    moving average.
+  """
+  with ops.op_scope([variable, value, decay], name, "AssignMovingAvg") as name:
+    with ops.device(variable.device):
+      decay = ops.convert_to_tensor(1.0 - decay, name="decay")
+      if decay.dtype != variable.dtype.base_dtype:
+        decay = math_ops.cast(decay, variable.dtype.base_dtype)
+      return state_ops.assign_sub(variable, (variable - value) * decay,
+                                  name=name)
+
+
+class ExponentialMovingAverage(object):
+  """Maintains moving averages of variables by employing and exponential decay.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   When training a model, it is often beneficial to maintain moving averages of
   the trained parameters.  Evaluations that use averaged parameters sometimes
@@ -316,12 +361,23 @@ class ExponentialMovingAverage(object):
   # Create an ExponentialMovingAverage object
   ema = tf.train.ExponentialMovingAverage(decay=0.9999)
 
+<<<<<<< HEAD
   with tf.control_dependencies([opt_op]):
       # Create the shadow variables, and add ops to maintain moving averages
       # of var0 and var1. This also creates an op that will update the moving
       # averages after each training step.  This is what we will use in place
       # of the usual training op.
       training_op = ema.apply([var0, var1])
+=======
+  # Create the shadow variables, and add ops to maintain moving averages
+  # of var0 and var1.
+  maintain_averages_op = ema.apply([var0, var1])
+
+  # Create an op that will update the moving averages after each training
+  # step.  This is what we will use in place of the usuall trainig op.
+  with tf.control_dependencies([opt_op]):
+      training_op = tf.group(maintain_averages_op)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   ...train the model by running training_op...
   ```
@@ -333,8 +389,13 @@ class ExponentialMovingAverage(object):
      for a given variable.
   *  Build a model normally but load the checkpoint files to evaluate by using
      the shadow variable names.  For this use the `average_name()` method.  See
+<<<<<<< HEAD
      the `tf.compat.v1.train.Saver` for more
      information on restoring saved variables.
+=======
+     the [Saver class](train.md#Saver) for more information on restoring saved
+     variables.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Example of restoring the shadow variable values:
 
@@ -342,6 +403,7 @@ class ExponentialMovingAverage(object):
   # Create a Saver that loads variables from their saved shadow values.
   shadow_var0_name = ema.average_name(var0)
   shadow_var1_name = ema.average_name(var1)
+<<<<<<< HEAD
   saver = tf.compat.v1.train.Saver({shadow_var0_name: var0, shadow_var1_name:
   var1})
   saver.restore(...checkpoint filename...)
@@ -361,6 +423,28 @@ class ExponentialMovingAverage(object):
 
     The optional `num_updates` parameter allows one to tweak the decay rate
     dynamically. It is typical to pass the count of training steps, usually
+=======
+  saver = tf.train.Saver({shadow_var0_name: var0, shadow_var1_name: var1})
+  saver.restore(...checkpoint filename...)
+  # var0 and var1 now hold the moving average values
+  ```
+
+  @@__init__
+  @@apply
+  @@average_name
+  @@average
+  """
+
+  def __init__(self, decay, num_updates=None,
+               name="ExponentialMovingAverage"):
+    """Creates a new ExponentialMovingAverage object.
+
+    The `Apply()` method has to be called to create shadow variables and add
+    ops to maintain moving averages.
+
+    The optional `num_updates` parameter allows one to tweak the decay rate
+    dynamically. .  It is typical to pass the count of training steps, usually
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     kept in a variable that is incremented at each step, in which case the
     decay rate is lower at the start of training.  This makes moving averages
     move faster.  If passed, the actual decay rate used is:
@@ -370,6 +454,7 @@ class ExponentialMovingAverage(object):
     Args:
       decay: Float.  The decay to use.
       num_updates: Optional count of number of updates applied to variables.
+<<<<<<< HEAD
       zero_debias: If `True`, zero debias moving-averages that are initialized
         with tensors.
       name: String. Optional prefix name to use for the name of ops added in
@@ -386,12 +471,23 @@ class ExponentialMovingAverage(object):
     """The name of this ExponentialMovingAverage object."""
     return self._name
 
+=======
+      name: String. Optional prefix name to use for the name of ops added in
+        `Apply()`.
+    """
+    self._decay = decay
+    self._num_updates = num_updates
+    self._name = name
+    self._averages = {}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def apply(self, var_list=None):
     """Maintains moving averages of variables.
 
     `var_list` must be a list of `Variable` or `Tensor` objects.  This method
     creates shadow variables for all elements of `var_list`.  Shadow variables
     for `Variable` objects are initialized to the variable's initial value.
+<<<<<<< HEAD
     They will be added to the `GraphKeys.MOVING_AVERAGE_VARIABLES` collection.
     For `Tensor` objects, the shadow variables are initialized to 0 and zero
     debiased (see docstring in `assign_moving_average` for more details).
@@ -410,11 +506,28 @@ class ExponentialMovingAverage(object):
     Args:
       var_list: A list of Variable or Tensor objects. The variables and Tensors
         must be of types bfloat16, float16, float32, or float64.
+=======
+    For `Tensor` objects, the shadow variables are initialized to 0.
+
+    shadow variables are created with `trainable=False` and added to the
+    `GraphKeys.ALL_VARIABLES` collection.  They will be returned by calls to
+    `tf.all_variables()`.
+
+    Returns an op that updates all shadow variables as described above.
+
+    Note that `apply()` can be called multiple times with different lists of
+    variables.
+
+    Args:
+      var_list: A list of Variable or Tensor objects. The variables
+        and Tensors must be of types float32 or float64.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Returns:
       An Operation that updates the moving averages.
 
     Raises:
+<<<<<<< HEAD
       TypeError: If the arguments are not an allowed type.
     """
     # TODO(touts): op_scope
@@ -463,13 +576,44 @@ class ExponentialMovingAverage(object):
       if self._num_updates is not None:
         num_updates = math_ops.cast(
             self._num_updates, dtypes.float32, name="num_updates")
+=======
+      TypeError: If the arguments are not all float32 or float64.
+      ValueError: If the moving average of one of the variables is already
+        being computed.
+    """
+    # TODO(mdevin): op_scope
+    if var_list is None:
+      var_list = variables.trainable_variables()
+    for var in var_list:
+      if var.dtype.base_dtype not in [types.float32, types.float64]:
+        raise TypeError("The variables must be float or double: %s" % var)
+      if var in self._averages:
+        raise ValueError("Moving average already computed for: %s" % var)
+      with ops.name_scope(var.op.name + "/" + self._name) as scope:
+        with ops.device(var.device):
+          if isinstance(var, variables.Variable):
+            initial_value = var.initialized_value()
+          else:
+            initial_value = array_ops.zeros(var.get_shape().as_list())
+          avg = variables.Variable(initial_value, name=scope, trainable=False)
+          self._averages[var] = avg
+    with ops.name_scope(self._name) as scope:
+      decay = ops.convert_to_tensor(self._decay, name="decay")
+      if self._num_updates is not None:
+        num_updates = math_ops.cast(self._num_updates, types.float32,
+                                    name="num_updates")
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         decay = math_ops.minimum(decay,
                                  (1.0 + num_updates) / (10.0 + num_updates))
       updates = []
       for var in var_list:
+<<<<<<< HEAD
         avg = self._averages[var.experimental_ref()]
         zero_debias = avg.experimental_ref() in zero_debias_true
         updates.append(assign_moving_average(avg, var, decay, zero_debias))
+=======
+        updates.append(assign_moving_average(self._averages[var], var, decay))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       return control_flow_ops.group(*updates, name=scope)
 
   def average(self, var):
@@ -480,9 +624,15 @@ class ExponentialMovingAverage(object):
 
     Returns:
       A `Variable` object or `None` if the moving average of `var`
+<<<<<<< HEAD
       is not maintained.
     """
     return self._averages.get(var.experimental_ref(), None)
+=======
+      is not maintained..
+    """
+    return self._averages.get(var, None)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def average_name(self, var):
     """Returns the name of the `Variable` holding the average for `var`.
@@ -494,7 +644,11 @@ class ExponentialMovingAverage(object):
     To restore variables, you have to know the name of the shadow variables.
     That name and the original variable can then be passed to a `Saver()` object
     to restore the variable from the moving average value with:
+<<<<<<< HEAD
       `saver = tf.compat.v1.train.Saver({ema.average_name(var): var})`
+=======
+      `saver = tf.train.Saver({ema.average_name(var): var})`
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     `average_name()` can be called whether or not `apply()` has been called.
 
@@ -502,6 +656,7 @@ class ExponentialMovingAverage(object):
       var: A `Variable` object.
 
     Returns:
+<<<<<<< HEAD
       A string: The name of the variable that will be used or was used
       by the `ExponentialMovingAverage class` to hold the moving average of
       `var`.
@@ -559,3 +714,10 @@ class ExponentialMovingAverage(object):
       if v.name not in moving_avg_variable_names and v.op.name not in name_map:
         name_map[v.op.name] = v
     return name_map
+=======
+      A string: the name of the variable that will be used or was used
+      by the `ExponentialMovingAverage class` to hold the moving average of
+      `var`.
+    """
+    return var.op.name + "/" + self._name
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

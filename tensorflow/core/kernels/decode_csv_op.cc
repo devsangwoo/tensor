@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,15 @@ limitations under the License.
 #include "tensorflow/core/framework/types.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/strings/numbers.h"
+=======
+// See docs in ../ops/parsing_ops.cc.
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/lib/strings/numbers.h"
+#include "tensorflow/core/public/tensor.h"
+#include "tensorflow/core/public/tensor_shape.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -30,6 +40,7 @@ class DecodeCSVOp : public OpKernel {
     string delim;
 
     OP_REQUIRES_OK(ctx, ctx->GetAttr("OUT_TYPE", &out_type_));
+<<<<<<< HEAD
     OP_REQUIRES(ctx, out_type_.size() < std::numeric_limits<int>::max(),
                 errors::InvalidArgument("Out type too large"));
     OP_REQUIRES_OK(ctx, ctx->GetAttr("field_delim", &delim));
@@ -51,6 +62,14 @@ class DecodeCSVOp : public OpKernel {
                 errors::InvalidArgument("field_delim should be only 1 char"));
     delim_ = delim[0];
     OP_REQUIRES_OK(ctx, ctx->GetAttr("na_value", &na_value_));
+=======
+    OP_REQUIRES_OK(ctx, ctx->GetAttr("field_delim", &delim));
+
+    OP_REQUIRES(ctx, delim.size() == 1,
+                errors::InvalidArgument("field_delim should be only 1 char"));
+
+    delim_ = delim[0];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   void Compute(OpKernelContext* ctx) override {
@@ -61,27 +80,44 @@ class DecodeCSVOp : public OpKernel {
     OP_REQUIRES_OK(ctx, ctx->input_list("record_defaults", &record_defaults));
 
     for (int i = 0; i < record_defaults.size(); ++i) {
+<<<<<<< HEAD
       OP_REQUIRES(ctx, record_defaults[i].dims() <= 1,
                   errors::InvalidArgument(
                       "Each record default should be at most rank 1"));
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       OP_REQUIRES(ctx, record_defaults[i].NumElements() < 2,
                   errors::InvalidArgument(
                       "There should only be 1 default per field but field ", i,
                       " has ", record_defaults[i].NumElements()));
     }
 
+<<<<<<< HEAD
     auto records_t = records->flat<tstring>();
     int64 records_size = records_t.size();
+=======
+    auto records_t = records->flat<string>();
+    int records_size = records_t.size();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     OpOutputList output;
     OP_REQUIRES_OK(ctx, ctx->output_list("output", &output));
 
+<<<<<<< HEAD
     for (int i = 0; i < static_cast<int>(out_type_.size()); ++i) {
       Tensor* out = nullptr;
       OP_REQUIRES_OK(ctx, output.allocate(i, records->shape(), &out));
     }
 
     for (int64 i = 0; i < records_size; ++i) {
+=======
+    for (size_t i = 0; i < out_type_.size(); ++i) {
+      Tensor* out = nullptr;
+      output.allocate(i, records->shape(), &out);
+    }
+
+    for (int i = 0; i < records_size; ++i) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       const StringPiece record(records_t(i));
       std::vector<string> fields;
       ExtractFields(ctx, record, &fields);
@@ -91,6 +127,7 @@ class DecodeCSVOp : public OpKernel {
                                           " in record ", i));
 
       // Check each field in the record
+<<<<<<< HEAD
       for (int f = 0; f < static_cast<int>(out_type_.size()); ++f) {
         const DataType& dtype = out_type_[f];
         switch (dtype) {
@@ -98,6 +135,15 @@ class DecodeCSVOp : public OpKernel {
             // If this field is empty or NA value, check if default is given:
             // If yes, use default value; Otherwise report error.
             if (fields[f].empty() || fields[f] == na_value_) {
+=======
+      for (size_t f = 0; f < out_type_.size(); ++f) {
+        const DataType& dtype = out_type_[f];
+        switch (dtype) {
+          case DT_INT32: {
+            // If this field is empty, check if default is given:
+            // If yes, use default value; Otherwise report error.
+            if (fields[f].empty()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               OP_REQUIRES(ctx, record_defaults[f].NumElements() == 1,
                           errors::InvalidArgument(
                               "Field ", f,
@@ -106,18 +152,31 @@ class DecodeCSVOp : public OpKernel {
               output[f]->flat<int32>()(i) = record_defaults[f].flat<int32>()(0);
             } else {
               int32 value;
+<<<<<<< HEAD
               OP_REQUIRES(ctx, strings::safe_strto32(fields[f], &value),
                           errors::InvalidArgument(
                               "Field ", f, " in record ", i,
                               " is not a valid int32: ", fields[f]));
+=======
+              OP_REQUIRES(ctx, strings::safe_strto32(fields[f].c_str(), &value),
+                          errors::InvalidArgument("Field ", f, " in record ", i,
+                                                  " is not a valid int32: ",
+                                                  fields[f]));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               output[f]->flat<int32>()(i) = value;
             }
             break;
           }
           case DT_INT64: {
+<<<<<<< HEAD
             // If this field is empty or NA value, check if default is given:
             // If yes, use default value; Otherwise report error.
             if (fields[f].empty() || fields[f] == na_value_) {
+=======
+            // If this field is empty, check if default is given:
+            // If yes, use default value; Otherwise report error.
+            if (fields[f].empty()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               OP_REQUIRES(ctx, record_defaults[f].NumElements() == 1,
                           errors::InvalidArgument(
                               "Field ", f,
@@ -126,18 +185,31 @@ class DecodeCSVOp : public OpKernel {
               output[f]->flat<int64>()(i) = record_defaults[f].flat<int64>()(0);
             } else {
               int64 value;
+<<<<<<< HEAD
               OP_REQUIRES(ctx, strings::safe_strto64(fields[f], &value),
                           errors::InvalidArgument(
                               "Field ", f, " in record ", i,
                               " is not a valid int64: ", fields[f]));
+=======
+              OP_REQUIRES(ctx, strings::safe_strto64(fields[f].c_str(), &value),
+                          errors::InvalidArgument("Field ", f, " in record ", i,
+                                                  " is not a valid int64: ",
+                                                  fields[f]));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               output[f]->flat<int64>()(i) = value;
             }
             break;
           }
           case DT_FLOAT: {
+<<<<<<< HEAD
             // If this field is empty or NA value, check if default is given:
             // If yes, use default value; Otherwise report error.
             if (fields[f].empty() || fields[f] == na_value_) {
+=======
+            // If this field is empty, check if default is given:
+            // If yes, use default value; Otherwise report error.
+            if (fields[f].empty()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               OP_REQUIRES(ctx, record_defaults[f].NumElements() == 1,
                           errors::InvalidArgument(
                               "Field ", f,
@@ -145,14 +217,22 @@ class DecodeCSVOp : public OpKernel {
               output[f]->flat<float>()(i) = record_defaults[f].flat<float>()(0);
             } else {
               float value;
+<<<<<<< HEAD
               OP_REQUIRES(ctx, strings::safe_strtof(fields[f], &value),
                           errors::InvalidArgument(
                               "Field ", f, " in record ", i,
                               " is not a valid float: ", fields[f]));
+=======
+              OP_REQUIRES(ctx, strings::safe_strtof(fields[f].c_str(), &value),
+                          errors::InvalidArgument("Field ", f, " in record ", i,
+                                                  " is not a valid float: ",
+                                                  fields[f]));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               output[f]->flat<float>()(i) = value;
             }
             break;
           }
+<<<<<<< HEAD
           case DT_DOUBLE: {
             // If this field is empty or NA value, check if default is given:
             // If yes, use default value; Otherwise report error.
@@ -177,14 +257,27 @@ class DecodeCSVOp : public OpKernel {
             // If this field is empty or NA value, check if default is given:
             // If yes, use default value; Otherwise report error.
             if (fields[f].empty() || fields[f] == na_value_) {
+=======
+          case DT_STRING: {
+            // If this field is empty, check if default is given:
+            // If yes, use default value; Otherwise report error.
+            if (fields[f].empty()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               OP_REQUIRES(ctx, record_defaults[f].NumElements() == 1,
                           errors::InvalidArgument(
                               "Field ", f,
                               " is required but missing in record ", i, "!"));
+<<<<<<< HEAD
               output[f]->flat<tstring>()(i) =
                   record_defaults[f].flat<tstring>()(0);
             } else {
               output[f]->flat<tstring>()(i) = std::move(fields[f]);
+=======
+              output[f]->flat<string>()(i) =
+                  record_defaults[f].flat<string>()(0);
+            } else {
+              output[f]->flat<string>()(i) = fields[f];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             }
             break;
           }
@@ -199,6 +292,7 @@ class DecodeCSVOp : public OpKernel {
 
  private:
   std::vector<DataType> out_type_;
+<<<<<<< HEAD
   std::vector<int64> select_cols_;
   char delim_;
   bool use_quote_delim_;
@@ -211,6 +305,13 @@ class DecodeCSVOp : public OpKernel {
     int64 num_fields_parsed = 0;
     int64 selector_idx = 0;  // Keep track of index into select_cols
 
+=======
+  char delim_;
+
+  void ExtractFields(OpKernelContext* ctx, StringPiece input,
+                     std::vector<string>* result) {
+    int current_idx = 0;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if (!input.empty()) {
       while (static_cast<size_t>(current_idx) < input.size()) {
         if (input[current_idx] == '\n' || input[current_idx] == '\r') {
@@ -219,11 +320,15 @@ class DecodeCSVOp : public OpKernel {
         }
 
         bool quoted = false;
+<<<<<<< HEAD
         bool include =
             (select_all_cols_ || select_cols_[selector_idx] ==
                                      static_cast<size_t>(num_fields_parsed));
 
         if (use_quote_delim_ && input[current_idx] == '"') {
+=======
+        if (input[current_idx] == '"') {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           quoted = true;
           current_idx++;
         }
@@ -233,6 +338,7 @@ class DecodeCSVOp : public OpKernel {
         if (!quoted) {
           while (static_cast<size_t>(current_idx) < input.size() &&
                  input[current_idx] != delim_) {
+<<<<<<< HEAD
             OP_REQUIRES(ctx,
                         (!use_quote_delim_ || input[current_idx] != '"') &&
                             input[current_idx] != '\n' &&
@@ -240,41 +346,68 @@ class DecodeCSVOp : public OpKernel {
                         errors::InvalidArgument(
                             "Unquoted fields cannot have quotes/CRLFs inside"));
             if (include) field += input[current_idx];
+=======
+            OP_REQUIRES(ctx, input[current_idx] != '"' &&
+                                 input[current_idx] != '\n' &&
+                                 input[current_idx] != '\r',
+                        errors::InvalidArgument(
+                            "Unquoted fields cannot have quotes/CRLFs inside"));
+            field += input[current_idx];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
             current_idx++;
           }
 
           // Go to next field or the end
           current_idx++;
+<<<<<<< HEAD
         } else if (use_quote_delim_) {
+=======
+        } else {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           // Quoted field needs to be ended with '"' and delim or end
           while (
               (static_cast<size_t>(current_idx) < input.size() - 1) &&
               (input[current_idx] != '"' || input[current_idx + 1] != delim_)) {
             if (input[current_idx] != '"') {
+<<<<<<< HEAD
               if (include) field += input[current_idx];
+=======
+              field += input[current_idx];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               current_idx++;
             } else {
               OP_REQUIRES(
                   ctx, input[current_idx + 1] == '"',
                   errors::InvalidArgument("Quote inside a string has to be "
                                           "escaped by another quote"));
+<<<<<<< HEAD
               if (include) field += '"';
+=======
+              field += '"';
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               current_idx += 2;
             }
           }
 
           OP_REQUIRES(
               ctx,
+<<<<<<< HEAD
               (static_cast<size_t>(current_idx) < input.size() &&
                input[current_idx] == '"' &&
                (static_cast<size_t>(current_idx) == input.size() - 1 ||
                 input[current_idx + 1] == delim_)),
+=======
+              input[current_idx] == '"' &&
+                  (static_cast<size_t>(current_idx) == input.size() - 1 ||
+                   input[current_idx + 1] == delim_),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
               errors::InvalidArgument("Quoted field has to end with quote "
                                       "followed by delim or end"));
 
           current_idx += 2;
         }
 
+<<<<<<< HEAD
         num_fields_parsed++;
         if (include) {
           result->push_back(field);
@@ -289,6 +422,13 @@ class DecodeCSVOp : public OpKernel {
       // Check if the last field is missing
       if (include && input[input.size() - 1] == delim_)
         result->push_back(string());
+=======
+        result->push_back(field);
+      }
+
+      // Check if the last field is missing
+      if (input[input.size() - 1] == delim_) result->push_back(string());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 };

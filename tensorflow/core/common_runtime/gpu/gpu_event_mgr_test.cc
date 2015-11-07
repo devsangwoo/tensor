@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #if GOOGLE_CUDA
 
 #include "tensorflow/core/common_runtime/gpu/gpu_event_mgr.h"
 
+<<<<<<< HEAD
 #include <atomic>
 #include "tensorflow/core/common_runtime/dma_helper.h"
 #include "tensorflow/core/common_runtime/gpu/gpu_device.h"
@@ -54,20 +58,46 @@ class TEST_EventMgrHelper {
   }
 
   size_t queue_size() {
+=======
+#include "tensorflow/core/common_runtime/gpu/gpu_init.h"
+#include "tensorflow/stream_executor/multi_platform_manager.h"
+#include "tensorflow/stream_executor/stream_executor.h"
+#include <gtest/gtest.h>
+
+namespace gpu = ::perftools::gputools;
+
+namespace tensorflow {
+
+class TEST_EventMgrHelper {
+ public:
+  explicit TEST_EventMgrHelper(EventMgr* em) : em_(em) {}
+
+  int queue_size() {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     mutex_lock l(em_->mu_);
     return em_->used_events_.size();
   }
 
+<<<<<<< HEAD
   size_t free_size() {
+=======
+  int free_size() {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     mutex_lock l(em_->mu_);
     return em_->free_events_.size();
   }
 
+<<<<<<< HEAD
   void QueueTensors(se::Stream* stream, TensorReferenceVector* tensors) {
+=======
+  void QueueTensors(perftools::gputools::Stream* stream,
+                    std::vector<Tensor>* tensors) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     mutex_lock l(em_->mu_);
     em_->QueueTensors(stream, tensors);
   }
 
+<<<<<<< HEAD
   void PollEvents() {
     while (queue_size() > 0) {
       // For ordinary tensor frees, this function
@@ -86,10 +116,18 @@ class TEST_EventMgrHelper {
 
   void StartPollingLoop() { return em_->StartPollingLoop(); }
 
+=======
+  void PollEvents(bool is_dedicated_poller) {
+    mutex_lock l(em_->mu_);
+    em_->PollEvents(is_dedicated_poller);
+  }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
  private:
   EventMgr* em_;
 };
 
+<<<<<<< HEAD
 static std::atomic_int_fast64_t live_tensor_bytes(0);
 
 // A TensorBuffer that counts live memory usage for testing
@@ -111,27 +149,37 @@ class TestTensorBuffer : public TensorBuffer {
   size_t bytes_;
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace {
 
 TEST(EventMgr, Empty) {
   auto stream_exec = GPUMachineManager()->ExecutorForDevice(0).ValueOrDie();
+<<<<<<< HEAD
   TEST_EventMgr em(stream_exec, GPUOptions());
+=======
+  EventMgr em(stream_exec);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TEST_EventMgrHelper th(&em);
   EXPECT_EQ(0, th.queue_size());
   EXPECT_EQ(0, th.free_size());
 }
 
+<<<<<<< HEAD
 static void AddTensorReference(TensorReferenceVector* v, int64 size) {
   TestTensorBuffer* buf = new TestTensorBuffer(size);
   v->push_back(TensorReference(buf));
   buf->Unref();
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Delaying polling until after several enqueings should grow the
 // total number of allocated events.  Once we have enough events for
 // the max simultaneously pending, we should not allocate any more.
 TEST(EventMgr, DelayedPolling) {
   auto stream_exec = GPUMachineManager()->ExecutorForDevice(0).ValueOrDie();
+<<<<<<< HEAD
   TEST_EventMgr em(stream_exec, GPUOptions());
   TEST_EventMgrHelper th(&em);
   EXPECT_EQ(0, th.queue_size());
@@ -142,27 +190,51 @@ TEST(EventMgr, DelayedPolling) {
   for (int i = 0; i < 5; ++i) {
     v = new TensorReferenceVector;
     AddTensorReference(v, 100 * 1048576);
+=======
+  EventMgr em(stream_exec);
+  TEST_EventMgrHelper th(&em);
+  EXPECT_EQ(0, th.queue_size());
+  std::vector<Tensor>* v = nullptr;
+  std::unique_ptr<gpu::Stream> stream(new gpu::Stream(stream_exec));
+  CHECK(stream.get());
+  stream->Init();
+  for (int i = 0; i < 5; ++i) {
+    v = new std::vector<Tensor>;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     th.QueueTensors(stream.get(), v);
     EXPECT_EQ(i + 1, th.queue_size());
     EXPECT_EQ(0, th.free_size());
   }
+<<<<<<< HEAD
   th.PollEvents();
+=======
+  th.PollEvents(false);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   EXPECT_EQ(0, th.queue_size());
   EXPECT_EQ(5, th.free_size());
   for (int j = 0; j < 2; ++j) {
     for (int i = 0; i < 5; ++i) {
+<<<<<<< HEAD
       v = new TensorReferenceVector;
       AddTensorReference(v, 100 * 1048576);
+=======
+      v = new std::vector<Tensor>;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       th.QueueTensors(stream.get(), v);
       EXPECT_EQ(i + 1, th.queue_size());
       EXPECT_EQ(4 - i, th.free_size());
     }
+<<<<<<< HEAD
     th.PollEvents();
+=======
+    th.PollEvents(false);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     EXPECT_EQ(0, th.queue_size());
     EXPECT_EQ(5, th.free_size());
   }
 }
 
+<<<<<<< HEAD
 TEST(EventMgr, FlushLargeTensorImmediately) {
   auto stream_exec = GPUMachineManager()->ExecutorForDevice(0).ValueOrDie();
   TEST_EventMgr em(stream_exec, GPUOptions());
@@ -239,12 +311,55 @@ TEST(EventMgr, ManySmallTensorsSeparateCallsFlushed) {
     // Some of the tensors at least should be flushed
     EXPECT_GT(1000 * 100 * 1024, live_tensor_bytes);
   }
+=======
+// Immediate polling should require only one event to be allocated.
+TEST(EventMgr, ImmediatePolling) {
+  auto stream_exec = GPUMachineManager()->ExecutorForDevice(0).ValueOrDie();
+  EventMgr em(stream_exec);
+  TEST_EventMgrHelper th(&em);
+  EXPECT_EQ(0, th.queue_size());
+  EXPECT_EQ(0, th.free_size());
+  std::vector<Tensor>* v = nullptr;
+  std::unique_ptr<gpu::Stream> stream(new gpu::Stream(stream_exec));
+  CHECK(stream.get());
+  stream->Init();
+  for (int i = 0; i < 5; ++i) {
+    v = new std::vector<Tensor>;
+    em.ThenDeleteTensors(stream.get(), v);
+    EXPECT_EQ(0, th.queue_size());
+    EXPECT_EQ(1, th.free_size());
+  }
+}
+
+// If we delay polling by more than 1 second, the backup polling loop
+// should clear the queue.
+TEST(EventMgr, LongDelayedPolling) {
+  auto stream_exec = GPUMachineManager()->ExecutorForDevice(0).ValueOrDie();
+  EventMgr em(stream_exec);
+  TEST_EventMgrHelper th(&em);
+  EXPECT_EQ(0, th.queue_size());
+  EXPECT_EQ(0, th.free_size());
+  std::vector<Tensor>* v = nullptr;
+  std::unique_ptr<gpu::Stream> stream(new gpu::Stream(stream_exec));
+  CHECK(stream.get());
+  stream->Init();
+  for (int i = 0; i < 5; ++i) {
+    v = new std::vector<Tensor>;
+    th.QueueTensors(stream.get(), v);
+    EXPECT_EQ(1 + i, th.queue_size());
+    EXPECT_EQ(0, th.free_size());
+  }
+  sleep(1);
+  EXPECT_EQ(0, th.queue_size());
+  EXPECT_EQ(5, th.free_size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // Deleting the EventMgr when events are still pending should shut
 // down gracefully.
 TEST(EventMgr, NonEmptyShutdown) {
   auto stream_exec = GPUMachineManager()->ExecutorForDevice(0).ValueOrDie();
+<<<<<<< HEAD
   TEST_EventMgr em(stream_exec, GPUOptions());
   TEST_EventMgrHelper th(&em);
   EXPECT_EQ(0, th.queue_size());
@@ -255,12 +370,25 @@ TEST(EventMgr, NonEmptyShutdown) {
   for (int i = 0; i < 5; ++i) {
     TensorReferenceVector* v = new TensorReferenceVector;
     AddTensorReference(v, 100 * 1048576);
+=======
+  EventMgr em(stream_exec);
+  TEST_EventMgrHelper th(&em);
+  EXPECT_EQ(0, th.queue_size());
+  EXPECT_EQ(0, th.free_size());
+  std::vector<Tensor>* v = nullptr;
+  std::unique_ptr<gpu::Stream> stream(new gpu::Stream(stream_exec));
+  CHECK(stream.get());
+  stream->Init();
+  for (int i = 0; i < 5; ++i) {
+    v = new std::vector<Tensor>;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     th.QueueTensors(stream.get(), v);
     EXPECT_EQ(1 + i, th.queue_size());
     EXPECT_EQ(0, th.free_size());
   }
 }
 
+<<<<<<< HEAD
 // Tests that WarnIfInCallback() triggers correctly.
 TEST(EventMgr, WarnIfInCallback) {
   auto stream_exec = GPUMachineManager()->ExecutorForDevice(0).ValueOrDie();
@@ -856,6 +984,8 @@ BENCHMARK(BM_chain_1M_100_true)->Arg(2);
 BENCHMARK(BM_chain_1M_100_false)->Arg(8);
 BENCHMARK(BM_chain_1M_100_true)->Arg(8);
 #endif
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,14 +20,29 @@ limitations under the License.
 #include "tensorflow/core/framework/summary.pb.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/core/status.h"
+=======
+#include "tensorflow/core/util/events_writer.h"
+
+#include <math.h>
+#include "tensorflow/core/lib/core/errors.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/core/status_test_util.h"
 #include "tensorflow/core/lib/io/path.h"
 #include "tensorflow/core/lib/io/record_reader.h"
 #include "tensorflow/core/lib/strings/strcat.h"
+<<<<<<< HEAD
 #include "tensorflow/core/platform/env.h"
 #include "tensorflow/core/platform/logging.h"
 #include "tensorflow/core/platform/protobuf.h"
 #include "tensorflow/core/platform/test.h"
+=======
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/platform/protobuf.h"
+#include "tensorflow/core/platform/test.h"
+#include "tensorflow/core/public/env.h"
+#include "tensorflow/core/public/status.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/util/event.pb.h"
 
 namespace tensorflow {
@@ -53,7 +69,11 @@ void WriteFile(EventsWriter* writer) {
 
 static bool ReadEventProto(io::RecordReader* reader, uint64* offset,
                            Event* proto) {
+<<<<<<< HEAD
   tstring record;
+=======
+  string record;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   Status s = reader->ReadRecord(offset, &record);
   if (!s.ok()) {
     return false;
@@ -62,10 +82,17 @@ static bool ReadEventProto(io::RecordReader* reader, uint64* offset,
 }
 
 void VerifyFile(const string& filename) {
+<<<<<<< HEAD
   CHECK(env()->FileExists(filename).ok());
   std::unique_ptr<RandomAccessFile> event_file;
   TF_CHECK_OK(env()->NewRandomAccessFile(filename, &event_file));
   io::RecordReader* reader = new io::RecordReader(event_file.get());
+=======
+  CHECK(env()->FileExists(filename));
+  RandomAccessFile* event_file;
+  TF_CHECK_OK(env()->NewRandomAccessFile(filename, &event_file));
+  io::RecordReader* reader = new io::RecordReader(event_file);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   uint64 offset = 0;
 
@@ -101,7 +128,13 @@ void VerifyFile(const string& filename) {
   // EXPECT_THAT(expected, EqualsProto(actual));
 
   TF_CHECK_OK(env()->DeleteFile(filename));
+<<<<<<< HEAD
   delete reader;
+=======
+
+  delete reader;
+  delete event_file;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 string GetDirName(const string& suffix) {
@@ -112,7 +145,11 @@ TEST(EventWriter, WriteFlush) {
   string file_prefix = GetDirName("/writeflush_test");
   EventsWriter writer(file_prefix);
   WriteFile(&writer);
+<<<<<<< HEAD
   TF_EXPECT_OK(writer.Flush());
+=======
+  EXPECT_TRUE(writer.Flush());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string filename = writer.FileName();
   VerifyFile(filename);
 }
@@ -121,7 +158,11 @@ TEST(EventWriter, WriteClose) {
   string file_prefix = GetDirName("/writeclose_test");
   EventsWriter writer(file_prefix);
   WriteFile(&writer);
+<<<<<<< HEAD
   TF_EXPECT_OK(writer.Close());
+=======
+  EXPECT_TRUE(writer.Close());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string filename = writer.FileName();
   VerifyFile(filename);
 }
@@ -140,9 +181,17 @@ TEST(EventWriter, FailFlush) {
   EventsWriter writer(file_prefix);
   string filename = writer.FileName();
   WriteFile(&writer);
+<<<<<<< HEAD
   TF_EXPECT_OK(env()->FileExists(filename));
   TF_ASSERT_OK(env()->DeleteFile(filename));
   EXPECT_TRUE(writer.Flush().ok());
+=======
+  EXPECT_TRUE(env()->FileExists(filename));
+  env()->DeleteFile(filename);
+  EXPECT_FALSE(env()->FileExists(filename));
+  EXPECT_FALSE(writer.Flush());
+  EXPECT_FALSE(env()->FileExists(filename));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(EventWriter, FailClose) {
@@ -150,19 +199,35 @@ TEST(EventWriter, FailClose) {
   EventsWriter writer(file_prefix);
   string filename = writer.FileName();
   WriteFile(&writer);
+<<<<<<< HEAD
   TF_EXPECT_OK(env()->FileExists(filename));
   TF_ASSERT_OK(env()->DeleteFile(filename));
   EXPECT_TRUE(writer.Close().ok());
+=======
+  EXPECT_TRUE(env()->FileExists(filename));
+  env()->DeleteFile(filename);
+  EXPECT_FALSE(env()->FileExists(filename));
+  EXPECT_FALSE(writer.Close());
+  EXPECT_FALSE(env()->FileExists(filename));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(EventWriter, InitWriteClose) {
   string file_prefix = GetDirName("/initwriteclose_test");
   EventsWriter writer(file_prefix);
+<<<<<<< HEAD
   TF_EXPECT_OK(writer.Init());
   string filename0 = writer.FileName();
   TF_EXPECT_OK(env()->FileExists(filename0));
   WriteFile(&writer);
   TF_EXPECT_OK(writer.Close());
+=======
+  EXPECT_TRUE(writer.Init());
+  string filename0 = writer.FileName();
+  EXPECT_TRUE(env()->FileExists(filename0));
+  WriteFile(&writer);
+  EXPECT_TRUE(writer.Close());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string filename1 = writer.FileName();
   EXPECT_EQ(filename0, filename1);
   VerifyFile(filename1);
@@ -172,9 +237,15 @@ TEST(EventWriter, NameWriteClose) {
   string file_prefix = GetDirName("/namewriteclose_test");
   EventsWriter writer(file_prefix);
   string filename = writer.FileName();
+<<<<<<< HEAD
   TF_EXPECT_OK(env()->FileExists(filename));
   WriteFile(&writer);
   TF_EXPECT_OK(writer.Close());
+=======
+  EXPECT_TRUE(env()->FileExists(filename));
+  WriteFile(&writer);
+  EXPECT_TRUE(writer.Close());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   VerifyFile(filename);
 }
 
@@ -182,15 +253,22 @@ TEST(EventWriter, NameClose) {
   string file_prefix = GetDirName("/nameclose_test");
   EventsWriter writer(file_prefix);
   string filename = writer.FileName();
+<<<<<<< HEAD
   TF_EXPECT_OK(writer.Close());
   TF_EXPECT_OK(env()->FileExists(filename));
   TF_ASSERT_OK(env()->DeleteFile(filename));
+=======
+  EXPECT_TRUE(writer.Close());
+  EXPECT_TRUE(env()->FileExists(filename));
+  env()->DeleteFile(filename);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 TEST(EventWriter, FileDeletionBeforeWriting) {
   string file_prefix = GetDirName("/fdbw_test");
   EventsWriter writer(file_prefix);
   string filename0 = writer.FileName();
+<<<<<<< HEAD
   TF_EXPECT_OK(env()->FileExists(filename0));
   env()->SleepForMicroseconds(
       2000000);  // To make sure timestamp part of filename will differ.
@@ -198,6 +276,15 @@ TEST(EventWriter, FileDeletionBeforeWriting) {
   TF_EXPECT_OK(writer.Init());  // Init should reopen file.
   WriteFile(&writer);
   TF_EXPECT_OK(writer.Flush());
+=======
+  EXPECT_TRUE(env()->FileExists(filename0));
+  env()->SleepForMicroseconds(
+      2000000);  // To make sure timestamp part of filename will differ.
+  env()->DeleteFile(filename0);
+  EXPECT_TRUE(writer.Init());  // Init should reopen file.
+  WriteFile(&writer);
+  EXPECT_TRUE(writer.Flush());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string filename1 = writer.FileName();
   EXPECT_NE(filename0, filename1);
   VerifyFile(filename1);

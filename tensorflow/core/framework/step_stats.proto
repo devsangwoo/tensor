@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package tensorflow;
+<<<<<<< HEAD
 option cc_enable_arenas = true;
 option java_outer_classname = "StepStatsProtos";
 option java_multiple_files = true;
@@ -30,11 +31,33 @@ message AllocatorMemoryUsed {
   // These are snapshots of the overall allocator memory stats.
   // The number of live bytes currently allocated by the allocator.
   int64 allocator_bytes_in_use = 5;
+=======
+// option cc_enable_arenas = true;
+
+import "tensorflow/core/framework/tensor_description.proto";
+
+// TODO(tucker): The next 4 message defs are very similar to
+// the *LogEntry messages in profile.proto.  They should be
+// unified in one place.
+
+message AllocatorMemoryUsed {
+  string allocator_name = 1;
+  int64 total_bytes = 2;
+  int64 peak_bytes = 3;
+}
+
+enum AllocationType {
+  AT_NOTUSED = 0;    // tensor was not filled in
+  AT_ALLOCATED = 1;  // tensor was allocated by the Op
+  AT_EXISTING = 2;   // tensor was set to share the value of an existing tensor
+  AT_REF = 3;        // tensor was set to be a reference to an existing tensor
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 // Output sizes recorded for a single execution of a graph node.
 message NodeOutput {
   int32 slot = 1;
+<<<<<<< HEAD
   TensorDescription tensor_description = 3;
 };
 
@@ -49,6 +72,13 @@ message MemoryStats {
   repeated int64 device_persistent_tensor_alloc_ids = 6 [deprecated = true];
 }
 
+=======
+  // Was the tensor allocated by this Op or a previous computation
+  AllocationType allocation_type = 2;
+  TensorDescription tensor_description = 3;
+};
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Time/size stats recorded for a single execution of a graph node.
 message NodeExecStats {
   // TODO(tucker): Use some more compact form of node identity than
@@ -65,6 +95,7 @@ message NodeExecStats {
   string timeline_label = 8;
   int64 scheduled_micros = 9;
   uint32 thread_id = 10;
+<<<<<<< HEAD
   repeated AllocationDescription referenced_tensor = 11;
   MemoryStats memory_stats = 12;
   int64 all_start_nanos = 13;
@@ -72,13 +103,18 @@ message NodeExecStats {
   int64 op_end_rel_nanos = 15;
   int64 all_end_rel_nanos = 16;
   int64 scheduled_nanos = 17;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 message DeviceStepStats {
   string device = 1;
   repeated NodeExecStats node_stats = 2;
+<<<<<<< HEAD
   // Its key is thread id.
   map<uint32, string> thread_names = 3;
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 message StepStats {

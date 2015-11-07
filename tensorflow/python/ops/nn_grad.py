@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,6 +96,20 @@ def _Conv2DBackpropFilterGrad(op, grad):
 
 @ops.RegisterGradient("DepthwiseConv2dNativeBackpropInput")
 def _DepthwiseConv2dNativeBackpropInputGrad(op, grad):
+=======
+"""Gradients for operators defined in nn_ops.py."""
+
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import control_flow_ops
+from tensorflow.python.ops import math_ops
+from tensorflow.python.ops import nn_ops
+from tensorflow.python.ops import gen_nn_ops
+
+
+@ops.RegisterGradient("Conv2DBackpropInput")
+def _DeConv2DGrad(op, grad):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """The derivatives for deconvolution.
 
   Args:
@@ -104,6 +119,7 @@ def _DepthwiseConv2dNativeBackpropInputGrad(op, grad):
   Returns:
     the gradients w.r.t. the input and the filter
   """
+<<<<<<< HEAD
   return [
       None,
       nn_ops.depthwise_conv2d_native_backprop_filter(
@@ -277,6 +293,18 @@ def _MaxPool3DGradGradGrad(op, grad):
               op.get_attr("strides"),
               padding=op.get_attr("padding"),
               data_format=op.get_attr("data_format").decode()))
+=======
+  return [None,
+          nn_ops.conv2d_backprop_filter(grad,
+                                      array_ops.shape(op.inputs[1]),
+                                      op.inputs[2],
+                                      op.get_attr("strides"),
+                                      op.get_attr("padding")),
+          nn_ops.conv2d(grad,
+                        op.inputs[1],
+                        op.get_attr("strides"),
+                        op.get_attr("padding"))]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Softmax")
@@ -292,13 +320,19 @@ def _SoftmaxGrad(op, grad_softmax):
 
   Args:
      op: the Softmax op.
+<<<<<<< HEAD
      grad_softmax:  the tensor representing the gradient w.r.t. the softmax
        output.
+=======
+     grad_softmax:  the tensor representing the gradient w.r.t. the
+       softmax output.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   Returns:
      gradient w.r.t the input to the softmax
 
   """
+<<<<<<< HEAD
   softmax = op.outputs[0]
   sum_channels = math_ops.reduce_sum(grad_softmax * softmax, -1, keepdims=True)
   return (grad_softmax - sum_channels) * softmax
@@ -324,6 +358,21 @@ def _LogSoftmaxGrad(op, grad):
 
 @ops.RegisterGradient("BiasAdd")
 def _BiasAddGrad(op, received_grad):
+=======
+  # TODO(ilyasu): assert that the tensor has two dimensions at
+  # graph-construction time?  Alternatively: do different things
+  # depending on the dimensionality of the input tensors.
+  softmax = op.outputs[0]
+  grad_x = ((grad_softmax -
+             array_ops.reshape(math_ops.reduce_sum(grad_softmax * softmax, [1]),
+                               [-1, 1]))
+            * softmax)
+  return grad_x
+
+
+@ops.RegisterGradient("BiasAdd")
+def _BiasAddGrad(unused_bias_op, received_grad):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   """Return the gradients for the 2 inputs of bias_op.
 
   The first input of unused_bias_op is the tensor t, and its gradient is
@@ -334,13 +383,18 @@ def _BiasAddGrad(op, received_grad):
   received gradient Summed on the batch dimension, which is the first dimension.
 
   Args:
+<<<<<<< HEAD
     op: The BiasOp for which we need to generate gradients.
+=======
+    unused_bias_op: The BiasOp for which we need to generate gradients.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     received_grad: Tensor.  The gradients passed to the BiasOp.
 
   Returns:
     Two tensors, the first one for the "tensor" input of the BiasOp,
     the second one for the "bias" input of the BiasOp.
   """
+<<<<<<< HEAD
   try:
     data_format = op.get_attr("data_format")
   except ValueError:
@@ -408,10 +462,32 @@ def _BiasAddGradV1(unused_bias_op, received_grad):
   reduction_dim_tensor = math_ops.range(array_ops.rank(received_grad) - 1)
   return (received_grad, math_ops.reduce_sum(received_grad,
                                              reduction_dim_tensor))
+=======
+  reduction_dim_tensor = math_ops.range(0, array_ops.rank(received_grad) - 1)
+  return (received_grad, math_ops.reduce_sum(received_grad, reduction_dim_tensor))
+
+
+def _VerifyTensor(t, name, msg):
+  """Assert that the tensor does not contain any NaN's.
+
+  Args:
+    t: Tensor
+    name: name
+    msg: message to log
+  Returns:
+    Tensor, but verified
+  """
+  with ops.name_scope(name):
+    with ops.device(t.device or ops.get_default_graph().get_default_device()):
+      verify_input = array_ops.check_numerics(t, message=msg)
+      out = control_flow_ops.with_dependencies([verify_input], t)
+  return out
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Relu")
 def _ReluGrad(op, grad):
+<<<<<<< HEAD
   return gen_nn_ops.relu_grad(grad, op.outputs[0])
 
 
@@ -429,10 +505,15 @@ def _SeluGradGrad(op, grad):
   return (gen_nn_ops.selu_grad(grad, selu_x),
           array_ops.where(
               selu_x < 0., grad * op.inputs[0], array_ops.zeros_like(selu_x)))
+=======
+  t = _VerifyTensor(op.inputs[0], op.name, "ReluGrad input is not finite.")
+  return gen_nn_ops._relu_grad(grad, t)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Relu6")
 def _Relu6Grad(op, grad):
+<<<<<<< HEAD
   return gen_nn_ops.relu6_grad(grad, op.outputs[0])
 
 
@@ -466,10 +547,14 @@ def _EluGrad(op, grad):
 @ops.RegisterGradient("Selu")
 def _SeluGrad(op, grad):
   return gen_nn_ops.selu_grad(grad, op.outputs[0])
+=======
+  return gen_nn_ops._relu6_grad(grad, op.inputs[0])
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Softplus")
 def _SoftplusGrad(op, grad):
+<<<<<<< HEAD
   return grad * math_ops.sigmoid(op.inputs[0])
 
 
@@ -489,12 +574,19 @@ def _SoftplusGradGrad(op, grad):
 @ops.RegisterGradient("Softsign")
 def _SoftsignGrad(op, grad):
   return gen_nn_ops.softsign_grad(grad, op.inputs[0])
+=======
+  return gen_nn_ops._softplus_grad(grad, op.inputs[0])
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("ReluGrad")
 def _ReluGradGrad(op, grad):
   x = op.inputs[1]
+<<<<<<< HEAD
   return (gen_nn_ops.relu_grad(grad, x),
+=======
+  return (gen_nn_ops._relu_grad(grad, x),
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           array_ops.zeros(shape=array_ops.shape(x), dtype=x.dtype))
 
 
@@ -514,6 +606,7 @@ def _BroadcastMul(vec, mat):
 
 
 @ops.RegisterGradient("SoftmaxCrossEntropyWithLogits")
+<<<<<<< HEAD
 def _SoftmaxCrossEntropyWithLogitsGrad(op, grad_loss, grad_grad):
   """Gradient function for SoftmaxCrossEntropyWithLogits."""
   # grad_loss is the backprop for cost, and we multiply it with the gradients
@@ -564,10 +657,18 @@ def _SparseSoftmaxCrossEntropyWithLogitsGrad(op, grad_0, _):
       "derivative of sparse_softmax_cross_entropy_with_logits due to the fused "
       "implementation's interaction with tf.gradients()")
   return _BroadcastMul(grad_0, sparse_softmax_grad_without_gradient), None
+=======
+def _SoftmaxCrossEntropyWithLogitsGrad(op, grad_0, _):
+  # grad_0 is the backprop for cost, and we multiply it with the gradients
+  # (which is output[1])
+  # There is no gradient for the labels
+  return _BroadcastMul(grad_0, op.outputs[1]), None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("Conv2D")
 def _Conv2DGrad(op, grad):
+<<<<<<< HEAD
   """Gradient function for Conv2D."""
   dilations = op.get_attr("dilations")
   strides = op.get_attr("strides")
@@ -641,6 +742,18 @@ def _Dilation2DGrad(op, grad):
                                         op.get_attr("rates"),
                                         op.get_attr("padding"))
   ]
+=======
+  return [nn_ops.conv2d_backprop_input(array_ops.shape(op.inputs[0]),
+                                       op.inputs[1],
+                                       grad,
+                                       op.get_attr("strides"),
+                                       op.get_attr("padding")),
+          nn_ops.conv2d_backprop_filter(op.inputs[0],
+                                        array_ops.shape(op.inputs[1]),
+                                        grad,
+                                        op.get_attr("strides"),
+                                        op.get_attr("padding"))]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("LRN")
@@ -649,14 +762,20 @@ def _LRNGrad(op, grad):
   bias = op.get_attr("bias")
   alpha = op.get_attr("alpha")
   beta = op.get_attr("beta")
+<<<<<<< HEAD
   return [
       gen_nn_ops.lrn_grad(grad, op.inputs[0], op.outputs[0], depth_radius, bias,
                           alpha, beta)
   ]
+=======
+  return [gen_nn_ops._lrn_grad(grad, op.inputs[0], op.outputs[0],
+                               depth_radius, bias, alpha, beta)]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("AvgPool")
 def _AvgPoolGrad(op, grad):
+<<<<<<< HEAD
   return gen_nn_ops.avg_pool_grad(
       array_ops.shape(op.inputs[0]),
       grad,
@@ -675,10 +794,17 @@ def _AvgPoolGradGrad(op, grad):
               op.get_attr("strides"),
               op.get_attr("padding"),
               data_format=op.get_attr("data_format")))
+=======
+  return gen_nn_ops._avg_pool_grad(array_ops.shape(op.inputs[0]), grad,
+                                   op.get_attr("ksize"),
+                                   op.get_attr("strides"),
+                                   op.get_attr("padding"))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("MaxPool")
 def _MaxPoolGrad(op, grad):
+<<<<<<< HEAD
   return gen_nn_ops.max_pool_grad(
       op.inputs[0],
       op.outputs[0],
@@ -808,6 +934,12 @@ def _FractionalAvgPoolGrad(op, grad_0, unused_grad_1, unused_grad_2):
   return gen_nn_ops.fractional_avg_pool_grad(op.inputs[0].get_shape(), grad_0,
                                              op.outputs[1], op.outputs[2],
                                              op.get_attr("overlapping"))
+=======
+  return gen_nn_ops._max_pool_grad(op.inputs[0], op.outputs[0], grad,
+                                   op.get_attr("ksize"),
+                                   op.get_attr("strides"),
+                                   padding=op.get_attr("padding"))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 
 @ops.RegisterGradient("BatchNormWithGlobalNormalization")
@@ -831,12 +963,17 @@ def _BatchNormWithGlobalNormalizationGrad(op, grad):
         last dimension.
     dg: Backprop for gamma, which is (grad * ((x - m) * rsqrt(v + epsilon)))
   """
+<<<<<<< HEAD
   dx, dm, dv, db, dg = gen_nn_ops.batch_norm_with_global_normalization_grad(
+=======
+  dx, dm, dv, db, dg = gen_nn_ops._batch_norm_with_global_normalization_grad(
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       op.inputs[0], op.inputs[1], op.inputs[2], op.inputs[4], grad,
       op.get_attr("variance_epsilon"), op.get_attr("scale_after_normalization"))
   return dx, dm, dv, db, dg
 
 
+<<<<<<< HEAD
 def _BaseFusedBatchNormGrad(op, version, *grad):
   """Return the gradients for the 3 inputs of BatchNorm.
 
@@ -1054,6 +1191,8 @@ def _FusedBatchNormGradGradV3(op, *grad):
   return grad_grad_y, grad_x, grad_scale, None, None, None
 
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 @ops.RegisterGradient("L2Loss")
 def _L2LossGrad(op, grad):
   """Return the gradients for L2Loss.
@@ -1066,6 +1205,7 @@ def _L2LossGrad(op, grad):
     The gradient, which is (x * grad).
   """
   return op.inputs[0] * grad
+<<<<<<< HEAD
 
 
 @ops.RegisterGradient("TopK")
@@ -1139,3 +1279,5 @@ def _NthElementGrad(op, grad):
   num_selected = array_ops.expand_dims(math_ops.reduce_sum(indicators, -1), -1)
 
   return [math_ops.divide(indicators, num_selected) * grad, None]
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

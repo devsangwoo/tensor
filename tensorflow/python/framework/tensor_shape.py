@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -182,10 +183,20 @@ class Dimension(object):
 
   __slots__ = ["_value"]
 
+=======
+"""Helper classes for tensor shape inference."""
+import tensorflow.python.platform
+
+
+class Dimension(object):
+  """Represents the value of one dimension in a TensorShape."""
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def __init__(self, value):
     """Creates a new Dimension with the given value."""
     if value is None:
       self._value = None
+<<<<<<< HEAD
     elif isinstance(value, Dimension):
       self._value = value
     else:
@@ -200,10 +211,15 @@ class Dimension(object):
             None)
       if self._value < 0:
         raise ValueError("Dimension %d must be >= 0" % self._value)
+=======
+    else:
+      self._value = int(value)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def __repr__(self):
     return "Dimension(%s)" % repr(self._value)
 
+<<<<<<< HEAD
   def __str__(self):
     value = self._value
     return "?" if value is None else str(value)
@@ -214,16 +230,25 @@ class Dimension(object):
       other = as_dimension(other)
     except (TypeError, ValueError):
       return NotImplemented
+=======
+  def __eq__(self, other):
+    """Returns true if `other` has the same known value as this Dimension."""
+    other = as_dimension(other)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if self._value is None or other.value is None:
       return None
     return self._value == other.value
 
   def __ne__(self, other):
     """Returns true if `other` has a different known value from `self`."""
+<<<<<<< HEAD
     try:
       other = as_dimension(other)
     except (TypeError, ValueError):
       return NotImplemented
+=======
+    other = as_dimension(other)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if self._value is None or other.value is None:
       return None
     return self._value != other.value
@@ -231,6 +256,7 @@ class Dimension(object):
   def __int__(self):
     return self._value
 
+<<<<<<< HEAD
   # This is needed for Windows.
   # See https://github.com/tensorflow/tensorflow/pull/9780
   def __long__(self):
@@ -240,6 +266,8 @@ class Dimension(object):
     # Allow use in Python 3 range
     return self._value
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   @property
   def value(self):
     """The value of this dimension, or None if it is unknown."""
@@ -258,8 +286,14 @@ class Dimension(object):
       True if this Dimension and `other` are compatible.
     """
     other = as_dimension(other)
+<<<<<<< HEAD
     return (self._value is None or other.value is None or
             self._value == other.value)
+=======
+    return (self._value is None
+            or other.value is None
+            or self._value == other.value)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def assert_is_compatible_with(self, other):
     """Raises an exception if `other` is not compatible with this Dimension.
@@ -272,14 +306,20 @@ class Dimension(object):
         is_compatible_with).
     """
     if not self.is_compatible_with(other):
+<<<<<<< HEAD
       raise ValueError("Dimensions %s and %s are not compatible" %
                        (self, other))
+=======
+      raise ValueError("Dimensions %s and %s are not compatible"
+                       % (self, other))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def merge_with(self, other):
     """Returns a Dimension that combines the information in `self` and `other`.
 
     Dimensions are combined as follows:
 
+<<<<<<< HEAD
     ```python
     tf.compat.v1.Dimension(n)   .merge_with(tf.compat.v1.Dimension(n))     ==
     tf.compat.v1.Dimension(n)
@@ -293,6 +333,13 @@ class Dimension(object):
     # raises ValueError for n != m
     tf.compat.v1.Dimension(n)   .merge_with(tf.compat.v1.Dimension(m))
     ```
+=======
+      Dimension(n)   .merge_with(Dimension(n))    == Dimension(n)
+      Dimension(n)   .merge_with(Dimension(None)) == Dimension(n)
+      Dimension(None).merge_with(Dimension(n))    == Dimension(n)
+      Dimension(None).merge_with(Dimension(None)) == Dimension(None)
+      Dimension(n)   .merge_with(Dimension(m)) raises ValueError for n != m
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Args:
       other: Another Dimension.
@@ -317,6 +364,7 @@ class Dimension(object):
 
     Dimensions are summed as follows:
 
+<<<<<<< HEAD
     ```python
     tf.compat.v1.Dimension(m)    + tf.compat.v1.Dimension(n)     ==
     tf.compat.v1.Dimension(m + n)
@@ -330,19 +378,33 @@ class Dimension(object):
 
     Args:
       other: Another Dimension, or a value accepted by `as_dimension`.
+=======
+      Dimension(m)    + Dimension(n)    == Dimension(m + n)
+      Dimension(m)    + Dimension(None) == Dimension(None)
+      Dimension(None) + Dimension(n)    == Dimension(None)
+      Dimension(None) + Dimension(None) == Dimension(None)
+
+    Args:
+      other: Another Dimension.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Returns:
       A Dimension whose value is the sum of `self` and `other`.
     """
+<<<<<<< HEAD
     try:
       other = as_dimension(other)
     except (TypeError, ValueError):
       return NotImplemented
+=======
+    other = as_dimension(other)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if self._value is None or other.value is None:
       return Dimension(None)
     else:
       return Dimension(self._value + other.value)
 
+<<<<<<< HEAD
   def __radd__(self, other):
     """Returns the sum of `other` and `self`.
 
@@ -354,11 +416,14 @@ class Dimension(object):
     """
     return self + other
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def __sub__(self, other):
     """Returns the subtraction of `other` from `self`.
 
     Dimensions are subtracted as follows:
 
+<<<<<<< HEAD
     ```python
     tf.compat.v1.Dimension(m)    - tf.compat.v1.Dimension(n)     ==
     tf.compat.v1.Dimension(m - n)
@@ -393,18 +458,35 @@ class Dimension(object):
 
     Returns:
       A Dimension whose value is the subtraction of `self` from `other`.
+=======
+      Dimension(m)    - Dimension(n)    == Dimension(m - n)
+      Dimension(m)    - Dimension(None) == Dimension(None)
+      Dimension(None) - Dimension(n)    == Dimension(None)
+      Dimension(None) - Dimension(None) == Dimension(None)
+
+    Args:
+      other: Another Dimension.
+
+    Returns:
+      A Dimension whose value is the subtraction of sum of `other` from `self`.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """
     other = as_dimension(other)
     if self._value is None or other.value is None:
       return Dimension(None)
     else:
+<<<<<<< HEAD
       return Dimension(other.value - self._value)
+=======
+      return Dimension(self._value - other.value)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def __mul__(self, other):
     """Returns the product of `self` and `other`.
 
     Dimensions are summed as follows:
 
+<<<<<<< HEAD
     ```python
     tf.compat.v1.Dimension(m)    * tf.compat.v1.Dimension(n)     ==
     tf.compat.v1.Dimension(m * n)
@@ -427,11 +509,26 @@ class Dimension(object):
     except (TypeError, ValueError):
       return NotImplemented
 
+=======
+      Dimension(m)    * Dimension(n)    == Dimension(m * n)
+      Dimension(m)    * Dimension(None) == Dimension(None)
+      Dimension(None) * Dimension(n)    == Dimension(None)
+      Dimension(None) * Dimension(None) == Dimension(None)
+
+    Args:
+      other: Another Dimension.
+
+    Returns:
+      A Dimension whose value is the sum of `self` and `other`.
+    """
+    other = as_dimension(other)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     if self._value is None or other.value is None:
       return Dimension(None)
     else:
       return Dimension(self._value * other.value)
 
+<<<<<<< HEAD
   def __rmul__(self, other):
     """Returns the product of `self` and `other`.
 
@@ -482,11 +579,29 @@ class Dimension(object):
 
     Returns:
       A `Dimension` whose value is the integer quotient of `self` and `other`.
+=======
+  def __div__(self, other):
+    """Returns the quotient of `self` and `other`.
+
+    Dimensions are summed as follows:
+
+      Dimension(m)    / Dimension(n)    == Dimension(m / n)
+      Dimension(m)    / Dimension(None) == Dimension(None)
+      Dimension(None) / Dimension(n)    == Dimension(None)
+      Dimension(None) / Dimension(None) == Dimension(None)
+
+    Args:
+      other: Another Dimension.
+
+    Returns:
+      A Dimension whose value is the sum of `self` and `other`.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """
     other = as_dimension(other)
     if self._value is None or other.value is None:
       return Dimension(None)
     else:
+<<<<<<< HEAD
       return Dimension(other.value // self._value)
 
   def __div__(self, other):
@@ -571,6 +686,22 @@ class Dimension(object):
 
     Args:
       other: Another Dimension, or a value accepted by `as_dimension`.
+=======
+      return Dimension(self._value / other.value)
+
+  def __mod__(self, other):
+    """Returns `self` modulo `other.
+
+    Dimension moduli are computed  as follows:
+
+      Dimension(m)    % Dimension(n)     == Dimension(m % n)
+      Dimension(m)    % Dimension(None)  == Dimension(None)
+      Dimension(None) % Dimension(n)     == Dimension(None)
+      Dimension(None) %  Dimension(None) == Dimension(None)
+
+    Args:
+      other: Another Dimension.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Returns:
       A Dimension whose value is `self` modulo `other`.
@@ -581,6 +712,7 @@ class Dimension(object):
     else:
       return Dimension(self._value % other.value)
 
+<<<<<<< HEAD
   def __rmod__(self, other):
     """Returns `other` modulo `self`.
 
@@ -593,17 +725,26 @@ class Dimension(object):
     other = as_dimension(other)
     return other % self
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def __lt__(self, other):
     """Returns True if `self` is known to be less than `other`.
 
     Dimensions are compared as follows:
 
+<<<<<<< HEAD
     ```python
     (tf.compat.v1.Dimension(m)    < tf.compat.v1.Dimension(n))    == (m < n)
     (tf.compat.v1.Dimension(m)    < tf.compat.v1.Dimension(None)) == None
     (tf.compat.v1.Dimension(None) < tf.compat.v1.Dimension(n))    == None
     (tf.compat.v1.Dimension(None) < tf.compat.v1.Dimension(None)) == None
     ```
+=======
+      Dimension(m)    < Dimension(n)    == m < n
+      Dimension(m)    < Dimension(None) == None
+      Dimension(None) < Dimension(n)    == None
+      Dimension(None) < Dimension(None) == None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Args:
       other: Another Dimension.
@@ -623,12 +764,19 @@ class Dimension(object):
 
     Dimensions are compared as follows:
 
+<<<<<<< HEAD
     ```python
     (tf.compat.v1.Dimension(m)    <= tf.compat.v1.Dimension(n))    == (m <= n)
     (tf.compat.v1.Dimension(m)    <= tf.compat.v1.Dimension(None)) == None
     (tf.compat.v1.Dimension(None) <= tf.compat.v1.Dimension(n))    == None
     (tf.compat.v1.Dimension(None) <= tf.compat.v1.Dimension(None)) == None
     ```
+=======
+      Dimension(m)    <= Dimension(n)    == m <= n
+      Dimension(m)    <= Dimension(None) == None
+      Dimension(None) <= Dimension(n)    == None
+      Dimension(None) <= Dimension(None) == None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Args:
       other: Another Dimension.
@@ -648,12 +796,19 @@ class Dimension(object):
 
     Dimensions are compared as follows:
 
+<<<<<<< HEAD
     ```python
     (tf.compat.v1.Dimension(m)    > tf.compat.v1.Dimension(n))    == (m > n)
     (tf.compat.v1.Dimension(m)    > tf.compat.v1.Dimension(None)) == None
     (tf.compat.v1.Dimension(None) > tf.compat.v1.Dimension(n))    == None
     (tf.compat.v1.Dimension(None) > tf.compat.v1.Dimension(None)) == None
     ```
+=======
+      Dimension(m)    > Dimension(n)    == m > n
+      Dimension(m)    > Dimension(None) == None
+      Dimension(None) > Dimension(n)    == None
+      Dimension(None) > Dimension(None) == None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Args:
       other: Another Dimension.
@@ -673,12 +828,19 @@ class Dimension(object):
 
     Dimensions are compared as follows:
 
+<<<<<<< HEAD
     ```python
     (tf.compat.v1.Dimension(m)    >= tf.compat.v1.Dimension(n))    == (m >= n)
     (tf.compat.v1.Dimension(m)    >= tf.compat.v1.Dimension(None)) == None
     (tf.compat.v1.Dimension(None) >= tf.compat.v1.Dimension(n))    == None
     (tf.compat.v1.Dimension(None) >= tf.compat.v1.Dimension(None)) == None
     ```
+=======
+      Dimension(m)    >= Dimension(n)    == m >= n
+      Dimension(m)    >= Dimension(None) == None
+      Dimension(None) >= Dimension(n)    == None
+      Dimension(None) >= Dimension(None) == None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     Args:
       other: Another Dimension.
@@ -693,14 +855,21 @@ class Dimension(object):
     else:
       return self._value >= other.value
 
+<<<<<<< HEAD
   def __reduce__(self):
     return Dimension, (self._value,)
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 def as_dimension(value):
   """Converts the given value to a Dimension.
 
+<<<<<<< HEAD
   A Dimension input will be returned unmodified.
+=======
+  A Dimenson input will be returned unmodified.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   An input of `None` will be converted to an unknown Dimension.
   An integer input will be converted to a Dimension with that value.
 
@@ -716,7 +885,10 @@ def as_dimension(value):
     return Dimension(value)
 
 
+<<<<<<< HEAD
 @tf_export("TensorShape")
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class TensorShape(object):
   """Represents the shape of a `Tensor`.
 
@@ -724,6 +896,7 @@ class TensorShape(object):
   `Tensor`. It may be one of the following:
 
   * *Fully-known shape:* has a known number of dimensions and a known size
+<<<<<<< HEAD
     for each dimension. e.g. `TensorShape([16, 256])`
   * *Partially-known shape:* has a known number of dimensions, and an unknown
     size for one or more dimension. e.g. `TensorShape([None, 256])`
@@ -738,12 +911,46 @@ class TensorShape(object):
   the shape may be set explicitly using `tf.Tensor.set_shape`.
   """
   __slots__ = ["_dims"]
+=======
+    for each dimension.
+  * *Partially-known shape:* has a known number of dimensions, and an unknown
+    size for one or more dimension.
+  * *Unknown shape:* has an unknown number of dimensions, and an unknown
+    size in all dimensions.
+
+  If a tensor is produced by an operation of type `"Foo"`, its shape
+  may be inferred if there is a registered shape function for
+  `"Foo"`. See [`tf.RegisterShape()`](framework.md#RegisterShape)
+  for details of shape
+  functions and how to register them. Alternatively, the shape may be set
+  explicitly using [`Tensor.set_shape()`](framework.md#Tensor.set_shape).
+
+  @@merge_with
+  @@concatenate
+
+  @@ndims
+  @@dims
+  @@as_list
+  @@is_compatible_with
+  @@is_fully_defined
+
+  @@with_rank
+  @@with_rank_at_least
+  @@with_rank_at_most
+
+  @@assert_has_rank
+  @@assert_same_rank
+  @@assert_is_compatible_with
+  @@assert_is_fully_defined
+  """
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def __init__(self, dims):
     """Creates a new TensorShape with the given dimensions.
 
     Args:
       dims: A list of Dimensions, or None if the shape is unspecified.
+<<<<<<< HEAD
 
     Raises:
       TypeError: If dims cannot be converted to a list of dimensions.
@@ -761,6 +968,13 @@ class TensorShape(object):
         ]
     elif isinstance(dims, TensorShape):
       self._dims = dims.dims
+=======
+        DEPRECATED: A single integer is treated as a singleton list.
+    """
+    # TODO(irving): Eliminate the single integer special case.
+    if dims is None:
+      self._dims = None
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     else:
       try:
         dims_iter = iter(dims)
@@ -768,6 +982,7 @@ class TensorShape(object):
         # Treat as a singleton dimension
         self._dims = [as_dimension(dims)]
       else:
+<<<<<<< HEAD
         self._dims = [as_dimension(d) for d in dims_iter]
 
   @property
@@ -816,16 +1031,36 @@ class TensorShape(object):
       A list containing `tf.compat.v1.Dimension`s, or None if the shape is
       unspecified.
     """
+=======
+        # Got a list of dimensions
+        self._dims = map(as_dimension, dims_iter)
+
+  def __repr__(self):
+    return "TensorShape(%s)" % str(self._dims)
+
+  @property
+  def dims(self):
+    """Returns a list of Dimensions, or None if the shape is unspecified."""
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return self._dims
 
   @property
   def ndims(self):
+<<<<<<< HEAD
     """Deprecated accessor for `rank`."""
     return self.rank
+=======
+    """Returns the rank of this shape, or None if it is unspecified."""
+    if self._dims is None:
+      return None
+    else:
+      return len(self._dims)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def __len__(self):
     """Returns the rank of this shape, or raises ValueError if unspecified."""
     if self._dims is None:
+<<<<<<< HEAD
       raise ValueError("Cannot take the length of shape with unknown rank.")
     return len(self._dims)
 
@@ -846,11 +1081,21 @@ class TensorShape(object):
       else:
         return iter(d for d in self._dims)
 
+=======
+      raise ValueError("Cannot take the length of Shape with unknown rank.")
+    return len(self._dims)
+
+  def __nonzero__(self):
+    """Returns True if this shape contains non-zero information."""
+    return self._dims is not None
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   def __getitem__(self, key):
     """Returns the value of a dimension or a shape, depending on the key.
 
     Args:
       key: If `key` is an integer, returns the dimension at that index;
+<<<<<<< HEAD
         otherwise if `key` is a slice, returns a TensorShape whose dimensions
         are those selected by the slice from `self`.
 
@@ -861,15 +1106,31 @@ class TensorShape(object):
     Raises:
       ValueError: If `key` is a slice and `self` is completely unknown and
         the step is set.
+=======
+        otherwise if `key` is a slice, returns a TensorShape whose
+        dimensions are those selected by the slice from `self`.
+
+    Returns:
+      A dimension if `key` is an integer, or a `TensorShape` if `key` is a
+      slice.
+
+    Raises:
+      ValueError: If `key` is a slice, and any of its elements are negative, or
+        if `self` is completely unknown and the step is set.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     """
     if self._dims is not None:
       if isinstance(key, slice):
         return TensorShape(self._dims[key])
       else:
+<<<<<<< HEAD
         if self._v2_behavior:
           return self._dims[key].value
         else:
           return self._dims[key]
+=======
+        return self._dims[key]
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     else:
       if isinstance(key, slice):
         start = key.start if key.start is not None else 0
@@ -889,12 +1150,18 @@ class TensorShape(object):
           # suffixes of otherwise unknown shapes.
           return unknown_shape()
         else:
+<<<<<<< HEAD
           return unknown_shape(rank=stop - start)
       else:
         if self._v2_behavior:
           return None
         else:
           return Dimension(None)
+=======
+          return unknown_shape(ndims=stop-start)
+      else:
+        return Dimension(None)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def num_elements(self):
     """Returns the total number of elements, or none for incomplete shapes."""
@@ -926,6 +1193,7 @@ class TensorShape(object):
     if self._dims is None:
       return other
     else:
+<<<<<<< HEAD
       try:
         self.assert_same_rank(other)
         new_dims = []
@@ -944,6 +1212,13 @@ class TensorShape(object):
     if not isinstance(other, TensorShape):
       other = TensorShape(other)
     return other.concatenate(self)
+=======
+      self.assert_same_rank(other)
+      new_dims = []
+      for i, dim in enumerate(self._dims):
+        new_dims.append(dim.merge_with(other[i]))
+      return TensorShape(new_dims)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def concatenate(self, other):
     """Returns the concatenation of the dimension in `self` and `other`.
@@ -979,10 +1254,17 @@ class TensorShape(object):
         same rank.
     """
     other = as_shape(other)
+<<<<<<< HEAD
     if self.rank is not None and other.rank is not None:
       if self.rank != other.rank:
         raise ValueError("Shapes %s and %s must have the same rank" %
                          (self, other))
+=======
+    if self.ndims is not None and other.ndims is not None:
+      if self.ndims != other.ndims:
+        raise ValueError(
+            "Shapes %s and %s must have the same rank" % (self, other))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def assert_has_rank(self, rank):
     """Raises an exception if `self` is not compatible with the given `rank`.
@@ -993,7 +1275,11 @@ class TensorShape(object):
     Raises:
       ValueError: If `self` does not represent a shape with the given `rank`.
     """
+<<<<<<< HEAD
     if self.rank not in (None, rank):
+=======
+    if self.ndims not in (None, rank):
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       raise ValueError("Shape %s must have rank %d" % (self, rank))
 
   def with_rank(self, rank):
@@ -1011,10 +1297,14 @@ class TensorShape(object):
     Raises:
       ValueError: If `self` does not represent a shape with the given `rank`.
     """
+<<<<<<< HEAD
     try:
       return self.merge_with(unknown_shape(rank=rank))
     except ValueError:
       raise ValueError("Shape %s must have rank %d" % (self, rank))
+=======
+    return self.merge_with(unknown_shape(ndims=rank))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def with_rank_at_least(self, rank):
     """Returns a shape based on `self` with at least the given rank.
@@ -1030,7 +1320,11 @@ class TensorShape(object):
       ValueError: If `self` does not represent a shape with at least the given
         `rank`.
     """
+<<<<<<< HEAD
     if self.rank is not None and self.rank < rank:
+=======
+    if self.ndims is not None and self.ndims < rank:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       raise ValueError("Shape %s must have rank at least %d" % (self, rank))
     else:
       return self
@@ -1049,7 +1343,11 @@ class TensorShape(object):
       ValueError: If `self` does not represent a shape with at most the given
         `rank`.
     """
+<<<<<<< HEAD
     if self.rank is not None and self.rank > rank:
+=======
+    if self.ndims is not None and self.ndims > rank:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       raise ValueError("Shape %s must have rank at most %d" % (self, rank))
     else:
       return self
@@ -1094,7 +1392,11 @@ class TensorShape(object):
     """
     other = as_shape(other)
     if self._dims is not None and other.dims is not None:
+<<<<<<< HEAD
       if self.rank != other.rank:
+=======
+      if self.ndims != other.ndims:
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         return False
       for x_dim, y_dim in zip(self._dims, other.dims):
         if not x_dim.is_compatible_with(y_dim):
@@ -1116,6 +1418,7 @@ class TensorShape(object):
     if not self.is_compatible_with(other):
       raise ValueError("Shapes %s and %s are incompatible" % (self, other))
 
+<<<<<<< HEAD
   def most_specific_compatible_shape(self, other):
     """Returns the most specific TensorShape compatible with `self` and `other`.
 
@@ -1150,6 +1453,12 @@ class TensorShape(object):
     """Returns True iff `self` is fully defined in every dimension."""
     return (self._dims is not None and
             all(dim.value is not None for dim in self._dims))
+=======
+  def is_fully_defined(self):
+    """Returns True iff `self` is fully defined in every dimension."""
+    return (self._dims is not None
+            and all(dim.value is not None for dim in self._dims))
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   def assert_is_fully_defined(self):
     """Raises an exception if `self` is not fully defined in every dimension.
@@ -1160,6 +1469,7 @@ class TensorShape(object):
     if not self.is_fully_defined():
       raise ValueError("Shape %s is not fully defined" % self)
 
+<<<<<<< HEAD
   def as_list(self):
     """Returns a list of integers or `None` for each dimension.
 
@@ -1189,10 +1499,25 @@ class TensorShape(object):
       other = as_shape(other)
     except TypeError:
       return NotImplemented
+=======
+  def as_dimension_list(self):
+    """DEPRECATED: use as_list()."""
+    self.assert_is_fully_defined()
+    return self.as_list()
+
+  def as_list(self):
+    """Returns a list of integers or None for each dimension."""
+    return [dim.value for dim in self._dims]
+
+  def __eq__(self, other):
+    """Returns True if `self` is equivalent to `other`."""
+    other = as_shape(other)
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return self._dims == other.dims
 
   def __ne__(self, other):
     """Returns True if `self` is known to be different from `other`."""
+<<<<<<< HEAD
     try:
       other = as_shape(other)
     except TypeError:
@@ -1209,6 +1534,15 @@ class TensorShape(object):
   def __concat__(self, other):
     return self.concatenate(other)
 
+=======
+    other = as_shape(other)
+    if self.ndims is None or other.ndims is None:
+      raise ValueError("The inequality of unknown TensorShapes is undefined.")
+    if self.ndims != other.ndims:
+      return True
+    return self._dims != other.dims
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 def as_shape(shape):
   """Converts the given object to a TensorShape."""
@@ -1218,6 +1552,7 @@ def as_shape(shape):
     return TensorShape(shape)
 
 
+<<<<<<< HEAD
 def unknown_shape(rank=None, **kwargs):
   """Returns an unknown TensorShape, optionally with a known rank.
 
@@ -1239,3 +1574,48 @@ def unknown_shape(rank=None, **kwargs):
     return TensorShape(None)
   else:
     return TensorShape([Dimension(None)] * rank)
+=======
+def unknown_shape(ndims=None):
+  """Returns an unknown TensorShape, optionally with a known rank.
+
+  Args:
+    ndims: (Optional) If specified, the number of dimensions in the shape.
+
+  Returns:
+    An unknown TensorShape.
+  """
+  if ndims is None:
+    return TensorShape(None)
+  else:
+    return TensorShape([Dimension(None) for _ in range(ndims)])
+
+
+def scalar():
+  """Returns a shape representing a scalar."""
+  return TensorShape([])
+
+
+def vector(length):
+  """Returns a shape representing a vector.
+
+  Args:
+    length: The length of the vector, which may be None if unknown.
+
+  Returns:
+    A TensorShape representing a vector of the given length.
+  """
+  return TensorShape([length])
+
+
+def matrix(rows, cols):
+  """Returns a shape representing a matrix.
+
+  Args:
+    rows: The number of rows in the matrix, which may be None if unknown.
+    cols: The number of columns in the matrix, which may be None if unknown.
+
+  Returns:
+    A TensorShape representing a matrix of the given size.
+  """
+  return TensorShape([rows, cols])
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

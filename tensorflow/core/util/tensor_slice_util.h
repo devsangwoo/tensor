@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +25,17 @@ namespace tensorflow {
 
 namespace {
 
+=======
+#ifndef TENSORFLOW_UTIL_TENSOR_SLICE_UTIL_H_
+#define TENSORFLOW_UTIL_TENSOR_SLICE_UTIL_H_
+
+#include "tensorflow/core/framework/tensor_slice.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/public/tensor_shape.h"
+
+namespace tensorflow {
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Some hackery to invoke eigen tensor to copy over tensor slices with variable
 // dimension tensors.
 // TODO(yangke): get rid of that once the variable dimension tensor support is
@@ -42,6 +54,7 @@ GetEigenTensorMapFromTensorShape(const TensorShape& shape, T* data) {
   return eig;
 }
 
+<<<<<<< HEAD
 // For everything except string, a standard Eigen cast and assignment works
 template <typename DstT>
 struct CopyThatWorksWithStringPointer {
@@ -125,6 +138,8 @@ struct CopyThatWorksWithStringPointer<Eigen::half> {
   }
 };
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // Given a tensor described by "shape", two slices "slice_s" and "slice_d",
 // and two pointers "ptr_s" and "ptr_d", where "ptr_s" points to a chunk of
 // memory that stores the data for "slice_s" and "ptr_d" points to a chunk of
@@ -139,9 +154,15 @@ static bool CopyDataFromTensorSliceToTensorSlice(const TensorShape& shape,
                                                  const TensorSlice& slice_d,
                                                  const SrcT* ptr_s,
                                                  DstT* ptr_d) {
+<<<<<<< HEAD
   CHECK_LE(shape.dims(), kTensorSliceMaxRank)
       << "Only tensors of size up to " << kTensorSliceMaxRank
       << " are supported";
+=======
+  CHECK_LE(shape.dims(), kTensorSliceMaxRank) << "Only tensors of size up to "
+                                              << kTensorSliceMaxRank
+                                              << " are supported";
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // We need to compute the intersection of the two slices.
   TensorSlice inter;
   if (!slice_s.Intersect(slice_d, &inter)) {
@@ -178,14 +199,24 @@ static bool CopyDataFromTensorSliceToTensorSlice(const TensorShape& shape,
 
     rel_s.FillIndicesAndSizes<kTensorSliceMaxRank>(shp_s, &s_start, &s_len);
     rel_d.FillIndicesAndSizes<kTensorSliceMaxRank>(shp_d, &d_start, &d_len);
+<<<<<<< HEAD
     CopyThatWorksWithStringPointer<DstT>::Copy(t_s, s_start, s_len, t_d,
                                                d_start);
+=======
+    t_d.slice(d_start, d_len) = t_s.slice(s_start, s_len).template cast<DstT>();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     return true;
   }
 }
 
+<<<<<<< HEAD
 }  // namespace
 
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_UTIL_TENSOR_SLICE_UTIL_H_
+=======
+}  // namespace tensorflow
+
+#endif  // TENSORFLOW_UTIL_TENSOR_SLICE_UTIL_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

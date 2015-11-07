@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 include LICENSE
 include README
 recursive-include * *.py
@@ -18,3 +19,8 @@ recursive-include tensorflow_core/include/google *.inc
 recursive-include tensorflow_core/include/include *.h
 recursive-include tensorflow_core/include/third_party *
 recursive-include tensorflow_core/include/unsupported *
+=======
+include README
+recursive-include * *.py
+recursive-include * *.so
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

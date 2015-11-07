@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/common_runtime/session_factory.h"
 
 #include <unordered_map>
 
+<<<<<<< HEAD
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/logging.h"
@@ -25,11 +29,19 @@ limitations under the License.
 #include "tensorflow/core/protobuf/config.pb.h"
 #include "tensorflow/core/public/session_options.h"
 
+=======
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/platform/port.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 namespace tensorflow {
 namespace {
 
 static mutex* get_session_factory_lock() {
+<<<<<<< HEAD
   static mutex session_factory_lock(LINKER_INITIALIZED);
+=======
+  static mutex session_factory_lock;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   return &session_factory_lock;
 }
 
@@ -50,6 +62,7 @@ void SessionFactory::Register(const string& runtime_type,
   }
 }
 
+<<<<<<< HEAD
 namespace {
 const string RegisteredFactoriesErrorMessageLocked() {
   std::vector<string> factory_types;
@@ -110,6 +123,15 @@ Status SessionFactory::GetFactory(const SessionOptions& options,
         SessionOptionsToString(options), "} ",
         RegisteredFactoriesErrorMessageLocked());
   }
+=======
+SessionFactory* SessionFactory::GetFactory(const string& runtime_type) {
+  mutex_lock l(*get_session_factory_lock());  // could use reader lock
+  auto it = session_factories()->find(runtime_type);
+  if (it == session_factories()->end()) {
+    return nullptr;
+  }
+  return it->second;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

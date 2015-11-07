@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,10 +36,28 @@ from tensorflow.python.platform import googletest
 
 
 @test_util.run_all_in_graph_and_eager_modes
+=======
+"""Tests for tensorflow.ops.math_ops."""
+import math
+
+import tensorflow.python.platform
+
+import numpy as np
+
+from tensorflow.python.framework import test_util
+from tensorflow.python.ops import constant_op
+from tensorflow.python.ops import math_ops
+from tensorflow.python.platform import googletest
+
+exp = math.exp
+log = math.log
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class ReduceTest(test_util.TensorFlowTestCase):
 
   def testReduceAllDims(self):
     x = np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32)
+<<<<<<< HEAD
     with test_util.device(use_gpu=True):
       y_tf = self.evaluate(math_ops.reduce_sum(x))
       self.assertEqual(y_tf, 21)
@@ -180,6 +199,27 @@ class RoundTest(test_util.TensorFlowTestCase):
 
 
 @test_util.run_all_in_graph_and_eager_modes
+=======
+    with self.test_session():
+      y_tf = math_ops.reduce_sum(x).eval()
+      self.assertEqual(y_tf, 21)
+
+class RoundTest(test_util.TensorFlowTestCase):
+
+  def testRounding(self):
+    x = [0.49, 0.7, -0.3, -0.8]
+    for dtype in [np.float32, np.double]:
+      x_np = np.array(x, dtype=dtype)
+      for use_gpu in [True, False]:
+        with self.test_session(use_gpu=use_gpu):
+          x_tf = constant_op.constant(x_np, shape=x_np.shape)
+          y_tf = math_ops.round(x_tf)
+          y_tf_np = y_tf.eval()
+          y_np = np.round(x_np)
+          self.assertAllClose(y_tf_np, y_np, atol=1e-2)
+
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 class ModTest(test_util.TensorFlowTestCase):
 
   def testFloat(self):
@@ -188,10 +228,17 @@ class ModTest(test_util.TensorFlowTestCase):
       # Test scalar and vector versions.
       for denom in [x[0], [x[0]] * 3]:
         x_np = np.array(x, dtype=dtype)
+<<<<<<< HEAD
         with test_util.use_gpu():
           x_tf = constant_op.constant(x_np, shape=x_np.shape)
           y_tf = math_ops.mod(x_tf, denom)
           y_tf_np = self.evaluate(y_tf)
+=======
+        with self.test_session():
+          x_tf = constant_op.constant(x_np, shape=x_np.shape)
+          y_tf = math_ops.mod(x_tf, denom)
+          y_tf_np = y_tf.eval()
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
           y_np = np.fmod(x_np, denom)
         self.assertAllClose(y_tf_np, y_np, atol=1e-2)
 
@@ -201,6 +248,7 @@ class ModTest(test_util.TensorFlowTestCase):
       # Test scalar and vector versions.
       for denom in [x[0], x]:
         x_np = np.array(x, dtype=dtype)
+<<<<<<< HEAD
         with test_util.use_gpu():
           x_tf = constant_op.constant(x_np, shape=x_np.shape)
           y_tf = math_ops.mod(x_tf, denom)
@@ -733,5 +781,14 @@ class RangeTest(test_util.TensorFlowTestCase):
     self.assertAllEqual(values, self.evaluate(tensor))
 
 
+=======
+        with self.test_session():
+          x_tf = constant_op.constant(x_np, shape=x_np.shape)
+          y_tf = math_ops.mod(x_tf, denom)
+          y_tf_np = y_tf.eval()
+          y_np = np.mod(x_np, denom)
+        self.assertAllClose(y_tf_np, y_np)
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 if __name__ == "__main__":
   googletest.main()

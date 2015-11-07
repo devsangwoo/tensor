@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +34,24 @@ limitations under the License.
 #include "tensorflow/core/lib/strings/str_util.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include <functional>
+#include <memory>
+#include <vector>
+
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/framework/fake_input.h"
+#include "tensorflow/core/framework/graph.pb.h"
+#include "tensorflow/core/framework/node_def_builder.h"
+#include "tensorflow/core/framework/op_kernel.h"
+#include "tensorflow/core/framework/types.h"
+#include "tensorflow/core/framework/types.pb.h"
+#include "tensorflow/core/kernels/ops_util.h"
+#include "tensorflow/core/kernels/ops_testutil.h"
+#include "tensorflow/core/public/tensor.h"
+#include <gtest/gtest.h>
+#include "tensorflow/core/lib/core/status_test_util.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace {
@@ -40,12 +59,22 @@ namespace {
 class DynamicPartitionOpTest : public OpsTestBase {
  protected:
   void MakeOp() {
+<<<<<<< HEAD
     TF_ASSERT_OK(NodeDefBuilder("myop", "DynamicPartition")
                      .Input(FakeInput(DT_FLOAT))
                      .Input(FakeInput(DT_INT32))
                      .Attr("num_partitions", 4)
                      .Finalize(node_def()));
     TF_ASSERT_OK(InitOp());
+=======
+    RequireDefaultOps();
+    ASSERT_OK(NodeDefBuilder("myop", "DynamicPartition")
+                  .Input(FakeInput(DT_FLOAT))
+                  .Input(FakeInput(DT_INT32))
+                  .Attr("num_partitions", 4)
+                  .Finalize(node_def()));
+    ASSERT_OK(InitOp());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 };
 
@@ -57,7 +86,11 @@ TEST_F(DynamicPartitionOpTest, Simple_OneD) {
   // Feed and run
   AddInputFromArray<float>(TensorShape({6}), {0, 13, 2, 39, 4, 17});
   AddInputFromArray<int32>(TensorShape({6}), {0, 0, 2, 3, 2, 1});
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the output sizes
   {  // Output 0
@@ -90,7 +123,11 @@ TEST_F(DynamicPartitionOpTest, Simple_TwoD) {
       TensorShape({6, 3}),
       {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17});
   AddInputFromArray<int32>(TensorShape({6}), {0, 0, 2, 3, 2, 1});
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Check the output sizes
   {  // Output 0
@@ -121,7 +158,11 @@ TEST_F(DynamicPartitionOpTest, SomeOutputsEmpty) {
   // Feed and run
   AddInputFromArray<float>(TensorShape({6}), {0, 13, 2, 39, 4, 17});
   AddInputFromArray<int32>(TensorShape({6}), {0, 0, 2, 2, 0, 2});
+<<<<<<< HEAD
   TF_ASSERT_OK(RunOpKernel());
+=======
+  ASSERT_OK(RunOpKernel());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   TensorShape empty_one_dim;
   empty_one_dim.AddDim(0);
@@ -155,6 +196,7 @@ TEST_F(DynamicPartitionOpTest, Error_IndexOutOfRange) {
   AddInputFromArray<int32>(TensorShape({5}), {0, 2, 99, 2, 2});
   Status s = RunOpKernel();
   EXPECT_TRUE(
+<<<<<<< HEAD
       absl::StrContains(s.ToString(), "partitions[2] = 99 is not in [0, 4)"))
       << s;
 }
@@ -212,5 +254,11 @@ BM_DYNAMIC_PARTITION(gpu, double, 100);
 BM_DYNAMIC_PARTITION(gpu, complex64, 2);
 BM_DYNAMIC_PARTITION(gpu, complex64, 100);
 
+=======
+      StringPiece(s.ToString()).contains("partitions[2] = 99 is not in [0, 4)"))
+      << s;
+}
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }  // namespace
 }  // namespace tensorflow

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/platform/protobuf.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 bool ParseProtoUnlimited(protobuf::MessageLite* proto,
                          const string& serialized) {
   return proto->ParseFromString(serialized);
@@ -25,6 +29,18 @@ bool ParseProtoUnlimited(protobuf::MessageLite* proto,
 bool ParseProtoUnlimited(protobuf::MessageLite* proto, const void* serialized,
                          size_t size) {
   return proto->ParseFromArray(serialized, size);
+=======
+bool ParseProtoUnlimited(protobuf::Message* proto, const string& serialized) {
+  return ParseProtoUnlimited(proto, serialized.data(), serialized.size());
+}
+
+bool ParseProtoUnlimited(protobuf::Message* proto, const void* serialized,
+                         size_t size) {
+  protobuf::io::CodedInputStream coded_stream(
+      reinterpret_cast<const uint8*>(serialized), size);
+  coded_stream.SetTotalBytesLimit(INT_MAX, INT_MAX);
+  return proto->ParseFromCodedStream(&coded_stream);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 
 }  // namespace tensorflow

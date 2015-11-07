@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/graph/subgraph.h"
 
 #include <algorithm>
@@ -28,6 +31,7 @@ limitations under the License.
 #include "tensorflow/core/graph/algorithm.h"
 #include "tensorflow/core/graph/graph.h"
 #include "tensorflow/core/graph/graph_constructor.h"
+<<<<<<< HEAD
 #include "tensorflow/core/graph/tensor_id.h"
 #include "tensorflow/core/lib/core/errors.h"
 #include "tensorflow/core/lib/core/status.h"
@@ -35,6 +39,15 @@ limitations under the License.
 
 namespace tensorflow {
 namespace subgraph {
+=======
+#include "tensorflow/core/graph/node_builder.h"
+#include "tensorflow/core/graph/tensor_id.h"
+#include "tensorflow/core/platform/logging.h"
+#include "tensorflow/core/lib/core/errors.h"
+#include "tensorflow/core/public/status.h"
+
+namespace tensorflow {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // ----------------------------------------------------------------------------
 // Subgraph construction-related routines
@@ -44,7 +57,11 @@ namespace subgraph {
 
 namespace {
 
+<<<<<<< HEAD
 typedef std::unordered_map<StringPiece, Node*, StringPieceHasher> NameIndex;
+=======
+typedef std::unordered_map<StringPiece, Node*, StringPiece::Hasher> NameIndex;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 // Rewrite graph by replacing the output tensors specified in
 // "fed_outputs" with special feed nodes for each specified output
@@ -55,6 +72,7 @@ typedef std::unordered_map<StringPiece, Node*, StringPieceHasher> NameIndex;
 // Return true on success.  On error, return false and sets *error to
 // an appropriate error message (and *g is left in an indeterminate
 // state).
+<<<<<<< HEAD
 Status FeedInputs(
     Graph* g, const std::vector<std::unique_ptr<PruneRewrite>>& feed_rewrites,
     NameIndex* name_index, DataTypeVector* out_feed_types) {
@@ -62,19 +80,30 @@ Status FeedInputs(
   out_feed_types->reserve(feed_rewrites.size());
   for (size_t i = 0; i < feed_rewrites.size(); ++i) {
     const string& t = feed_rewrites[i]->endpoint_name();
+=======
+static Status FeedInputs(Graph* g, const DeviceAttributes& device_info,
+                              const gtl::ArraySlice<string>& fed_outputs,
+                              NameIndex* name_index) {
+  for (const string& t : fed_outputs) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     TensorId id(ParseTensorName(t));
 
     auto iter = name_index->find(id.first);
     if (iter == name_index->end()) {
       return errors::NotFound("FeedInputs: unable to find feed output ", t);
     }
+<<<<<<< HEAD
     Node* n = iter->second;
+=======
+    const Node* n = iter->second;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     DCHECK_EQ(n->name(), id.first);
     if (id.second >= n->num_outputs()) {
       return errors::InvalidArgument(
           "FeedInputs: ", t, " should have output index < ", n->num_outputs());
     }
 
+<<<<<<< HEAD
     Node* feed_node;
     TF_RETURN_IF_ERROR(
         feed_rewrites[i]->AddNode(g, {n, id.second}, &feed_node));
@@ -84,6 +113,25 @@ Status FeedInputs(
     // Duplicate control edges aren't allowed, but feed_node was *just* created
     // so there's no need to check for a duplicate.
     g->AddControlEdge(g->source_node(), feed_node, true);
+=======
+    Node* recv_node;
+    TF_RETURN_IF_ERROR(
+        NodeBuilder(strings::StrCat("_recv_", id.first, "_", id.second),
+                    "_Recv")
+            .Attr("tensor_type", BaseType(n->output_type(id.second)))
+            .Attr("tensor_name", t)
+            .Attr("send_device", device_info.name())
+            .Attr("recv_device", device_info.name())
+            .Attr("send_device_incarnation",
+                  static_cast<int64>(device_info.incarnation()))
+            .Attr("client_terminated", true)
+            .Finalize(g, &recv_node));
+    recv_node->set_assigned_device_name(device_info.name());
+
+    // Update name_index
+    (*name_index)[recv_node->name()] = recv_node;
+    g->AddControlEdge(g->source_node(), recv_node);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
     // Look through edges coming out of "n" for edges whose src_output() index
     // matches "output_index".  If found, replace the edges with a connection
@@ -93,11 +141,18 @@ Status FeedInputs(
       if (e->src_output() == id.second) {
         to_remove.emplace_back(e);
       } else if (e->src_output() == Graph::kControlSlot &&
+<<<<<<< HEAD
                  (n->type_string() == "Placeholder" ||
                   n->type_string() == "PlaceholderV2")) {
         // When feeding a Placeholder node, any outgoing control edges
         // will be replaced with a control edge from the replacement
         // feed_node.
+=======
+                 n->def().op() == "Placeholder") {
+        // When feeding a Placeholder node, any outgoing control edges
+        // will be replaced with a control edge from the replacement
+        // recv_node.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         // TODO(josh11b,mrry): Come up with a more elegant way of addressing
         // the general version of this problem.
         to_remove.emplace_back(e);
@@ -106,6 +161,7 @@ Status FeedInputs(
 
     for (const Edge* e : to_remove) {
       if (e->src_output() == id.second) {
+<<<<<<< HEAD
         g->AddEdge(feed_node, 0, e->dst(), e->dst_input());
       } else {
         CHECK_EQ(Graph::kControlSlot, e->src_output());
@@ -116,10 +172,20 @@ Status FeedInputs(
       g->RemoveEdge(e);
     }
     out_feed_types->push_back(BaseType(n->output_type(id.second)));
+=======
+        g->AddEdge(recv_node, 0, e->dst(), e->dst_input());
+      } else {
+        CHECK_EQ(Graph::kControlSlot, e->src_output());
+        g->AddControlEdge(recv_node, e->dst());
+      }
+      g->RemoveEdge(e);
+    }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
   return Status::OK();
 }
 
+<<<<<<< HEAD
 Status FetchOutputs(
     Graph* g, const std::vector<std::unique_ptr<PruneRewrite>>& fetch_rewrites,
     NameIndex* name_index, std::vector<Node*>* out_fetch_nodes,
@@ -129,6 +195,22 @@ Status FetchOutputs(
   for (size_t i = 0; i < fetch_rewrites.size(); ++i) {
     const string& t = fetch_rewrites[i]->endpoint_name();
 
+=======
+// Augment "*g" by adding special "fetch" nodes that connect to the
+// tensor outputs specified in "fetch_outputs" to retrieve the output
+// of the tensors.  The new nodes added are set up to execute on
+// "client_device_name", and are returned in "*fetch_nodes".
+//
+// Return true on success.  On error, return false and sets *error to
+// an appropriate error message (and *g is left in an indeterminate
+// state).
+static Status FetchOutputs(Graph* g, const DeviceAttributes& device_info,
+                           const gtl::ArraySlice<string>& fetch_outputs,
+                           NameIndex* name_index,
+                           std::vector<Node*>* fetch_nodes) {
+  fetch_nodes->clear();
+  for (const string& t : fetch_outputs) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     // Parse t into node_name and output_index.
     TensorId id(ParseTensorName(t));
 
@@ -142,6 +224,7 @@ Status FetchOutputs(
     VLOG(2) << "Found fetch node for " << t;
 
     // Validate output_index
+<<<<<<< HEAD
     if (n->num_outputs() == 0) {
       return errors::InvalidArgument(
           "Tried to fetch data for '", t,
@@ -151,12 +234,16 @@ Status FetchOutputs(
           "' as an argument to the 'target_node_names' argument of the "
           "Session::Run API.");
     } else if (id.second >= n->num_outputs()) {
+=======
+    if (id.second >= n->num_outputs()) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       return errors::InvalidArgument("FetchOutputs ", t,
                                      ": output index too large, must be < ",
                                      n->num_outputs());
     }
 
     // Create the fetch Node and connect it up
+<<<<<<< HEAD
     Node* fetch_node;
     TF_RETURN_IF_ERROR(
         fetch_rewrites[i]->AddNode(g, {n, id.second}, &fetch_node));
@@ -169,28 +256,69 @@ Status FetchOutputs(
     g->AddControlEdge(fetch_node, g->sink_node(), true);
     out_fetch_nodes->push_back(fetch_node);
     out_fetch_types->push_back(BaseType(n->output_type(id.second)));
+=======
+    Node* send_node;
+    TF_RETURN_IF_ERROR(
+        NodeBuilder(strings::StrCat("_send_", id.first, "_", id.second),
+                    "_Send")
+            .Input(n, id.second)
+            .Attr("tensor_name", t)
+            .Attr("send_device", device_info.name())
+            .Attr("recv_device", device_info.name())
+            .Attr("send_device_incarnation",
+                  static_cast<int64>(device_info.incarnation()))
+            .Attr("client_terminated", true)
+            .Finalize(g, &send_node));
+    send_node->set_assigned_device_name(device_info.name());
+    VLOG(1) << "Created fetch node: " << SummarizeNodeDef(send_node->def());
+
+    // Update the index.
+    (*name_index)[send_node->name()] = send_node;
+
+    g->AddControlEdge(send_node, g->sink_node());
+    fetch_nodes->push_back(send_node);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   return Status::OK();
 }
 
+<<<<<<< HEAD
 bool AddNodeToTargets(const string& node_or_tensor_name,
                       const NameIndex& name_index,
                       std::unordered_set<const Node*>* targets) {
+=======
+static bool AddNodeToTargets(const string& node_or_tensor_name,
+                             const NameIndex& name_index,
+                             std::unordered_set<const Node*>* targets) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   TensorId id = ParseTensorName(node_or_tensor_name);
   auto iter = name_index.find(id.first);
   if (iter == name_index.end()) {
     return false;
   }
   const Node* n = iter->second;
+<<<<<<< HEAD
   CHECK_EQ(n->name(), id.first);
+=======
+  if (n->name() != node_or_tensor_name) {
+    return false;
+  }
+
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   targets->insert(n);
   return true;
 }
 
+<<<<<<< HEAD
 Status PruneForTargets(Graph* g, const NameIndex& name_index,
                        const std::vector<Node*>& fetch_nodes,
                        const gtl::ArraySlice<string>& target_nodes) {
+=======
+static Status PruneForTargets(Graph* g, const NameIndex& name_index,
+                              const std::vector<Node*>& fetch_nodes,
+                              const gtl::ArraySlice<string>& target_nodes) {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   string not_found;
   std::unordered_set<const Node*> targets;
   for (Node* n : fetch_nodes) {
@@ -207,16 +335,21 @@ Status PruneForTargets(Graph* g, const NameIndex& name_index,
     return errors::NotFound("PruneForTargets: Some target nodes not found: ",
                             not_found);
   }
+<<<<<<< HEAD
   PruneForReverseReachability(g, std::move(targets));
 
   // Reconnect nodes with no outgoing edges to the sink node
   FixupSourceAndSinkEdges(g);
+=======
+  PruneForReverseReachability(g, targets);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   return Status::OK();
 }
 
 }  // namespace
 
+<<<<<<< HEAD
 Status ArgFeedRewrite::AddNode(Graph* g, NodeBuilder::NodeOut feed_tensor,
                                Node** out_node) {
   // NOTE(mrry): We must include the index as part of the node
@@ -290,11 +423,15 @@ Status SendFetchRewrite::AddNode(Graph* g, NodeBuilder::NodeOut fetch_tensor,
   (*out_node)->set_assigned_device_name(device_info().name());
   return Status::OK();
 }
+=======
+namespace subgraph {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 Status RewriteGraphForExecution(
     Graph* g, const gtl::ArraySlice<string>& fed_outputs,
     const gtl::ArraySlice<string>& fetch_outputs,
     const gtl::ArraySlice<string>& target_node_names,
+<<<<<<< HEAD
     const DeviceAttributes& device_info, bool use_function_convention,
     RewriteGraphMetadata* out_metadata) {
   std::vector<std::unique_ptr<PruneRewrite>> feed_rewrites;
@@ -360,27 +497,45 @@ Status RewriteGraphForExecution(
     if (endpoints.count(fetch_rewrite->endpoint_name()) > 0) {
       return errors::InvalidArgument(fetch_rewrite->endpoint_name(),
                                      " is both fed and fetched.");
+=======
+    const DeviceAttributes& device_info) {
+  std::unordered_set<string> endpoints(fed_outputs.begin(), fed_outputs.end());
+  for (const auto& fetch : fetch_outputs) {
+    if (endpoints.count(fetch) > 0) {
+      return errors::InvalidArgument(fetch, " is both fed and fetched.");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   }
 
   // A separate index mapping name to Node*, for use by FeedInputs,
   // FetchOutputs, and PruneForTargets
   NameIndex name_index;
+<<<<<<< HEAD
   name_index.reserve(g->num_nodes());
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   for (Node* n : g->nodes()) {
     name_index[n->name()] = n;
   }
 
   // Add the feeds.  This may replace nodes in the graph, including the nodes
+<<<<<<< HEAD
   // currently listed in "fetch_rewrites".  We pass "name_index" so the index is
   // kept up to date.
   if (!feed_rewrites.empty()) {
     TF_RETURN_IF_ERROR(
         FeedInputs(g, feed_rewrites, &name_index, &out_metadata->feed_types));
+=======
+  // currently listed in "fetch_nodes".  We pass "name_index" so the index is
+  // kept up to date.
+  if (!fed_outputs.empty()) {
+    TF_RETURN_IF_ERROR(FeedInputs(g, device_info, fed_outputs, &name_index));
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   }
 
   // Add the fetch nodes, also updating "name_index".
   std::vector<Node*> fetch_nodes;
+<<<<<<< HEAD
   if (!fetch_rewrites.empty()) {
     TF_RETURN_IF_ERROR(FetchOutputs(g, fetch_rewrites, &name_index,
                                     &fetch_nodes, &out_metadata->fetch_types));
@@ -388,6 +543,15 @@ Status RewriteGraphForExecution(
 
   // Prune the graph to only compute what is needed for the fetch nodes and the
   // target nodes.
+=======
+  if (!fetch_outputs.empty()) {
+    TF_RETURN_IF_ERROR(
+        FetchOutputs(g, device_info, fetch_outputs, &name_index, &fetch_nodes));
+  }
+
+  // Prune the graph to only compute what is needed for the fetch nodes and the
+  // targets nodes.
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   if (!fetch_nodes.empty() || !target_node_names.empty()) {
     TF_RETURN_IF_ERROR(
         PruneForTargets(g, name_index, fetch_nodes, target_node_names));

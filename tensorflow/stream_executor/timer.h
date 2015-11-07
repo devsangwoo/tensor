@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #ifndef TENSORFLOW_STREAM_EXECUTOR_TIMER_H_
 #define TENSORFLOW_STREAM_EXECUTOR_TIMER_H_
 
@@ -20,7 +23,12 @@ limitations under the License.
 
 #include "tensorflow/stream_executor/platform/port.h"
 
+<<<<<<< HEAD
 namespace stream_executor {
+=======
+namespace perftools {
+namespace gputools {
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace internal {
 class TimerInterface;
@@ -57,17 +65,32 @@ class Timer {
   internal::TimerInterface *implementation() { return implementation_.get(); }
 
  private:
+<<<<<<< HEAD
   // The StreamExecutor that manages the platform-specific internals for this
   // timer.
   StreamExecutor *parent_;
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // Platform-dependent implementation of the timer internals for the underlying
   // platform. This class just delegates to this opaque instance.
   std::unique_ptr<internal::TimerInterface> implementation_;
 
+<<<<<<< HEAD
   SE_DISALLOW_COPY_AND_ASSIGN(Timer);
 };
 
 }  // namespace stream_executor
+=======
+  // The StreamExecutor that manages the platform-specific internals for this
+  // timer.
+  StreamExecutor *parent_;
+
+  SE_DISALLOW_COPY_AND_ASSIGN(Timer);
+};
+
+}  // namespace gputools
+}  // namespace perftools
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 #endif  // TENSORFLOW_STREAM_EXECUTOR_TIMER_H_

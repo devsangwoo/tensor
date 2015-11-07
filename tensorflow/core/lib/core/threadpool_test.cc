@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/lib/core/threadpool.h"
 
 #include <atomic>
 
+<<<<<<< HEAD
 #include "absl/synchronization/barrier.h"
 #include "absl/synchronization/blocking_counter.h"
 #include "absl/types/optional.h"
@@ -25,6 +29,11 @@ limitations under the License.
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/test.h"
 #include "tensorflow/core/platform/test_benchmark.h"
+=======
+#include "tensorflow/core/platform/test_benchmark.h"
+#include "tensorflow/core/public/env.h"
+#include <gtest/gtest.h>
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace thread {
@@ -39,21 +48,34 @@ TEST(ThreadPool, Empty) {
 }
 
 TEST(ThreadPool, DoWork) {
+<<<<<<< HEAD
   Context outer_context(ContextKind::kThread);
   for (int num_threads = 1; num_threads < kNumThreads; num_threads++) {
     fprintf(stderr, "Testing with %d threads\n", num_threads);
     const int kWorkItems = 15;
     std::atomic<bool> work[kWorkItems];
+=======
+  for (int num_threads = 1; num_threads < kNumThreads; num_threads++) {
+    fprintf(stderr, "Testing with %d threads\n", num_threads);
+    const int kWorkItems = 15;
+    bool work[kWorkItems];
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     for (int i = 0; i < kWorkItems; i++) {
       work[i] = false;
     }
     {
       ThreadPool pool(Env::Default(), "test", num_threads);
       for (int i = 0; i < kWorkItems; i++) {
+<<<<<<< HEAD
         pool.Schedule([&outer_context, &work, i]() {
           Context inner_context(ContextKind::kThread);
           ASSERT_EQ(outer_context, inner_context);
           ASSERT_FALSE(work[i].exchange(true));
+=======
+        pool.Schedule([&work, i]() {
+          ASSERT_FALSE(work[i]);
+          work[i] = true;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
         });
       }
     }
@@ -63,6 +85,7 @@ TEST(ThreadPool, DoWork) {
   }
 }
 
+<<<<<<< HEAD
 void RunWithFixedBlockSize(int64 block_size, int64 total, ThreadPool* threads) {
   mutex mu;
   int64 num_shards = 0;
@@ -370,24 +393,42 @@ TEST(ThreadPool, Parallelism) {
   }
 }
 
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 static void BM_Sequential(int iters) {
   ThreadPool pool(Env::Default(), "test", kNumThreads);
   // Decrement count sequentially until 0.
   int count = iters;
   mutex done_lock;
+<<<<<<< HEAD
   bool done_flag = false;
   std::function<void()> work = [&pool, &count, &done_lock, &done_flag,
+=======
+  condition_variable done;
+  bool done_flag = false;
+  std::function<void()> work = [&pool, &count, &done_lock, &done, &done_flag,
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
                                 &work]() {
     if (count--) {
       pool.Schedule(work);
     } else {
       mutex_lock l(done_lock);
       done_flag = true;
+<<<<<<< HEAD
+=======
+      done.notify_all();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     }
   };
   work();
   mutex_lock l(done_lock);
+<<<<<<< HEAD
   done_lock.Await(Condition(&done_flag));
+=======
+  if (!done_flag) {
+    done.wait(l);
+  }
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 }
 BENCHMARK(BM_Sequential);
 
@@ -396,16 +437,28 @@ static void BM_Parallel(int iters) {
   // Decrement count concurrently until 0.
   std::atomic_int_fast32_t count(iters);
   mutex done_lock;
+<<<<<<< HEAD
   bool done_flag = false;
   for (int i = 0; i < iters; ++i) {
     pool.Schedule([&count, &done_lock, &done_flag]() {
       if (count.fetch_sub(1) == 1) {
         mutex_lock l(done_lock);
         done_flag = true;
+=======
+  condition_variable done;
+  bool done_flag = false;
+  for (int i = 0; i < iters; ++i) {
+    pool.Schedule([&count, &done_lock, &done, &done_flag]() {
+      if (count.fetch_sub(1) == 1) {
+        mutex_lock l(done_lock);
+        done_flag = true;
+        done.notify_all();
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
       }
     });
   }
   mutex_lock l(done_lock);
+<<<<<<< HEAD
   done_lock.Await(Condition(&done_flag));
 }
 BENCHMARK(BM_Parallel);
@@ -439,6 +492,13 @@ BENCHMARK(BM_ParallelFor)
     ->ArgPair(1 << 20, 1 << 20)
     ->ArgPair(1 << 10, 1 << 30)
     ->ArgPair(1 << 20, 1 << 30);
+=======
+  if (!done_flag) {
+    done.wait(l);
+  }
+}
+BENCHMARK(BM_Parallel);
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace thread
 }  // namespace tensorflow

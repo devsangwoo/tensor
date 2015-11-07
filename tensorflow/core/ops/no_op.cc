@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +15,19 @@ limitations under the License.
 ==============================================================================*/
 
 #include "tensorflow/core/framework/common_shape_fns.h"
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 #include "tensorflow/core/framework/op.h"
 
 namespace tensorflow {
 
+<<<<<<< HEAD
 REGISTER_OP("NoOp").SetShapeFn(shape_inference::NoOutputs);
+=======
+REGISTER_OP("NoOp")
+    .Doc(R"doc(
+Does nothing. Only useful as a placeholder for control edges.
+)doc");
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 }  // namespace tensorflow

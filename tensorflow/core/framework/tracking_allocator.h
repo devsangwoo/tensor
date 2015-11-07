@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +23,15 @@ limitations under the License.
 #include "tensorflow/core/platform/mutex.h"
 #include "tensorflow/core/platform/thread_annotations.h"
 #include "tensorflow/core/platform/types.h"
+=======
+#ifndef TENSORFLOW_FRAMEWORK_TRACKING_ALLOCATOR_H_
+#define TENSORFLOW_FRAMEWORK_TRACKING_ALLOCATOR_H_
+
+#include "tensorflow/core/framework/allocator.h"
+#include "tensorflow/core/lib/core/refcount.h"
+#include "tensorflow/core/platform/port.h"
+#include "tensorflow/core/platform/thread_annotations.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 
@@ -42,6 +52,7 @@ namespace tensorflow {
 // TrackingAllocator keeps track of outstanding calls using a
 // reference count, and deletes itself once the last call has been
 // received and the high watermark has been retrieved.
+<<<<<<< HEAD
 struct AllocRecord {
   AllocRecord(int64 a_btyes, int64 a_micros)
       : alloc_bytes(a_btyes), alloc_micros(a_micros) {}
@@ -79,10 +90,32 @@ class TrackingAllocator : public Allocator {
   //
   std::tuple<size_t, size_t, size_t> GetSizes();
   // After GetRecordsAndUnRef is called, the only further calls allowed
+=======
+class TrackingAllocator : public Allocator {
+ public:
+  explicit TrackingAllocator(Allocator* allocator);
+  string Name() override { return allocator_->Name(); }
+  void* AllocateRaw(size_t alignment, size_t num_bytes) override;
+  void DeallocateRaw(void* ptr) override;
+  bool TracksAllocationSizes() override;
+  size_t RequestedSize(void* ptr) override;
+  size_t AllocatedSize(void* ptr) override;
+
+  // If the underlying allocator tracks allocation sizes, this returns
+  // a pair where the first value is the total number of bytes
+  // allocated through this wrapper, and the second value is the high
+  // watermark of bytes allocated through this wrapper. If the
+  // underlying allocator does not track allocation sizes the first
+  // value is the total number of bytes requested through this wrapper
+  // and the second is 0.
+  //
+  // After GetSizesAndUnref is called, the only further calls allowed
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // on this wrapper are calls to DeallocateRaw with pointers that
   // were allocated by this wrapper and have not yet been
   // deallocated. After this call completes and all allocated pointers
   // have been deallocated the wrapper will delete itself.
+<<<<<<< HEAD
   gtl::InlinedVector<AllocRecord, 4> GetRecordsAndUnRef();
   // Returns a copy of allocation records collected so far.
   gtl::InlinedVector<AllocRecord, 4> GetCurrentRecords();
@@ -95,6 +128,16 @@ class TrackingAllocator : public Allocator {
 
   Allocator* allocator_;  // not owned.
   mutable mutex mu_;
+=======
+  std::pair<size_t, size_t> GetSizesAndUnRef();
+
+ private:
+  ~TrackingAllocator() override {}
+  bool UnRef() EXCLUSIVE_LOCKS_REQUIRED(mu_);
+
+  Allocator* allocator_;  // not owned.
+  mutex mu_;
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   // the number of calls to AllocateRaw that have not yet been matched
   // by a corresponding call to DeAllocateRaw, plus 1 if the Executor
   // has not yet read out the high watermark.
@@ -112,6 +155,7 @@ class TrackingAllocator : public Allocator {
   // otherwise the total number of bytes that have been requested by
   // this allocator.
   size_t total_bytes_ GUARDED_BY(mu_);
+<<<<<<< HEAD
 
   gtl::InlinedVector<AllocRecord, 4> allocations_ GUARDED_BY(mu_);
 
@@ -125,8 +169,14 @@ class TrackingAllocator : public Allocator {
   };
   std::unordered_map<const void*, Chunk> in_use_ GUARDED_BY(mu_);
   int64 next_allocation_id_ GUARDED_BY(mu_);
+=======
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 };
 
 }  // end namespace tensorflow
 
+<<<<<<< HEAD
 #endif  // TENSORFLOW_CORE_FRAMEWORK_TRACKING_ALLOCATOR_H_
+=======
+#endif  // TENSORFLOW_FRAMEWORK_TRACKING_ALLOCATOR_H_
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.

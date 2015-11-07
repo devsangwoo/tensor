@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+=======
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+//
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 // BlockBuilder generates blocks where keys are prefix-compressed:
 //
 // When we store a key, we drop the prefix shared with the previous
@@ -39,10 +46,17 @@ limitations under the License.
 
 #include "tensorflow/core/lib/io/block_builder.h"
 
+<<<<<<< HEAD
 #include <assert.h>
 #include <algorithm>
 #include "tensorflow/core/lib/core/coding.h"
 #include "tensorflow/core/lib/io/table_builder.h"
+=======
+#include <algorithm>
+#include <assert.h>
+#include "tensorflow/core/lib/io/table_builder.h"
+#include "tensorflow/core/lib/core/coding.h"
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
 namespace tensorflow {
 namespace table {
@@ -70,12 +84,19 @@ size_t BlockBuilder::CurrentSizeEstimate() const {
 
 StringPiece BlockBuilder::Finish() {
   // Append restart array
+<<<<<<< HEAD
   CHECK_LE(restarts_.size(), std::numeric_limits<uint32_t>::max());
   for (const auto r : restarts_) {
     core::PutFixed32(&buffer_, r);
   }
   // Downcast safe because of the CHECK.
   core::PutFixed32(&buffer_, static_cast<uint32_t>(restarts_.size()));
+=======
+  for (size_t i = 0; i < restarts_.size(); i++) {
+    core::PutFixed32(&buffer_, restarts_[i]);
+  }
+  core::PutFixed32(&buffer_, restarts_.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
   finished_ = true;
   return StringPiece(buffer_);
 }
@@ -95,12 +116,17 @@ void BlockBuilder::Add(const StringPiece& key, const StringPiece& value) {
     }
   } else {
     // Restart compression
+<<<<<<< HEAD
     CHECK_LE(buffer_.size(), std::numeric_limits<uint32_t>::max());
     restarts_.push_back(static_cast<uint32_t>(buffer_.size()));
+=======
+    restarts_.push_back(buffer_.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
     counter_ = 0;
   }
   const size_t non_shared = key.size() - shared;
 
+<<<<<<< HEAD
   CHECK_LE(shared, std::numeric_limits<uint32_t>::max());
   CHECK_LE(non_shared, std::numeric_limits<uint32_t>::max());
   CHECK_LE(value.size(), std::numeric_limits<uint32_t>::max());
@@ -113,6 +139,16 @@ void BlockBuilder::Add(const StringPiece& key, const StringPiece& value) {
   // Add string delta to buffer_ followed by value
   buffer_.append(key.data() + shared, non_shared);
   buffer_.append(value.data(), static_cast<uint32_t>(value.size()));
+=======
+  // Add "<shared><non_shared><value_size>" to buffer_
+  core::PutVarint32(&buffer_, shared);
+  core::PutVarint32(&buffer_, non_shared);
+  core::PutVarint32(&buffer_, value.size());
+
+  // Add string delta to buffer_ followed by value
+  buffer_.append(key.data() + shared, non_shared);
+  buffer_.append(value.data(), value.size());
+>>>>>>> f41959ccb2... TensorFlow: Initial commit of TensorFlow library.
 
   // Update state
   last_key_.resize(shared);
